@@ -1,0 +1,1979 @@
+1621487941840	geckodriver	INFO	Listening on 127.0.0.1:53508
+1621488497464	geckodriver	INFO	Listening on 127.0.0.1:54409
+1621488500504	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilebHUdBm"
+1621488500837	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621488502750	Marionette	INFO	Listening on port 54421
+1621488503166	Marionette	WARN	TLS certificate errors will be ignored for this session
+Handler function threw an exception: TypeError: topFrame.browsingContext is null
+Stack: matchRequest@resource://devtools/server/actors/network-monitor/network-observer.js:130:9
+_onRequestHeader@resource://devtools/server/actors/network-monitor/network-observer.js:959:10
+NetworkObserver.prototype.observeActivity<@resource://devtools/server/actors/network-monitor/network-observer.js:710:12
+exports.makeInfallible/<@resource://devtools/shared/ThreadSafeDevToolsUtils.js:103:22
+Line: 130, column: 9
+console.error: (new TypeError("topFrame.browsingContext is null", "resource://devtools/server/actors/network-monitor/network-observer.js", 130))
+Handler function _httpResponseExaminer threw an exception: TypeError: topFrame.browsingContext is null
+Stack: matchRequest@resource://devtools/server/actors/network-monitor/network-observer.js:130:9
+_httpResponseExaminer@resource://devtools/server/actors/network-monitor/network-observer.js:456:10
+exports.makeInfallible/<@resource://devtools/shared/ThreadSafeDevToolsUtils.js:103:22
+Line: 130, column: 9
+console.error: (new TypeError("topFrame.browsingContext is null", "resource://devtools/server/actors/network-monitor/network-observer.js", 130))
+1621536247947	Marionette	INFO	Stopped listening on port 54421
+1522445597	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileUwGpfJ"
+1621522446094	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621522449117	Marionette	INFO	Listening on port 59926
+1621522449345	Marionette	WARN	TLS certificate errors will be ignored for this session
+
+###!!! [Child][MessageChannel] Error: (msgtype=0x5B0004,name=PHttpChannel::Msg_Cancel) Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][MessageChannel] Error: (msgtype=0x5B0009,name=PHttpChannel::Msg_DeletingChannel) Channel closing: too late to send/recv, messages will be lost
+
+1621522724596	Marionette	INFO	Stopped listening on port 59926
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+g on port 60182
+1621522725009	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621522939338	Marionette	INFO	Stopped listening on port 60182
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilebNtuXz"
+1621522848315	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621522851227	Marionette	INFO	Listening on port 60407
+1621522851287	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621522940414	Marionette	INFO	Stopped listening on port 60407
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileuVFSkQ"
+1621522912204	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621522914643	Marionette	INFO	Listening on port 60541
+1621522914960	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621523040320	Marionette	INFO	Stopped listening on port 60541
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile02j8q2"
+1621522963765	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621522966147	Marionette	INFO	Listening on port 60664
+1621522966493	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621523141147	Marionette	INFO	Stopped listening on port 60664
+1523034575	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilewfswaz"
+1621523035046	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621523037445	Marionette	INFO	Listening on port 60797
+1621523037798	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621523142234	Marionette	INFO	Stopped listening on port 60797
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileyb4o6A"
+1621523066321	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621523068753	Marionette	INFO	Listening on port 60916
+1621523069078	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621523143455	Marionette	INFO	Stopped listening on port 60916
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileUHp09U"
+1621523131482	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621523134341	Marionette	INFO	Listening on port 61056
+1621523134753	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621536248710	Marionette	INFO	Stopped listening on port 61056
+1531414652	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileFf8WYA"
+1621531415171	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621531418255	Marionette	INFO	Listening on port 49989
+1621531418340	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621536249599	Marionette	INFO	Stopped listening on port 49989
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilen0twZL"
+1621531703968	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621531707115	Marionette	INFO	Listening on port 50302
+1621531707183	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621536250347	Marionette	INFO	Stopped listening on port 50302
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileQrESRl"
+1621533146353	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621533149351	Marionette	INFO	Listening on port 50876
+1621533149563	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621536251133	Marionette	INFO	Stopped listening on port 50876
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile3y6rgl"
+1621533205807	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621533208687	Marionette	INFO	Listening on port 50978
+1621533209047	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621536252337	Marionette	INFO	Stopped listening on port 50978
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile7XgQOI"
+1621536189571	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621536192288	Marionette	INFO	Listening on port 51385
+1621536192697	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621539583553	Marionette	INFO	Stopped listening on port 51385
+1536495947	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilem0DoJY"
+1621536496371	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621536499272	Marionette	INFO	Listening on port 51674
+1621536499670	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621536503233	Marionette	INFO	Stopped listening on port 51674
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621537174794	geckodriver	INFO	Listening on 127.0.0.1:52199
+1621537177866	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileCG7WcT"
+1621537178455	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621537181168	Marionette	INFO	Listening on port 52210
+1621537181566	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621537184849	Marionette	INFO	Stopped listening on port 52210
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621537593844	geckodriver	INFO	Listening on 127.0.0.1:52545
+1621537596907	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilem1XENA"
+1621537597585	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621537600677	Marionette	INFO	Listening on port 52558
+1621537601121	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: resource:///modules/UrlbarProviderHeuristicFallback.jsm, line 201: URIError: malformed URI sequence
+JavaScript error: resource:///modules/UrlbarProviderHeuristicFallback.jsm, line 201: URIError: malformed URI sequence
+pData\\Local\\Temp\\rust_mozprofile3619m0"
+1621537949859	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621537953101	Marionette	INFO	Listening on port 52850
+1621537953582	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621537956861	Marionette	INFO	Stopped listening on port 52850
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621538229256	geckodriver	INFO	Listening on 127.0.0.1:53116
+1621538232320	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileO2NxVE"
+1621538232826	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621538236303	Marionette	INFO	Listening on port 53126
+1621538236533	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621538240191	Marionette	INFO	Stopped listening on port 53126
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621538924357	geckodriver	INFO	Listening on 127.0.0.1:53621
+1621538927430	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile7a1P8D"
+1621538927864	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621538930309	Marionette	INFO	Listening on port 53631
+1621538930611	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621538936242	Marionette	INFO	Stopped listening on port 53631
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621539003900	geckodriver	INFO	Listening on 127.0.0.1:53766
+1621539198331	geckodriver	INFO	Listening on 127.0.0.1:54033
+1621539201413	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilewjiuhN"
+1621539201901	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621539204632	Marionette	INFO	Listening on port 54043
+1621539205106	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621539208551	Marionette	INFO	Stopped listening on port 54043
+1621539447569	geckodriver	INFO	Listening on 127.0.0.1:54283
+1621539450627	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileJpBKkG"
+1621539451123	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621539453906	Marionette	INFO	Listening on port 54292
+1621539454326	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621539457827	Marionette	INFO	Stopped listening on port 54292
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621539578867	geckodriver	INFO	Listening on 127.0.0.1:54466
+1621539631849	geckodriver	INFO	Listening on 127.0.0.1:54521
+1621539634937	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileHig2iF"
+1621539635373	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621539638743	Marionette	INFO	Listening on port 54530
+1621539639128	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621539642176	Marionette	INFO	Stopped listening on port 54530
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621539751169	geckodriver	INFO	Listening on 127.0.0.1:54693
+1621539754280	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileWKZSID"
+1621539754908	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621539757714	Marionette	INFO	Listening on port 54702
+1621539757992	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621539760696	Marionette	INFO	Stopped listening on port 54702
+1621543081071	geckodriver	INFO	Listening on 127.0.0.1:55751
+1621543084162	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile8EbFPL"
+1621543084587	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621543087031	Marionette	INFO	Listening on port 55760
+1621543087353	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621543128211	Marionette	INFO	Stopped listening on port 55760
+JavaScript error: , line 0: uncaught exception: undefined
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621543300036	geckodriver	INFO	Listening on 127.0.0.1:56031
+1621543340247	geckodriver	INFO	Listening on 127.0.0.1:56077
+1621543343318	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile6oPdyZ"
+1621543343776	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621543346699	Marionette	INFO	Listening on port 56087
+1621543347014	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621543351117	Marionette	INFO	Stopped listening on port 56087
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621543548965	geckodriver	INFO	Listening on 127.0.0.1:56391
+1621543552052	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileMVnQju"
+1621543552495	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621543555165	Marionette	INFO	Listening on port 56401
+1621543555269	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621543558817	Marionette	INFO	Stopped listening on port 56401
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621543675037	geckodriver	INFO	Listening on 127.0.0.1:56575
+1621543678118	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilePoByag"
+1621543678596	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621543681823	Marionette	INFO	Listening on port 56585
+1621543682353	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621543685797	Marionette	INFO	Stopped listening on port 56585
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621549384823	geckodriver	INFO	Listening on 127.0.0.1:57254
+1621549387892	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileadB3wM"
+1621549388230	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621549389842	Marionette	INFO	Listening on port 57263
+1621549389944	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621549392770	Marionette	INFO	Stopped listening on port 57263
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: resource://gre/modules/UrlClassifierListManager.jsm, line 691: TypeError: this.tablesData[table] is undefined
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621549944952	geckodriver	INFO	Listening on 127.0.0.1:57805
+1621549948042	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile5E8GMF"
+1621549948383	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621549950232	Marionette	INFO	Listening on port 57815
+1621549950700	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621549953234	Marionette	INFO	Stopped listening on port 57815
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621550861443	geckodriver	INFO	Listening on 127.0.0.1:58560
+1621550864529	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilexKc4aO"
+1621550864858	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621550866857	Marionette	INFO	Listening on port 58570
+1621550867220	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621550872194	Marionette	INFO	Stopped listening on port 58570
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621550940842	geckodriver	INFO	Listening on 127.0.0.1:58733
+1621550943909	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilezVbd8q"
+1621550944248	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621550946225	Marionette	INFO	Listening on port 58742
+1621550946588	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621550949882	Marionette	INFO	Stopped listening on port 58742
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+[Parent 22540, IPC I/O Parent] WARNING: file /builds/worker/checkouts/gecko/ipc/chromium/src/base/process_util_win.cc:167
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621551519548	geckodriver	INFO	Listening on 127.0.0.1:59170
+1621551522618	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilewqn0gq"
+1621551522982	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621551525092	Marionette	INFO	Listening on port 59180
+1621551525320	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621551528986	Marionette	INFO	Stopped listening on port 59180
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621551590764	geckodriver	INFO	Listening on 127.0.0.1:59314
+1621551593835	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile9bmvaM"
+1621551594189	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621551596302	Marionette	INFO	Listening on port 59325
+1621551596527	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621551600654	Marionette	INFO	Stopped listening on port 59325
+1621552212355	geckodriver	INFO	Listening on 127.0.0.1:59805
+1621552236136	geckodriver	INFO	Listening on 127.0.0.1:59832
+1621552239210	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileV2FXoF"
+1621552239575	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621552241689	Marionette	INFO	Listening on port 59842
+1621552241895	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621552244807	Marionette	INFO	Stopped listening on port 59842
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621552437832	geckodriver	INFO	Listening on 127.0.0.1:60046
+1621552440883	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile5emZKh"
+1621552441252	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621552443269	Marionette	INFO	Listening on port 60055
+1621552443575	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621552446531	Marionette	INFO	Stopped listening on port 60055
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621552566417	geckodriver	INFO	Listening on 127.0.0.1:60227
+1621552569452	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileL54cgT"
+1621552569788	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621552572001	Marionette	INFO	Listening on port 60237
+1621552572179	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621552575082	Marionette	INFO	Stopped listening on port 60237
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621552639388	geckodriver	INFO	Listening on 127.0.0.1:60364
+1621552642460	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileJpgkwt"
+1621552642807	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621552644855	Marionette	INFO	Listening on port 60374
+1621552645141	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621552648066	Marionette	INFO	Stopped listening on port 60374
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileJpgkwt\protections.sqlite
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621552728039	geckodriver	INFO	Listening on 127.0.0.1:60562
+1621552731100	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile03WmGG"
+1621552731439	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621552733310	Marionette	INFO	Listening on port 60572
+1621552733788	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621552737044	Marionette	INFO	Stopped listening on port 60572
+1621552830265	geckodriver	INFO	Listening on 127.0.0.1:60731
+1621552833330	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofiledeDYU6"
+1621552833667	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621552835532	Marionette	INFO	Listening on port 60744
+1621552836012	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621552839564	Marionette	INFO	Stopped listening on port 60744
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621552923627	geckodriver	INFO	Listening on 127.0.0.1:60888
+1621552926692	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilePsDSUM"
+1621552927038	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621552928915	Marionette	INFO	Listening on port 60898
+1621552929376	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621552932638	Marionette	INFO	Stopped listening on port 60898
+JavaScript error: resource://gre/modules/UrlClassifierListManager.jsm, line 691: TypeError: this.tablesData[table] is undefined
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621553103140	geckodriver	INFO	Listening on 127.0.0.1:61117
+1621553106204	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileXltSN8"
+1621553106552	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621553108531	Marionette	INFO	Listening on port 61127
+1621553108886	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621553113214	Marionette	INFO	Stopped listening on port 61127
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621553191450	geckodriver	INFO	Listening on 127.0.0.1:61283
+1621553194516	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileOahHpY"
+1621553194850	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621553196852	Marionette	INFO	Listening on port 61292
+1621553197210	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621553200683	Marionette	INFO	Stopped listening on port 61292
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621553264933	geckodriver	INFO	Listening on 127.0.0.1:61424
+1621553267997	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile0vBvdl"
+1621553268361	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621553270284	Marionette	INFO	Listening on port 61433
+1621553270665	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621553273677	Marionette	INFO	Stopped listening on port 61433
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621553392850	geckodriver	INFO	Listening on 127.0.0.1:61598
+1621553395929	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilePtWsmP"
+1621553396290	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621553398311	Marionette	INFO	Listening on port 61608
+1621553398606	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621553402463	Marionette	INFO	Stopped listening on port 61608
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621553452103	geckodriver	INFO	Listening on 127.0.0.1:61716
+1621553455189	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilepkIswx"
+1621553455540	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621553457474	Marionette	INFO	Listening on port 61726
+1621553457866	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621553461430	Marionette	INFO	Stopped listening on port 61726
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621553473650	geckodriver	INFO	Listening on 127.0.0.1:61823
+1621553476751	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilej4S9iB"
+1621553477082	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621553479196	Marionette	INFO	Listening on port 61833
+1621553479447	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621553482303	Marionette	INFO	Stopped listening on port 61833
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: resource://gre/modules/UrlClassifierListManager.jsm, line 691: TypeError: this.tablesData[table] is undefined
+JavaScript error: , line 0: uncaught exception: undefined
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621553513847	geckodriver	INFO	Listening on 127.0.0.1:61941
+1621553516915	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileY3W5TV"
+1621553517268	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621553519504	Marionette	INFO	Listening on port 61950
+1621553519611	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621553523963	Marionette	INFO	Stopped listening on port 61950
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621553586398	geckodriver	INFO	Listening on 127.0.0.1:62074
+1621553589442	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileKRn7fo"
+1621553589784	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621553591728	Marionette	INFO	Listening on port 62085
+1621553592121	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621553595057	Marionette	INFO	Stopped listening on port 62085
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621554214103	geckodriver	INFO	Listening on 127.0.0.1:62558
+1621554217181	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileQLNG9P"
+1621554217530	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621554219605	Marionette	INFO	Listening on port 62568
+1621554219875	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621554224330	Marionette	INFO	Stopped listening on port 62568
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621554302627	geckodriver	INFO	Listening on 127.0.0.1:62708
+1621554305704	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilexoKZ3B"
+1621554306051	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621554308167	Marionette	INFO	Listening on port 62717
+1621554308383	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621554311782	Marionette	INFO	Stopped listening on port 62717
+JavaScript error: , line 0: uncaught exception: undefined
+1621554424858	geckodriver	INFO	Listening on 127.0.0.1:62871
+1621554427909	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileTfrJtn"
+1621554428256	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621554430133	Marionette	INFO	Listening on port 62880
+1621554430602	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621554434371	Marionette	INFO	Stopped listening on port 62880
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621554570820	geckodriver	INFO	Listening on 127.0.0.1:63070
+1621554573890	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile5OL19C"
+1621554574221	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621554576437	Marionette	INFO	Listening on port 63081
+1621554576574	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621554580621	Marionette	INFO	Stopped listening on port 63081
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621554665210	geckodriver	INFO	Listening on 127.0.0.1:63228
+1621554668304	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileefNJ4O"
+1621554668644	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621554670520	Marionette	INFO	Listening on port 63246
+1621554671012	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621554674528	Marionette	INFO	Stopped listening on port 63246
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621556611659	geckodriver	INFO	Listening on 127.0.0.1:64551
+1621556614709	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileVaaV1g"
+1621556615049	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621556617119	Marionette	INFO	Listening on port 64561
+1621556617376	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621556620567	Marionette	INFO	Stopped listening on port 64561
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621558505135	geckodriver	INFO	Listening on 127.0.0.1:49716
+1621558508190	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileiM5iX4"
+1621558508547	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621558510494	Marionette	INFO	Listening on port 49725
+1621558510850	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621558514960	Marionette	INFO	Stopped listening on port 49725
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileiM5iX4\protections.sqlite
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621560023009	geckodriver	INFO	Listening on 127.0.0.1:50785
+1621560026101	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileIGtWan"
+1621560026443	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621560028477	Marionette	INFO	Listening on port 50796
+1621560028771	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621560032011	Marionette	INFO	Stopped listening on port 50796
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+1621577429725	geckodriver	INFO	Listening on 127.0.0.1:54495
+1621577432802	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileiDwhZL"
+1621577433286	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621577435461	Marionette	INFO	Listening on port 54504
+1621577435994	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621577439568	Marionette	INFO	Stopped listening on port 54504
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621577546432	geckodriver	INFO	Listening on 127.0.0.1:54673
+1621577549524	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilefI7Bqm"
+1621577549876	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621577551717	Marionette	INFO	Listening on port 54683
+1621577552196	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621577555238	Marionette	INFO	Stopped listening on port 54683
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilefI7Bqm\protections.sqlite
+1621606532812	geckodriver	INFO	Listening on 127.0.0.1:58962
+1621606535857	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile8GH4pK"
+1621606536316	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621606539072	Marionette	INFO	Listening on port 58971
+1621606539578	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621606542947	Marionette	INFO	Stopped listening on port 58971
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621610193628	geckodriver	INFO	Listening on 127.0.0.1:59666
+1621610196725	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilerjLmb3"
+1621610197173	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621610199564	Marionette	INFO	Listening on port 59676
+1621610199942	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621610203788	Marionette	INFO	Stopped listening on port 59676
+1621610261085	geckodriver	INFO	Listening on 127.0.0.1:59816
+1621610264174	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileCpcJaj"
+1621610264649	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621610267774	Marionette	INFO	Listening on port 59826
+1621610267905	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621610271559	Marionette	INFO	Stopped listening on port 59826
+JavaScript error: resource://devtools/client/jsonview/Sniffer.jsm, line 56: NS_ERROR_NOT_AVAILABLE: Component returned failure code: 0x80040111 (NS_ERROR_NOT_AVAILABLE) [nsIChannel.contentType]
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621614700489	geckodriver	INFO	Listening on 127.0.0.1:61209
+1621614703554	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile0ebweJ"
+1621614704158	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621614707352	Marionette	INFO	Listening on port 61219
+1621614707764	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621614712452	Marionette	INFO	Stopped listening on port 61219
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621614814573	geckodriver	INFO	Listening on 127.0.0.1:61378
+1621614817633	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileOdtQqP"
+1621614818083	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621614820818	Marionette	INFO	Listening on port 61387
+1621614821350	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621614826577	Marionette	INFO	Stopped listening on port 61387
+1621614911459	geckodriver	INFO	Listening on 127.0.0.1:61530
+1621614914513	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile80VnQz"
+1621614915024	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621614917565	Marionette	INFO	Listening on port 61541
+1621614917703	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621614921374	Marionette	INFO	Stopped listening on port 61541
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621615214664	geckodriver	INFO	Listening on 127.0.0.1:61817
+1621615217689	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileJP9bDE"
+1621615218114	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621615220849	Marionette	INFO	Listening on port 61827
+1621615221405	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621615225274	Marionette	INFO	Stopped listening on port 61827
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621616082783	geckodriver	INFO	Listening on 127.0.0.1:62413
+1621616085840	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileu8mQV8"
+1621616086302	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621616089018	Marionette	INFO	Listening on port 62423
+1621616089546	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621616094151	Marionette	INFO	Stopped listening on port 62423
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621619069580	geckodriver	INFO	Listening on 127.0.0.1:62755
+1621619072654	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileTXlHp5"
+1621619073266	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621619076158	Marionette	INFO	Listening on port 62783
+1621619076334	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621619081570	Marionette	INFO	Stopped listening on port 62783
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621620738583	geckodriver	INFO	Listening on 127.0.0.1:63993
+1621620741646	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileFt6chE"
+1621620742127	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621620745334	Marionette	INFO	Listening on port 64003
+1621620745855	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621620749379	Marionette	INFO	Stopped listening on port 64003
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621624423569	geckodriver	INFO	Listening on 127.0.0.1:50251
+1621624426640	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilenZgGNk"
+1621624427090	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621624430016	Marionette	INFO	Listening on port 50261
+1621624430341	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621624434125	Marionette	INFO	Stopped listening on port 50261
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621624687163	geckodriver	INFO	Listening on 127.0.0.1:50498
+1621624690237	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilel4KXF0"
+1621624690727	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621624693560	Marionette	INFO	Listening on port 50507
+1621624693981	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621624700570	Marionette	INFO	Stopped listening on port 50507
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621624891271	geckodriver	INFO	Listening on 127.0.0.1:50719
+1621624894369	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile22zFw4"
+1621624894788	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621624897555	Marionette	INFO	Listening on port 50728
+1621624897598	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621624902130	Marionette	INFO	Stopped listening on port 50728
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621625004842	geckodriver	INFO	Listening on 127.0.0.1:50883
+1621625007974	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilebIEbIm"
+1621625008489	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621625011660	Marionette	INFO	Listening on port 50895
+1621625012185	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621625016006	Marionette	INFO	Stopped listening on port 50895
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+1621625388125	geckodriver	INFO	Listening on 127.0.0.1:51196
+1621625391197	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile5FT1dG"
+1621625391649	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621625394692	Marionette	INFO	Listening on port 51205
+1621625394895	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621625399446	Marionette	INFO	Stopped listening on port 51205
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621625518541	geckodriver	INFO	Listening on 127.0.0.1:51371
+1621625521589	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileT3h2cW"
+1621625522004	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621625524617	Marionette	INFO	Listening on port 51381
+1621625524762	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621625529735	Marionette	INFO	Stopped listening on port 51381
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621626100552	geckodriver	INFO	Listening on 127.0.0.1:51578
+1621626103635	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilekQ0JGa"
+1621626104315	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621626107250	Marionette	INFO	Listening on port 51593
+1621626107325	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621626113185	Marionette	INFO	Stopped listening on port 51593
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621730935147	geckodriver	INFO	Listening on 127.0.0.1:57974
+1621730938238	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileYomDTI"
+1621730951641	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621730953974	Marionette	INFO	Listening on port 57993
+1621730954310	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621730957468	Marionette	INFO	Stopped listening on port 57993
+1621731858003	geckodriver	INFO	Listening on 127.0.0.1:58692
+1621731861034	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilebib4Ax"
+1621731861378	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621731863457	Marionette	INFO	Listening on port 58701
+1621731863695	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621731866770	Marionette	INFO	Stopped listening on port 58701
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621732067554	geckodriver	INFO	Listening on 127.0.0.1:58907
+1621732070620	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileLBeDrP"
+1621732070962	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621732072988	Marionette	INFO	Listening on port 58916
+1621732073308	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621732076292	Marionette	INFO	Stopped listening on port 58916
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621732621686	geckodriver	INFO	Listening on 127.0.0.1:59368
+1621732624743	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile6irREM"
+1621732625108	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621732626955	Marionette	INFO	Listening on port 59377
+1621732627417	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621732630461	Marionette	INFO	Stopped listening on port 59377
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621732796278	geckodriver	INFO	Listening on 127.0.0.1:59568
+1621732799347	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile2aP4uV"
+1621732799677	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621732801382	Marionette	INFO	Listening on port 59578
+1621732801445	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621732804370	Marionette	INFO	Stopped listening on port 59578
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+[Parent 6548, IPC I/O Parent] WARNING: file /builds/worker/checkouts/gecko/ipc/chromium/src/base/process_util_win.cc:167
+1621734075245	geckodriver	INFO	Listening on 127.0.0.1:60417
+1621734078313	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileyRYLyI"
+1621734078695	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621734080565	Marionette	INFO	Listening on port 60427
+1621734080962	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621734083957	Marionette	INFO	Stopped listening on port 60427
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621734299863	geckodriver	INFO	Listening on 127.0.0.1:60643
+1621734302940	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilelPPrZV"
+1621734303291	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621734305370	Marionette	INFO	Listening on port 60652
+1621734305630	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621734308797	Marionette	INFO	Stopped listening on port 60652
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621740803227	geckodriver	INFO	Listening on 127.0.0.1:61686
+1621740806311	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilecYKYi8"
+1621740806666	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621740808753	Marionette	INFO	Listening on port 61696
+1621740808981	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621740811978	Marionette	INFO	Stopped listening on port 61696
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621743522948	geckodriver	INFO	Listening on 127.0.0.1:64211
+1621743526012	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilehZglXy"
+1621743526380	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621743528407	Marionette	INFO	Listening on port 64223
+1621743528699	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621743628975	Marionette	INFO	Stopped listening on port 64223
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilePT9Arc"
+1621743579560	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621743581658	Marionette	INFO	Listening on port 64372
+1621743581839	Marionette	WARN	TLS certificate errors will be ignored for this session
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621743630519	Marionette	INFO	Stopped listening on port 64372
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile7OCowl"
+1621743628352	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621743630624	Marionette	INFO	Listening on port 64516
+1621743630675	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621744065429	Marionette	INFO	Stopped listening on port 64516
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilet0r55o"
+1621743662424	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621743664394	Marionette	INFO	Listening on port 64647
+1621743664758	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621744066838	Marionette	INFO	Stopped listening on port 64647
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+"--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileUOfTDJ"
+1621743692715	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621743694939	Marionette	INFO	Listening on port 64768
+1621743695042	Marionette	WARN	TLS certificate errors will be ignored for this session
+[Child 15228, IPC I/O Child] WARNING: pipe error: 232: file /builds/worker/checkouts/gecko/ipc/chromium/src/chrome/common/ipc_channel_win.cc:544
+1621744067944	Marionette	INFO	Stopped listening on port 64768
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621744014478	Marionette	INFO	Listening on port 65212
+1621744014982	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621744017575	Marionette	INFO	Stopped listening on port 65212
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621744062352	geckodriver	INFO	Listening on 127.0.0.1:65365
+1621744065378	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilekrSUTl"
+1621744065756	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621744068120	Marionette	INFO	Listening on port 65377
+1621744068542	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621744071067	Marionette	INFO	Stopped listening on port 65377
+JavaScript error: resource://gre/modules/UrlClassifierListManager.jsm, line 691: TypeError: this.tablesData[table] is undefined
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilekrSUTl\protections.sqlite
+1621744080579	geckodriver	INFO	Listening on 127.0.0.1:65478
+1621744083619	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileTrWrc0"
+1621744083964	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621744085968	Marionette	INFO	Listening on port 65490
+1621744086299	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621744088941	Marionette	INFO	Stopped listening on port 65490
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileTrWrc0\protections.sqlite
+1621744153492	geckodriver	INFO	Listening on 127.0.0.1:49265
+1621744156555	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileA24DpG"
+1621744156888	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621744158884	Marionette	INFO	Listening on port 49282
+1621744159245	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621744162237	Marionette	INFO	Stopped listening on port 49282
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621744174501	geckodriver	INFO	Listening on 127.0.0.1:49380
+1621744177565	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile8WgEz3"
+1621744177915	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621744179862	Marionette	INFO	Listening on port 49391
+1621744180238	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621744183420	Marionette	INFO	Stopped listening on port 49391
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile8WgEz3\protections.sqlite
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621745487181	geckodriver	INFO	Listening on 127.0.0.1:51458
+1621745490231	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilezOITho"
+1621745490569	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621745492201	Marionette	INFO	Listening on port 51469
+1621745492283	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621745495161	Marionette	INFO	Stopped listening on port 51469
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilezOITho\protections.sqlite
+1621745570797	geckodriver	INFO	Listening on 127.0.0.1:51648
+1621745573878	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile7WJGzr"
+1621745574213	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621745576016	Marionette	INFO	Listening on port 51659
+1621745576071	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621745579320	Marionette	INFO	Stopped listening on port 51659
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile7WJGzr\protections.sqlite
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621752860909	geckodriver	INFO	Listening on 127.0.0.1:59450
+1621752863964	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile1BTjWq"
+*** You are running in headless mode.
+1621752864301	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621752865278	Marionette	INFO	Listening on port 59460
+1621752865520	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621752868647	Marionette	INFO	Stopped listening on port 59460
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621755936038	geckodriver	INFO	Listening on 127.0.0.1:62650
+1621755939104	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofiledWKvnr"
+*** You are running in headless mode.
+1621755939461	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621755940724	Marionette	INFO	Listening on port 62660
+1621755941154	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621755944267	Marionette	INFO	Stopped listening on port 62660
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofiledWKvnr\protections.sqlite
+1621756182258	geckodriver	INFO	Listening on 127.0.0.1:63066
+1621756185334	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileBDeRtK"
+*** You are running in headless mode.
+1621756185692	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621756187065	Marionette	INFO	Listening on port 63077
+1621756187407	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621756190204	Marionette	INFO	Stopped listening on port 63077
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621756278769	geckodriver	INFO	Listening on 127.0.0.1:63267
+1621756281828	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofiley0DK1g"
+*** You are running in headless mode.
+1621756282183	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621756283538	Marionette	INFO	Listening on port 63277
+1621756283905	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621756287018	Marionette	INFO	Stopped listening on port 63277
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofiley0DK1g\protections.sqlite
+1621756322358	geckodriver	INFO	Listening on 127.0.0.1:63402
+1621756325416	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile0XLd6T"
+*** You are running in headless mode.
+1621756325753	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621756327020	Marionette	INFO	Listening on port 63413
+1621756327471	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621756330304	Marionette	INFO	Stopped listening on port 63413
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile0XLd6T\protections.sqlite
+1621757548053	geckodriver	INFO	Listening on 127.0.0.1:64786
+1621757551150	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofiletA2GTj"
+*** You are running in headless mode.
+1621757551495	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621757552821	Marionette	INFO	Listening on port 64798
+1621757553191	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621757556030	Marionette	INFO	Stopped listening on port 64798
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621800443946	geckodriver	INFO	Listening on 127.0.0.1:58726
+1621800447019	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilejAOlgK"
+*** You are running in headless mode.
+1621800447360	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621800448657	Marionette	INFO	Listening on port 58737
+1621800449080	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621800452498	Marionette	INFO	Stopped listening on port 58737
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilejAOlgK\protections.sqlite
+1621800506701	geckodriver	INFO	Listening on 127.0.0.1:58885
+1621800509741	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileaVztXQ"
+*** You are running in headless mode.
+1621800510058	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621800511243	Marionette	INFO	Listening on port 58899
+1621800511301	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621800519744	Marionette	INFO	Stopped listening on port 58899
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621800548533	geckodriver	INFO	Listening on 127.0.0.1:59022
+1621800551583	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilezPLzqk"
+*** You are running in headless mode.
+1621800551926	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621800553213	Marionette	INFO	Listening on port 59032
+1621800553647	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621800557261	Marionette	INFO	Stopped listening on port 59032
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilezPLzqk\protections.sqlite
+1621800759420	geckodriver	INFO	Listening on 127.0.0.1:59326
+1621800762494	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile6GMQRK"
+*** You are running in headless mode.
+1621800762804	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621800764049	Marionette	INFO	Listening on port 59337
+1621800764556	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621800767738	Marionette	INFO	Stopped listening on port 59337
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile6GMQRK\protections.sqlite
+1621800808928	geckodriver	INFO	Listening on 127.0.0.1:59477
+1621800811990	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileZgbWlz"
+*** You are running in headless mode.
+1621800812331	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621800813683	Marionette	INFO	Listening on port 59489
+1621800814034	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621800817184	Marionette	INFO	Stopped listening on port 59489
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileZgbWlz\protections.sqlite
+1621800985479	geckodriver	INFO	Listening on 127.0.0.1:59740
+1621800988541	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilevB3kWD"
+*** You are running in headless mode.
+1621800988874	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621800989979	Marionette	INFO	Listening on port 59752
+1621800990108	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621800993395	Marionette	INFO	Stopped listening on port 59752
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621801118929	geckodriver	INFO	Listening on 127.0.0.1:59974
+1621801121982	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilevAyZXI"
+*** You are running in headless mode.
+1621801122304	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621801123385	Marionette	INFO	Listening on port 59986
+1621801123527	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621801126466	Marionette	INFO	Stopped listening on port 59986
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621801314160	geckodriver	INFO	Listening on 127.0.0.1:60298
+1621801317218	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileGjRnF3"
+*** You are running in headless mode.
+1621801317540	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621801318522	Marionette	INFO	Listening on port 60309
+1621801318790	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621801321515	Marionette	INFO	Stopped listening on port 60309
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileGjRnF3\protections.sqlite
+1621801619650	geckodriver	INFO	Listening on 127.0.0.1:60702
+1621801622729	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileI4aXsK"
+*** You are running in headless mode.
+1621801623064	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621801624288	Marionette	INFO	Listening on port 60712
+1621801624805	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621801627939	Marionette	INFO	Stopped listening on port 60712
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileI4aXsK\protections.sqlite
+1621801955196	geckodriver	INFO	Listening on 127.0.0.1:61175
+1621801958264	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileeFAgDm"
+*** You are running in headless mode.
+1621801958601	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621801959788	Marionette	INFO	Listening on port 61186
+1621801959825	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621801962875	Marionette	INFO	Stopped listening on port 61186
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileeFAgDm\protections.sqlite
+1621802050590	geckodriver	INFO	Listening on 127.0.0.1:61369
+1621802053700	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileKmQs4e"
+*** You are running in headless mode.
+1621802054030	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621802055202	Marionette	INFO	Listening on port 61381
+1621802055253	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621802058183	Marionette	INFO	Stopped listening on port 61381
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: resource://gre/modules/UrlClassifierListManager.jsm, line 691: TypeError: this.tablesData[table] is undefined
+JavaScript error: , line 0: uncaught exception: undefined
+1621802126311	geckodriver	INFO	Listening on 127.0.0.1:61546
+1621802129374	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilegZOZXa"
+*** You are running in headless mode.
+1621802129706	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621802130954	Marionette	INFO	Listening on port 61557
+1621802131437	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621802134351	Marionette	INFO	Stopped listening on port 61557
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilegZOZXa\protections.sqlite
+1621802345975	geckodriver	INFO	Listening on 127.0.0.1:61866
+1621802349025	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileNTUDwR"
+*** You are running in headless mode.
+1621802349365	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621802350464	Marionette	INFO	Listening on port 61877
+1621802350572	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621802353220	Marionette	INFO	Stopped listening on port 61877
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621802444442	geckodriver	INFO	Listening on 127.0.0.1:62053
+1621802447509	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilej4lcP7"
+*** You are running in headless mode.
+1621802447864	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621802449315	Marionette	INFO	Listening on port 62065
+1621802449570	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621802452348	Marionette	INFO	Stopped listening on port 62065
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621802516732	geckodriver	INFO	Listening on 127.0.0.1:62227
+1621802519817	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilecHw7bZ"
+*** You are running in headless mode.
+1621802520152	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621802521454	Marionette	INFO	Listening on port 62239
+1621802521862	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621802524574	Marionette	INFO	Stopped listening on port 62239
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilecHw7bZ\protections.sqlite
+1621802621797	geckodriver	INFO	Listening on 127.0.0.1:62423
+1621802624885	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileGr7BQ3"
+*** You are running in headless mode.
+1621802625214	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621802626417	Marionette	INFO	Listening on port 62434
+1621802626939	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621802629823	Marionette	INFO	Stopped listening on port 62434
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileGr7BQ3\protections.sqlite
+1621802684077	geckodriver	INFO	Listening on 127.0.0.1:62586
+1621802687146	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilerOCWU6"
+*** You are running in headless mode.
+1621802687481	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621802688682	Marionette	INFO	Listening on port 62597
+1621802689197	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621802692389	Marionette	INFO	Stopped listening on port 62597
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilerOCWU6\protections.sqlite
+
+###!!! [Parent][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621802911669	geckodriver	INFO	Listening on 127.0.0.1:62899
+1621802914749	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile2Gl6R7"
+*** You are running in headless mode.
+1621802915075	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621802916027	Marionette	INFO	Listening on port 62910
+1621802916303	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621802919179	Marionette	INFO	Stopped listening on port 62910
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile2Gl6R7\protections.sqlite
+1621802964382	geckodriver	INFO	Listening on 127.0.0.1:63078
+1621802967457	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilew96U19"
+*** You are running in headless mode.
+1621802967792	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621802968728	Marionette	INFO	Listening on port 63089
+1621802969013	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621802971920	Marionette	INFO	Stopped listening on port 63089
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilew96U19\protections.sqlite
+
+###!!! [Parent][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621803083783	geckodriver	INFO	Listening on 127.0.0.1:63307
+1621803086879	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileyguvRN"
+*** You are running in headless mode.
+1621803087221	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621803088469	Marionette	INFO	Listening on port 63317
+1621803088938	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621803091753	Marionette	INFO	Stopped listening on port 63317
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileyguvRN\protections.sqlite
+1621803780954	geckodriver	INFO	Listening on 127.0.0.1:64185
+1621803784002	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilesnd5kO"
+*** You are running in headless mode.
+1621803784336	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621803785612	Marionette	INFO	Listening on port 64196
+1621803786066	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621803788565	Marionette	INFO	Stopped listening on port 64196
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilesnd5kO\protections.sqlite
+1621803902997	geckodriver	INFO	Listening on 127.0.0.1:64411
+1621803906074	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileEQWWJ6"
+*** You are running in headless mode.
+1621803906412	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621803907679	Marionette	INFO	Listening on port 64425
+1621803908145	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621803910860	Marionette	INFO	Stopped listening on port 64425
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621804004018	geckodriver	INFO	Listening on 127.0.0.1:64612
+1621804007071	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileRGj3wG"
+*** You are running in headless mode.
+1621804007399	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621804008516	Marionette	INFO	Listening on port 64622
+1621804008622	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621804012073	Marionette	INFO	Stopped listening on port 64622
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileRGj3wG\protections.sqlite
+1621804185230	geckodriver	INFO	Listening on 127.0.0.1:64892
+1621804188306	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileFfb945"
+*** You are running in headless mode.
+1621804188627	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621804189572	Marionette	INFO	Listening on port 64906
+1621804189865	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621804193170	Marionette	INFO	Stopped listening on port 64906
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621804358062	geckodriver	INFO	Listening on 127.0.0.1:65160
+1621804361108	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileRuKOqS"
+*** You are running in headless mode.
+1621804361428	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621804362372	Marionette	INFO	Listening on port 65172
+1621804362662	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621804365471	Marionette	INFO	Stopped listening on port 65172
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileRuKOqS\protections.sqlite
+1621804449032	geckodriver	INFO	Listening on 127.0.0.1:65343
+1621804452138	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilexIZdYQ"
+*** You are running in headless mode.
+1621804452472	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621804453727	Marionette	INFO	Listening on port 65355
+1621804454202	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621804457080	Marionette	INFO	Stopped listening on port 65355
+JavaScript error: resource://gre/modules/UrlClassifierListManager.jsm, line 691: TypeError: this.tablesData[table] is undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilexIZdYQ\protections.sqlite
+1621804896780	geckodriver	INFO	Listening on 127.0.0.1:49839
+1621804899831	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilejtO7jb"
+*** You are running in headless mode.
+1621804900157	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621804901443	Marionette	INFO	Listening on port 49851
+1621804901896	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621804923746	Marionette	INFO	Stopped listening on port 49851
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621805131887	geckodriver	INFO	Listening on 127.0.0.1:50180
+1621805134961	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileZL2Wbp"
+*** You are running in headless mode.
+1621805135286	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621805136226	Marionette	INFO	Listening on port 50190
+1621805136504	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621805140481	Marionette	INFO	Stopped listening on port 50190
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileZL2Wbp\protections.sqlite
+1621805258099	geckodriver	INFO	Listening on 127.0.0.1:50411
+1621805261196	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileeIh9NJ"
+*** You are running in headless mode.
+1621805261532	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621805262835	Marionette	INFO	Listening on port 50421
+1621805263260	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621805266578	Marionette	INFO	Stopped listening on port 50421
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileeIh9NJ\protections.sqlite
+1621805361202	geckodriver	INFO	Listening on 127.0.0.1:50605
+1621805364283	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileblEswy"
+*** You are running in headless mode.
+1621805364618	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621805365672	Marionette	INFO	Listening on port 50617
+1621805365851	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621805369207	Marionette	INFO	Stopped listening on port 50617
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: resource://gre/modules/UrlClassifierListManager.jsm, line 691: TypeError: this.tablesData[table] is undefined
+JavaScript error: , line 0: uncaught exception: undefined
+1621805563360	geckodriver	INFO	Listening on 127.0.0.1:51033
+1621805566405	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilewhFc8N"
+*** You are running in headless mode.
+1621805566737	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621805567951	Marionette	INFO	Listening on port 51043
+1621805568458	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621805571551	Marionette	INFO	Stopped listening on port 51043
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilewhFc8N\protections.sqlite
+1621805659316	geckodriver	INFO	Listening on 127.0.0.1:51222
+1621805662369	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilenBypUT"
+*** You are running in headless mode.
+1621805662700	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621805664011	Marionette	INFO	Listening on port 51235
+1621805664439	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621805667656	Marionette	INFO	Stopped listening on port 51235
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilenBypUT\protections.sqlite
+1621805774238	geckodriver	INFO	Listening on 127.0.0.1:51446
+1621805777286	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilenRzPes"
+*** You are running in headless mode.
+1621805777618	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621805778847	Marionette	INFO	Listening on port 51457
+1621805779347	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621805782718	Marionette	INFO	Stopped listening on port 51457
+JavaScript error: resource://gre/modules/UrlClassifierListManager.jsm, line 691: TypeError: this.tablesData[table] is undefined
+1621805965703	geckodriver	INFO	Listening on 127.0.0.1:51737
+1621805968785	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileQQesJ8"
+*** You are running in headless mode.
+1621805969138	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621805970322	Marionette	INFO	Listening on port 51749
+1621805970340	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621805973537	Marionette	INFO	Stopped listening on port 51749
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileQQesJ8\protections.sqlite
+1621806134342	geckodriver	INFO	Listening on 127.0.0.1:52015
+1621806137400	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileNxxAcP"
+*** You are running in headless mode.
+1621806137798	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621806139119	Marionette	INFO	Listening on port 52027
+1621806139461	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621806142262	Marionette	INFO	Stopped listening on port 52027
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: resource://gre/modules/UrlClassifierListManager.jsm, line 691: TypeError: this.tablesData[table] is undefined
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621806579767	geckodriver	INFO	Listening on 127.0.0.1:52578
+1621806582878	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilee47Gx3"
+*** You are running in headless mode.
+1621806583231	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621806584580	Marionette	INFO	Listening on port 52590
+1621806584931	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621806588332	Marionette	INFO	Stopped listening on port 52590
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilee47Gx3\protections.sqlite
+1621806827965	geckodriver	INFO	Listening on 127.0.0.1:52947
+1621806831023	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileQmwDe9"
+*** You are running in headless mode.
+1621806831361	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621806832479	Marionette	INFO	Listening on port 52959
+1621806832568	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621806837859	Marionette	INFO	Stopped listening on port 52959
+JavaScript error: , line 0: uncaught exception: undefined
+
+###!!! [Parent][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621807066585	geckodriver	INFO	Listening on 127.0.0.1:53316
+1621807069642	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile7JJI3S"
+*** You are running in headless mode.
+1621807069971	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621807070908	Marionette	INFO	Listening on port 53329
+1621807071188	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: https://pagead2.googlesyndication.com/pagead/js/r20210517/r20190131/show_ads_impl_fy2019.js, line 269: Error: XHR error: https://partner.googleadservices.com/gampad/cookie.js?domain=gb.hlorenzi.com&client=ca-pub-6982958846760476
+1621807074482	Marionette	INFO	Stopped listening on port 53329
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621813840034	geckodriver	INFO	Listening on 127.0.0.1:60706
+1621813843117	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilej9Y1VP"
+*** You are running in headless mode.
+1621813843485	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621813844844	Marionette	INFO	Listening on port 60716
+1621813845174	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621813848642	Marionette	INFO	Stopped listening on port 60716
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilej9Y1VP\protections.sqlite
+1621814076325	geckodriver	INFO	Listening on 127.0.0.1:61086
+1621814079370	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilekysPao"
+*** You are running in headless mode.
+1621814079689	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621814080609	Marionette	INFO	Listening on port 61097
+1621814080937	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621814084418	Marionette	INFO	Stopped listening on port 61097
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilekysPao\protections.sqlite
+1621815708153	geckodriver	INFO	Listening on 127.0.0.1:62005
+1621815711196	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileAOCqON"
+*** You are running in headless mode.
+1621815711518	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621815712504	Marionette	INFO	Listening on port 62017
+1621815712735	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621815716165	Marionette	INFO	Stopped listening on port 62017
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileAOCqON\protections.sqlite
+1621815974616	geckodriver	INFO	Listening on 127.0.0.1:62364
+1621815977680	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileRtH2f9"
+*** You are running in headless mode.
+1621815977999	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621815979025	Marionette	INFO	Listening on port 62376
+1621815979222	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621815981765	Marionette	INFO	Stopped listening on port 62376
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621816600782	geckodriver	INFO	Listening on 127.0.0.1:63096
+1621816603860	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileBwHTyu"
+*** You are running in headless mode.
+1621816604183	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621816605265	Marionette	INFO	Listening on port 63108
+1621816605422	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621816608213	Marionette	INFO	Stopped listening on port 63108
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileBwHTyu\protections.sqlite
+1621820288596	geckodriver	INFO	Listening on 127.0.0.1:51074
+1621820291645	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile0NP1Qo"
+*** You are running in headless mode.
+1621820292000	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621820293260	Marionette	INFO	Listening on port 51088
+1621820293704	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621820297165	Marionette	INFO	Stopped listening on port 51088
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621820905715	geckodriver	INFO	Listening on 127.0.0.1:51831
+1621820908777	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileiETaoZ"
+*** You are running in headless mode.
+1621820909141	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621820910539	Marionette	INFO	Listening on port 51843
+1621820910835	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621820914008	Marionette	INFO	Stopped listening on port 51843
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621821013281	geckodriver	INFO	Listening on 127.0.0.1:52055
+1621821016331	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilewV5JIW"
+*** You are running in headless mode.
+1621821016705	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621821018009	Marionette	INFO	Listening on port 52066
+1621821018383	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621821021456	Marionette	INFO	Stopped listening on port 52066
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621821089287	geckodriver	INFO	Listening on 127.0.0.1:52240
+1621821092332	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilexgIcSP"
+*** You are running in headless mode.
+1621821092689	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621821094036	Marionette	INFO	Listening on port 52252
+1621821094394	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621821097377	Marionette	INFO	Stopped listening on port 52252
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilexgIcSP\protections.sqlite
+1621821200543	geckodriver	INFO	Listening on 127.0.0.1:52464
+1621821203640	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileZJ589n"
+*** You are running in headless mode.
+1621821203982	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621821205063	Marionette	INFO	Listening on port 52475
+1621821205190	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621821208292	Marionette	INFO	Stopped listening on port 52475
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileZJ589n\protections.sqlite
+1621821358580	geckodriver	INFO	Listening on 127.0.0.1:52725
+1621821361633	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileyymSTP"
+*** You are running in headless mode.
+1621821361997	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621821363353	Marionette	INFO	Listening on port 52737
+1621821363700	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621821367021	Marionette	INFO	Stopped listening on port 52737
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621821686944	geckodriver	INFO	Listening on 127.0.0.1:53170
+1621821690024	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile8nOhWE"
+*** You are running in headless mode.
+1621821690352	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621821691613	Marionette	INFO	Listening on port 53180
+1621821692094	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621821695372	Marionette	INFO	Stopped listening on port 53180
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile8nOhWE\protections.sqlite
+1621824210117	geckodriver	INFO	Listening on 127.0.0.1:54917
+1621824213218	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileepe8fD"
+*** You are running in headless mode.
+1621824213554	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621824214825	Marionette	INFO	Listening on port 54926
+1621824215284	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621824218901	Marionette	INFO	Stopped listening on port 54926
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileepe8fD\protections.sqlite
+1621824274140	geckodriver	INFO	Listening on 127.0.0.1:55049
+1621824277201	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileBO2AWG"
+*** You are running in headless mode.
+1621824277530	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621824278781	Marionette	INFO	Listening on port 55060
+1621824279261	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621824282264	Marionette	INFO	Stopped listening on port 55060
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileBO2AWG\protections.sqlite
+1621825654124	geckodriver	INFO	Listening on 127.0.0.1:55964
+1621825657198	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile0w9Qag"
+*** You are running in headless mode.
+1621825657526	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621825658674	Marionette	INFO	Listening on port 55975
+1621825658753	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621825661693	Marionette	INFO	Stopped listening on port 55975
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621825856774	geckodriver	INFO	Listening on 127.0.0.1:56177
+1621825859841	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileHeMdF0"
+*** You are running in headless mode.
+1621825860172	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621825861449	Marionette	INFO	Listening on port 56186
+1621825861908	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621825864655	Marionette	INFO	Stopped listening on port 56186
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileHeMdF0\protections.sqlite
+1621827322315	geckodriver	INFO	Listening on 127.0.0.1:57200
+1621827325378	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileQENWVA"
+*** You are running in headless mode.
+1621827325780	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621827327126	Marionette	INFO	Listening on port 57210
+1621827327445	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621827330289	Marionette	INFO	Stopped listening on port 57210
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621827688893	geckodriver	INFO	Listening on 127.0.0.1:57527
+1621827691966	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilewmYh78"
+*** You are running in headless mode.
+1621827692322	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621827693649	Marionette	INFO	Listening on port 57537
+1621827694033	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621827700157	Marionette	INFO	Stopped listening on port 57537
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilewmYh78\protections.sqlite
+1621827754087	geckodriver	INFO	Listening on 127.0.0.1:57657
+1621827757171	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilevshtXd"
+*** You are running in headless mode.
+1621827757500	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621827758809	Marionette	INFO	Listening on port 57668
+1621827759236	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621827761939	Marionette	INFO	Stopped listening on port 57668
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilevshtXd\protections.sqlite
+1621827945921	geckodriver	INFO	Listening on 127.0.0.1:57865
+1621827948966	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofiletOW3fm"
+*** You are running in headless mode.
+1621827949301	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621827950611	Marionette	INFO	Listening on port 57875
+1621827951036	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621827954204	Marionette	INFO	Stopped listening on port 57875
+JavaScript error: , line 0: uncaught exception: undefined
+[Parent 21084, IPC I/O Parent] WARNING: file /builds/worker/checkouts/gecko/ipc/chromium/src/base/process_util_win.cc:167
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofiletOW3fm\protections.sqlite
+1621828042105	geckodriver	INFO	Listening on 127.0.0.1:58011
+1621828045170	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile9sP6pf"
+*** You are running in headless mode.
+1621828045497	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621828046736	Marionette	INFO	Listening on port 58020
+1621828047231	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621828049961	Marionette	INFO	Stopped listening on port 58020
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile9sP6pf\protections.sqlite
+1621828307213	geckodriver	INFO	Listening on 127.0.0.1:58275
+1621828310258	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileSIKmN5"
+*** You are running in headless mode.
+1621828310574	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621828311675	Marionette	INFO	Listening on port 58286
+1621828311826	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621828315065	Marionette	INFO	Stopped listening on port 58286
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621828441972	geckodriver	INFO	Listening on 127.0.0.1:58446
+1621828445044	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileDfW90U"
+*** You are running in headless mode.
+1621828445382	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621828446639	Marionette	INFO	Listening on port 58456
+1621828447109	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621828450208	Marionette	INFO	Stopped listening on port 58456
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621828557982	geckodriver	INFO	Listening on 127.0.0.1:58612
+1621828561061	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilevQiqRJ"
+*** You are running in headless mode.
+1621828561408	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621828562540	Marionette	INFO	Listening on port 58622
+1621828562626	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621828565099	Marionette	INFO	Stopped listening on port 58622
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilevQiqRJ\protections.sqlite
+1621828663802	geckodriver	INFO	Listening on 127.0.0.1:58772
+1621828666876	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile48Rhx7"
+*** You are running in headless mode.
+1621828667278	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621828668443	Marionette	INFO	Listening on port 58782
+1621828668933	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621828671875	Marionette	INFO	Stopped listening on port 58782
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile48Rhx7\protections.sqlite
+1621828939238	geckodriver	INFO	Listening on 127.0.0.1:59079
+1621828942339	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileEyox5K"
+*** You are running in headless mode.
+1621828942665	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621828943884	Marionette	INFO	Listening on port 59088
+1621828944404	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621828947266	Marionette	INFO	Stopped listening on port 59088
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621829157718	geckodriver	INFO	Listening on 127.0.0.1:59283
+1621829160787	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilejJkuNH"
+*** You are running in headless mode.
+1621829161156	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621829162454	Marionette	INFO	Listening on port 59293
+1621829162845	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621829165465	Marionette	INFO	Stopped listening on port 59293
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilejJkuNH\protections.sqlite
+1621829655065	geckodriver	INFO	Listening on 127.0.0.1:59700
+1621829658145	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileAUtulv"
+*** You are running in headless mode.
+1621829658479	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621829659693	Marionette	INFO	Listening on port 59709
+1621829660215	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621829663603	Marionette	INFO	Stopped listening on port 59709
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileAUtulv\protections.sqlite
+1621830006463	geckodriver	INFO	Listening on 127.0.0.1:60052
+1621830009508	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileLnViqW"
+*** You are running in headless mode.
+1621830009842	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621830011112	Marionette	INFO	Listening on port 60061
+1621830011579	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621830014206	Marionette	INFO	Stopped listening on port 60061
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileLnViqW\protections.sqlite
+1621830101713	geckodriver	INFO	Listening on 127.0.0.1:60223
+1621830104813	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilemJYKc0"
+*** You are running in headless mode.
+1621830105167	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621830106444	Marionette	INFO	Listening on port 60233
+1621830106881	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621830109763	Marionette	INFO	Stopped listening on port 60233
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilemJYKc0\protections.sqlite
+1621830348470	geckodriver	INFO	Listening on 127.0.0.1:60475
+1621830351524	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileiNZ3gr"
+*** You are running in headless mode.
+1621830351852	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621830353204	Marionette	INFO	Listening on port 60485
+1621830353587	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621830356782	Marionette	INFO	Stopped listening on port 60485
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileiNZ3gr\protections.sqlite
+1621831583291	geckodriver	INFO	Listening on 127.0.0.1:61347
+1621831586370	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileA8X4eL"
+*** You are running in headless mode.
+1621831586697	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621831587926	Marionette	INFO	Listening on port 61356
+1621831588431	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621831591397	Marionette	INFO	Stopped listening on port 61356
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileA8X4eL\protections.sqlite
+1621832165614	geckodriver	INFO	Listening on 127.0.0.1:61778
+1621832168707	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilesaVTL0"
+*** You are running in headless mode.
+1621832169046	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621832170364	Marionette	INFO	Listening on port 61790
+1621832170780	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621832173695	Marionette	INFO	Stopped listening on port 61790
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621832375731	geckodriver	INFO	Listening on 127.0.0.1:62014
+1621832378798	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileUtFgSE"
+*** You are running in headless mode.
+1621832379163	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621832380490	Marionette	INFO	Listening on port 62024
+1621832380864	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621832383813	Marionette	INFO	Stopped listening on port 62024
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621832463687	geckodriver	INFO	Listening on 127.0.0.1:62171
+1621832466751	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileOqIQvh"
+*** You are running in headless mode.
+1621832467106	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621832468447	Marionette	INFO	Listening on port 62180
+1621832468809	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621832471888	Marionette	INFO	Stopped listening on port 62180
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621832534890	geckodriver	INFO	Listening on 127.0.0.1:62358
+1621832537970	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileaxXwgU"
+*** You are running in headless mode.
+1621832538316	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621832539554	Marionette	INFO	Listening on port 62368
+1621832540027	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621832542816	Marionette	INFO	Stopped listening on port 62368
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileaxXwgU\protections.sqlite
+1621832835605	geckodriver	INFO	Listening on 127.0.0.1:62623
+1621832838676	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileRZls6Y"
+*** You are running in headless mode.
+1621832839003	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621832840302	Marionette	INFO	Listening on port 62634
+1621832840725	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621832843730	Marionette	INFO	Stopped listening on port 62634
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileRZls6Y\protections.sqlite
+1621832881019	geckodriver	INFO	Listening on 127.0.0.1:62749
+1621832884075	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileaaIQHQ"
+*** You are running in headless mode.
+1621832884409	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621832885687	Marionette	INFO	Listening on port 62758
+1621832886144	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621832889361	Marionette	INFO	Stopped listening on port 62758
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileaaIQHQ\protections.sqlite
+1621832961873	geckodriver	INFO	Listening on 127.0.0.1:62892
+1621832964937	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilejMHUhI"
+*** You are running in headless mode.
+1621832965279	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621832966532	Marionette	INFO	Listening on port 62902
+1621832967006	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621832969827	Marionette	INFO	Stopped listening on port 62902
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621833548997	geckodriver	INFO	Listening on 127.0.0.1:63363
+1621833552052	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile8uQ6kM"
+*** You are running in headless mode.
+1621833552379	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621833553750	Marionette	INFO	Listening on port 63373
+1621833554118	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621833557255	Marionette	INFO	Stopped listening on port 63373
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile8uQ6kM\protections.sqlite
+1621833724012	geckodriver	INFO	Listening on 127.0.0.1:63626
+1621833727064	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile7H4JN3"
+*** You are running in headless mode.
+1621833727429	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621833728770	Marionette	INFO	Listening on port 63635
+1621833729125	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621833731943	Marionette	INFO	Stopped listening on port 63635
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621833756793	geckodriver	INFO	Listening on 127.0.0.1:63743
+1621833759868	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilekThg6D"
+*** You are running in headless mode.
+1621833760199	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621833761327	Marionette	INFO	Listening on port 63752
+1621833761415	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621833764426	Marionette	INFO	Stopped listening on port 63752
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilekThg6D\protections.sqlite
+1621869376777	geckodriver	INFO	Listening on 127.0.0.1:55127
+1621869379881	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileoPUtDN"
+*** You are running in headless mode.
+1621869380380	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621869382102	Marionette	INFO	Listening on port 55137
+1621869382578	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621869386166	Marionette	INFO	Stopped listening on port 55137
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621869435332	geckodriver	INFO	Listening on 127.0.0.1:55280
+1621869438413	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileLtghkq"
+*** You are running in headless mode.
+1621869438861	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621869440663	Marionette	INFO	Listening on port 55293
+1621869441114	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621869444303	Marionette	INFO	Stopped listening on port 55293
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+1621869495803	geckodriver	INFO	Listening on 127.0.0.1:55419
+1621869498876	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileoFN8aR"
+*** You are running in headless mode.
+1621869499322	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621869501040	Marionette	INFO	Listening on port 55431
+1621869501579	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621869504546	Marionette	INFO	Stopped listening on port 55431
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621869992059	geckodriver	INFO	Listening on 127.0.0.1:56023
+1621869995139	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileMt8bqm"
+*** You are running in headless mode.
+1621869995982	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621869998192	Marionette	INFO	Listening on port 56033
+1621869998327	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621870002310	Marionette	INFO	Stopped listening on port 56033
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621870314101	geckodriver	INFO	Listening on 127.0.0.1:56511
+1621870317145	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilejlRxkj"
+*** You are running in headless mode.
+1621870317562	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621870319470	Marionette	INFO	Listening on port 56522
+1621870319836	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621870324128	Marionette	INFO	Stopped listening on port 56522
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621870550743	geckodriver	INFO	Listening on 127.0.0.1:56833
+1621870553824	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilebsSCUM"
+*** You are running in headless mode.
+1621870554693	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621870556991	Marionette	INFO	Listening on port 56843
+1621870557051	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621870560371	Marionette	INFO	Stopped listening on port 56843
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621870750766	geckodriver	INFO	Listening on 127.0.0.1:57061
+1621870753863	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilehejmL2"
+*** You are running in headless mode.
+1621870754426	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621870756414	Marionette	INFO	Listening on port 57072
+1621870756564	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621870759806	Marionette	INFO	Stopped listening on port 57072
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+
+###!!! [Parent][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1621870903932	geckodriver	INFO	Listening on 127.0.0.1:57305
+1621870906997	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilefNkFz1"
+*** You are running in headless mode.
+1621870907485	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621870909346	Marionette	INFO	Listening on port 57315
+1621870909681	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621870913462	Marionette	INFO	Stopped listening on port 57315
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilefNkFz1\protections.sqlite
+1621871031344	geckodriver	INFO	Listening on 127.0.0.1:57485
+1621871034435	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile0oN8En"
+*** You are running in headless mode.
+1621871035012	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621871037059	Marionette	INFO	Listening on port 57496
+1621871037131	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621871040625	Marionette	INFO	Stopped listening on port 57496
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621871124681	geckodriver	INFO	Listening on 127.0.0.1:57662
+1621871127755	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileT9JbH1"
+*** You are running in headless mode.
+1621871128241	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621871130323	Marionette	INFO	Listening on port 57671
+1621871130423	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621871133707	Marionette	INFO	Stopped listening on port 57671
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+1621871251241	geckodriver	INFO	Listening on 127.0.0.1:57832
+1621871254320	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile6PGJtL"
+*** You are running in headless mode.
+1621871254792	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621871256848	Marionette	INFO	Listening on port 57845
+1621871257027	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621871260782	Marionette	INFO	Stopped listening on port 57845
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile6PGJtL\protections.sqlite
+1621871306161	geckodriver	INFO	Listening on 127.0.0.1:57959
+1621871309238	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileye3SNC"
+*** You are running in headless mode.
+1621871309728	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621871311505	Marionette	INFO	Listening on port 57968
+1621871311949	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621871314902	Marionette	INFO	Stopped listening on port 57968
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621872185578	geckodriver	INFO	Listening on 127.0.0.1:58856
+1621872188710	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile48qs6f"
+*** You are running in headless mode.
+1621872189145	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621872190879	Marionette	INFO	Listening on port 58866
+1621872191408	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621872194792	Marionette	INFO	Stopped listening on port 58866
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 575: NotFoundError: No such JSWindowActor 'MarionetteEvents'
+JavaScript error: , line 0: uncaught exception: undefined
+1621912934008	geckodriver	INFO	Listening on 127.0.0.1:57714
+1621912937084	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileCtgywq"
+*** You are running in headless mode.
+1621912937647	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621912939053	Marionette	INFO	Listening on port 57724
+1621912939170	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621912942685	Marionette	INFO	Stopped listening on port 57724
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileCtgywq\protections.sqlite
+1621913491830	geckodriver	INFO	Listening on 127.0.0.1:58173
+1621913494880	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofilejlLfMa"
+*** You are running in headless mode.
+1621913495219	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621913496557	Marionette	INFO	Listening on port 58182
+1621913496969	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621913499712	Marionette	INFO	Stopped listening on port 58182
+JavaScript error: resource://gre/modules/UrlClassifierListManager.jsm, line 691: TypeError: this.tablesData[table] is undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofilejlLfMa\protections.sqlite
+1621913611948	geckodriver	INFO	Listening on 127.0.0.1:58335
+1621913615009	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofile0851Dy"
+*** You are running in headless mode.
+1621913615327	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621913616285	Marionette	INFO	Listening on port 58345
+1621913616548	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621913618919	Marionette	INFO	Stopped listening on port 58345
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofile0851Dy\protections.sqlite
+1621913639126	geckodriver	INFO	Listening on 127.0.0.1:58438
+1621913642162	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileYJBEmh"
+*** You are running in headless mode.
+1621913642476	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621913643393	Marionette	INFO	Listening on port 58451
+1621913643709	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621913646803	Marionette	INFO	Stopped listening on port 58451
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 718: Error: Phase "Sqlite.jsm: wait until all connections are closed" is finished, it is too late to register completion condition "protections.sqlite#0: waiting for shutdown"
+1621917475601	geckodriver	INFO	Listening on 127.0.0.1:61247
+1621917478688	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\ryanz\\AppData\\Local\\Temp\\rust_mozprofileJTZQkV"
+*** You are running in headless mode.
+1621917479015	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new Error("", "(unknown module)"))
+1621917480268	Marionette	INFO	Listening on port 61260
+1621917480736	Marionette	WARN	TLS certificate errors will be ignored for this session
+1621917483919	Marionette	INFO	Stopped listening on port 61260
+JavaScript error: , line 0: uncaught exception: undefined
+JavaScript error: resource://gre/modules/Sqlite.jsm, line 1030: Error: Sqlite.jsm has been shutdown. Cannot open connection to: C:\Users\ryanz\AppData\Local\Temp\rust_mozprofileJTZQkV\protections.sqlite
+
+###!!! [Parent][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
