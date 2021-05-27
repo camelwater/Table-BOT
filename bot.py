@@ -45,7 +45,9 @@ async def send_messages(ctx, *args):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("{}.\nType ?help for a list of commands.".format(error))
-    '''
+    #else:
+        #await ctx.send(error)
+'''    
 
 #default max teams based on format (currently used for ffa format only)
 def max_teams(f):
@@ -133,7 +135,7 @@ async def start(ctx, *args):
                 return
         
     searching_room = True   
-    await send_messages(ctx, "Provide a room id (rxx) or mii name(s) in the room.", "Usage: ?search <roomid/rid or mii> <rxxx or name1, name2,...>", "Make sure at least one race in the room has finished.")
+    await send_messages(ctx, "Provide a room id (rxx) or mii name(s) in the room.", "Usage: ?search <rxx or mii> <rxx or mii names(s)>", "Make sure at least one race in the room has finished.")
 
 #?search   
 @bot.command(aliases=['sr'])  
@@ -148,7 +150,7 @@ async def search(ctx, *, arg):
         return
     arg = arg.strip()
     
-    usage = "Usage: ?search <rxx or mii> <rxx or name(s)>\nRoom list: {}".format(home_url)
+    usage = "Usage: ?search <rxx or mii> <rxx or name(s)>\nmkwx room list: {}".format(home_url)
     if len(arg)<1:
         await send_temp_messages(ctx, usage)
         return
@@ -157,7 +159,6 @@ async def search(ctx, *, arg):
     arg_indx = arg.find(' ')
     if arg_indx == -1: arg_indx = len(arg)+1
     search_type = arg[:arg_indx].lower()
-    #print(search_type+";")
     search_args = arg[arg_indx+1:].split(",")
     search_args = [i.lower().strip() for i in search_args]
     
@@ -198,6 +199,11 @@ async def search(ctx, *, arg):
         await send_messages(ctx, choose_message)
         return
 
+@search.error
+async def search_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await send_messages(ctx, "Usage: ?search <rxx or mii> <rxx or name(s)>\nmkwx room list: {}".format(home_url)) 
+
 #change one player's tag
 @bot.command()
 async def changetag(ctx, *args): 
@@ -227,21 +233,58 @@ async def changetag(ctx, *args):
     else:
         await send_messages(ctx, mes)
     
-    
-
-#to manually create tags
-@bot.command(aliases=['tag'])
-async def tags(ctx, *, arg): 
-    usage = "Usage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / Poo 5 6"
+@bot.command(aliases=['et', 'edittags']) 
+async def edittag(ctx, *, arg): 
+    usage = 'Usage: ?edittag <tag> <corrected tag>'
+    if confirm_reset or( confirm_room and table_running):
+        await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
+        return
+    if not (confirm_room and not table_running) and not table_running:
+        await send_temp_messages(ctx, "You can only use this command if the bot prompts you or a table is currently active.")
+        return
     
     arg = [i.strip() for i in arg.strip().split("/")]
     arg  = [i.split(" ") for i in arg]
+    if len(arg)==0:
+        await send_temp_messages(ctx, table.player_list, '\n', usage)
     for i in arg:
         if len(i)<1:
             await send_temp_messages(ctx, "Missing tag(s) for command.", table.player_list, '\n',usage)
             return
         if len(i)<2:
-            await send_temp_messages(ctx, "Error processing command: missing players for tag {}".format(i[0]), table.player_list, usage)
+            await send_temp_messages(ctx, "Error processing command: missing <corrected tag> for tag '{}'".format(i[0]), table.player_list, usage)
+            return
+    
+    
+    mes = table.edit_tag_name(arg)
+    if confirm_room:
+        await send_messages(ctx, mes, table.player_list, '\n', "Is this correct? (?yes / ?no)")
+    else:
+        await send_messages(ctx, mes)
+        
+@edittag.error
+async def edittag_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await send_messages(ctx, table.player_list,'\nUsage: ?edittag <tag> <corrected tag>')    
+
+#to manually create tags
+@bot.command(aliases=['tag'])
+async def tags(ctx, *, arg): 
+    usage = "Usage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / Poo 5 6"
+    if confirm_room:
+        await send_messages(ctx, "Answer the last confirmation question: ",choose_message)
+    
+    arg = [i.strip() for i in arg.strip().split("/")]
+    arg  = [i.split(" ") for i in arg]
+    if len(arg)==0:
+        await send_temp_messages(ctx, table.player_list, '\n',usage)
+        return
+    for i in arg:
+        if len(i)<1:
+            await send_temp_messages(ctx, "Missing tag(s) for command.", table.player_list, '\n',usage)
+            return
+        if len(i)<2:
+            await send_temp_messages(ctx, "Error processing command: missing players for tag '{}'".format(i[0]), table.player_list, usage)
             return
     dic = {}
     for i in arg:
@@ -249,6 +292,11 @@ async def tags(ctx, *, arg):
     
     mes = table.group_tags(dic)
     await send_messages(ctx, mes, table.player_list, "\nIs this correct? (?yes / ?no)")
+    
+@tags.error
+async def tags_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await send_messages(ctx, table.player_list, "\nUsage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / Poo 5 6")
 
 @bot.command(aliases=['y'])
 async def yes(ctx, *args):
@@ -258,7 +306,7 @@ async def yes(ctx, *args):
         return
     if confirm_room:
         if choose_room: choose_room = False
-        mes = table.begin_table()
+        mes = "Table successfully started. Watching room {}.\n?pic to get table picture.".format(table.rxx)
         table_running = True
         await send_messages(ctx, mes)
         searching_room = False
@@ -271,13 +319,16 @@ async def yes(ctx, *args):
     
 @bot.command(aliases=['n'])
 async def no(ctx, *args):
-    global confirm_room, searching_room, confirm_reset
+    global confirm_room, searching_room, confirm_reset, table
     if not confirm_room and not confirm_reset:
         await send_temp_messages(ctx, "You can only use ?no if the bot prompts you to do so.")
         return 
     if confirm_room:
         confirm_room = False
-        await send_messages(ctx, "Search for a room with ?search <search type> <room id or mii name(s)>")
+        table = Table()
+        #await send_messages(ctx, "Search for a room with ?search <search type> <room id or mii name(s)>")
+        await send_messages(ctx, "Start a new table with ?start.")
+       
     elif confirm_reset:
         confirm_reset = False
         await send_messages(ctx, "Tabler watching room {} will continue running.".format(table.rxx))
@@ -314,13 +365,21 @@ async def picture(ctx, *args):
         await send_temp_messages(ctx, "You need to start a table before getting the table picture.", "?start <format> <teams> <gps=3>")
         return
     wait_mes = await ctx.send("Fetching table. Please wait...")
-    mes, img = table.update_table()
+    mes = table.update_table()
+    img = await table.get_table_img(table.table_str)
     await wait_mes.edit(content=mes)
     #await send_messages(ctx, mes)
-    
     f=discord.File(fp=img, filename='table.png')
-    await ctx.send(file = f)
-    await send_messages(ctx, table.get_warnings())
+    em = discord.Embed(title=table.tag_str(), color=0x00ff6f)
+    
+    value_field = "[Edit this table on gb.hlorenzi.com]("+table.table_link+")"
+    em.add_field(name='\u200b', value= value_field, inline=False)
+    em.set_image(url='attachment://table.png')
+    em.set_footer(text = table.get_warnings())
+    
+    #await ctx.send(file = f)
+    #await send_messages(ctx, table.get_warnings())
+    await ctx.send(embed=em, file=f)
  
 #?reset
 @bot.command()
@@ -337,8 +396,8 @@ async def reset(ctx, *args):
     await send_messages(ctx, "Reset the tabler. ?start to start a new table.")
 
 @bot.command(aliases = ['dc'])
-async def dcs(ctx): #TODO
-    await send_messages(ctx, "DC list: ", table.dc_list())
+async def dcs(ctx): 
+    await send_messages(ctx, table.dc_list_str())
     
 @bot.command()
 async def sub(ctx, *args): #TODO
@@ -359,11 +418,23 @@ async def sub(ctx, *args): #TODO
     
 @bot.command(aliases=['pl', 'players'])
 async def playerlist(ctx):
+    if confirm_room or confirm_reset:
+        await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
+        return
+    if not table_running:
+        await send_temp_messages(ctx, "You need to have an active table first before using ?players.")
+        return
     await send_messages(ctx, table.player_list)
 
 @bot.command()
 async def edit(ctx, *args): #TOO
     usage = "Usage: ?edit <player id> <gp number> <gp score>"
+    if confirm_room or confirm_reset:
+        await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
+        return
+    if not table_running:
+        await send_temp_messages(ctx, "You need to have an active table first before using ?edit.")
+        return
     if len(args)==0:
         await send_temp_messages(ctx, table.player_list, '\n',usage)
         return
@@ -382,12 +453,13 @@ async def edit(ctx, *args): #TOO
     if not gp.isnumeric():
         await send_temp_messages(ctx, "<gp> must be a number.", usage)
         return
-    if not score.isnumeric():
+    if not score.lstrip('-').isnumeric() and not score.lstrip('+').isnumeric():
         await send_temp_messages(ctx, "<score> must be a number.", usage)
         return
     
-    mes = table.edit_score(pID, gp, score)
+    mes = table.edit(pID, gp, score)
     await send_messages(ctx, mes)
+
     
 @bot.command(aliases = ['rr', 'res', 'results', 'race'])
 async def raceresults(ctx, *args):
@@ -495,7 +567,88 @@ async def mergeroom(ctx, *args): #TODO
     
     usage = 'Usage: ?mergeroom <rxx or host> <rxx or host mii name>'
 
+@bot.command(aliases=['gp', 'gps', 'changegp'])
+async def changegps(ctx, *args):
+    usage = "Usage: ?changegps <num gps>"
+    if len(args)==0: 
+        await send_temp_messages(ctx, usage)
+        return
+    try:
+        gps = int(args[1])
+        assert gps>0
+    except:
+        await send_temp_messages(ctx, "<num gps> must be a real number.", usage)
+        return
+    table.gps = gps
+    await send_messages(ctx, "Changed total gps to {}.".format(gps))
+    
+@bot.command(aliases=['quickedit', 'qedit'])
+async def editrace(ctx, *, arg): #TODO: editing placements (for ties)
+    if confirm_room or confirm_reset:
+        await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
+        return
+    if not table_running:
+        await send_temp_messages(ctx, "You need to have an active table to be able to merge rooms.")
+        return
+    usage = "Usage: ?editrace <race number> <player id> <corrected placement>"
+    arg = [i.strip() for i in arg.strip().split("/")]
+    arg  = [i.split(" ") for i in arg]
+    if len(arg)==0:
+        await send_temp_messages(ctx, table.player_list, '\n',usage)
+        return
+    for i in arg:
+        if len(i)<1:
+            await send_temp_messages(ctx, "Missing <race number> for command.", table.player_list, '\n',usage)
+            return
+        if len(i)<2:
+            await send_temp_messages(ctx, "Error processing command: missing players for command on race {}".format(i[0]), table.player_list, usage)
+            return
+        if len(i)<3:
+            await send_temp_messages(ctx, "Error: missing <corrected placement> for race {}, player {}.".format(i[0], i[1]), table.player_list, usage)
+        
+        for t in i:
+            if not t.isnumeric():
+                await send_temp_messages(ctx, "Argument '{}' for the command must be a real number.".format(t), table.player_list, usage)
+                return
+            
+    mes = table.edit_race(arg)
+    await send_messages(ctx, mes)
+    
+@editrace.error
+async def editrace_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await send_messages(ctx, table.player_list,"\nUsage: ?editrace <race number> <player id> <corrected placement>")
 
+@bot.command(aliases=['crs', 'roomsize'])
+async def changeroomsize(ctx, *, arg): #TODO: editing room size (for when mkwx bugs and shows wrong players)
+    if confirm_room or confirm_reset:
+        await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
+        return
+    if not table_running:
+        await send_temp_messages(ctx, "You need to have an active table to be able to merge rooms.")
+        return
+    usage = "Usage: ?changeroomsize <race number> <corrected room size (num players)>"
+    arg = [i.strip() for i in arg.strip().split("/")]
+    arg  = [i.split(" ") for i in arg]
+    if len(arg)==0:
+        await send_temp_messages(ctx, usage)
+        return
+    for i in arg:
+        if len(i)<1:
+            await send_temp_messages(ctx, "Missing <race number> for command.",usage)
+            return
+        if len(i)<2:
+            await send_temp_messages(ctx, "Error processing command: missing <corrected room size> for race {}".format(i[0]), usage)
+            return
+    mes = table.change_room_size(arg)
+    await send_messages(ctx, mes)
+    
+@changeroomsize.error
+async def changeroomsize_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await send_messages(ctx, "Usage: ?changeroomsize <race number> <corrected room size (num players)>")
+    
+    
 @bot.command(name='help',aliases = ['h'])
 async def _help(ctx):
     info = 'List of commands:\n\t**?start**\n\t**?search**\n\t**?reset**\n\t**?players**\n\t**?tracks**\n\t**?rxx**\n\t**?raceresults**'

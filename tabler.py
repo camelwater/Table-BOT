@@ -16,42 +16,42 @@ import base64
 import io
 import traceback
 
+from requests_html import AsyncHTMLSession
+#TODO: need to find out how to get table picture faster (currently using requests-html : around 5 secs for picture)
 
 class Table():
     def __init__(self):
         self.URL = "https://wiimmfi.de/stats/mkwx"
         self.ROOM_URL = "https://wiimmfi.de/stats/mkwx/list/{}"
-        self.left = 500#475.4
-        self.top = 95#75.233
-        self.right = self.left+900 #731
-        self.bottom = self.top + 484#442
         self.current_url = ""
         
-        self.players = {}
-        self.pot_sub_players = {}
-        self.finish_times = {}
+        self.recorded_elems = [] #don't record races that have already been recorded
+        self.players = {} #dictionary of players: holds total score and their gp scores
+        self.finish_times = {} #finish times of each race (used for ?rr)
         self.races = []
         self.warnings = {} #race: list of warnings
-        self.dcs = {} # race: list of player dcs
-        self.dc_players = {} #gp: list of players who have dced in gp
-        self.tracks = []
-        self.fcs = {}
+        self.dc_list = {} # race: list of player dcs (?dcs)
+        self.dc_players = {} 
+        self.tracks = [] #track list
+        self.fcs = {} #map fcs to mii name (used so no conflicts with mii names)
        
         self.dup_players = [] #in case some players have same mii name fc: edited mii name (ex. 'Player 1' instead of 'Player')
-        self.player_ids = {} 
+        self.player_ids = {} #used to map player ids to players (player id from bot)
         self.pens = {}
+        self.ties = {} #tied race times
+        self.gp_dcs = {} #gp: list of players who have dced in gp (to ensure dc warnings are simplified in embed)
                             
-        self.tags = {}
-        self.table_str = ""
+        self.tags = {} #list of team tags and their respective players
+        self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
         self.table_img = None
-        self.image_loc = ''
+        self.image_loc = '' #image uri
         
         self.format = ""
         self.teams = 0
         self.gps = 3
         self.rxx = ''
         self.gp = 0
-        self.player_list = ''
+        self.player_list = '' #string for bot printout of players and their ids
         
         self.pts= {12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
               11:{0:15, 1:12, 2:10, 3:8, 4:6, 5:5, 6:4, 7:3, 8:2, 9:1, 10:0},
@@ -73,7 +73,8 @@ class Table():
         if not f.isnumeric():
             return 1
         return int(f)
-    def find_room(self,rid = None, mii = None):
+    
+    def find_room(self,rid = None, mii = None): #TODO: rewrite html parsing for mii name search
         global current_url
         ret_str = ""
         type_ask = "none"
@@ -150,7 +151,7 @@ class Table():
                 
                     counter = 1
                     if self.format[0] == 'f':
-                        #string+='\n-'
+                        string+='\nFFA'
                         for p in self.players.keys():
                             string+="\n{}. {}".format(counter,p)
                             self.player_ids[str(counter)] = p
@@ -176,6 +177,7 @@ class Table():
         else: #room id
             rid = rid[0]
             self.rxx = rid
+            if len(rid)==4: rid = rid.upper()
             print(rid)
             room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rid)
             page = http.request('GET', room_url)
@@ -318,6 +320,7 @@ class Table():
             
             
         self.tags = teams
+        self.tags = dict(sorted(self.tags.items(), key=lambda item: item[0]))
         print()
         print(self.tags)
         
@@ -348,17 +351,62 @@ class Table():
         return lcs_str
     
     def get_warnings(self):
+        #print(self.warnings)
         if len(self.warnings)==0:
             return "Room had no warnings or DCs. This table should be accurate."
-        ret = 'Room errors that could affect the table:\n'
+        ret = 'Room errors that could affect the table (?dcs to fix dcs):\n'
         for i in self.warnings.items():
-            ret+="   Race #{}: {}".format(i[0], self.tracks[i[0]-1])
+            ret+="   Race #{}: {}\n".format(i[0], self.tracks[i[0]-1])
             for warn in i[1]:
-                ret+="   \t-{}".format(warn)
+                ret+="   \t- {}\n".format(warn)
+        
+        return ret
     
+    def tag_str(self):
+        ret = '{}: '.format(self.full_format(self.format))
+        for index, i in enumerate(list(self.tags.keys())):
+            if index==len(self.tags.keys())-1:
+                ret+="{} ".format(i)
+            else:
+                ret+='{} v. '.format(i)
+        ret+="({} races)".format(len(self.races))
+        return ret
+    
+    def edit_tag_name(self, l):
+        ret = ''
+        for num,e in enumerate(l):
+            orig = e[0]
+            new = e[1]
+            if orig.isnumeric():
+                try:
+                    orig = list(self.tags.keys())[int(orig)]
+                except:
+                    return "'{}' out of range. Number must be between 1-{}".format(orig, len(self.tags))
+                data = self.tags.pop(orig)
+                self.tags[new]= data
+                self.update_player_list()
+                ret+= "Edited tag '{}' to '{}'.{}".format(orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
+            
+            else:
+                try:
+                    data = self.tags.pop(orig)
+                except:
+                    string = "Tag '{}' not a valid tag. Tags are case-sensitive.\n The original tag must be one of the following:\n"
+                    for i in list(self.tags.keys()):
+                        string+='{}\n'.format(i)
+                    return string
+                self.tags[new] = data
+                self.update_player_list()
+                ret+= "Edited tag '{}' to '{}'.{}".format(orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
+        
         return ret
             
-            
+    def full_format(self,f):
+        if not f[0].isnumeric():
+            return 'FFA'
+        return '{}v{}'.format(int(f[0]), int(f[0]))
+    
+
     def tracklist(self):
         ret = 'Tracks played:\n'
         for i, track in enumerate(self.tracks):
@@ -376,7 +424,7 @@ class Table():
                 return True, "Race {} doesn't exist. The race number should be from {}-{}.".format(race, 0, len(self.races))
             x = self.finish_times[race-1]
         count = 1 
-        ret+="Race {} results:\n".format(race)
+        ret+="Race {} - {} results:\n".format(race, self.tracks[race-1])
         for i in list(x.items()):
             ret+="{}. {} - {}\n".format(count, i[0], i[1])
             count+=1
@@ -394,6 +442,9 @@ class Table():
             self.tags[tag] = [player]
         else:
             self.tags[tag].append(player)
+        empty_keys = [k[0] for k in list(self.tags.items()) if len(k[1])==0]
+        for k in empty_keys:
+            del self.tags[k]
         self.update_player_list()   
         return "{} tag changed to {}".format(player, tag)  
         
@@ -452,9 +503,32 @@ class Table():
                     counter+=1
         string = string.replace("no name", "Player")
         self.player_list = string
-    
-    def edit(player, gp, score): #TODO
-        pass
+        
+    def dc_list_str(self):
+        ret = "DCs in the room (?edit to correct affected players' scores):\n"
+        for race in list(self.dc_list.items()):
+            ret+='Race #{}: {}\n'.format(race[0], self.tracks[int(race[0]-1)])
+            for player in race[1]:
+                ret+='\t- {}\n'.format(player)
+        if len(self.dc_list)==0:
+            ret+="No DCs."
+        return ret
+        
+    def edit(self,player, gp, score):
+        try:
+            player = self.player_ids[player]
+        except:
+            return "{} was not a valid player index. The index must be between 1-{}".format(player, len(self.players))
+      
+        try:
+            if '-' or '+' in score:
+                self.players[player][1][int(gp)-1] += int(score)
+                return "{} GP {} score changed to {}".format(player, gp, self.players[player][1][int(gp)-1])
+            else:
+                self.players[player][1][int(gp)-1] = int(score)
+                return "{} GP {} score changed to {}".format(player, gp, score)
+        except:
+            return "{} was not a valid gp. The gp number must be between 1-{}".format(gp, self.gp+1)
     
     def penalty(self,player, pen):
         pen = int(pen.lstrip('-'))
@@ -480,32 +554,25 @@ class Table():
                 self.pens[player] -= unpen
                 return "Penalty for {} reduced by {}".format(player, unpen)
 
-    def find_players(self,url):
+    def find_players(self,url): 
         http = urllib3.PoolManager()
         page = http.request('GET', url)
         soup = BeautifulSoup(page.data, 'html.parser')
-        races = soup.get_text(separator = "\n",strip = True).split("UTC ★")[1:]
-        races.reverse()
-        races = [i.split("\n") for i in races]
-        #print(races[0])
-        for race in races:
-            #print(race)
-            h_index = race.index('HOST')
-            race[h_index-1] = race[h_index-1]+ race[h_index]
-            del race[h_index]
-        #players = races[0][35::10]
-        try:
-            delta_index = races[0].index('Δ')+13
-            players = races[0][delta_index::10]
-            f_codes = races[0][delta_index-9::10]
-            
-        except:
-            mii_index = races[0].index('Mii name')+10
-            players= races[0][mii_index::10]
-            f_codes = races[0][mii_index-9::10]
+       
+        elem = soup.select('tr[id*=r]')[-1]
+        next_elem = elem.findNext('tr').findNext('tr')
         
-        players = ['Player' if i == 'no name' else i for i in players]
-        for i, fc in zip(players, f_codes):
+        players = []
+        
+        while next_elem !=None:
+            miiName = next_elem.find('td', class_='mii-font').text
+            if miiName == "no name": miiName = "Player"
+            fc = next_elem.select('span[title*=PID]')[0].text
+            
+            players.append((miiName, fc))
+            next_elem = next_elem.findNext('tr')
+                  
+        for i, fc in players:
             
             if i == 'no name':
                 i == "Player"
@@ -525,6 +592,7 @@ class Table():
                     
                 self.players[name] = [0,[0]*self.gps]
                 self.fcs[fc]= name
+                
         for i in self.dup_players:
             if i in self.players:
                 indx = list(self.fcs.values()).index(i)
@@ -547,148 +615,338 @@ class Table():
     def add_sub_player(self,player, fc):
          self.players[player] = [0,[0]*self.gps]
          self.fcs[fc] = player
+         
+    def change_room_size(self, l): #TODO
+        pass
     
-    def begin_table(self):
-        #global players, last_finish_times, races
-        #indx = len(self.current_url) - 1 - self.current_url[::-1].index('/')
-        #rID = self.current_url[indx+1:]
+    def edit_race(self, l):
+        ret = ''
+        for num, elem in enumerate(l):
+            raceNum = elem[0]
+            player = elem[1]
+            try:
+                player = self.player_ids[player]
+            except:
+                return "The player index {} was invalid. The player id must be between 1-{}".format(player,len(self.players))
+                
+            correct_pos = int(elem[2])-1
+            try:
+                raceNum = int(raceNum)
+                corresponding_rr = self.races[raceNum-1]
+            except:
+                return "The race number {} was invalid. It must be between 1-{}".format(raceNum, len(self.races))
+            
+            corresponding_rr = [i[2] for i in corresponding_rr]
+            corresponding_rr = [self.fcs[i] for i in corresponding_rr]
+            orig_pos = corresponding_rr.index(player)
+            orig_pts = self.pts[len(corresponding_rr)][orig_pos]
+            try:   
+                cor_pts = self.pts[len(corresponding_rr)][int(correct_pos)]
+            except:
+                return "The corrected position {} was invalid. It must be a number between 1-{}".format(correct_pos, len(corresponding_rr))
+            
+            correct_ft_order = list(self.finish_times[raceNum-1].keys())
+            correct_ft_order[correct_pos], correct_ft_order[orig_pos]= correct_ft_order[orig_pos], correct_ft_order[correct_pos]
+            self.finish_times[raceNum-1] = {k : self.finish_times[raceNum-1][k] for k in correct_ft_order}
+            
+            
+            self.races[raceNum-1][correct_pos], self.races[raceNum-1][orig_pos] = self.races[raceNum-1][orig_pos], self.races[raceNum-1][correct_pos]
+            
+            #print(self.races[raceNum-1])
+            gp = int((raceNum-1)/4)
+            print(cor_pts-orig_pts)
+            
+            self.players[player][0] += (cor_pts-orig_pts)
+            
+            self.players[player][1][gp] += (cor_pts-orig_pts)
+
+            
+            aff = self.fcs[self.races[raceNum-1][orig_pos][2]]
+            self.players[aff][0] += (orig_pts-cor_pts)
+            self.players[aff][1][gp] += (orig_pts-cor_pts)
+            
+            
+            ret+='{} race {} placement changed to {}{}'.format(player, raceNum, correct_pos+1, '\n' if num==len(l)-1 else "")
+            
+        return ret
+        
+    def update_table(self):
         rID = self.rxx
         
         http = urllib3.PoolManager()
         page = http.request('GET', self.current_url)
         soup = BeautifulSoup(page.data, 'html.parser')
-        self.races = soup.get_text(separator = "\n",strip = True).split("UTC ★")[1:]
-        self.races.reverse()
-        self.races = [i.split("\n") for i in self.races]
-        #print(self.races)
-        for race in self.races:
-            #print(race)
-            h_index = race.index('HOST')
-            race[h_index-1] = race[h_index-1]+ race[h_index]
-            del race[h_index]
-        '''
-        for i in races[0][35::10]:
-            players[i] = [0,[0]]
-        print()
-        '''
-        #print(self.players.keys())
-        #print()
-        gp = 0
+        
+        new_races = []
+        new_tracks = []
+        elems = soup.select('tr[id*=r]')
+        for i in elems:
+            race = []
+            elem = i
+            if elem in self.recorded_elems:
+                break
+            self.recorded_elems.append(elem)
+                
+            try:
+                track = elem.findAll('a')[-1].text
+                assert(elem.findAll('a')[2] == elem.findAll('a')[-1])
+                track = track[0:track.find('(')-1]
+            except:
+                track = "Unknown Track"
+            
+            new_tracks.insert(0, track)
+            next_elem = elem.findNext('tr').findNext('tr')
+            
+            #tr_parent = elems[0].parent
+            
+            #next_elem = tr_parent.findNext('tr').findNext('tr').findNext('tr')
+            
+            while next_elem not in elems and next_elem !=None:
+                #print(next_elem)
+                time = next_elem.findAll('td', align='center')[-1].text
+                miiName = next_elem.find('td', class_='mii-font').text
+                if miiName == "no name": miiName = "Player"
+                fc = next_elem.select('span[title*=PID]')[0].text
+                
+                race.append((miiName, time, fc))
+                next_elem = next_elem.findNext('tr')
+                
+            new_races.append(race)
 
-        for num,race in enumerate(self.races):
-            #print(race)
-            #self.last_finish_times= copy.deepcopy(self.players)
+        new_races.reverse()
+        
+        #make sure table doesn't record unwanted races
+        if len(self.races+new_races)>self.gps*4:
+            if len(self.races)>=self.gps*4:
+                new_races = []
+            else:
+                new_races = new_races[:self.gps*4-len(self.races)]
+        
+        #self.races.reverse()
+        #self.tracks.reverse()
+        self.tracks+=new_tracks
+        if len(self.tracks)>self.gps*4:
+            self.tracks = self.tracks[:self.gps*4]
+        
+        #self.gp= len(self.races)%4 #find gp of current race (new_races)
+        
+        real_room_size = len(self.players)
+        
+        #increment gp
+        for raceNum, race in enumerate(new_races):
+            if (len(self.races)+raceNum)%4 == 0 and len(self.races)+raceNum!=0: 
+                self.gp+=1
+                if self.gp>=self.gps: 
+                    for i in self.players.values():
+                        i[1].append(0)
+                        
+            cur_room_size = len(race)
             last_finish_times = {}
             
-            try:
-                delta_index = race.index('Δ')+13
-                player_pos = race[delta_index::10]
-                f_codes = race[delta_index-9::10]
-                
-            except:
-                mii_index = race.index('Mii name')+10
-                player_pos = race[mii_index::10]
-                f_codes = race[mii_index-9::10]
-            #f_codes = race[26::10]
-            #player_pos = race[35::10]
-            orig_player_pos = copy.deepcopy(player_pos)
-            player_pos = ['Player' if i == 'no name' else i for i in player_pos]
-            
-            
-            try:
-                track_ind = race.index("Track:")+1
-                par_ind = race[track_ind].find('(')
-                self.tracks.append(race[track_ind][:par_ind].strip())
-            except:
-                self.tracks.append('Unknown Track')
-            
-            #TODO: add warnings (large finish times, ties, etc.)
-            #add dcs (blank finish times, and missing players)
-            #players who dc in gp added to dc_players dict so it doesn't repeat the error message
-            current_room_size = len(player_pos)
-            real_room_size = len(self.players)
-            if current_room_size<len(self.players):
+            if cur_room_size<real_room_size:
+                f_codes = [i[2] for i in race]
                 missing_players = []
                 for i in self.fcs:
                     if i not in f_codes: missing_players.append(self.fcs[i])
-                if num%4 == 0:
+                
+                if len(self.races)+raceNum%4 == 0:
                     for mp in missing_players:
-                        if num+1 not in self.warnings:
-                            self.warnings[num+1] = []
-                        self.warnings[num+1].append("{} missing from GP. 15 DC points for GP {}".format(mp,gp))
-                else:
-                    for mp in missing_players:
-                        if num+1 not in self.warnings:
-                            self.warnings[num+1] = []
-                        self.warnings[num+1].append("{} DCed before race. 3 DC points for the next {} races in GP {}.".format(mp, 4-(num%4), gp+1))
-            if num%4==0 and num!=0: #new gp
-                    gp+=1
-                    self.gp = gp
-                    if self.gp>=self.gps:
-                        for i in self.players.values():
-                            i[1].append(0)
-
-            for player, fc in zip(player_pos, f_codes):
-
-                if player in self.dup_players:
-                    cor_name = self.fcs[fc]
-                    try:
-                        self.players[cor_name][1][gp] += self.pts[current_room_size][f_codes.index(fc)]
-                        self.players[cor_name][0] += self.pts[current_room_size][f_codes.index(fc)]
-                        last_finish_times[cor_name] = race[race.index(fc)+8]
-                    except:
-                        if num+1 not in self.warnings:
-                            self.warnings[num+1] = []
-                        self.warnings[num+1].append("{} had a blank race time. No DC points for this race.".format(cor_name))
-                else:
-                    if player not in self.players:
-                        #print('poop')
-                        player = self.check_name(player)
-                        self.sub_players.append(player)
-                        self.add_sub_player(player)
-                        try:
-                            self.players[player][1][gp] += self.pts[current_room_size][f_codes.index(fc)]
-                            self.players[player][0] += self.pts[current_room_size][f_codes.index(fc)]
-                            last_finish_times[player] = race[race.index(fc)+8]
-                            self.warnings[len(self.races)+num+1].append("Potential sub detected: {}. If this player is a sub, run ?sub to fix the table.".format(player))
-                        except:
-                            if len(self.races)+num+1 not in self.warnings:
-                                self.warnings[len(self.races)+num+1] = []
-                            #print("AOSIDJ 2222")
-                            self.warnings[len(self.races)+num+1].append("{} had a blank race time. No DC points for this race.".format(player))
-                    else:
-                        try:
-                            self.players[player][1][gp] += self.pts[current_room_size][player_pos.index(player)]
-                            self.players[player][0] += self.pts[current_room_size][player_pos.index(player)]
-                            last_finish_times[player] = race[race.index(fc)+8]
-    
-                        except:
-                            if num+1 not in self.warnings:
-                                self.warnings[num+1] = []
-
-                            self.warnings[num+1].append("{} had a blank race time. No DC points for this race.".format(player))
+                        if self.gp not in self.gp_dcs or mp not in self.gp_dcs[self.gp]:
+                            if len(self.races)+raceNum+1 not in self.warnings:
+                                self.warnings[len(self.races)+raceNum+1] = []
+                            if len(self.races)+raceNum+1 not in self.dc_list:   
+                                self.dc_list[len(self.races)+raceNum+1] = []
+                                
+                            self.warnings[len(self.races)+raceNum+1].append("{} is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war).".format(mp,self.gp+1, self.gp+1, self.gp+1))
+                            self.dc_list[len(self.races)+raceNum+1].append("**{}. {}**  -  DCed before race 1 (missing from GP {}). 18 pts for GP {} (mogi), 15 pts for GP {} (war).".format(list(self.player_ids.keys())[list(self.player_ids.values()).index(mp)],mp, self.gp+1,self.gp+1, self.gp+1))
+                            if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
+                            self.gp_dcs[self.gp].append(mp)
                             
-            self.players = dict(sorted(self.players.items(), key=lambda item: item[1], reverse=True))
-            #print(self.players)
-            #last_finish_times = dict(sorted(last_finish_times.items(), key =lambda item : item[1]))
-            self.finish_times[num] = last_finish_times
-            #for ft in list(self.finish_times.items()):
-                #self.finish_times[ft[0]] = dict(sorted(self.finish_times[ft[0]].items(), key=lambda item: item[1]))
-           
+                else:
+                    for mp in missing_players:
+                        if self.gp not in self.gp_dcs or mp not in self.gp_dcs[self.gp]:
+                            if len(self.races)+raceNum+1 not in self.warnings:
+                                self.warnings[len(self.races)+raceNum+1] = []
+                            if len(self.races)+raceNum+1 not in self.dc_list:   
+                                self.dc_list[len(self.races)+raceNum+1] = []
+                                
+                            self.warnings[len(self.races)+raceNum+1].append("{} DCed before race. 3 DC points per race for the next {} races in GP {} ({} pts total).".format(mp, 4-((len(self.races)+raceNum)%4), self.gp+1, 3*(4-((len(self.races)+raceNum)%4))))
+                            self.dc_list[len(self.races)+raceNum+1].append("**{}. {}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total).".format(list(self.player_ids.keys())[list(self.player_ids.values()).index(mp)],mp, len(self.races)+raceNum+1, self.gp+1, 3*(4-((len(self.races)+raceNum)%4))))
+                            if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
+                            self.gp_dcs[self.gp].append(mp)
+        
+            for place,player in enumerate(race):
+                time = player[1]
+                fc = player[2]
+                miiName = self.fcs[fc]
+                
+                if miiName not in self.players: #sub player
+                    self.sub_players.append(miiName)
+                    self.add_sub_player(miiName)
+        
+                    try:
+                        self.warnings[len(self.races)+raceNum+1].append("{}  -  Potential sub detected. If this player is a sub, run ?sub to fix the table.".format(player))
+                    except:
+                        self.warnings[len(self.races)+raceNum+1] = ["{}  -  Potential sub detected. If this player is a sub, run ?sub to fix the table.".format(player)]
+                try:
+                    self.players[miiName][1][self.gp] += self.pts[cur_room_size][place]
+                    self.players[miiName][0] += self.pts[cur_room_size][place]
+                    
+                    #check for ties
+                    if time in list(last_finish_times.values()):
+                        
+                        for index,t in enumerate(list(last_finish_times.values())):
+                            if t == time:
+                                if len(self.races)+raceNum+1 not in self.ties:
+                                    self.ties[len(self.races)+raceNum+1] = {}
+                                if time in self.ties[len(self.races)+raceNum+1]:
+                                    self.ties[len(self.races)+raceNum+1][time].append(list(last_finish_times.keys())[index])
+                                else:
+                                    self.ties[len(self.races)+raceNum+1][time] = [list(last_finish_times.keys())[index]]
+                        
+                        self.ties[len(self.races)+raceNum+1][time].append(miiName)
+                    last_finish_times[miiName] = time
+                    
+                                
+                    
+                except:
+                    if self.gp not in self.gp_dcs or miiName not in self.gp_dcs[self.gp]:
+                        if len(self.races)+raceNum+1 not in self.warnings:
+                            self.warnings[len(self.races)+raceNum+1] = []
+                        if len(self.races)+raceNum+1 not in self.dc_list:   
+                                self.dc_list[len(self.races)+raceNum+1] = []
+                        
+                        self.warnings[len(self.races)+raceNum+1].append("{} had a blank race time. No DC points for this race. 3 DC points per race for next {} races in GP {} ({} pts total).".format(miiName,4-((len(self.races)+raceNum+1)%4) , self.gp+1, 3*(4-((len(self.races)+raceNum+1)%4))))
+                        self.dc_list[len(self.races)+raceNum+1].append("**{}. {}**  -  DCed during the race (blank race time). No DC points for this race. 3 pts per race for remaining {} races in GP {} ({} pts total).".format(list(self.player_ids.keys())[list(self.player_ids.values()).index(miiName)], miiName, 4-((len(self.races)+raceNum+1)%4), self.gp+1, 3*(4-((len(self.races)+raceNum+1)%4))))
+                        if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
+                        self.gp_dcs[self.gp].append(miiName)
+                        
+            if len(self.races)+raceNum+1 in self.ties:
+                for tie in list(self.ties[len(self.races)+raceNum+1].items()):     
+                    if len(self.races)+raceNum+1 not in self.warnings:
+                        self.warnings[len(self.races)+raceNum+1] = []
+                    
+                    self.warnings[len(self.races)+raceNum+1].append("{} had tied race times ({}). Check GP picture to correct any errors with ?editrace.".format(tie[1], tie[0])) 
+            
+            self.finish_times[len(self.races)+raceNum] = last_finish_times
+            
+            
+        self.players = dict(sorted(self.players.items(), key=lambda item: item[1], reverse=True))
+        self.races+=new_races
+        
+        self.table_str = self.create_string()
+        print()
+        #print(self.warnings)
+        #print()
+        print(self.table_str)
+        #last_table_img = table_img
+        return "Table updated. Room {} has finished {} {}. Last race: {}".format(rID, len(self.races), "race" if len(self.races)==1 else "races",self.tracks[len(self.races)-1])
+                
 
-        #print("Race: %d"%(num+1))
-        #print("Player dict:", players)
-        #print("Finish times: ", last_finish_times)
-        #print()
-        self.table_str =  self.create_string()  
-        #print("Player dict:",self.players)
-        #print()
-        #print("\nFinish times:",self.finish_times)
-        #print()
-        print(self.warnings)
-        return "Table successfully started. Watching room {}.\n?pic to get table picture.".format(rID)
+    def create_string(self):
+        ret = "#title {} races".format(len(self.races))
+        if self.format[0] == 'f':
+            ret+='\nFFA'
+            for p in self.players.keys():
+                ret+="\n{} ".format(p)
+                for num,gp in enumerate(self.players[p][1]):
+                    ret+="{}".format(gp)
+                    if num+1!=len(self.players[p][1]):
+                        ret+='|'
+                if p in self.pens:
+                    ret+='-{}'.format(self.pens[p])
+                
+        else:
+            for tag in self.tags.keys():
+                if tag == "":
+                    for p in self.tags[tag]:
+                        ret+="\n\nNO TEAM\n{} ".format(p)
+                        for num,gp in enumerate(self.players[p][1]):
+                            ret+="{}".format(gp)
+                            if num+1!=len(self.players[p][1]):
+                                ret+='|'
+                        if p in self.pens:
+                            ret+='-{}'.format(self.pens[p])
+                else:   
+                    ret+='\n\n{}'.format(tag)
+                    for p in self.tags[tag]:
+                        ret+="\n{} ".format(p)
+                        for num,gp in enumerate(self.players[p][1]):
+                            ret+="{}".format(gp)
+                            if num+1!=len(self.players[p][1]):
+                                ret+='|'
+                        if p in self.pens:
+                            ret+='-{}'.format(self.pens[p])
+                            
+        ret = ret.replace("no name", "Player")
+        return ret
     
     
+    async def get_table_img(self,data):
+        '''
+        f_options = webdriver.FirefoxOptions()
+        f_options.set_headless()
+        driver = webdriver.Firefox(firefox_options=f_options,executable_path='./geckodriver.exe')
+        driver.get("https://gb.hlorenzi.com/table?data={}".format(quote(data)))
+        '''
+        self.table_link = "https://gb.hlorenzi.com/table?data={}".format(quote(data))
+        asession = AsyncHTMLSession()
+    
+        r = await asession.get(self.table_link)
+        
+        await r.html.arender(15)
+        image = r.html.find('img')[7]
+        #print(images)
+        data = image.attrs['src']
+        #print(data)
+        
+        #html = driver.page_source
+        #soup = BeautifulSoup(html, features='lxml')
+        #images = soup.findAll('img')
+        #data = images[7]['src']
+        self.image_loc = data
+        #driver.close()
+        
+        im = Image.open(io.BytesIO(base64.b64decode(data.split(',')[1])))
+        output = BytesIO()
+        im.save(output, format="png")
+        output.seek(0)
+        self.table_img = output
+        return output
+    
+    def get_quick_table(self):
+        im = Image.open(io.BytesIO(base64.b64decode(self.image_loc.split(',')[1])))
+        output = BytesIO()
+        im.save(output, format="png")
+        output.seek(0)
+        self.table_img = output
+        return output
+
+
+if __name__ == "__main__":
+    #ask()
+    print()
+    
+    #table = Table()
+    #table.format = '2'
+    #table.teams = 5
+    #table.find_players('https://wiimmfi.de/stats/mkwx/list/r2884087')
+    
+    #from requests_html import HTMLSession
+    #asession = HTMLSession()
+    #r= asession.get("https://gb.hlorenzi.com/table")
+    #r.html.render()
+
+    
+    
+    #payload = {'data':"%23title%2012%20races%0AFFA%0ARushW%20%5Bus%5D%2036%7C15%7C29%0AWolf%2029%7C7%7C40%0AEdison%20%5Bus%5D%2022%7C44%7C14%0AHenryUS%20%5Btk%5D%2018%7C34%7C27%0Ashamron%2038%7C36%7C25%0AFM72%2017%7C20%7C13%0AZn%20%5Bbr%5D%2015%7C15%7C25%0ACamelot%2027%7C32%7C18%0ASchwoz%20%5Bau%5D%2026%7C15%7C35%0AzachUK%20%5Bgb%5D%2016%7C22%7C19%0ASword%2017%7C33%7C33%0AUkemu%2031%7C13%7C14%0A"}
+    #r = requests.get('https://gb.hlorenzi.com/table', params=payload)
+    #print(r.text)
+    
+    
+    ###  x =  475.4, y = 75.233
+    
+'''
     def update_table(self):
         #global players, last_finish_times, races, table_img, table_str, last_table_img
         #indx = len(self.current_url) - 1 - self.current_url[::-1].index('/')
@@ -711,8 +969,7 @@ class Table():
             
         
         #self.gp = (len(self.races)+1)/4
-        #TODO: need to find out how to get table picture without selenium so it is much faster
-        '''
+        
         if(len(new_races)==0 and self.image_loc!=''):
             print('same table')
             
@@ -721,7 +978,7 @@ class Table():
             table_pic = self.get_quick_table()
             race_str = "race" if len(self.races)==1 else "races"
             return "Table updated. Room {} has finished {} {}. Last race: {}".format(rID, len(self.races), race_str,self.tracks[len(self.races)-1]), table_pic
-        '''
+        
         gp = self.gp
         for num,race in enumerate(new_races):
             last_finish_times = {}
@@ -748,7 +1005,7 @@ class Table():
             
             room_size = len(self.players)
             current_room_size = len(player_pos)
-            #TODO: add warnings (large finish times, ties, etc.)
+             add warnings (large finish times, ties, etc.)
             #add dcs (blank finish times, and missing players)
             #players who dc in gp added to dc_players dict so it doesn't repeat the error message
             #add mergeroom and removerace commands 
@@ -764,7 +1021,7 @@ class Table():
                 else:
                     for mp in missing_players:
                         add = False
-                        #TODO: add check to ensure that DC warnings on same player doesn't repeat in same GP (only show warning on the race that the DC occurred)
+                         add check to ensure that DC warnings on same player doesn't repeat in same GP (only show warning on the race that the DC occurred)
                         if len(self.races)+num+1 not in self.warnings:
                             self.warnings[len(self.races)+num+1] = []
                         self.warnings[len(self.races)+num+1].append("{} DCed before race. 3 DC points for the next {} races in GP {}.".format(mp, 4-(num%4), gp+1))
@@ -839,156 +1096,7 @@ class Table():
         #last_table_img = table_img
         #print(last_table_img)
         return "Table updated. Room {} has finished {} {}. Last race: {}".format(rID, len(self.races), "race" if len(self.races)==1 else "races",self.tracks[len(self.races)-1]), self.table_img
-     
-   
-    def create_string(self):
-        ret = "#title {} races".format(len(self.races))
-        if self.format[0] == 'f':
-            ret+='\n-'
-            for p in self.players.keys():
-                ret+="\n{} ".format(p)
-                for num,gp in enumerate(self.players[p][1]):
-                    ret+="{}".format(gp)
-                    if num+1!=len(self.players[p][1]):
-                        ret+='|'
-                if p in self.pens:
-                    ret+='-{}'.format(self.pens[p])
-                
-        else:
-            for tag in self.tags.keys():
-                if tag == "":
-                    for p in self.tags[tag]:
-                        ret+="\n\nNO TEAM\n{} ".format(p)
-                        for num,gp in enumerate(self.players[p][1]):
-                            ret+="{}".format(gp)
-                            if num+1!=len(self.players[p][1]):
-                                ret+='|'
-                        if p in self.pens:
-                            ret+='-{}'.format(self.pens[p])
-                else:   
-                    ret+='\n\n{}'.format(tag)
-                    for p in self.tags[tag]:
-                        ret+="\n{} ".format(p)
-                        for num,gp in enumerate(self.players[p][1]):
-                            ret+="{}".format(gp)
-                            if num+1!=len(self.players[p][1]):
-                                ret+='|'
-                        if p in self.pens:
-                            ret+='-{}'.format(self.pens[p])
-                            
-        ret = ret.replace("no name", "Player")
-        return ret
-    
-    
-    def get_table_img(self,data):
-        f_options = webdriver.FirefoxOptions()
-        f_options.set_headless()
-        driver = webdriver.Firefox(firefox_options=f_options,executable_path='./geckodriver.exe')
-        driver.get("https://gb.hlorenzi.com/table?data={}".format(quote(data)))
-        self.table_link = "https://gb.hlorenzi.com/table?data={}".format(quote(data))
-        '''
-        png = driver.get_screenshot_as_png()
-        im = Image.open(BytesIO(png)) # uses PIL library to open image in memory
-        driver.close()
-        left = 500#475.4
-        top = 95#75.233
-        right = left+900 #731
-        bottom = top + 484#442
-    
-        im = im.crop((left, top, right, bottom))
-        #im.save('screenshot.png')
-        '''
-        html = driver.page_source
-        soup = BeautifulSoup(html, features='lxml')
-        images = soup.findAll('img')
-        data = images[7]['src']
-        self.image_loc = data
-        #print(data)
-        driver.close()
-        
-        im = Image.open(io.BytesIO(base64.b64decode(data.split(',')[1])))
-        output = BytesIO()
-        im.save(output, format="png")
-        output.seek(0)
-        self.table_img = output
-        return output
-    
-    def get_quick_table(self):
-        im = Image.open(io.BytesIO(base64.b64decode(self.image_loc.split(',')[1])))
-        output = BytesIO()
-        im.save(output, format="png")
-        output.seek(0)
-        self.table_img = output
-        return output
-
-
-if __name__ == "__main__":
-    #ask()
-    
-    
-    #table = Table()
-    #table.format = '2'
-    #table.teams = 5
-    #table.find_players('https://wiimmfi.de/stats/mkwx/list/r2884087')
-    
-    #from requests_html import HTMLSession
-    #asession = HTMLSession()
-    #r= asession.get("https://gb.hlorenzi.com/table")
-    #r.html.render()
-    
-    
-    
-    http = urllib3.PoolManager()
-    #page = http.request("GET", "https://gb.hlorenzi.com/table")
-    page = http.request("GET", 'https://wiimmfi.de/stats/mkwx/list/r2896707')
-    
-    soup = BeautifulSoup(page.data, 'html.parser')
-    #print(soup.prettify())
-    
-    races = []
-    tracks = []
-    elems = soup.select('tr[id*=r]')
-    for i in elems:
-        race = []
-        elem = i
-        
-        try:
-            track = elem.findAll('a')[2].text
-            track = track[0:track.find('(')-1]
-        except:
-            track = "Unknown Track"
-        
-        tracks.append(track)
-        next_elem = elem.findNext('tr').findNext('tr')
-        
-        #tr_parent = elems[0].parent
-        
-        #next_elem = tr_parent.findNext('tr').findNext('tr').findNext('tr')
-        
-        while next_elem not in elems and next_elem !=None:
-            #print(next_elem)
-            time = next_elem.findAll('td', align='center')[6].text
-            miiName = next_elem.find('td', class_='mii-font').text
-            if miiName == "no name": miiName = "Player"
-            fc = next_elem.select('span[title*=PID]')[0].text
-            race.append((miiName, time, fc))
-            next_elem = next_elem.findNext('tr')
-        races.append(race)
-        #print(race[0])
-        #print()
-    races.reverse()
-    tracks.reverse()
-    #print(races[1])
-    for i, track in zip(races, tracks):
-        print(track)
-        for place,j in enumerate(i):
-            print("{}. {}\t|\t{}".format(place+1, j[0], j[1]))
-        print()
-    print()
-    print(tracks)
-    
-    
-    ###  x =  475.4, y = 75.233
+'''
     
 '''
 def ask():
