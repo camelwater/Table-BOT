@@ -25,6 +25,7 @@ choose_room = False
 confirm_room = False
 confirm_reset = False
 #confirm_message = ''
+reset_args = None
 
 num_players = 0
 gps = 0
@@ -40,14 +41,14 @@ async def send_temp_messages(ctx, *args):
     await ctx.send('\n'.join(args), delete_after=25)
 async def send_messages(ctx, *args):
     await ctx.send('\n'.join(args))
-'''
+'''   
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("{}.\nType ?help for a list of commands.".format(error))
     #else:
         #await ctx.send(error)
-'''    
+'''  
 
 #default max teams based on format (currently used for ffa format only)
 def max_teams(f):
@@ -75,16 +76,23 @@ def get_num_players(f, teams):
 #?start
 @bot.command(aliases=['st', 'starttable', 'sw'])
 async def start(ctx, *args):
-    global searching_room, num_players, teams, gps, _format, confirm_reset, confirm_room, table, choose_message
+    global searching_room, num_players, teams, gps, _format, confirm_reset, confirm_room, table, choose_message, table_running, reset_args
+    
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
     if table_running:
         confirm_reset = True
+        reset_args = args
         choose_message= "A tabler watching room {} is currently active.\nAre you sure you want to start a new table? (?yes/?no)".format(table.rxx)
         await send_messages(ctx, choose_message)
         return
     usage = "Usage: ?start <format> <number of teams> <gps = 3>"
+    
+    if isinstance(args[0], tuple) and reset_args !=None:
+        args = args[0]
+        print(args)
+    
     if len(args)<1:
         await send_temp_messages(ctx, usage)
         return
@@ -97,6 +105,7 @@ async def start(ctx, *args):
     
     if _format not in ['ffa', '2v2', '3v3', '4v4', '5v5', '6v6', '2', '3', '4', '5', '6']:
         await send_messages(ctx, "Invalid format. Format must be FFA, 2v2, 3v3, 4v4, 5v5, or 6v6.", usage)
+        return
     
     teams = max_teams(_format)
     if len(args)>1:
@@ -131,11 +140,19 @@ async def start(ctx, *args):
                 return
             if ask=="confirm":
                 confirm_room = True
+                if table.format[0] == 'f':
+                    mes = "Table successfully started. Watching room {}.\n?pic to get table picture.".format(table.rxx)
+                    table_running = True
+                    await send_messages(ctx, mes)
+                    searching_room = False
+                    confirm_room = False
+                    return
+                    
                 await send_messages(ctx, choose_message)
                 return
         
     searching_room = True   
-    await send_messages(ctx, "Provide a room id (rxx) or mii name(s) in the room.", "Usage: ?search <rxx or mii> <rxx or mii names(s)>", "Make sure at least one race in the room has finished.")
+    await send_messages(ctx, "Provide a room id (rxx) or mii name(s) in the room.", "Make sure at least one race in the room has finished.", "Usage: ?search <rxx or mii> <rxx or mii names(s)>")
 
 #?search   
 @bot.command(aliases=['sr'])  
@@ -270,9 +287,13 @@ async def edittag_error(ctx, error):
 #to manually create tags
 @bot.command(aliases=['tag'])
 async def tags(ctx, *, arg): 
-    usage = "Usage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / Poo 5 6"
-    if confirm_room:
-        await send_messages(ctx, "Answer the last confirmation question: ",choose_message)
+    usage = "Usage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / B 5 6"
+    if confirm_reset or( confirm_room and table_running):
+        await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
+        return
+    if not (confirm_room and not table_running) and not table_running:
+        await send_temp_messages(ctx, "You can only use this command if the bot prompts you or a table is currently active.")
+        return
     
     arg = [i.strip() for i in arg.strip().split("/")]
     arg  = [i.split(" ") for i in arg]
@@ -286,6 +307,10 @@ async def tags(ctx, *, arg):
         if len(i)<2:
             await send_temp_messages(ctx, "Error processing command: missing players for tag '{}'".format(i[0]), table.player_list, usage)
             return
+        for indx, j in enumerate(i[1:]):
+            if not j.isnumeric():
+                await send_temp_messages(ctx, "Error processing players for tag '{}': {} is not a number. All players must be numeric.".format(i[0], i[indx]), usage)
+                return 
     dic = {}
     for i in arg:
         dic[i[0]] = i[1:]
@@ -296,7 +321,7 @@ async def tags(ctx, *, arg):
 @tags.error
 async def tags_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await send_messages(ctx, table.player_list, "\nUsage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / Poo 5 6")
+        await send_messages(ctx, table.player_list, "\nUsage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / B 5 6")
 
 @bot.command(aliases=['y'])
 async def yes(ctx, *args):
@@ -315,7 +340,8 @@ async def yes(ctx, *args):
         table = Table()
         table_running=False
         confirm_reset = False
-        await send_messages(ctx, "Table has been reset.", "?start to start a new table.")
+        await send_messages(ctx, "Table has been reset.")
+        await start(ctx, reset_args)
     
 @bot.command(aliases=['n'])
 async def no(ctx, *args):
@@ -364,11 +390,11 @@ async def picture(ctx, *args):
     if not table_running:
         await send_temp_messages(ctx, "You need to start a table before getting the table picture.", "?start <format> <teams> <gps=3>")
         return
-    wait_mes = await ctx.send("Fetching table. Please wait...")
+    wait_mes = await ctx.send("Fetching table picture. Please wait...")
     mes = table.update_table()
-    img = await table.get_table_img(table.table_str)
+    img = await table.get_table_img()
     await wait_mes.edit(content=mes)
-    #await send_messages(ctx, mes)
+    
     f=discord.File(fp=img, filename='table.png')
     em = discord.Embed(title=table.tag_str(), color=0x00ff6f)
     
@@ -384,7 +410,7 @@ async def picture(ctx, *args):
 #?reset
 @bot.command()
 async def reset(ctx, *args):
-    global table, table_running
+    global table, table_running, confirm_room, confirm_reset, choose_message
     #if confirm_room or confirm_reset:
         #await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         #return
@@ -393,11 +419,54 @@ async def reset(ctx, *args):
         return
     table = Table()
     table_running = False
+    choose_message = None 
+    confirm_reset = False
+    confirm_room= False
     await send_messages(ctx, "Reset the tabler. ?start to start a new table.")
 
 @bot.command(aliases = ['dc'])
-async def dcs(ctx): 
-    await send_messages(ctx, table.dc_list_str())
+async def dcs(ctx, *, arg): 
+    if confirm_room or confirm_reset:
+        await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
+        return
+    if not table_running:
+        await send_temp_messages(ctx, "You cannot use ?dcs if there is no table running.")
+        return
+    usage = '\nUsage: ?dcs <DC number> <"on"/"during" or "off"/"before">'
+    
+    arg = [i.strip() for i in arg.strip().split("/")]
+    arg  = [i.split(" ") for i in arg]
+    
+    for i in arg:
+        if len(i)<1:
+            await send_temp_messages(ctx, "Error: Missing <DC number>.", table.dc_list_str(), usage)
+            return
+        if len(i)<2:
+            await send_temp_messages(ctx, "Error processing command: missing DC status for DC number {}.".format(i[0]), table.dc_list_str(), usage)
+            return
+        if len(i)>2:
+            await send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <DC number> and <DC status>.".format(i[0]), table.dc_list_str(), usage)
+        if not i[0].isnumeric():
+            await send_temp_messages(ctx, "DC numbers must be numeric.", table.dc_list_str(), usage)
+            return
+        if not (i[1] == "on" or i[1]=='during') and not (i[1]=='off' or i[1] == "before"):
+            await send_temp_messages(ctx, "The DC status argument must be either 'on'/'during' or 'off'/'before'.", table.dc_list_str(), usage)
+        
+    mes = table.edit_dc_status(arg)
+    await send_messages(ctx, mes)
+    
+      
+@dcs.error
+async def dcs_error(ctx, error):
+    if confirm_room or confirm_reset:
+        await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
+        return
+    if not table_running:
+        await send_temp_messages(ctx, "You need to have an active table first before using ?dcs.")
+        return
+    
+    if isinstance(error, commands.MissingRequiredArgument):
+        await send_messages(ctx, table.dc_list_str(), '\nUsage: ?dcs <DC number> <"on"/"during" or "off"/"before">')
     
 @bot.command()
 async def sub(ctx, *args): #TODO
@@ -514,7 +583,7 @@ async def penalty(ctx, *args): #TOOD
     usage = "Usage: ?pen <player id> <pen amount>"
     
     if len(args)==0:
-        await send_messages(ctx, table.player_list, usage)
+        await send_messages(ctx, table.player_list, '\n'+usage)
         return
     pID = args[0].lower()
     if not pID.isnumeric():
@@ -542,7 +611,7 @@ async def unpenalty(ctx, *args):
     usage = "Usage: ?unpen <player id> <unpen amount = current pen>"
     
     if len(args)==0:
-        await send_messages(ctx, table.player_list, usage)
+        await send_messages(ctx, table.player_list, '\n'+usage)
         return
     
     pID = args[0].lower()
@@ -583,7 +652,7 @@ async def changegps(ctx, *args):
     await send_messages(ctx, "Changed total gps to {}.".format(gps))
     
 @bot.command(aliases=['quickedit', 'qedit'])
-async def editrace(ctx, *, arg): #TODO: editing placements (for ties)
+async def editrace(ctx, *, arg):
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -651,7 +720,7 @@ async def changeroomsize_error(ctx, error):
     
 @bot.command(name='help',aliases = ['h'])
 async def _help(ctx):
-    info = 'List of commands:\n\t**?start**\n\t**?search**\n\t**?reset**\n\t**?players**\n\t**?tracks**\n\t**?rxx**\n\t**?raceresults**'
+    info = 'List of commands:\n\t**?start**\n\t**?search**\n\t**?reset**\n\t**?players**\n\t**?tracks**\n\t**?rxx**\n\t**?raceresults\n\t?editrace\n\t?changeroomsize\n\t?dcs\n\t?penalty, ?unpenalty\n\t?tags\n\t?edittag\n\t?changetag\n\t?changegps\n\t?edit\n\t?pic**'
     await send_messages(ctx, info)
     
 bot.run(KEY)
