@@ -26,6 +26,8 @@ confirm_room = False
 confirm_reset = False
 #confirm_message = ''
 reset_args = None
+undo_empty = False
+redo_empty = False
 
 num_players = 0
 gps = 0
@@ -77,6 +79,8 @@ def get_num_players(f, teams):
 @bot.command(aliases=['st', 'starttable', 'sw'])
 async def start(ctx, *args):
     global searching_room, num_players, teams, gps, _format, confirm_reset, confirm_room, table, choose_message, table_running, reset_args
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
@@ -91,7 +95,6 @@ async def start(ctx, *args):
     
     if isinstance(args[0], tuple) and reset_args !=None:
         args = args[0]
-        print(args)
     
     if len(args)<1:
         await send_temp_messages(ctx, usage)
@@ -158,6 +161,8 @@ async def start(ctx, *args):
 @bot.command(aliases=['sr'])  
 async def search(ctx, *, arg):
     global searching_room, num_players, choose_room, confirm_room, choose_message, table
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -218,12 +223,17 @@ async def search(ctx, *, arg):
 
 @search.error
 async def search_error(ctx, error):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if isinstance(error, commands.MissingRequiredArgument):
         await send_messages(ctx, "Usage: ?search <rxx or mii> <rxx or name(s)>\nmkwx room list: {}".format(home_url)) 
 
 #change one player's tag
 @bot.command()
 async def changetag(ctx, *args): 
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
+    global choose_message
     if confirm_reset or( confirm_room and table_running):
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -232,7 +242,7 @@ async def changetag(ctx, *args):
         return
     usage = "Usage: ?changetag <player id> <corrected tag>"
     if len(args)==0:
-        await send_temp_messages(ctx, table.player_list,'\n',usage)
+        await send_temp_messages(ctx, table.get_player_list(),'\n',usage)
         return
     
     pID = args[0].lower()
@@ -246,12 +256,16 @@ async def changetag(ctx, *args):
     tag = args[1]
     mes= table.change_tag(pID, tag)
     if confirm_room:
-        await send_messages(ctx, mes, table.player_list, '\n', "Is this correct? (?yes / ?no)")
+        choose_message = table.get_player_list() +"\nIs this correct? (?yes / ?no)"
+        await send_messages(ctx, mes, table.get_player_list(), '\n', "Is this correct? (?yes / ?no)")
     else:
         await send_messages(ctx, mes)
     
 @bot.command(aliases=['et', 'edittags']) 
 async def edittag(ctx, *, arg): 
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
+    global choose_message
     usage = 'Usage: ?edittag <tag> <corrected tag>'
     if confirm_reset or( confirm_room and table_running):
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
@@ -263,30 +277,36 @@ async def edittag(ctx, *, arg):
     arg = [i.strip() for i in arg.strip().split("/")]
     arg  = [i.split(" ") for i in arg]
     if len(arg)==0:
-        await send_temp_messages(ctx, table.player_list, '\n', usage)
+        await send_temp_messages(ctx, table.get_player_list(), '\n', usage)
     for i in arg:
         if len(i)<1:
-            await send_temp_messages(ctx, "Missing tag(s) for command.", table.player_list, '\n',usage)
+            await send_temp_messages(ctx, "Missing tag(s) for command.", table.get_player_list(), '\n',usage)
             return
         if len(i)<2:
-            await send_temp_messages(ctx, "Error processing command: missing <corrected tag> for tag '{}'".format(i[0]), table.player_list, usage)
+            await send_temp_messages(ctx, "Error processing command: missing <corrected tag> for tag '{}'".format(i[0]), table.get_player_list(), usage)
             return
     
     
     mes = table.edit_tag_name(arg)
     if confirm_room:
-        await send_messages(ctx, mes, table.player_list, '\n', "Is this correct? (?yes / ?no)")
+        choose_message = table.get_player_list() +"\nIs this correct? (?yes / ?no)"
+        await send_messages(ctx, mes, table.get_player_list(), '\n', "Is this correct? (?yes / ?no)")
     else:
         await send_messages(ctx, mes)
         
 @edittag.error
 async def edittag_error(ctx, error):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if isinstance(error, commands.MissingRequiredArgument):
-        await send_messages(ctx, table.player_list,'\nUsage: ?edittag <tag> <corrected tag>')    
+        await send_messages(ctx, table.get_player_list(),'\nUsage: ?edittag <tag> <corrected tag>')    
 
 #to manually create tags
 @bot.command(aliases=['tag'])
 async def tags(ctx, *, arg): 
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
+    global choose_message
     usage = "Usage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / B 5 6"
     if confirm_reset or( confirm_room and table_running):
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
@@ -298,14 +318,14 @@ async def tags(ctx, *, arg):
     arg = [i.strip() for i in arg.strip().split("/")]
     arg  = [i.split(" ") for i in arg]
     if len(arg)==0:
-        await send_temp_messages(ctx, table.player_list, '\n',usage)
+        await send_temp_messages(ctx, table.get_player_list(), '\n',usage)
         return
     for i in arg:
         if len(i)<1:
-            await send_temp_messages(ctx, "Missing tag(s) for command.", table.player_list, '\n',usage)
+            await send_temp_messages(ctx, "Missing tag(s) for command.", table.get_player_list(), '\n',usage)
             return
         if len(i)<2:
-            await send_temp_messages(ctx, "Error processing command: missing players for tag '{}'".format(i[0]), table.player_list, usage)
+            await send_temp_messages(ctx, "Error processing command: missing players for tag '{}'".format(i[0]), table.get_player_list(), usage)
             return
         for indx, j in enumerate(i[1:]):
             if not j.isnumeric():
@@ -316,15 +336,20 @@ async def tags(ctx, *, arg):
         dic[i[0]] = i[1:]
     
     mes = table.group_tags(dic)
-    await send_messages(ctx, mes, table.player_list, "\nIs this correct? (?yes / ?no)")
+    choose_message = table.get_player_list() +"\nIs this correct? (?yes / ?no)"
+    await send_messages(ctx, mes, table.get_player_list(), "\nIs this correct? (?yes / ?no)")
     
 @tags.error
 async def tags_error(ctx, error):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if isinstance(error, commands.MissingRequiredArgument):
-        await send_messages(ctx, table.player_list, "\nUsage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / B 5 6")
+        await send_messages(ctx, table.get_player_list(), "\nUsage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / B 5 6")
 
 @bot.command(aliases=['y'])
 async def yes(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     global confirm_room, searching_room, table_running, confirm_reset, table, choose_room
     if not confirm_room and not confirm_reset:
         await send_temp_messages(ctx, "You can only use ?yes if the bot prompts you to do so.")
@@ -345,6 +370,8 @@ async def yes(ctx, *args):
     
 @bot.command(aliases=['n'])
 async def no(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     global confirm_room, searching_room, confirm_reset, table
     if not confirm_room and not confirm_reset:
         await send_temp_messages(ctx, "You can only use ?no if the bot prompts you to do so.")
@@ -362,6 +389,8 @@ async def no(ctx, *args):
 #choose correct room if multiple matches from mii name search
 @bot.command(aliases=['ch'])
 async def choose(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     global choose_room
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
@@ -383,6 +412,8 @@ async def choose(ctx, *args):
 #?picture
 @bot.command(aliases=['p', 'pic', 'wp'])
 async def picture(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     global table_running
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
@@ -406,10 +437,80 @@ async def picture(ctx, *args):
     #await ctx.send(file = f)
     #await send_messages(ctx, table.get_warnings())
     await ctx.send(embed=em, file=f)
+
+@bot.command()
+async def undo(ctx, *args):
+    global undo_empty, redo_empty
+    
+    if confirm_reset or( confirm_room and table_running):
+        await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
+        return
+    if not (confirm_room and not table_running) and not table_running:
+        await send_temp_messages(ctx, "You can only use this command if the bot prompts you or a table is currently active.")
+        return
+    
+    usage = 'Usage: ?undo <modification number ("all" if you want to undo all)>'
+    
+    if undo_empty and len(args)==0:
+        mes = table.undo_commands(-1)
+        await send_messages(ctx, mes)
+        undo_empty = False
+        return
+    if len(args)==0:
+        await send_messages(ctx, table.get_modifications(), '\n'+usage)
+        undo_empty = True
+        return
+    
+    else:
+        if args[0].lower()=='all':
+            args = 0
+        elif args[0].isnumeric():
+            args = int(args[0])
+        else:
+            await send_temp_messages(ctx, "{} is not a valid parameter for ?undo. The only valid parameters are 'all' and numbers.".format(args[0]), usage)
+            return
+    undo_empty = False   
+    mes = table.undo_commands(args)
+    await send_messages(ctx,mes)
+    
+@bot.command()
+async def redo(ctx, *args):
+    global redo_empty
+    if confirm_room or confirm_reset:
+        await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
+        return
+    if not table_running:
+        await send_temp_messages(ctx, "You cannot use ?dcs if there is no table running.")
+        return
+    usage = 'Usage: ?redo <undo number ("all" if you want to redo all)>'
+    
+    if redo_empty and len(args)==0:
+        mes = table.redo_commands(-1)
+        await send_messages(ctx, mes)
+        redo_empty = False
+        return
+    if len(args)==0:
+        await send_messages(ctx, table.get_undos(), '\n'+usage)
+        redo_empty = True
+        return
+    else:
+        if args[0].lower()=='all':
+            args = 0
+        elif args[0].isnumeric():
+            args = int(args[0])
+        else:
+            await send_temp_messages(ctx, "{} is not a valid parameter for ?redo. The only valid parameters are 'all' and a number.".format(args[0]), usage)
+            return
+    redo_empty = False
+    mes = table.redo_commands(args)
+    await send_messages(ctx,mes)
+   
  
 #?reset
 @bot.command()
 async def reset(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     global table, table_running, confirm_room, confirm_reset, choose_message
     #if confirm_room or confirm_reset:
         #await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
@@ -422,10 +523,12 @@ async def reset(ctx, *args):
     choose_message = None 
     confirm_reset = False
     confirm_room= False
-    await send_messages(ctx, "Reset the tabler. ?start to start a new table.")
+    await send_messages(ctx, "Reset the table. ?start to start a new table.")
 
 @bot.command(aliases = ['dc'])
 async def dcs(ctx, *, arg): 
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -458,6 +561,8 @@ async def dcs(ctx, *, arg):
       
 @dcs.error
 async def dcs_error(ctx, error):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -470,33 +575,39 @@ async def dcs_error(ctx, error):
     
 @bot.command()
 async def sub(ctx, *args): #TODO
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     usage = "Usage: ?sub <sub out> <sub in>"
     if len(args)==0:
-        await send_temp_messages(ctx, table.player_list, usage)
+        await send_temp_messages(ctx, table.get_player_list(), usage)
         return
     if len(args)<2:
-        await send_temp_messages(ctx, "Missing <sub in> player.", table.player_list, usage)
+        await send_temp_messages(ctx, "Missing <sub in> player.", table.get_player_list(), usage)
         return
     subIn = args[1]
     subOut = args[0]
     if not (subIn.isnumeric() or subOut.isnumeric()):
-        await send_temp_messages(ctx, "<sub in> and <sub out> must be numbers.", table.player_list, usage)
+        await send_temp_messages(ctx, "<sub in> and <sub out> must be numbers.", table.get_player_list(), usage)
         return
     mes = table.sub(subIn, subOut)
     await send_messages(ctx, mes)
     
 @bot.command(aliases=['pl', 'players'])
 async def playerlist(ctx):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
     if not table_running:
         await send_temp_messages(ctx, "You need to have an active table first before using ?players.")
         return
-    await send_messages(ctx, table.player_list)
+    await send_messages(ctx, table.get_player_list())
 
 @bot.command()
-async def edit(ctx, *args): #TOO
+async def edit(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     usage = "Usage: ?edit <player id> <gp number> <gp score>"
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
@@ -505,7 +616,7 @@ async def edit(ctx, *args): #TOO
         await send_temp_messages(ctx, "You need to have an active table first before using ?edit.")
         return
     if len(args)==0:
-        await send_temp_messages(ctx, table.player_list, '\n',usage)
+        await send_temp_messages(ctx, table.get_player_list(), '\n',usage)
         return
     if len(args)<3:
         if len(args)<2:
@@ -525,13 +636,14 @@ async def edit(ctx, *args): #TOO
     if not score.lstrip('-').isnumeric() and not score.lstrip('+').isnumeric():
         await send_temp_messages(ctx, "<score> must be a number.", usage)
         return
-    
     mes = table.edit(pID, gp, score)
     await send_messages(ctx, mes)
 
     
 @bot.command(aliases = ['rr', 'res', 'results', 'race'])
 async def raceresults(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -553,6 +665,8 @@ async def raceresults(ctx, *args):
     
 @bot.command(aliases=['tl', 'tracks', 'races'])
 async def tracklist(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -563,6 +677,8 @@ async def tracklist(ctx, *args):
     
 @bot.command(aliases=['rxx', 'rid', 'room'])
 async def roomid(ctx):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -572,8 +688,10 @@ async def roomid(ctx):
     
     await send_messages(ctx, 'Current table is watching room: '+table.rxx)
   
-@bot.command(aliases=['pen'])
-async def penalty(ctx, *args): #TOOD
+@bot.command(aliases=['pen', 'pens'])
+async def penalty(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -583,7 +701,7 @@ async def penalty(ctx, *args): #TOOD
     usage = "Usage: ?pen <player id> <pen amount>"
     
     if len(args)==0:
-        await send_messages(ctx, table.player_list, '\n'+usage)
+        await send_messages(ctx, table.get_pen_player_list(), '\n'+usage)
         return
     pID = args[0].lower()
     if not pID.isnumeric():
@@ -593,7 +711,7 @@ async def penalty(ctx, *args): #TOOD
         await send_temp_messages(ctx, "Missing <pen amount>.",usage)
         return
     pen = args[1].lower()
-    if not pen.lstrip('-').isnumeric():
+    if not pen.lstrip('-').lstrip('=').isnumeric():
         await send_temp_messages(ctx, "The penalty amount must be a number (negative allowed).", usage)
         return
     
@@ -602,6 +720,8 @@ async def penalty(ctx, *args): #TOOD
 
 @bot.command(aliases=['unpen'])
 async def unpenalty(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -611,7 +731,7 @@ async def unpenalty(ctx, *args):
     usage = "Usage: ?unpen <player id> <unpen amount = current pen>"
     
     if len(args)==0:
-        await send_messages(ctx, table.player_list, '\n'+usage)
+        await send_messages(ctx, table.get_pen_player_list(), '\n'+usage)
         return
     
     pID = args[0].lower()
@@ -627,6 +747,8 @@ async def unpenalty(ctx, *args):
                             
 @bot.command(aliases=['mr', 'merge'])
 async def mergeroom(ctx, *args): #TODO
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -638,6 +760,8 @@ async def mergeroom(ctx, *args): #TODO
 
 @bot.command(aliases=['gp', 'gps', 'changegp'])
 async def changegps(ctx, *args):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     usage = "Usage: ?changegps <num gps>"
     if len(args)==0: 
         await send_temp_messages(ctx, usage)
@@ -653,6 +777,8 @@ async def changegps(ctx, *args):
     
 @bot.command(aliases=['quickedit', 'qedit'])
 async def editrace(ctx, *, arg):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -663,21 +789,21 @@ async def editrace(ctx, *, arg):
     arg = [i.strip() for i in arg.strip().split("/")]
     arg  = [i.split(" ") for i in arg]
     if len(arg)==0:
-        await send_temp_messages(ctx, table.player_list, '\n',usage)
+        await send_temp_messages(ctx, table.get_player_list(), '\n',usage)
         return
     for i in arg:
         if len(i)<1:
-            await send_temp_messages(ctx, "Missing <race number> for command.", table.player_list, '\n',usage)
+            await send_temp_messages(ctx, "Missing <race number> for command.", table.get_player_list(), '\n',usage)
             return
         if len(i)<2:
-            await send_temp_messages(ctx, "Error processing command: missing players for command on race {}".format(i[0]), table.player_list, usage)
+            await send_temp_messages(ctx, "Error processing command: missing players for command on race {}".format(i[0]), table.get_player_list(), usage)
             return
         if len(i)<3:
-            await send_temp_messages(ctx, "Error: missing <corrected placement> for race {}, player {}.".format(i[0], i[1]), table.player_list, usage)
+            await send_temp_messages(ctx, "Error: missing <corrected placement> for race {}, player {}.".format(i[0], i[1]), table.get_player_list(), usage)
         
         for t in i:
             if not t.isnumeric():
-                await send_temp_messages(ctx, "Argument '{}' for the command must be a real number.".format(t), table.player_list, usage)
+                await send_temp_messages(ctx, "Argument '{}' for the command must be a real number.".format(t), table.get_player_list(), usage)
                 return
             
     mes = table.edit_race(arg)
@@ -685,12 +811,17 @@ async def editrace(ctx, *, arg):
     
 @editrace.error
 async def editrace_error(ctx, error):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if isinstance(error, commands.MissingRequiredArgument):
-        await send_messages(ctx, table.player_list,"\nUsage: ?editrace <race number> <player id> <corrected placement>")
+        await send_messages(ctx, table.get_player_list(),"\nUsage: ?editrace <race number> <player id> <corrected placement>")
 
 @bot.command(aliases=['crs', 'roomsize'])
 async def changeroomsize(ctx, *, arg): #TODO: editing room size (for when mkwx bugs and shows wrong players)
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
+        
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
     if not table_running:
@@ -714,13 +845,17 @@ async def changeroomsize(ctx, *, arg): #TODO: editing room size (for when mkwx b
     
 @changeroomsize.error
 async def changeroomsize_error(ctx, error):
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
     if isinstance(error, commands.MissingRequiredArgument):
         await send_messages(ctx, "Usage: ?changeroomsize <race number> <corrected room size (num players)>")
     
     
 @bot.command(name='help',aliases = ['h'])
 async def _help(ctx):
-    info = 'List of commands:\n\t**?start**\n\t**?search**\n\t**?reset**\n\t**?players**\n\t**?tracks**\n\t**?rxx**\n\t**?raceresults\n\t?editrace\n\t?changeroomsize\n\t?dcs\n\t?penalty, ?unpenalty\n\t?tags\n\t?edittag\n\t?changetag\n\t?changegps\n\t?edit\n\t?pic**'
+    global undo_empty, redo_empty
+    undo_empty=redo_empty=False
+    info = 'List of commands:\n\t**?start**\n\t**?search**\n\t**?reset**\n\t**?players**\n\t**?tracks**\n\t**?rxx**\n\t**?raceresults\n\t?editrace\n\t?changeroomsize\n\t?dcs\n\t?penalty, ?unpenalty\n\t?tags\n\t?edittag\n\t?changetag\n\t?changegps\n\t?edit\n\t?undo, ?redo\n\t?pic**'
     await send_messages(ctx, info)
     
 bot.run(KEY)
