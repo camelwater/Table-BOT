@@ -176,8 +176,7 @@ async def search(ctx, *, arg):
     if len(arg)<1:
         await send_temp_messages(ctx, usage)
         return
-    #search_type = args[0].lower()
-    #search_args = [i.lower() for i in args[1:]] 
+     
     arg_indx = arg.find(' ')
     if arg_indx == -1: arg_indx = len(arg)+1
     search_type = arg[:arg_indx].lower()
@@ -434,14 +433,12 @@ async def picture(ctx, *args):
     em.set_image(url='attachment://table.png')
     em.set_footer(text = table.get_warnings())
     
-    #await ctx.send(file = f)
-    #await send_messages(ctx, table.get_warnings())
     await ctx.send(embed=em, file=f)
 
 @bot.command()
 async def undo(ctx, *args):
     global undo_empty, redo_empty
-    
+    redo_empty = False
     if confirm_reset or( confirm_room and table_running):
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -475,7 +472,8 @@ async def undo(ctx, *args):
     
 @bot.command()
 async def redo(ctx, *args):
-    global redo_empty
+    global redo_empty, undo_empty
+    undo_empty = False
     if confirm_room or confirm_reset:
         await send_temp_messages(ctx, "Please answer the last confirmation question:", choose_message)
         return
@@ -572,7 +570,7 @@ async def dcs_error(ctx, error):
     
     if isinstance(error, commands.MissingRequiredArgument):
         await send_messages(ctx, table.dc_list_str(), '\nUsage: ?dcs <DC number> <"on"/"during" or "off"/"before">')
-    
+'''   
 @bot.command()
 async def sub(ctx, *args): #TODO
     global undo_empty, redo_empty
@@ -591,6 +589,7 @@ async def sub(ctx, *args): #TODO
         return
     mes = table.sub(subIn, subOut)
     await send_messages(ctx, mes)
+'''
     
 @bot.command(aliases=['pl', 'players'])
 async def playerlist(ctx):
@@ -817,7 +816,7 @@ async def editrace_error(ctx, error):
         await send_messages(ctx, table.get_player_list(),"\nUsage: ?editrace <race number> <player id> <corrected placement>")
 
 @bot.command(aliases=['crs', 'roomsize'])
-async def changeroomsize(ctx, *, arg): #TODO: editing room size (for when mkwx bugs and shows wrong players)
+async def changeroomsize(ctx, *, arg): 
     global undo_empty, redo_empty
     undo_empty=redo_empty=False
     if confirm_room or confirm_reset:
