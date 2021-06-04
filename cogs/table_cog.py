@@ -50,18 +50,14 @@ class table_bot(commands.Cog):
        
     @commands.Cog.listener()
     async def on_command_error(self,ctx, error):
-        channel_id = ctx.message.channel.id
-        if channel_id not in self.table_instances:
-            self.table_instances[channel_id] = Table()
-        #self.table = self.table_instances[channel_id]
-        self.table_instances[ctx.channel.id].ctx = ctx
+        self.set_instance(ctx)
         
         if isinstance(error, commands.CommandNotFound):
             await ctx.send("{}.\nType ?help for a list of commands.".format(error.__str__().replace("is not found", "is not a valid command")))
         elif isinstance(error, commands.CommandOnCooldown):
-            await ctx.send("This command can only be used once every 10 seconds. You can retry in {:.1f} seconds.".format(error.retry_after))
+            await ctx.send("This command can only be used once every {} seconds. You can retry in {:.1f} seconds.".format(error.cooldown.per, error.retry_after))
         elif isinstance(error, commands.MaxConcurrencyReached):
-            await ctx.send("This command can only be used by {} person at a time. Try again later.".format(error.number))
+            await ctx.send("This command can only be used by once at a time. Try again later.".format(error.number))
         elif isinstance(error, commands.MissingRequiredArgument):
             pass
         else:
@@ -112,11 +108,7 @@ class table_bot(commands.Cog):
             return True
         
     async def cog_before_invoke(self,ctx):
-        channel_id = ctx.message.channel.id
-        if channel_id not in self.table_instances:
-            self.table_instances[channel_id] = Table()
-        #self.table = self.table_instances[channel_id]
-        self.table_instances[ctx.channel.id].ctx = ctx
+        self.set_instance(ctx)
     
     #?start
     @commands.command(aliases=['st', 'starttable', 'sw'])
@@ -437,9 +429,12 @@ class table_bot(commands.Cog):
     
     #?picture
     @commands.command(aliases=['p', 'pic', 'wp'])
-    @commands.max_concurrency(number=1, wait=True)
+    @commands.max_concurrency(number=1, wait=True, per = commands.BucketType.channel)
     @commands.cooldown(1, 10, type=commands.BucketType.channel)
-    async def picture(self,ctx, *args):
+    async def picture(self,ctx):
+        if self.table_instances[ctx.channel.id].picture_running:
+            await self.send_temp_messages(ctx, "This command is currently in use. Please wait.")
+            return
         self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
 
         if await self.check_callable(ctx, "pic"): return

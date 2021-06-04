@@ -87,6 +87,7 @@ class Table():
         self.undo_empty = False
         self.redo_empty = False
         self.table_running = False
+        self.picture_running = False
         self.ctx = None
         ##### Stuff for bot instances #####
         
@@ -1025,6 +1026,7 @@ class Table():
     @tasks.loop(seconds=5)
     async def check_mkwx_update(self):
         if self.check_updated():
+            self.picture_running = True
             await self.ctx.send("Detected race finish.")
             wait_mes = await self.ctx.send("Updating scores...")
             mes = self.update_table()
@@ -1039,11 +1041,12 @@ class Table():
             em.add_field(name='\u200b', value= value_field, inline=False)
             em.set_image(url='attachment://table.png')
             em.set_footer(text = self.get_warnings())
-            
             await self.ctx.send(embed=em, file=f)
             
         if len(self.races)>=self.gps*4:
             self.check_mkwx_update.stop()
+            
+        self.picture_running=False
         
     def update_table(self, prnt=True):
         rID = self.rxx
