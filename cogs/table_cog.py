@@ -8,32 +8,41 @@ Created on Wed May 19 08:33:13 2021
 import discord
 from discord.ext import commands, tasks
 from cogs.tabler import Table
+from itertools import cycle
 
 class table_bot(commands.Cog):
     def __init__(self, bot):
         self.home_url = "https://wiimmfi.de/stats/mkwx/list/"
         self.bot = bot
-        self.table = Table()
-        self.choose_message = ""
-        self.searching_room = False
-        self.choose_room = False
-        self.confirm_room = False
-        self.confirm_reset = False
-        #confirm_message = ''
-        self.reset_args = None
-        self.undo_empty = False
-        self.redo_empty = False
+        self.table_instances = {}
+        #self.table = None
+        self.presences = cycle(['?help for help', '{} active tables'])
         
-        self.num_players = 0
-        self.gps = 0
-        self.teams = 0
-        self._format = ''
-        self.table_running = False
     
     @commands.Cog.listener()
     async def on_ready(self):
         print("Bot logged in as {0.user}".format(self.bot))
-        
+        if not self.cycle_presences.is_running():
+            try:
+                self.cycle_presences.start()
+            except:
+                pass
+    
+    @tasks.loop(seconds=30)
+    async def cycle_presences(self):
+        next_pres = next(self.presences)
+        if "active tables" in next_pres:
+            next_pres = next_pres.replace('{}', str(len(self.table_instances)))
+        game = discord.Game(next_pres)
+        await self.bot.change_presence(status=discord.Status.online, activity=game)
+                
+    def set_instance(self, ctx):
+        channel_id = ctx.message.channel.id
+        if channel_id not in self.table_instances:
+            self.table_instances[channel_id] = Table()
+        #self.table = self.table_instances[channel_id]
+        self.table_instances[ctx.channel.id].ctx = ctx
+     
     async def send_temp_messages(self,ctx, *args):
         await ctx.send('\n'.join(args), delete_after=25)
     async def send_messages(self,ctx, *args):
@@ -41,10 +50,22 @@ class table_bot(commands.Cog):
        
     @commands.Cog.listener()
     async def on_command_error(self,ctx, error):
+        channel_id = ctx.message.channel.id
+        if channel_id not in self.table_instances:
+            self.table_instances[channel_id] = Table()
+        #self.table = self.table_instances[channel_id]
+        self.table_instances[ctx.channel.id].ctx = ctx
+        
         if isinstance(error, commands.CommandNotFound):
             await ctx.send("{}.\nType ?help for a list of commands.".format(error.__str__().replace("is not found", "is not a valid command")))
-        #else:
-            #await ctx.send(error)
+        elif isinstance(error, commands.CommandOnCooldown):
+            await ctx.send("This command can only be used once every 10 seconds. You can retry in {:.1f} seconds.".format(error.retry_after))
+        elif isinstance(error, commands.MaxConcurrencyReached):
+            await ctx.send("This command can only be used by {} person at a time. Try again later.".format(error.number))
+        elif isinstance(error, commands.MissingRequiredArgument):
+            pass
+        else:
+            raise error
       
     #default max teams based on format (currently used for ffa format only)
     def max_teams(self,f):
@@ -70,116 +91,127 @@ class table_bot(commands.Cog):
         return teams*f
     
     async def check_callable(self, ctx, command): #for most commands
-        if self.confirm_room or self.confirm_reset:
-            await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.choose_message)
+        if self.table_instances[ctx.channel.id].confirm_room or self.table_instances[ctx.channel.id].confirm_reset:
+            await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.table_instances[ctx.channel.id].choose_message)
             return True
         if command in ['yes', 'no']:
-            if not self.choose_room:
+            if not self.table_instances[ctx.channel.id].choose_room:
                 await self.send_temp_messages(ctx, "You can only use ?{} if the bot prompts you to do so.".format(command))
                 return True
         else:
-            if not self.table_running:
+            if not self.table_instances[ctx.channel.id].table_running:
                 await self.send_temp_messages(ctx, "You need to have an active table before using ?{}.".format(command))
                 return True
             
-    async def check_special_callable(ctx,self): #used for commands that can be used when confirm_room == True
-        if self.confirm_reset or( self.confirm_room and self.table_running):
-            await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.choose_message)
+    async def check_special_callable(self, ctx): #used for commands that can be used when confirm_room == True
+        if self.table_instances[ctx.channel.id].confirm_reset or(self.table_instances[ctx.channel.id].confirm_room and self.table_instances[ctx.channel.id].table_running):
+            await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.table_instances[ctx.channel.id].choose_message)
             return True
-        if not (self.confirm_room and not self.table_running) and not self.table_running:
+        if not (self.table_instances[ctx.channel.id].confirm_room and not self.table_instances[ctx.channel.id].table_running) and not self.table_instances[ctx.channel.id].table_running:
             await self.send_temp_messages(ctx, "You can only use this command if the bot prompts you or a table is currently active.")
             return True
+        
+    async def cog_before_invoke(self,ctx):
+        channel_id = ctx.message.channel.id
+        if channel_id not in self.table_instances:
+            self.table_instances[channel_id] = Table()
+        #self.table = self.table_instances[channel_id]
+        self.table_instances[ctx.channel.id].ctx = ctx
     
     #?start
     @commands.command(aliases=['st', 'starttable', 'sw'])
     async def start(self,ctx, *args):
-        self.undo_empty=self.redo_empty=False
-        
-        if self.confirm_room or self.confirm_reset:
-            await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.choose_message)
+        #print(self.table_instances)
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
+        if self.table_instances[ctx.channel.id].confirm_room or self.table_instances[ctx.channel.id].confirm_reset:
+            await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.table_instances[ctx.channel.id].choose_message)
             return
-        if self.table_running:
-            self.confirm_reset = True
+        if self.table_instances[ctx.channel.id].table_running:
+            self.table_instances[ctx.channel.id].confirm_reset = True
             self.reset_args = args
-            self.choose_message= "A tabler watching room {} is currently active.\nAre you sure you want to start a new table? (?yes/?no)".format(self.table.rxx)
-            await self.send_messages(ctx, self.choose_message)
+            self.table_instances[ctx.channel.id].choose_message= "A tabler watching room {} is currently active.\nAre you sure you want to start a new table? (?yes/?no)".format(self.table_instances[ctx.channel.id].rxx)
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].choose_message)
             return
         usage = "Usage: ?start <format> <number of teams> <gps = 3>"
-        
-        if isinstance(args[0], tuple) and self.reset_args !=None:
-            args = args[0]
         
         if len(args)<1:
             await self.send_temp_messages(ctx, usage)
             return
-        self._format = args[0].lower()
+         
+        if isinstance(args[0], tuple) and self.reset_args !=None:
+            args = args[0]
+            
+        _format = args[0].lower()
+        #print(args)
         
-        if len(args)<2 and self._format[0]!='f':
+        if len(args)<2 and _format[0]!='f':
             await self.send_temp_messages(ctx, "Missing <teams>.", usage)
             return
         
         
-        if self._format not in ['ffa', '2v2', '3v3', '4v4', '5v5', '6v6', '2', '3', '4', '5', '6']:
+        if _format not in ['ffa', '2v2', '3v3', '4v4', '5v5', '6v6', '2', '3', '4', '5', '6']:
             await self.send_messages(ctx, "Invalid format. Format must be FFA, 2v2, 3v3, 4v4, 5v5, or 6v6.", usage)
             return
         
-        self.teams = self.max_teams(self._format)
+        teams = self.max_teams(_format)
         if len(args)>1:
             try:
-                self.teams = int(args[1].lower())
+                teams = int(args[1].lower())
             except:
                 await self.send_messages(ctx, "Invalid use of ?start: <teams> must be an integer.", usage)
                 return
         
-        if self.check_teams(self._format, self.teams):
+        if self.check_teams(_format, teams):
             await self.send_messages(ctx, "Invalid number of teams. The number of teams cannot exceed 12 players.", usage)
             return
-        self.table.format = self._format
-        self.table.teams = self.teams
-        self.num_players = self.get_num_players(self._format, self.teams)    
-        self.gps = 3
+        self.table_instances[ctx.channel.id].format = _format
+        self.table_instances[ctx.channel.id].teams = teams
+        num_players = self.get_num_players(_format, teams) 
+        self.table_instances[ctx.channel.id].num_players = num_players
+        gps = 3
         if len(args)>2:
             
             arg3 = args[2].lower()
             if arg3.isnumeric():
-                self.gps = arg3
-                self.table.gps = self.gps
+                gps = arg3
+                self.table_instances[ctx.channel.id].gps = gps
             else:
                 rxx = [arg3]
                 wait_mes = await ctx.send('Searching for room...')
-                error, ask, self.choose_message = self.table.find_room(rid = rxx)
+                error, ask, self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].find_room(rid = rxx)
                 await wait_mes.delete()
                 if error:
                     if ask=='reset':
-                        self.table = Table()
-                    await self.send_messages(ctx, self.choose_message, usage)
+                        self.table_instances.pop(ctx.message.channel.id)
+                    await self.send_messages(ctx, self.table_instances[ctx.channel.id].choose_message, usage)
                     return
                 if ask=="confirm":
-                    self.confirm_room = True
-                    if self.table.format[0] == 'f':
-                        mes = "Table successfully started. Watching room {}.\n?pic to get table picture.".format(self.table.rxx)
-                        self.table_running = True
+                    self.table_instances[ctx.channel.id].confirm_room = True
+                    if self.table_instances[ctx.channel.id].format[0] == 'f':
+                        mes = "Table successfully started. Watching room {}.".format(self.table_instances[ctx.channel.id].rxx)
+                        self.table_instances[ctx.channel.id].table_running = True
                         await self.send_messages(ctx, mes)
-                        self.searching_room = False
-                        self.confirm_room = False
+                        self.table_instances[ctx.channel.id].searching_room = False
+                        self.table_instances[ctx.channel.id].confirm_room = False
+                        self.table_instances[ctx.channel.id].check_mkwx_update.start()
                         return
                         
-                    await self.send_messages(ctx, self.choose_message)
+                    await self.send_messages(ctx, self.table_instances[ctx.channel.id].choose_message)
                     return
             
-        self.searching_room = True   
+        self.table_instances[ctx.channel.id].searching_room = True   
         await self.send_messages(ctx, "Provide a room id (rxx) or mii name(s) in the room.", "Make sure at least one race in the room has finished.", "Usage: ?search <rxx or mii> <rxx or mii names(s)>")
     
     #?search   
     @commands.command(aliases=['sr'])  
     async def search(self,ctx, *, arg):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         
-        if self.confirm_room or self.confirm_reset:
-            await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.choose_message)
+        if self.table_instances[ctx.channel.id].confirm_room or self.table_instances[ctx.channel.id].confirm_reset:
+            await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.table_instances[ctx.channel.id].choose_message)
             return
        
-        if not self.searching_room:
+        if not self.table_instances[ctx.channel.id].searching_room:
             await self.send_messages(ctx, "You cannot search for a room if a table is currently running or a table hasn't been started yet.")
             return
         
@@ -199,8 +231,8 @@ class table_bot(commands.Cog):
         #print(search_args)
         if len(search_args)<1:
             await self.send_messages("You need to provide <rxx or mii name(s)>.", usage)
-        if len(search_args)>self.num_players:
-            await self.send_messages(ctx, "You cannot provide more than {} mii names.".self.format(self.num_players), usage)
+        if len(search_args)>self.table_instances[ctx.channel.id].num_players:
+            await self.send_messages(ctx, "You cannot provide more than {} mii names.".self.format(self.table_instances[ctx.channel.id].num_players), usage)
             return
         
         if search_type == 'roomid' or search_type=='rxx':
@@ -209,33 +241,35 @@ class table_bot(commands.Cog):
                 await self.send_messages(ctx, "Invalid room id: missing an 'r' or not in format 'XX00'.", usage)
                 return
             wait_mes = await ctx.send('Searching for room...')
-            error, ask, self.choose_message = self.table.find_room(rid = search_args)
+            error, ask, self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].find_room(rid = search_args)
         elif search_type == "mii":   
             wait_mes = await ctx.send('Searching for room...')
-            error, ask, self.choose_message = self.table.find_room(mii = search_args)
+            error, ask, self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].find_room(mii = search_args)
         else:
             await self.send_messages(ctx, "Invalid argument for ?search: <search type> must be 'rxx' or 'mii'", usage)
             return
         await wait_mes.delete()
         if error:
             if ask=='reset':
-                self.table = Table()
-            await self.send_messages(ctx, self.choose_message, usage)
+                self.table_instances.pop(ctx.message.channel.id)
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].choose_message, usage)
             return
         
         if ask == "match":
-            self.choose_room= True
+            self.table_instances[ctx.channel.id].choose_room= True
             
-            await self.send_messages(ctx, "There were more than one possible matching rooms. Choose the desired room number.", self.choose_message)
+            await self.send_messages(ctx, "There were more than one possible matching rooms. Choose the desired room number.", self.table_instances[ctx.channel.id].choose_message)
             return
         elif ask=="confirm":
-            self.confirm_room = True
-            await self.send_messages(ctx, self.choose_message)
+            self.table_instances[ctx.channel.id].confirm_room = True
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].choose_message)
             return
     
     @search.error
     async def search_error(self,ctx, error):
-        self.undo_empty=self.redo_empty=False
+        self.set_instance(ctx)
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
+        
         if isinstance(error, commands.MissingRequiredArgument):
             await self.send_messages(ctx, "Usage: ?search <rxx or mii> <rxx or name(s)>\nmkwx room list: {}".format(self.home_url)) 
     
@@ -243,13 +277,13 @@ class table_bot(commands.Cog):
     @commands.command()
     async def changetag(self,ctx, *args): 
 
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         
-        if self.check_special_callable(ctx)[0]: return
+        if await self.check_special_callable(ctx): return
         
         usage = "Usage: ?changetag <player id> <corrected tag>"
         if len(args)==0:
-            await self.send_temp_messages(ctx, self.table.get_player_list(),'\n',usage)
+            await self.send_temp_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(),'\n',usage)
             return
         
         pID = args[0].lower()
@@ -261,65 +295,65 @@ class table_bot(commands.Cog):
             return
         
         tag = args[1]
-        mes= self.table.change_tag(pID, tag)
-        if self.confirm_room:
-            self.choose_message = self.table.get_player_list() +"\nIs this correct? (?yes / ?no)"
-            await self.send_messages(ctx, mes, self.table.get_player_list(), '\n', "Is this correct? (?yes / ?no)")
+        mes= self.table_instances[ctx.channel.id].change_tag(pID, tag)
+        if self.table_instances[ctx.channel.id].confirm_room:
+            self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].get_player_list() +"\n**Is this correct?** (?yes / ?no)"
+            await self.send_messages(ctx, mes, self.table_instances[ctx.channel.id].get_player_list(), '\n', "**Is this correct?** (?yes / ?no)")
         else:
             await self.send_messages(ctx, mes)
         
     @commands.command(aliases=['et', 'edittags']) 
     async def edittag(self,ctx, *, arg): 
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         usage = 'Usage: ?edittag <tag> <corrected tag>'
-        if self.check_special_callable(ctx)[0]: return
+        if await self.check_special_callable(ctx): return
         
         arg = [i.strip() for i in arg.strip().split("/")]
         arg  = [i.split(" ") for i in arg]
         if len(arg)==0:
-            await self.send_temp_messages(ctx, self.table.get_player_list(), '\n', usage)
+            await self.send_temp_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), '\n', usage)
         for i in arg:
             if len(i)<1:
-                await self.send_temp_messages(ctx, "Missing tag(s) for command.", self.table.get_player_list(), '\n',usage)
+                await self.send_temp_messages(ctx, "Missing tag(s) for command.", self.table_instances[ctx.channel.id].get_player_list(), '\n',usage)
                 return
             if len(i)<2:
-                await self.send_temp_messages(ctx, "Error processing command: missing <corrected tag> for tag '{}'".format(i[0]), self.table.get_player_list(), usage)
+                await self.send_temp_messages(ctx, "Error processing command: missing <corrected tag> for tag '{}'".format(i[0]), self.table_instances[ctx.channel.id].get_player_list(), usage)
                 return
         
         
-        mes = self.table.edit_tag_name(arg)
-        if self.confirm_room:
-            self.choose_message = self.table.get_player_list() +"\nIs this correct? (?yes / ?no)"
-            await self.send_messages(ctx, mes, self.table.get_player_list(), '\n', "Is this correct? (?yes / ?no)")
+        mes = self.table_instances[ctx.channel.id].edit_tag_name(arg)
+        if self.table_instances[ctx.channel.id].confirm_room:
+            self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].get_player_list() +"\n**Is this correct?** (?yes / ?no)"
+            await self.send_messages(ctx, mes, self.table_instances[ctx.channel.id].get_player_list(), '\n', "**Is this correct?** (?yes / ?no)")
         else:
             await self.send_messages(ctx, mes)
             
     @edittag.error
     async def edittag_error(self,ctx, error):
-        
-        self.undo_empty=self.redo_empty=False
-        if self.check_special_callable(ctx)[0]: return
+        self.set_instance(ctx)
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
+        if await self.check_special_callable(ctx): return
         if isinstance(error, commands.MissingRequiredArgument):
-            await self.send_messages(ctx, self.table.get_player_list(),'\nUsage: ?edittag <tag> <corrected tag>')    
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(),'\nUsage: ?edittag <tag> <corrected tag>')    
     
     #to manually create tags
     @commands.command(aliases=['tag'])
     async def tags(self,ctx, *, arg): 
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         usage = "Usage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / B 5 6"
-        if self.check_special_callable(ctx)[0]: return
+        if await self.check_special_callable(ctx): return
         
         arg = [i.strip() for i in arg.strip().split("/")]
         arg  = [i.split(" ") for i in arg]
         if len(arg)==0:
-            await self.send_temp_messages(ctx, self.table.get_player_list(), '\n',usage)
+            await self.send_temp_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), '\n',usage)
             return
         for i in arg:
             if len(i)<1:
-                await self.send_temp_messages(ctx, "Missing tag(s) for command.", self.table.get_player_list(), '\n',usage)
+                await self.send_temp_messages(ctx, "Missing tag(s) for command.", self.table_instances[ctx.channel.id].get_player_list(), '\n',usage)
                 return
             if len(i)<2:
-                await self.send_temp_messages(ctx, "Error processing command: missing players for tag '{}'".format(i[0]), self.table.get_player_list(), usage)
+                await self.send_temp_messages(ctx, "Error processing command: missing players for tag '{}'".format(i[0]), self.table_instances[ctx.channel.id].get_player_list(), usage)
                 return
             for indx, j in enumerate(i[1:]):
                 if not j.isnumeric():
@@ -329,63 +363,71 @@ class table_bot(commands.Cog):
         for i in arg:
             dic[i[0]] = i[1:]
         
-        mes = self.table.group_tags(dic)
-        self.choose_message = self.table.get_player_list() +"\nIs this correct? (?yes / ?no)"
-        await self.send_messages(ctx, mes, self.table.get_player_list(), "\nIs this correct? (?yes / ?no)")
+        mes = self.table_instances[ctx.channel.id].group_tags(dic)
+        self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].get_player_list() +"\n**Is this correct?** (?yes / ?no)"
+        await self.send_messages(ctx, mes, self.table_instances[ctx.channel.id].get_player_list(), "\n**Is this correct?** (?yes / ?no)")
         
     @tags.error
     async def tags_error(self,ctx, error):
-        self.undo_empty=self.redo_empty=False
-        if self.check_special_callable(ctx)[0]: return
+        self.set_instance(ctx)
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
+        if await self.check_special_callable(ctx): return
+        
         if isinstance(error, commands.MissingRequiredArgument):
-            await self.send_messages(ctx, self.table.get_player_list(), "\nUsage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / B 5 6")
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), "\nUsage: ?tags <tag> <pID pID> / <tag> <pID pID>\n**ex.** ?tags Player 1 3 / Z 2 4 / B 5 6")
     
     @commands.command(aliases=['y'])
     async def yes(self,ctx, *args):
-        self.undo_empty=self.redo_empty=False
-        if not self.confirm_room and not self.confirm_reset:
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
+        if not self.table_instances[ctx.channel.id].confirm_room and not self.table_instances[ctx.channel.id].confirm_reset:
             await self.send_temp_messages(ctx, "You can only use ?yes if the bot prompts you to do so.")
             return
         
-        if self.confirm_room:
-            if self.choose_room: self.choose_room = False
-            mes = "Table successfully started. Watching room {}.\n?pic to get table picture.".format(self.table.rxx)
-            self.table_running = True
+        if self.table_instances[ctx.channel.id].confirm_room:
+            if self.table_instances[ctx.channel.id].choose_room: self.table_instances[ctx.channel.id].choose_room = False
+            mes = "Table successfully started. Watching room {}.".format(self.table_instances[ctx.channel.id].rxx)
+            self.table_instances[ctx.channel.id].table_running = True
             await self.send_messages(ctx, mes)
-            self.searching_room = False
-            self.confirm_room = False
-        elif self.confirm_reset:
-            self.table = Table()
-            self.table_running=False
-            self.confirm_reset = False
+            self.table_instances[ctx.channel.id].searching_room = False
+            self.table_instances[ctx.channel.id].confirm_room = False
+            self.table_instances[ctx.channel.id].check_mkwx_update.start()
+        elif self.table_instances[ctx.channel.id].confirm_reset:
+            self.table_instances[ctx.channel.id].check_mkwx_update.stop()
+            self.table_instances.pop(ctx.message.channel.id)
+            '''
+            self.table_instances[ctx.channel.id].table_running=False
+            self.table_instances[ctx.channel.id].confirm_reset = False
+            '''
             await self.send_messages(ctx, "Table has been reset.")
+            
+            self.set_instance(ctx)
             await self.start(ctx, self.reset_args)
         
     @commands.command(aliases=['n'])
     async def no(self,ctx, *args):
-        self.undo_empty=self.redo_empty=False
-        if not self.confirm_room and not self.confirm_reset:
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
+        if not self.table_instances[ctx.channel.id].confirm_room and not self.table_instances[ctx.channel.id].confirm_reset:
             await self.send_temp_messages(ctx, "You can only use ?no if the bot prompts you to do so.")
             return 
-        if self.confirm_room:
-            self.confirm_room = False
-            self.table = Table()
+        if self.table_instances[ctx.channel.id].confirm_room:
+            self.table_instances[ctx.channel.id].confirm_room = False
+            self.table_instances.pop(ctx.message.channel.id)
             #await send_messages(ctx, "Search for a room with ?search <search type> <room id or mii name(s)>")
             await self.send_messages(ctx, "Start a new table with ?start.")
            
-        elif self.confirm_reset:
-            self.confirm_reset = False
-            await self.send_messages(ctx, "Tabler watching room {} will continue running.".format(self.table.rxx))
+        elif self.table_instances[ctx.channel.id].confirm_reset:
+            self.table_instances[ctx.channel.id].confirm_reset = False
+            await self.send_messages(ctx, "Tabler watching room {} will continue running.".format(self.table_instances[ctx.channel.id].rxx))
      
     #choose correct room if multiple matches from mii name search
     @commands.command(aliases=['ch'])
     async def choose(self,ctx, *args):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "choose"): return
         usage = "Usage: ?choose <room index #>"
         
         room = args[0].lower()
-        count = self.choose_message.count("Players in room:")
+        count = self.table_instances[ctx.channel.id].choose_message.count("Players in room:")
         indices = range(1, count+1)
         if room not in indices:
             await self.send_messages(ctx, "Invalid room index: the room index should be from {} to {}.".format(indices[0], indices[-1]), usage)
@@ -396,42 +438,43 @@ class table_bot(commands.Cog):
     #?picture
     @commands.command(aliases=['p', 'pic', 'wp'])
     @commands.max_concurrency(number=1, wait=True)
+    @commands.cooldown(1, 10, type=commands.BucketType.channel)
     async def picture(self,ctx, *args):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
 
         if await self.check_callable(ctx, "pic"): return
         
         wait_mes = await ctx.send("Updating scores...")
-        mes = self.table.update_table()
+        mes = self.table_instances[ctx.channel.id].update_table()
         await wait_mes.edit(content="Fetching table picture. Please wait...")
-        img = await self.table.get_table_img()
+        img = await self.table_instances[ctx.channel.id].get_table_img()
         await wait_mes.edit(content=mes)
         
         f=discord.File(fp=img, filename='table.png')
-        em = discord.Embed(title=self.table.tag_str(), color=0x00ff6f)
+        em = discord.Embed(title=self.table_instances[ctx.channel.id].tag_str(), color=0x00ff6f)
         
-        value_field = "[Edit this table on gb.hlorenzi.com]("+self.table.table_link+")"
+        value_field = "[Edit this table on gb.hlorenzi.com]("+self.table_instances[ctx.channel.id].table_link+")"
         em.add_field(name='\u200b', value= value_field, inline=False)
         em.set_image(url='attachment://table.png')
-        em.set_footer(text = self.table.get_warnings())
+        em.set_footer(text = self.table_instances[ctx.channel.id].get_warnings())
         
         await ctx.send(embed=em, file=f)
     
     @commands.command()
     async def undo(self,ctx, *args):
-        self.redo_empty = False
+        self.table_instances[ctx.channel.id].redo_empty = False
         if await self.check_callable(ctx, "undo"): return
         
-        usage = 'Usage: ?undo <modification number ("all" if you want to undo all)>'
+        usage = 'Usage: ?undo <modification number ("all" if you want to undo all)>' if len(self.table_instances[ctx.channel.id].modifications)>0 else ""
         
-        if self.undo_empty and len(args)==0:
-            mes = self.table.undo_commands(-1)
+        if self.table_instances[ctx.channel.id].undo_empty and len(args)==0:
+            mes = self.table_instances[ctx.channel.id].undo_commands(-1)
             await self.send_messages(ctx, mes)
-            self.undo_empty = False
+            self.table_instances[ctx.channel.id].undo_empty = False
             return
         if len(args)==0:
-            await self.send_messages(ctx, self.table.get_modifications(), '\n'+usage)
-            self.undo_empty = True
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_modifications(), '\n'+usage)
+            self.table_instances[ctx.channel.id].undo_empty = True
             return
         
         else:
@@ -442,25 +485,25 @@ class table_bot(commands.Cog):
             else:
                 await self.send_temp_messages(ctx, "{} is not a valid parameter for ?undo. The only valid parameters are 'all' and numbers.".format(args[0]), usage)
                 return
-        self.undo_empty = False   
-        mes = self.table.undo_commands(args)
+        self.table_instances[ctx.channel.id].undo_empty = False   
+        mes = self.table_instances[ctx.channel.id].undo_commands(args)
         await self.send_messages(ctx,mes)
         
     @commands.command()
     async def redo(self,ctx, *args):
-        self.undo_empty = False
+        self.table_instances[ctx.channel.id].undo_empty = False
         if await self.check_callable(ctx, "redo"): return
         
-        usage = 'Usage: ?redo <undo number ("all" if you want to redo all)>'
+        usage = 'Usage: ?redo <undo number ("all" if you want to redo all)>' if len(self.table_instances[ctx.channel.id].undos)>0 else ""
         
-        if self.redo_empty and len(args)==0:
-            mes = self.table.redo_commands(-1)
+        if self.table_instances[ctx.channel.id].redo_empty and len(args)==0:
+            mes = self.table_instances[ctx.channel.id].redo_commands(-1)
             await self.send_messages(ctx, mes)
-            self.redo_empty = False
+            self.table_instances[ctx.channel.id].redo_empty = False
             return
         if len(args)==0:
-            await self.send_messages(ctx, self.table.get_undos(), '\n'+usage)
-            self.redo_empty = True
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_undos(), '\n'+usage)
+            self.table_instances[ctx.channel.id].redo_empty = True
             return
         else:
             if args[0].lower()=='all':
@@ -470,63 +513,70 @@ class table_bot(commands.Cog):
             else:
                 await self.send_temp_messages(ctx, "{} is not a valid parameter for ?redo. The only valid parameters are 'all' and a number.".format(args[0]), usage)
                 return
-        self.redo_empty = False
-        mes = self.table.redo_commands(args)
+        self.table_instances[ctx.channel.id].redo_empty = False
+        mes = self.table_instances[ctx.channel.id].redo_commands(args)
         await self.send_messages(ctx,mes)
        
      
     #?reset
-    @commands.command()
+    @commands.command(aliases=['stop'])
     async def reset(self,ctx, *args):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         
-        if not self.table_running and not self.confirm_room:
+        if not self.table_instances[ctx.channel.id].table_running and not self.table_instances[ctx.channel.id].confirm_room:
             await self.send_temp_messages(ctx, "You need to have an active table to be able to reset.")
             return
         
-        self.table = Table()
-        self.table_running = False
-        self.choose_message = None 
-        self.confirm_reset = False
-        self.confirm_room= False
-        await self.send_messages(ctx, "Reset the table. ?start to start a new table.")
+        self.table_instances[ctx.channel.id].check_mkwx_update.stop()
+        self.table_instances.pop(ctx.message.channel.id)
+        '''
+        self.table_instances[ctx.channel.id].table_running = False
+        self.table_instances[ctx.channel.id].choose_message = None 
+        self.table_instances[ctx.channel.id].confirm_reset = False
+        self.table_instances[ctx.channel.id].confirm_room= False
+        '''
+        await self.send_messages(ctx, "Table has been reset. ?start to start a new table.")
+        
     
     @commands.command(aliases = ['dc'])
     async def dcs(self,ctx, *, arg): 
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "dcs"): return
         
-        usage = '\nUsage: ?dcs <DC number> <"on"/"during" or "off"/"before">'
+        usage = '\nUsage: ?dcs <DC number> <"on"/"during" or "off"/"before">' if len(self.table_instances[ctx.channel.id].dc_list)>0 else ""
         
         arg = [i.strip() for i in arg.strip().split("/")]
         arg  = [i.split(" ") for i in arg]
         
         for i in arg:
             if len(i)<1:
-                await self.send_temp_messages(ctx, "Error: Missing <DC number>.", self.table.dc_list_str(), usage)
+                await self.send_temp_messages(ctx, "Error: Missing <DC number>.", self.table_instances[ctx.channel.id].dc_list_str(), usage)
                 return
             if len(i)<2:
-                await self.send_temp_messages(ctx, "Error processing command: missing DC status for DC number {}.".format(i[0]), self.table.dc_list_str(), usage)
+                await self.send_temp_messages(ctx, "Error processing command: missing DC status for DC number {}.".format(i[0]), self.table_instances[ctx.channel.id].dc_list_str(), usage)
                 return
             if len(i)>2:
-                await self.send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <DC number> and <DC status>.".format(i[0]), self.table.dc_list_str(), usage)
+                await self.send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <DC number> and <DC status>.".format(i[0]), self.table_instances[ctx.channel.id].dc_list_str(), usage)
             if not i[0].isnumeric():
-                await self.send_temp_messages(ctx, "DC numbers must be numeric.", self.table.dc_list_str(), usage)
+                await self.send_temp_messages(ctx, "DC numbers must be numeric.", self.table_instances[ctx.channel.id].dc_list_str(), usage)
                 return
             if not (i[1] == "on" or i[1]=='during') and not (i[1]=='off' or i[1] == "before"):
-                await self.send_temp_messages(ctx, "The DC status argument must be either 'on'/'during' or 'off'/'before'.", self.table.dc_list_str(), usage)
+                await self.send_temp_messages(ctx, "The DC status argument must be either 'on'/'during' or 'off'/'before'.", self.table_instances[ctx.channel.id].dc_list_str(), usage)
             
-        mes = self.table.edit_dc_status(arg)
+        mes = self.table_instances[ctx.channel.id].edit_dc_status(arg)
         await self.send_messages(ctx, mes)
         
           
     @dcs.error
     async def dcs_error(self,ctx, error):
-        self.undo_empty=self.redo_empty=False
+        self.set_instance(ctx)
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "dcs"): return
         
+        usage = '\nUsage: ?dcs <DC number> <"on"/"during" or "off"/"before">' if len(self.table_instances[ctx.channel.id].dc_list)>0 else ""
         if isinstance(error, commands.MissingRequiredArgument):
-            await self.send_messages(ctx, self.table.dc_list_str(), '\nUsage: ?dcs <DC number> <"on"/"during" or "off"/"before">')
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].dc_list_str(), usage)
+            return
     '''   
     @commands.command()
     async def sub(ctx, *args): #TODO
@@ -550,18 +600,18 @@ class table_bot(commands.Cog):
         
     @commands.command(aliases=['pl', 'players'])
     async def playerlist(self,ctx):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "players"): return
-        await self.send_messages(ctx, self.table.get_player_list())
+        await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list())
     
     @commands.command()
     async def edit(self,ctx, *args):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         usage = "Usage: ?edit <player id> <gp number> <gp score>"
         if await self.check_callable(ctx, "edit"): return
         
         if len(args)==0:
-            await self.send_temp_messages(ctx, self.table.get_player_list(), '\n',usage)
+            await self.send_temp_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), '\n',usage)
             return
         if len(args)<3:
             if len(args)<2:
@@ -581,13 +631,13 @@ class table_bot(commands.Cog):
         if not score.lstrip('-').isnumeric() and not score.lstrip('+').isnumeric():
             await self.send_temp_messages(ctx, "<score> must be a number.", usage)
             return
-        mes = self.table.edit(pID, gp, score)
+        mes = self.table_instances[ctx.channel.id].edit(pID, gp, score)
         await self.send_messages(ctx, mes)
     
         
     @commands.command(aliases = ['rr', 'res', 'results', 'race'])
     async def raceresults(self,ctx, *args):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "raceresults"): return
         usage = "Usage: ?rr <race # = last race>"
         race = -1
@@ -596,7 +646,7 @@ class table_bot(commands.Cog):
                 await self.send_temp_messages(ctx, "<race number> must be a number.", usage)
                 return
             race = int(args[0])
-        error, mes = self.table.race_results(race)
+        error, mes = self.table_instances[ctx.channel.id].race_results(race)
         if error:
             await self.send_temp_messages(ctx, mes, usage)
             return
@@ -604,25 +654,25 @@ class table_bot(commands.Cog):
         
     @commands.command(aliases=['tl', 'tracks', 'races'])
     async def tracklist(self,ctx, *args):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "tracklist"): return
-        await self.send_messages(ctx, self.table.tracklist())
+        await self.send_messages(ctx, self.table_instances[ctx.channel.id].tracklist())
         
     @commands.command(aliases=['rxx', 'rid', 'room'])
     async def roomid(self, ctx):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "rxx"): return
         
-        await self.send_messages(ctx, 'Current table is watching room: '+self.table.rxx)
+        await self.send_messages(ctx, 'Current table is watching room: '+self.table_instances[ctx.channel.id].rxx)
       
     @commands.command(aliases=['pen', 'pens'])
     async def penalty(self, ctx, *args):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "penalty"): return
         usage = "Usage: ?pen <player id> <pen amount>"
         
         if len(args)==0:
-            await self.send_messages(ctx, self.table.get_pen_player_list(), '\n'+usage)
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_pen_player_list(), '\n'+usage)
             return
         pID = args[0].lower()
         if not pID.isnumeric():
@@ -636,17 +686,17 @@ class table_bot(commands.Cog):
             await self.send_temp_messages(ctx, "The penalty amount must be a number (negative allowed).", usage)
             return
         
-        mes = self.table.penalty(pID, pen)
+        mes = self.table_instances[ctx.channel.id].penalty(pID, pen)
         await self.send_messages(ctx, mes)
     
     @commands.command(aliases=['unpen'])
     async def unpenalty(self, ctx, *args):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "unpenalty"): return
         usage = "Usage: ?unpen <player id> <unpen amount = current pen>"
         
         if len(args)==0:
-            await self.send_messages(ctx, self.table.get_pen_player_list(), '\n'+usage)
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_pen_player_list(), '\n'+usage)
             return
         
         pID = args[0].lower()
@@ -657,72 +707,85 @@ class table_bot(commands.Cog):
         unpen = None
         if len(args)>1:
             unpen = args[1].lower()
-        mes = self.table.unpenalty(pID, unpen)
+        mes = self.table_instances[ctx.channel.id].unpenalty(pID, unpen)
         await self.send_messages(ctx, mes)
                                 
     @commands.command(aliases=['mr', 'merge'])
     async def mergeroom(self, ctx, *args): #TODO
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "mergeroom"): return
         
         usage = 'Usage: ?mergeroom <rxx or host> <rxx or host mii name>'
+        if len(args)==0:
+            await self.send_temp_messages(ctx, "Missing <rxx or host mii name> parameter.", usage)
+            return
+        
+        rxx = args[0].lower()
     
     @commands.command(aliases=['gp', 'gps', 'changegp'])
     async def changegps(self, ctx, *args):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "changegps"): return
         usage = "Usage: ?changegps <num gps>"
         if len(args)==0: 
             await self.send_temp_messages(ctx, usage)
             return
         try:
-            gps = int(args[1])
-            assert gps>0
+            if args[0][1] == '+' or args[0][1] == '-':
+                gps = int(args[0])
+                self.table_instances[ctx.channel.id].gps+=gps
+            else:   
+                gps = int(args[0])
+                assert(gps>0)
+                self.table_instances[ctx.channel.id].gps = gps
         except:
             await self.send_temp_messages(ctx, "<num gps> must be a real number.", usage)
             return
-        self.table.gps = self.gps = gps
-        await self.send_messages(ctx, "Changed total gps to {}.".format(self.gps))
+        
+        await self.send_messages(ctx, "Changed total gps to {}.".format(gps))
+        self.table_instances[ctx.channel.id].check_mkwx_update.start()
         
     @commands.command(aliases=['quickedit', 'qedit'])
     async def editrace(self,ctx, *, arg):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "editrace"): return
         
         usage = "Usage: ?editrace <race number> <player id> <corrected placement>"
         arg = [i.strip() for i in arg.strip().split("/")]
         arg  = [i.split(" ") for i in arg]
         if len(arg)==0:
-            await self.send_temp_messages(ctx, self.table.get_player_list(), '\n',usage)
+            await self.send_temp_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), '\n',usage)
             return
         for i in arg:
             if len(i)<1:
-                await self.send_temp_messages(ctx, "Missing <race number> for command.", self.table.get_player_list(), '\n',usage)
+                await self.send_temp_messages(ctx, "Missing <race number> for command.", self.table_instances[ctx.channel.id].get_player_list(), '\n',usage)
                 return
             if len(i)<2:
-                await self.send_temp_messages(ctx, "Error processing command: missing players for command on race {}".format(i[0]), self.table.get_player_list(), usage)
+                await self.send_temp_messages(ctx, "Error processing command: missing players for command on race {}".format(i[0]), self.table_instances[ctx.channel.id].get_player_list(), usage)
                 return
             if len(i)<3:
-                await self.send_temp_messages(ctx, "Error: missing <corrected placement> for race {}, player {}.".format(i[0], i[1]), self.table.get_player_list(), usage)
+                await self.send_temp_messages(ctx, "Error: missing <corrected placement> for race {}, player {}.".format(i[0], i[1]), self.table_instances[ctx.channel.id].get_player_list(), usage)
             
             for t in i:
                 if not t.isnumeric():
-                    await self.send_temp_messages(ctx, "Argument '{}' for the command must be a real number.".format(t), self.table.get_player_list(), usage)
+                    await self.send_temp_messages(ctx, "Argument '{}' for the command must be a real number.".format(t), self.table_instances[ctx.channel.id].get_player_list(), usage)
                     return
                 
-        mes = self.table.edit_race(arg)
+        mes = self.table_instances[ctx.channel.id].edit_race(arg)
         await self.send_messages(ctx, mes)
         
     @editrace.error
     async def editrace_error(self, ctx, error):
-        self.undo_empty=self.redo_empty=False
+        self.set_instance(ctx)
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, 'editrace'): return
+        
         if isinstance(error, commands.MissingRequiredArgument):
-            await self.send_messages(ctx, self.table.get_player_list(),"\nUsage: ?editrace <race number> <player id> <corrected placement>")
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(),"\nUsage: ?editrace <race number> <player id> <corrected placement>")
     
     @commands.command(aliases=['crs', 'roomsize'])
     async def changeroomsize(self, ctx, *, arg): 
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "changeroomsize"): return
         
         usage = "Usage: ?changeroomsize <race number> <corrected room size (num players)>"
@@ -738,20 +801,22 @@ class table_bot(commands.Cog):
             if len(i)<2:
                 await self.send_temp_messages(ctx, "Error processing command: missing <corrected room size> for race {}".format(i[0]), usage)
                 return
-        mes = self.table.change_room_size(arg)
+        mes = self.table_instances[ctx.channel.id].change_room_size(arg)
         await self.send_messages(ctx, mes)
         
     @changeroomsize.error
     async def changeroomsize_error(self, ctx, error):
-        self.undo_empty=self.redo_empty=False
+        self.set_instance(ctx)
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         if await self.check_callable(ctx, "changeroomsize"): return
+        
         if isinstance(error, commands.MissingRequiredArgument):
             await self.send_messages(ctx, "Usage: ?changeroomsize <race number> <corrected room size (num players)>")
         
         
     @commands.command(name='help',aliases = ['h'])
     async def _help(self,ctx):
-        self.undo_empty=self.redo_empty=False
+        self.table_instances[ctx.channel.id].undo_empty=self.table_instances[ctx.channel.id].redo_empty=False
         info = 'List of commands:\n\t**?start**\n\t**?search**\n\t**?reset**\n\t**?players**\n\t**?tracks**\n\t**?rxx**\n\t**?raceresults\n\t?editrace\n\t?changeroomsize\n\t?dcs\n\t?penalty, ?unpenalty\n\t?tags\n\t?edittag\n\t?changetag\n\t?changegps\n\t?edit\n\t?undo, ?redo\n\t?pic**'
         await self.send_messages(ctx, info)
     
