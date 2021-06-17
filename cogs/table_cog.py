@@ -10,7 +10,7 @@ from discord.ext import commands, tasks
 from cogs.tabler import Table
 from itertools import cycle
 import Extra
-#hello
+#hello man
 
 class table_bot(commands.Cog):
     def __init__(self, bot):
