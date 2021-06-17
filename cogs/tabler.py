@@ -17,7 +17,7 @@ from discord.ext import tasks
 import time
 from unidecode import unidecode
 from collections import defaultdict
-import Extra
+import Utils
 
 #TODO: add graph and style options
 class Table():
@@ -264,13 +264,13 @@ class Table():
                         for tag in self.tags.keys():
                             if tag == "":
                                  for p in self.tags[tag]:
-                                     string+="\n**NO TEAM**\n\t{}. {} ".format(counter,Extra.dis_clean(p))
+                                     string+="\n**NO TEAM**\n\t{}. {} ".format(counter,Utils.dis_clean(p))
                                      self.player_ids[str(counter)] = p
                                      counter+=1
                             else:   
-                                string+='\n**Tag: {}**'.format(Extra.dis_clean(tag))
+                                string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
                                 for p in self.tags[tag]:
-                                    string+="\n\t{}. {}".format(counter,Extra.dis_clean(p))
+                                    string+="\n\t{}. {}".format(counter,Utils.dis_clean(p))
                                     self.player_ids[str(counter)] = p
                                     counter+=1
                                     
@@ -316,13 +316,13 @@ class Table():
                         for tag in self.tags.keys():
                             if tag == "":
                                  for p in self.tags[tag]:
-                                     string+="\n**NO TEAM**\n\t{}. {} ".format(counter,Extra.dis_clean(p))
+                                     string+="\n**NO TEAM**\n\t{}. {} ".format(counter,Utils.dis_clean(p))
                                      self.player_ids[str(counter)] = p
                                      counter+=1
                             else:   
-                                string+='\n**Tag: {}**'.format(Extra.dis_clean(tag))
+                                string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
                                 for p in self.tags[tag]:
-                                    string+="\n\t{}. {}".format(counter,Extra.dis_clean(p))
+                                    string+="\n\t{}. {}".format(counter,Utils.dis_clean(p))
                                     self.player_ids[str(counter)] = p
                                     counter+=1
                     string = string.replace("no name", "Player")
@@ -356,7 +356,7 @@ class Table():
                 indx-=1
                 matches = 1
                 for j in range(len(player_copy)):
-                    if i!=j and indx>0 and unidecode(Extra.strip_CJK(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx] == unidecode(Extra.strip_CJK(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx]:
+                    if i!=j and indx>0 and unidecode(Utils.strip_CJK(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx] == unidecode(Utils.strip_CJK(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx]:
                         matches+=1
                             
                         if matches == per_team: break 
@@ -407,7 +407,7 @@ class Table():
                 while indx>0:
                     indx-=1
                     for tag, _list in teams.items():
-                        if len(_list)<per_team and unidecode(Extra.strip_CJK(post_players[i].strip().lower().replace("[","").replace(']','')))[::-1][:indx][::-1] == unidecode(tag.lower().strip().replace("[","").replace(']','')):
+                        if len(_list)<per_team and unidecode(Utils.strip_CJK(post_players[i].strip().lower().replace("[","").replace(']','')))[::-1][:indx][::-1] == unidecode(tag.lower().strip().replace("[","").replace(']','')):
                             teams[tag].append(post_players.pop(i))
                             i = 0
                             cont = True
@@ -426,8 +426,8 @@ class Table():
                 temp_indx-=1
                
                 for j in range(len(post_players)):
-                    i_tag = unidecode(Extra.strip_CJK(post_players[i].strip().replace("[","").replace(']','')))
-                    j_tag = unidecode(Extra.strip_CJK(post_players[j].strip().replace("[","").replace(']','')))
+                    i_tag = unidecode(Utils.strip_CJK(post_players[i].strip().replace("[","").replace(']','')))
+                    j_tag = unidecode(Utils.strip_CJK(post_players[j].strip().replace("[","").replace(']','')))
                     
                     if i!=j and temp_indx>0 and (i_tag[:temp_indx] == j_tag[::-1][:temp_indx][::-1]
                                                  or i_tag[:temp_indx] == j_tag[:temp_indx]):
@@ -514,7 +514,7 @@ class Table():
                 match = 0
                 
                 for j in range(len(un_players)):
-                    m = Extra.LCS(unidecode(un_players[i].strip().lower().replace("[","").replace(']','')), unidecode(un_players[j].strip().lower().replace("[","").replace(']','')))
+                    m = Utils.LCS(unidecode(un_players[i].strip().lower().replace("[","").replace(']','')), unidecode(un_players[j].strip().lower().replace("[","").replace(']','')))
                     if un_players[i]!=un_players[j] and len(m)>longest_match:
                         longest_match = len(m)
                         match= un_players[i], un_players[j]
@@ -538,11 +538,11 @@ class Table():
                 while len(item[1])<per_team and len(un_players)>0:
                     item[1].append(un_players.pop(0))
         else:
-            split = list(Extra.chunks(un_players, per_team))
+            split = list(Utils.chunks(un_players, per_team))
             for i in split:
                 for ind,j in enumerate(i):
                     try:
-                        teams[Extra.replace_brackets(j)[0]] = i
+                        teams[Utils.replace_brackets(j)[0]] = i
                         break
                     
                     except:
@@ -579,7 +579,7 @@ class Table():
         return ret
     
     def tag_str(self):
-        ret = '{}{} '.format(Extra.full_format(self.format), "" if Extra.full_format(self.format)=="FFA" else ":")
+        ret = '{}{} '.format(Utils.full_format(self.format), "" if Utils.full_format(self.format)=="FFA" else ":")
         tags_copy = list(self.tags.keys())
         try:
             tags_copy.remove("SUBS")
@@ -646,7 +646,7 @@ class Table():
         ret+="Race #{} - {} results:\n".format(race, self.tracks[race-1])
         for i in list(x.items()):
             count+=1
-            ret+="   {}. {} - {}\n".format(count, Extra.dis_clean(i[0]), i[1])
+            ret+="   {}. {} - {}\n".format(count, Utils.dis_clean(i[0]), i[1])
             if self.format[0]!='f':
                 for t in self.tags.items():
                     if i[0] in t[1]:
@@ -709,7 +709,7 @@ class Table():
                         leftovers.append(j)
                 self.tags[i[0]] = i[1]
         
-        per_team = Extra.convert_format(self.format)
+        per_team = Utils.convert_format(self.format)
         if len(leftovers)>0:
             for i in self.tags.items():
                 while len(i[1])!=per_team:
@@ -732,7 +732,7 @@ class Table():
         self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].upper())))
         if self.format[0].lower() == 'f':
             for p in list(self.players.keys()):
-                string+="\n{}. {}".format(counter,Extra.dis_clean(p))
+                string+="\n{}. {}".format(counter,Utils.dis_clean(p))
                 self.player_ids[str(counter)] = p
                 counter+=1
         else:
@@ -746,11 +746,11 @@ class Table():
                             for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
                                 p2 += '{}({})/'.format(x, r)
                             p2+='{}({})'.format(p, self.sub_names[p]['in_races'])
-                         string+="\n**NO TEAM**\n\t{}. {} ".format(counter,Extra.dis_clean(p2))
+                         string+="\n**NO TEAM**\n\t{}. {} ".format(counter,Utils.dis_clean(p2))
                          
                          counter+=1
                 else:   
-                    string+='\n**Tag: {}**'.format(Extra.dis_clean(tag))
+                    string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
                     for p in self.tags[tag]:
                         self.player_ids[str(counter)] = p
                         p2 = p
@@ -759,7 +759,7 @@ class Table():
                             for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
                                 p2 += '{}({})/'.format(x, r)
                             p2+='{}({})'.format(p, self.sub_names[p]['in_races'])
-                        string+="\n\t{}. {}".format(counter,Extra.dis_clean(p2))
+                        string+="\n\t{}. {}".format(counter,Utils.dis_clean(p2))
                         
                         counter+=1
         string = string.replace("no name", "Player")
@@ -884,7 +884,7 @@ class Table():
                     for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
                         p2 += '{}({})/'.format(x, r)
                     p2+='{}({})'.format(p, self.sub_names[p]['in_races'])
-                string+="\n{}. {} {}".format(counter,Extra.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                string+="\n{}. {} {}".format(counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                 
                 counter+=1
         else:
@@ -892,11 +892,11 @@ class Table():
                 if tag == "":
                      for p in self.tags[tag]:
                          self.player_ids[str(counter)] = p
-                         string+="\n**NO TEAM**\n\t{}. {} {}".format(counter,Extra.dis_clean(p), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                         string+="\n**NO TEAM**\n\t{}. {} {}".format(counter,Utils.dis_clean(p), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                          
                          counter+=1
                 else:   
-                    string+='\n**Tag: {}**'.format(Extra.dis_clean(tag))
+                    string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
                     if tag in self.team_pens.keys(): 
                         string+=" **(-{})**".format(self.team_pens.get(tag))
                     for p in self.tags[tag]:
@@ -907,7 +907,7 @@ class Table():
                             for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
                                 p2 += '{}({})/'.format(x, r)
                             p2+='{}({})'.format(p, self.sub_names[p]['in_races'])
-                        string+="\n\t{}. {} {}".format(counter,Extra.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                        string+="\n\t{}. {} {}".format(counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                         
                         counter+=1
                     
@@ -1099,7 +1099,7 @@ class Table():
         
         self.all_players.sort(key=lambda x: unidecode(x.lower()))
         for i,p in enumerate(self.all_players):
-            ret+="\n{}. {}".format(i+1, Extra.dis_clean(p))
+            ret+="\n{}. {}".format(i+1, Utils.dis_clean(p))
         
         return ret
             
@@ -1108,7 +1108,7 @@ class Table():
              for ind,i in enumerate(self.dc_list[1]):
                  if "should've started with" in i:
                      #print(ind,i)
-                     self.dc_list[1][ind] = "{}** missing from GP 1. 18 pts for GP (mogi) or 15 pts (war).".format(Extra.dis_clean(player))
+                     self.dc_list[1][ind] = "{}** missing from GP 1. 18 pts for GP (mogi) or 15 pts (war).".format(Utils.dis_clean(player))
                      self.warnings[1][ind] = "{} missing from GP 1. 18 pts for GP (mogi) or 15 pts (war).".format(player)
                      self.dc_ids_append(player, 1)
                      if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
@@ -1284,9 +1284,9 @@ class Table():
                          for indx, i in enumerate(self.dc_list[raceNum]):
                              if i.find(player) == 0 and ("before" in i or "missing" in i):
                                  if (4-(raceNum%4))%4 == 0:
-                                     self.dc_list[raceNum][indx] = "{}**  -  DCed during the race (on results). No DC points for GP {} - determined by tabler.".format(Extra.dis_clean(player), self.gp+1)
+                                     self.dc_list[raceNum][indx] = "{}**  -  DCed during the race (on results). No DC points for GP {} - determined by tabler.".format(Utils.dis_clean(player), self.gp+1)
                                  else:    
-                                     self.dc_list[raceNum][indx] = "{}**  -  DCed during the race (on results). Giving 3 DC points per race for remaining {} races in GP {} ({} pts total) - determined by tabler.".format(Extra.dis_clean(player), (4-(raceNum%4))%4, self.gp+1, 3*(4-(raceNum%4))%4)
+                                     self.dc_list[raceNum][indx] = "{}**  -  DCed during the race (on results). Giving 3 DC points per race for remaining {} races in GP {} ({} pts total) - determined by tabler.".format(Utils.dis_clean(player), (4-(raceNum%4))%4, self.gp+1, 3*(4-(raceNum%4))%4)
                      
                      else:
                          for indx,i in enumerate(self.warnings[raceNum]):
@@ -1294,7 +1294,7 @@ class Table():
                                  self.warnings[raceNum][indx]="{} DCed on the first race of GP {} (blank race time). 15 DC points for GP {} - determined by tabler.".format(player, self.gp+1, self.gp+1)
                          for indx, i in enumerate(self.dc_list[raceNum]):
                              if i.find(player) == 0 and ("before" in i or "missing" in i):
-                                 self.dc_list[raceNum][indx] = "{}**  -  DCed on the first race of GP {}. 15 DC points for GP {} - determined by tabler.".format(Extra.dis_clean(player), self.gp+1, self.gp+1)
+                                 self.dc_list[raceNum][indx] = "{}**  -  DCed on the first race of GP {}. 15 DC points for GP {} - determined by tabler.".format(Utils.dis_clean(player), self.gp+1, self.gp+1)
              else:
                  orig_status = 'before'
                  if player in players:
@@ -1317,7 +1317,7 @@ class Table():
                                  self.warnings[raceNum][indx] = "{} DCed before race. 3 DC points per race for the next {} races in GP {} ({} pts total) - determined by tabler.".format(player, 4-(raceNum%4), self.gp+1, 3*(4-(raceNum%4)))
                          for indx, i in enumerate(self.dc_list[raceNum]):
                              if i.find(player) == 0 and ("during" in i or "on" in i):
-                                 self.dc_list[raceNum][indx] = "{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total) - determined by tabler.".format(Extra.dis_clean(player), raceNum, self.gp+1, 3*(4-(raceNum%4)))
+                                 self.dc_list[raceNum][indx] = "{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total) - determined by tabler.".format(Utils.dis_clean(player), raceNum, self.gp+1, 3*(4-(raceNum%4)))
                                             
                      else:     
                          for indx,i in enumerate(self.warnings[raceNum]):
@@ -1325,10 +1325,10 @@ class Table():
                                  self.warnings[raceNum][indx] = "{} is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war) - determined by tabler.".format(player,self.gp+1, self.gp+1, self.gp+1)                   
                          for indx, i in enumerate(self.dc_list[raceNum]):
                              if i.find(player) == 0 and ("during" in i or "on" in i):
-                                 self.dc_list[raceNum][indx]="{}**  -  DCed before race {} (missing from GP {}). 18 pts for GP {} (mogi), 15 pts for GP {} (war) - determined by tabler.".format(Extra.dis_clean(player), raceNum,self.gp+1,self.gp+1, self.gp+1)
+                                 self.dc_list[raceNum][indx]="{}**  -  DCed before race {} (missing from GP {}). 18 pts for GP {} (mogi), 15 pts for GP {} (war) - determined by tabler.".format(Utils.dis_clean(player), raceNum,self.gp+1,self.gp+1, self.gp+1)
 
              mods.append(('?dcs {} {}'.format(dc_num, status), dc_num, orig_status, status))         
-             ret+= "Changed {} DC status for race {} to '{}'.\n".format(Extra.dis_clean(player), raceNum, status)
+             ret+= "Changed {} DC status for race {} to '{}'.\n".format(Utils.dis_clean(player), raceNum, status)
          
          if not reundo and len(mods)>0: 
              self.modifications.append(mods)
@@ -1468,7 +1468,7 @@ class Table():
                 self.players[a][1][gp] += (aff_new_pts[a] - aff_orig_pts[a])
                 self.players[a][2][raceNum-1] = aff_new_pts[a]
             
-            ret+='{} race {} placement changed to {}.{}'.format(Extra.dis_clean(player), raceNum, correct_pos+1, '\n' if num==len(l)-1 else "")
+            ret+='{} race {} placement changed to {}.{}'.format(Utils.dis_clean(player), raceNum, correct_pos+1, '\n' if num==len(l)-1 else "")
             try:
                 if "Placements for this race have been manually altered by the tabler." not in self.warnings[raceNum]:
                     self.warnings[raceNum].append("Placements for this race have been manually altered by the tabler.")
@@ -1716,7 +1716,7 @@ class Table():
                                     self.dc_list[raceNum+1] = []
                                     
                                 self.warnings[raceNum+1].append("{} is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war).".format(mp,self.gp+1, self.gp+1, self.gp+1))
-                                self.dc_list[raceNum+1].append("{}**  -  DCed before race {} (missing from GP {}). 18 pts for GP {} (mogi), 15 pts for GP {} (war).".format(Extra.dis_clean(mp), raceNum+1,self.gp+1,self.gp+1, self.gp+1))
+                                self.dc_list[raceNum+1].append("{}**  -  DCed before race {} (missing from GP {}). 18 pts for GP {} (mogi), 15 pts for GP {} (war).".format(Utils.dis_clean(mp), raceNum+1,self.gp+1,self.gp+1, self.gp+1))
                                 self.dc_ids_append(mp, raceNum+1)
                                 if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                                 self.gp_dcs[self.gp].append(mp)
@@ -1730,7 +1730,7 @@ class Table():
                                     self.dc_list[raceNum+1] = []
                                     
                                 self.warnings[raceNum+1].append("{} DCed before race. 3 DC points per race for the next {} races in GP {} ({} pts total).".format(mp, 4-((raceNum)%4), self.gp+1, 3*(4-((raceNum)%4))))
-                                self.dc_list[raceNum+1].append("{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total).".format(Extra.dis_clean(mp), raceNum+1, self.gp+1, 3*(4-((raceNum)%4))))
+                                self.dc_list[raceNum+1].append("{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total).".format(Utils.dis_clean(mp), raceNum+1, self.gp+1, 3*(4-((raceNum)%4))))
                                 
                                 #self.dc_pts[mp] = (4-((len(self.races)+raceNum)%4))%4
                                 try:
@@ -1811,16 +1811,16 @@ class Table():
                         
                         if (raceNum)%4==0:
                             self.warnings[raceNum+1].append("{} DCed on the first race of GP {} (on results). 15 DC points for GP {}.".format(miiName, self.gp+1, self.gp+1))
-                            self.dc_list[raceNum+1].append("{}**  -  DCed on the first race of GP {} (on results). 15 DC points for GP {}.".format(Extra.dis_clean(miiName), self.gp+1, self.gp+1))
+                            self.dc_list[raceNum+1].append("{}**  -  DCed on the first race of GP {} (on results). 15 DC points for GP {}.".format(Utils.dis_clean(miiName), self.gp+1, self.gp+1))
                             
                         else: 
                             if (4-((raceNum+1)%4))%4 == 0:
                                 self.warnings[raceNum+1].append("{} DCed during the race (on results). No DC points for GP {}.".format(miiName, self.gp+1))
-                                self.dc_list[raceNum+1].append("{}**  -  DCed during the race (on results). No DC points for GP {}.".format(Extra.dis_clean(miiName), self.gp+1))
+                                self.dc_list[raceNum+1].append("{}**  -  DCed during the race (on results). No DC points for GP {}.".format(Utils.dis_clean(miiName), self.gp+1))
                         
                             else:
                                 self.warnings[raceNum+1].append("{} DCed during the race (on results). Awarding 3 DC points per race for next {} races in GP {} ({} pts total).".format(miiName,(4-((raceNum+1)%4))%4 , self.gp+1, 3*((4-((raceNum+1)%4))%4)))
-                                self.dc_list[raceNum+1].append("{}**  -  DCed during the race (on results). Giving 3 DC points per race for remaining {} races in GP {} ({} pts total).".format(Extra.dis_clean(miiName), (4-((raceNum+1)%4))%4, self.gp+1,3*((4-((raceNum+1)%4))%4)))
+                                self.dc_list[raceNum+1].append("{}**  -  DCed during the race (on results). Giving 3 DC points per race for remaining {} races in GP {} ({} pts total).".format(Utils.dis_clean(miiName), (4-((raceNum+1)%4))%4, self.gp+1,3*((4-((raceNum+1)%4))%4)))
                             
                             if (4-((raceNum+1)%4))%4!=0:
                                 try:
@@ -2040,7 +2040,7 @@ class Table():
                                     self.dc_list[len(self.races)+raceNum+1] = []
                                     
                                 self.warnings[len(self.races)+raceNum+1].append("{} is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war).".format(mp,self.gp+1, self.gp+1, self.gp+1))
-                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed before race {} (missing from GP {}). 18 pts for GP {} (mogi), 15 pts for GP {} (war).".format(Extra.dis_clean(mp), len(self.races)+raceNum+1,self.gp+1,self.gp+1, self.gp+1))
+                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed before race {} (missing from GP {}). 18 pts for GP {} (mogi), 15 pts for GP {} (war).".format(Utils.dis_clean(mp), len(self.races)+raceNum+1,self.gp+1,self.gp+1, self.gp+1))
                                 self.dc_ids_append(mp, len(self.races)+raceNum+1)
                                 if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                                 self.gp_dcs[self.gp].append(mp)
@@ -2054,7 +2054,7 @@ class Table():
                                     self.dc_list[len(self.races)+raceNum+1] = []
                                     
                                 self.warnings[len(self.races)+raceNum+1].append("{} DCed before race. 3 DC points per race for the next {} races in GP {} ({} pts total).".format(mp, 4-((len(self.races)+raceNum)%4), self.gp+1, 3*(4-((len(self.races)+raceNum)%4))))
-                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total).".format(Extra.dis_clean(mp), len(self.races)+raceNum+1, self.gp+1, 3*(4-((len(self.races)+raceNum)%4))))
+                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total).".format(Utils.dis_clean(mp), len(self.races)+raceNum+1, self.gp+1, 3*(4-((len(self.races)+raceNum)%4))))
                                 
                                 try:
                                     self.dc_pts[mp].append([len(self.races)+raceNum+1, [i for i in range(len(self.races)+raceNum+1, len(self.races)+raceNum+1+(4-((len(self.races)+raceNum)%4))%4)]])
@@ -2155,16 +2155,16 @@ class Table():
                         
                         if (len(self.races)+raceNum)%4==0:
                             self.warnings[len(self.races)+raceNum+1].append("{} DCed on the first race of GP {} (on results). 15 DC points for GP {}.".format(miiName, self.gp+1, self.gp+1))
-                            self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed on the first race of GP {} (on results). 15 DC points for GP {}.".format(Extra.dis_clean(miiName), self.gp+1, self.gp+1))
+                            self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed on the first race of GP {} (on results). 15 DC points for GP {}.".format(Utils.dis_clean(miiName), self.gp+1, self.gp+1))
                             
                         else: 
                             if (4-((len(self.races)+raceNum+1)%4))%4 == 0:
                                 self.warnings[len(self.races)+raceNum+1].append("{} DCed during the race (on results). No DC points for GP {}.".format(miiName, self.gp+1))
-                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed during the race (on results). No DC points for GP {}.".format(Extra.dis_clean(miiName), self.gp+1))
+                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed during the race (on results). No DC points for GP {}.".format(Utils.dis_clean(miiName), self.gp+1))
                         
                             else:
                                 self.warnings[len(self.races)+raceNum+1].append("{} DCed during the race (on results). Awarding 3 DC points per race for next {} races in GP {} ({} pts total).".format(miiName,(4-((len(self.races)+raceNum+1)%4))%4 , self.gp+1, 3*((4-((len(self.races)+raceNum+1)%4))%4)))
-                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed during the race (on results). Giving 3 DC points per race for remaining {} races in GP {} ({} pts total).".format(Extra.dis_clean(miiName), (4-((len(self.races)+raceNum+1)%4))%4, self.gp+1,3*((4-((len(self.races)+raceNum+1)%4))%4)))
+                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed during the race (on results). Giving 3 DC points per race for remaining {} races in GP {} ({} pts total).".format(Utils.dis_clean(miiName), (4-((len(self.races)+raceNum+1)%4))%4, self.gp+1,3*((4-((len(self.races)+raceNum+1)%4))%4)))
                             
                             if (4-((len(self.races)+raceNum+1)%4))%4!=0:
                                 #self.dc_pts[miiName] = (4-((len(self.races)+raceNum+1)%4))%4
@@ -2328,7 +2328,7 @@ class Table():
     
     def get_table_text(self):
         self.table_str = self.create_string()
-        return Extra.dis_clean(self.table_str)
+        return Utils.dis_clean(self.table_str)
     
     async def get_table_img(self, by_race = False):
         if by_race:

@@ -9,7 +9,7 @@ import discord
 from discord.ext import commands, tasks
 from cogs.tabler import Table
 from itertools import cycle
-import Extra
+import Utils
 
 class table_bot(commands.Cog):
     def __init__(self, bot):
@@ -165,7 +165,7 @@ class table_bot(commands.Cog):
             await self.send_messages(ctx, "Invalid format. Format must be FFA, 2v2, 3v3, 4v4, 5v5, or 6v6.", usage)
             return
         
-        teams = Extra.max_teams(_format)
+        teams = Utils.max_teams(_format)
         if len(args)>1:
             try:
                 teams = int(args[1].lower())
@@ -173,12 +173,12 @@ class table_bot(commands.Cog):
                 await self.send_messages(ctx, "Invalid use of ?start: <teams> must be an integer.", usage)
                 return
         
-        if Extra.check_teams(_format, teams):
+        if Utils.check_teams(_format, teams):
             await self.send_messages(ctx, "Invalid number of teams. The number of teams cannot exceed 12 players.", usage)
             return
         self.table_instances[ctx.channel.id].format = _format
         self.table_instances[ctx.channel.id].teams = teams
-        num_players = Extra.get_num_players(_format, teams) 
+        num_players = Utils.get_num_players(_format, teams) 
         self.table_instances[ctx.channel.id].num_players = num_players
         gps = 3
         sui=None
