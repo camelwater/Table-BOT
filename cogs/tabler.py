@@ -1545,7 +1545,7 @@ class Table():
                         tag[1].remove(i[1])
                 
     
-    def remove_race(self, raceNum, redo=False): #TODO: needs testing (also need to figure out how to keep manual warnings and manual edits to the table)
+    def remove_race(self, raceNum, redo=False): #TEST: needs testing (also need to figure out how to keep manual warnings and manual edits to the table)
         if raceNum==-1: raceNum = len(self.races)
         try:
             assert(raceNum<=len(self.races))
@@ -1617,8 +1617,7 @@ class Table():
                 dc[1] = dc[1]+direction
         
     
-    def recalc_table(self, start = 0): #TODO: write shift_warnings (for manual warnings and dc edits)
-                                        #make the recalc_table method only recalculate pts and dc pts from affected GPs 
+    def recalc_table(self, start = 0): #TODO: figure out how to shift warnings to keep manual warnings
                                         
         self.gp = int((start-1)/4)
         for player in self.players.items():

@@ -580,7 +580,7 @@ class table_bot(commands.Cog):
             return
     
     @commands.command(aliases=['substitute'])
-    async def sub(self, ctx, *args): #TODO: more testing but seems to work fine
+    async def sub(self, ctx, *args): #NOTE: needs more testing but seems to work fine 
         
         if await self.check_callable(ctx, "sub"): return
         
