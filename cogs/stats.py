@@ -33,7 +33,7 @@ class stats(commands.Cog):
 
         value_field = "[Github Repository](https://github.com/camelwater/Table-BOT)"
         e.add_field(name='\u200b', value= value_field, inline=False)
-        
-    def setup(bot):
-        if not hasattr(bot, "command_stats"):
-            bot.command_stats = Counter()
+
+def setup(bot):
+    if not hasattr(bot, "command_stats"):
+        bot.command_stats = Counter()
