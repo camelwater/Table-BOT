@@ -56,7 +56,6 @@ class table_bot(commands.Cog):
         channel_id = ctx.message.channel.id
         if channel_id not in self.table_instances:
             self.table_instances[channel_id] = Table()
-        #self.table = self.table_instances[channel_id]
         self.table_instances[ctx.channel.id].ctx = ctx
      
     async def send_temp_messages(self,ctx, *args):
@@ -433,7 +432,6 @@ class table_bot(commands.Cog):
         if self.table_instances[ctx.channel.id].confirm_room:
             self.table_instances[ctx.channel.id].confirm_room = False
             self.table_instances.pop(ctx.message.channel.id)
-            #await send_messages(ctx, "Search for a room with ?search <search type> <room id or mii name(s)>")
             await self.send_messages(ctx, "Start a new table with ?start.")
            
         elif self.table_instances[ctx.channel.id].confirm_reset:
@@ -492,9 +490,7 @@ class table_bot(commands.Cog):
     @commands.command()
     async def undo(self,ctx, *args):
         if await self.check_callable(ctx, "undo"): return
-        
-        #usage = 'Usage: ?undo ("all" if you want to undo all)' if len(self.table_instances[ctx.channel.id].modifications)>0 else ""
-        
+                
         if len(args)==0:
             args=-1
         else:
@@ -513,9 +509,7 @@ class table_bot(commands.Cog):
     @commands.command()
     async def redo(self,ctx, *args):
         if await self.check_callable(ctx, "redo"): return
-        
-        #usage = 'Usage: ?redo ("all" if you want to redo all)' if len(self.table_instances[ctx.channel.id].undos)>0 else ""
-        
+                
         if len(args)==0:
             args=-1
         else:
@@ -535,20 +529,13 @@ class table_bot(commands.Cog):
     #?reset
     @commands.command(aliases=['stop'])
     async def reset(self,ctx, *args):
-        
-        
         if not self.table_instances[ctx.channel.id].table_running and not self.table_instances[ctx.channel.id].confirm_room:
             await self.send_temp_messages(ctx, "You need to have an active table to be able to reset.")
             return
         
         self.table_instances[ctx.channel.id].check_mkwx_update.stop()
         self.table_instances.pop(ctx.message.channel.id)
-        '''
-        self.table_instances[ctx.channel.id].table_running = False
-        self.table_instances[ctx.channel.id].choose_message = None 
-        self.table_instances[ctx.channel.id].confirm_reset = False
-        self.table_instances[ctx.channel.id].confirm_room= False
-        '''
+       
         await self.send_messages(ctx, "Table has been reset. ?start to start a new table.")
         
     
