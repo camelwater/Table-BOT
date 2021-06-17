@@ -16,7 +16,7 @@ load_dotenv()
 KEY = os.getenv('KEY')
 SERVER_ID = 775253594848886785
 load_ext = ['cogs.table_cog']
-bot = commands.Bot(command_prefix = ('?'), case_insensitive=True, intents = discord.Intents.all(), help_command = None)      
+bot = commands.Bot(command_prefix = ('?', '^'), case_insensitive=True, intents = discord.Intents.all(), help_command = None)      
         
 if __name__ == "__main__":
     
@@ -24,3 +24,4 @@ if __name__ == "__main__":
         bot.load_extension(l)  
         
     bot.run(KEY)
+    

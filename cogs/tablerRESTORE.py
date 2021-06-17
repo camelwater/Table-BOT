@@ -19,7 +19,7 @@ from unidecode import unidecode
 from collections import defaultdict
 import Extra
 
-#TODO: add graph and style options
+
 class Table():
     def __init__(self):
         self.URL = "https://wiimmfi.de/stats/mkwx"
@@ -52,15 +52,11 @@ class Table():
         
         self.removed_races = {}
         self.removed_warn_dcs = {}
+        self.removed_tracks = {}
         
         self.room_sizes = [] #list of room sizes for different gps (check if room size increases mid-gp, to send warning message - ?changeroomsize might be necessary)
-        self.room_players = [] #list of list of players at beginning of GP (check if room changes mid-gp, send warning)
         self.room_sizes_error_affected = [[]] #races affected by mkwx messing up room sizes
         self.room_error_index = [[-1,-1]] #to update room size warnings
-        self.room_players = []
-        
-        self.changed_room_sizes = {}
-        self.edited_scores = defaultdict(lambda: defaultdict(int))
                    
         self.tags = {} #list of team tags and their respective players
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
@@ -120,12 +116,6 @@ class Table():
             if rid == None:
                 rxxs = {}
                 data= await self.fetch(self.URL)
-                if isinstance(data, str) and 'error' in data:
-                    if 'response' in data:
-                        return True, "Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
-                    
                 miis = data.find_all('span', {'class': 'mii-font'})
                 for m in mii:
                     for comp in miis:
@@ -151,12 +141,6 @@ class Table():
                 room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rxx)
                 
                 soup = await self.fetch(room_url)
-                if isinstance(soup, str) and 'error' in soup:
-                    if 'response' in soup:
-                        return True, "Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
-                    
                 if "No match found!" in list(soup.stripped_strings):
                     return True, "The room ({}) hasn't finished at least one race yet.\nRetry the ?mergeroom command when the room has finished one race.".format(rxx)
                 
@@ -180,12 +164,6 @@ class Table():
                 room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rid)
                 
                 soup = await self.fetch(room_url)
-                if isinstance(soup, str) and 'error' in soup:
-                    if 'response' in soup:
-                        return True, "Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
-                
                 stripped = list(soup.stripped_strings)
                 if "No match found!" in stripped:
                     return True, "The room ({}) hasn't finished at least one race yet.\nRetry the ?mergeroom command when the room has finished at least one race.".format(rid)
@@ -209,11 +187,6 @@ class Table():
                 rxxs = {}
                 #tick = time.time()
                 data = await self.fetch(self.URL)
-                if isinstance(data, str) and 'error' in data:
-                    if 'response' in data:
-                        return True, type_ask,"Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True, type_ask,"I am currently experiencing some issues with Wiimmfi. Try again later."
                 #print(time.time()-tick)
                 miis = data.find_all('span',{"class" : "mii-font"})
                 for m in mii:
@@ -239,11 +212,6 @@ class Table():
     
                 room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(self.rxx)
                 soup = await self.fetch(room_url)
-                if isinstance(soup, str) and 'error' in soup:
-                    if 'response' in soup:
-                        return True, type_ask, "Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True,type_ask, "I am currently experiencing some issues with Wiimmfi. Try again later."
 
                 if "No match found!" in list(soup.stripped_strings):
                     return True, type_ask, "The room hasn't finished at least one race yet.\nRetry the ?search command when the room has finished one race."
@@ -287,13 +255,6 @@ class Table():
                 room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rid)
                 
                 soup = await self.fetch(room_url)
-
-                if isinstance(soup, str) and 'error' in soup:
-                    if 'response' in soup:
-                        return True, type_ask, "Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True,type_ask, "I am currently experiencing some issues with Wiimmfi. Try again later."
-                
                 stripped = list(soup.stripped_strings)
                 if "No match found!" in stripped:
                     return True, type_ask, "The room either doesn't exist or hasn't finished at least one race yet.\nRetry the ?search command when the room has finished one race and make sure the room id is in rxx or XX00 format."
@@ -333,6 +294,7 @@ class Table():
     
     
     def split_teams(self, f, num_teams): #TODO: unidecode doesn't work fully, need to find another method
+    #TODO: have to somehow add postfix checker on the same step as prefix, just less precedent
         """
         split players into teams based on tags
         """
@@ -363,8 +325,46 @@ class Table():
                             
                         if matches == per_team: break 
                 
+            print(player_copy[i], matches)
+            pot_post = False
+            #Don't check for postfix and prefix if prefix test passes
+            if matches<per_team:
+                temp_tag = ''
+                temp_matches = 1
+                most_temp_matches = [1,'']
+                temp_indx = len(player_copy[i])+1
+                while temp_matches<per_team and temp_indx>0:
+                    temp_indx-=1
+                    temp_matches = 1
+                    for j in range(len(player_copy)):
+                        
+                        if i!=j and temp_indx>0 and (unidecode(Extra.strip_CJK(player_copy[i].strip().lower().replace("[","").replace(']','')))[:temp_indx] == unidecode(Extra.strip_CJK(player_copy[j].strip().lower().replace("[","").replace(']','')))[::-1][:temp_indx][::-1]
+                                                     or unidecode(Extra.strip_CJK(player_copy[i].strip().lower().replace("[","").replace(']','')))[:temp_indx] == unidecode(Extra.strip_CJK(player_copy[j].strip().lower().replace("[","").replace(']','')))[:temp_indx]):
+                            temp_matches+=1
+                            
+                            if temp_matches>most_temp_matches[0]:
+                                temp_tag = unidecode(Extra.strip_CJK(player_copy[i].strip().replace("[","").replace(']','')))[:temp_indx]
+                                most_temp_matches = [temp_matches, temp_tag]
+                            
+                        elif i!=j and temp_indx>0 and (unidecode(Extra.strip_CJK(player_copy[i].strip().lower().replace("[","").replace(']','')))[::-1][:temp_indx][::-1] == unidecode(Extra.strip_CJK(player_copy[j].strip().lower().replace("[","").replace(']','')))[::-1][:temp_indx][::-1]
+                                       or unidecode(Extra.strip_CJK(player_copy[i].strip().lower().replace("[","").replace(']','')))[::-1][:temp_indx][::-1] == unidecode(Extra.strip_CJK(player_copy[j].strip().lower().replace("[","").replace(']','')))[:temp_indx]):
+                            temp_matches+=1
+                            #print(temp_indx, player_copy[i], player_copy[j])
+                            
+                            if temp_matches>most_temp_matches[0]:
+                                temp_tag = unidecode(Extra.strip_CJK(player_copy[i].strip().replace("[","").replace(']','')))[::-1][:temp_indx][::-1]
+                                most_temp_matches = [temp_matches, temp_tag]
+                                
+                if most_temp_matches[0]>matches:
+                    #print(most_temp_matches)
+                    indx = len(most_temp_matches[1])
+                    pot_post=True
             
-            tag = player_copy[i].replace("[","").replace(']','')[:indx]
+            if pot_post:
+                tag = most_temp_matches[1]
+                #print(tag, indx)
+            else:
+                tag = player_copy[i].replace("[","").replace(']','')[:indx]
             if len(tag)>0 and tag[-1]=="-": 
                 tag = tag[:-1]
                 indx-=1
@@ -381,11 +381,19 @@ class Table():
             teams[temp_tag] = []
             ind = 0
             while ind<len(player_copy):
-                if unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(player_copy[ind].strip().lower().replace("[","").replace(']',''))[:indx]: 
-                    if len(teams[temp_tag])<per_team:
-                        teams[temp_tag].append(player_copy.pop(ind))
-                        ind = 0
-                        continue
+                if pot_post:
+                    if (unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(player_copy[ind].strip().lower().replace("[","").replace(']',''))[:indx]
+                    or unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(player_copy[ind].strip().lower().replace("[","").replace(']',''))[::-1][:indx][::-1]): 
+                        if len(teams[temp_tag])<per_team:
+                            teams[temp_tag].append(player_copy.pop(ind))
+                            ind = 0
+                            continue
+                else:
+                    if unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(player_copy[ind].strip().lower().replace("[","").replace(']',''))[:indx]: 
+                        if len(teams[temp_tag])<per_team:
+                            teams[temp_tag].append(player_copy.pop(ind))
+                            ind = 0
+                            continue
                 ind+=1
                 
             i = 0
@@ -393,11 +401,11 @@ class Table():
             
         #find postfix tags
         i = 0
-        all_tag_matches= {}
         while i < len(post_players):
             tag = ''
             matches = 1
             indx = len(post_players[i])+1
+            postfix = False
             
             postfix_fill = False
             for team in teams.items():
@@ -409,105 +417,66 @@ class Table():
                 while indx>0:
                     indx-=1
                     for tag, _list in teams.items():
-                        if len(_list)<per_team and unidecode(Extra.strip_CJK(post_players[i].strip().lower().replace("[","").replace(']','')))[::-1][:indx][::-1] == unidecode(tag.lower().strip().replace("[","").replace(']','')):
+                        if unidecode(Extra.strip_CJK(post_players[i].strip().lower().replace("[","").replace(']','')))[-indx:] == unidecode(tag.lower().strip().replace("[","").replace(']','')):
                             teams[tag].append(post_players.pop(i))
                             i = 0
                             cont = True
                             break
                 if cont:
                     continue
-
-
-            #postfix and prefix (together) check
-            temp_tag = ''
-            tag_matches = defaultdict(list)
-            temp_indx = len(post_players[i])+1
-            
-            while temp_indx>0:
-                cont=False
-                temp_indx-=1
-               
-                for j in range(len(post_players)):
-                    i_tag = unidecode(Extra.strip_CJK(post_players[i].strip().replace("[","").replace(']','')))
-                    j_tag = unidecode(Extra.strip_CJK(post_players[j].strip().replace("[","").replace(']','')))
                     
-                    if i!=j and temp_indx>0 and (i_tag[:temp_indx] == j_tag[::-1][:temp_indx][::-1]
-                                                 or i_tag[:temp_indx] == j_tag[:temp_indx]):
+            indx = len(post_players[i])+1
+            while matches != per_team:
+                indx-=1
+                for j in range(len(post_players)):
+                    
+                    if i!=j and unidecode(Extra.strip_CJK(post_players[i].strip().lower().replace("[","").replace(']','')))[:indx] == unidecode(Extra.strip_CJK(post_players[j].strip().lower().replace("[","").replace(']','')))[-indx:]:
+
+                        matches+=1
+                        postfix = False
+                        if matches == per_team: break
+                    elif i!=j and (unidecode(Extra.strip_CJK(post_players[i].strip().lower().replace("[","").replace(']','')))[-indx:] == unidecode(Extra.strip_CJK(post_players[j].strip().lower().replace("[","").replace(']','')))[-indx:]
+                                   or unidecode(Extra.strip_CJK(post_players[i].strip().lower().replace("[","").replace(']','')))[-indx:] == unidecode(Extra.strip_CJK(post_players[j].strip().lower().replace("[","").replace(']','')))[:indx]):
+                        matches+=1
+                        postfix = True
+                        if matches==per_team: break
                         
-                        #print(temp_indx, post_players[i], post_players[j])
-                        if len(tag_matches[i_tag[:temp_indx]])==0:
-                            tag_matches[i_tag[:temp_indx]].append(post_players[i])
-                        tag_matches[i_tag[:temp_indx]].append(post_players[j])
-                        if len(tag_matches[i_tag[:temp_indx]])==per_team:
-                            teams[i_tag[:temp_indx]] = tag_matches.pop(i_tag[:temp_indx])
-                            for p in teams[i_tag[:temp_indx]]:
-                                try:
-                                    post_players.remove(p)
-                                except:
-                                    pass
-                                for x in all_tag_matches.items():
-                                    try:
-                                        all_tag_matches[1].remove(p)
-                                    except:
-                                        pass
-                                i = -1
-                            cont=True
-                            break
-                        
-                        
-                    elif i!=j and temp_indx>0 and (i_tag[::-1][:temp_indx][::-1] == j_tag[::-1][:temp_indx][::-1]
-                                   or i_tag[::-1][:temp_indx][::-1] == j_tag[:temp_indx]):
-                        
-                        #print(temp_indx, post_players[i], post_players[j])
-                        if len(tag_matches[i_tag[::-1][:temp_indx][::-1]])==0:
-                            tag_matches[i_tag[::-1][:temp_indx][::-1]].append(post_players[i])
-                        tag_matches[i_tag[::-1][:temp_indx][::-1]].append(post_players[j])
-                        if len(tag_matches[i_tag[::-1][:temp_indx][::-1]])==per_team:
-                            teams[i_tag[::-1][:temp_indx][::-1]] = tag_matches.pop(i_tag[::-1][:temp_indx][::-1])
-                            for p in teams[i_tag[::-1][:temp_indx][::-1]]:
-                                try:
-                                    post_players.remove(p)
-                                except:
-                                    pass
-                                for x in all_tag_matches.items():
-                                    try:
-                                        all_tag_matches[1].remove(p)
-                                    except:
-                                        pass
-                                i = 1
-                            cont=True
-                                
-                            break
-                                
-                if cont:
-                    break
-               
-            i+=1
-            for item in tag_matches.items():
-                if item[0] in all_tag_matches:
-                    if len(item[1]) > len(all_tag_matches[item[0]]):
-                        all_tag_matches[item[0]] = item[1]
-                else:
-                    all_tag_matches[item[0]] = item[1]
+                if indx == 0: break
+            
+            if postfix:
+                tag = post_players[i].replace("[","").replace(']','')[-indx:]
+                if indx == 0:
+                    tag = ''
+            else:
+                tag = post_players[i].replace("[","").replace(']','')[:indx]
+            if len(tag)>0 and tag[-1]=="-": 
+                tag = tag[:-1]
+                indx-=1
+            if len(tag)==1: tag = tag.upper()
+
+            temp_tag = tag
+            if tag == "": 
+                un_players.append(post_players.pop(i))
+                continue
+            x = 1
+            while temp_tag in teams:
+                temp_tag = tag +"-"+str(x)
+                x+=1
+            teams[temp_tag] = []
+            ind = 0
+            while ind<len(post_players):
+                if (unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(post_players[ind].strip().lower().replace("[","").replace(']',''))[:indx]
+                    or unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(post_players[ind].strip().lower().replace("[","").replace(']',''))[-indx:]): 
+                    if len(teams[temp_tag])<per_team:
+                        teams[temp_tag].append(post_players.pop(ind))
+                        ind = 0
+                        continue
+                ind+=1
+                
+            i = 0
+            
         
-        teams_needed = num_teams-len(teams.keys())
-        if(len(all_tag_matches)>=teams_needed):
-            for t in range(teams_needed):
-                all_tag_matches = dict(sorted(all_tag_matches.items(), key=lambda item: len(item[1]), reverse=True))
-                teams[list(all_tag_matches.keys())[0]] = all_tag_matches[list(all_tag_matches.keys())[0]]
-                for p in all_tag_matches[list(all_tag_matches.keys())[0]]:
-                    post_players.remove(p)
-                    for x in tag_matches.items():
-                        try:
-                            x[1].remove(p)
-                        except:
-                            pass
-                        
-        un_players = copy.deepcopy(post_players)
-        post_players.clear()
-      
-        
-        #substring (unconventional) tag for 2v2s
+        #substring tag for 2v2s
         if per_team==2:
             i = 0
             while i<len(un_players):
@@ -534,13 +503,16 @@ class Table():
                     for p in match:
                         un_players.remove(p)
                 
-        #randomly tag the rest
+        print(un_players)
+         #randomly tag the rest
         if len(un_players)>0 and len(un_players) <per_team and len(teams)==num_teams:
+            #print(teams)
             for item in teams.items():
-                while len(item[1])<per_team and len(un_players)>0:
+                while len(item[1])<per_team:
                     item[1].append(un_players.pop(0))
         else:
             split = list(Extra.chunks(un_players, per_team))
+            #print(split)
             for i in split:
                 for ind,j in enumerate(i):
                     try:
@@ -559,10 +531,11 @@ class Table():
         self.tags = {k.strip(): v for (k, v) in self.tags.items()}
         print()
         print(self.tags)
-        print("tag algo time:",time.time()-tick)
+        print("split teams time:",time.time()-tick)
         
     
     def get_warnings(self):
+        
         if len(self.warnings)==0:
             return "Room had no warnings/errors. This table should be accurate."
         ret = 'Room warnings/errors that could affect the table{}:\n'.format(" (?dcs to fix dcs)" if len(self.dc_list)>0 else "")
@@ -662,8 +635,8 @@ class Table():
                 ret+="{} -".format(tag)
                 for p in placements:
                     ret+=' {}{}'.format(p, '' if p==placements[-1] else ',')
-                ret+=" ({} pts)".format(sum([self.pts[count][i-1] for i in placements]))
                 ret+="{}".format("" if tag==list(tag_places.items())[-1][0] else "   |   ")
+            
         return False,ret
     
     def change_tag(self,player, tag):
@@ -785,86 +758,46 @@ class Table():
         i = 1
         while i in self.dc_list_ids:
             i+=1
-        self.dc_list_ids[i] = [player,race]
+        self.dc_list_ids[i] = (player,race)
         
-    def edit(self,player, gp, score, restore_races = None, redo=False): 
-        if not redo:    
-            try:
-                p_indx = player
-                player = self.player_ids[player]
-            except:
-                return "{} was not a valid player index. The index must be between 1-{}".format(player, len(self.players))
+    def edit(self,player, gp, score, reundo=False):
+        try:
+            p_indx = player
+            player = self.player_ids[player]
+        except:
+            return "{} was not a valid player index. The index must be between 1-{}".format(player, len(self.players))
       
         try:
-            assert(int(gp)-1 <=self.gp)
+            if '-' in score or '+' in score:
+                self.players[player][1][int(gp)-1] += int(score)
+                if not reundo:
+                    self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), p_indx, gp,score)])
+                    self.undos.clear()
+                
+                try:
+                    if self.warnings[int(gp)*4-3][0] != "Scores have been manually modified by the tabler for this GP ({}).".format(gp):
+                        self.warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
+                except:
+                    self.warnings[int(gp)*4-3] = ["Scores have been manually modified by the tabler for this GP ({}).".format(gp)]
+                    
+                return "{} GP {} score changed to {}".format(player, gp, self.players[player][1][int(gp)-1])
+            else:
+                orig_score = self.players[player][1][int(gp)-1]
+                self.players[player][1][int(gp)-1] = int(score)
+                if not reundo:
+                    self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), p_indx, gp, orig_score, score)])
+                    self.undos.clear()
+                
+                try:
+                    if self.warnings[int(gp)*4-3][0] != "Scores have been manually modified by the tabler for this GP ({}).".format(gp):
+                        self.warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
+                except:
+                    self.warnings[int(gp)*4-3] = ["Scores have been manually modified by the tabler for this GP ({}).".format(gp)]
+                        
+                return "{} GP {} score changed to {}".format(player, gp, score)
         except:
             return "{} was not a valid gp. The gp number must be between 1-{}".format(gp, self.gp+1)
-        
-       
-        if '-' in score or '+' in score:
-            self.edited_scores[int(gp)][player] = self.players[player][1][int(gp)-1] + int(score)
-            
-            '''
-            if not reundo and restore_races is None:
-                race_restore = (len(self.races)-1, self.players[player][2][len(self.races)-1])
-                #race_restore = [score for score in self.players[player][2][(int(gp)-1)*4:int(gp)*4]]
-            if restore_races is not None:
-                self.players[player][2][race_restore[0]] = race_restore[1]
-                
-                for indx,race in enumerate(self.players[player][2]):
-                    if indx>=(int(gp)-1)*4 and indx<=int(gp)*4: 
-                        self.players[player][2][indx] = restore_races.pop(0)
-                
-                    
-            self.players[player][1][int(gp)-1] += int(score)
-            if restore_races is None:
-                self.players[player][2][len(self.races)-1] += int(score)
-                
-                for indx, race in enumerate(self.players[player][2]):
-                    if indx>=(int(gp)-1)*4 and indx<=int(gp)*4:
-                        self.players[player][2][indx] = 0
-                self.players[player][2][(int(gp)-1)*4] = self.players[player][1][int(gp)-1]
-                
-            '''    
-            if not redo:
-                self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
-                self.undos.clear()
-            
-            try:
-                if self.warnings[int(gp)*4-3][0] != "Scores have been manually modified by the tabler for this GP ({}).".format(gp):
-                    self.warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
-            except:
-                self.warnings[int(gp)*4-3] = ["Scores have been manually modified by the tabler for this GP ({}).".format(gp)]
-                
-            return "{} GP {} score changed to {}".format(player, gp, self.players[player][1][int(gp)-1])
-        else:
-            #orig_score = self.players[player][1][int(gp)-1]
-            self.edited_scores[int(gp)][player] = int(score)
-            '''
-            self.players[player][1][int(gp)-1] = int(score)
-            if restore_races is None:
-                for indx, race in enumerate(self.players[player][2]):
-                    if indx>=(int(gp)-1)*4 and indx<=int(gp)*4:
-                        self.players[player][2][indx] = 0
-                self.players[player][2][(int(gp)-1)*4] = int(score)
-            '''
-            
-            if not redo:
-                self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
-                self.undos.clear()
-            
-            try:
-                if self.warnings[int(gp)*4-3][0] != "Scores have been manually modified by the tabler for this GP ({}).".format(gp):
-                    self.warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
-            except:
-                self.warnings[int(gp)*4-3] = ["Scores have been manually modified by the tabler for this GP ({}).".format(gp)]
-                    
-            return "{} GP {} score changed to {}".format(player, gp, score)
     
-    def undo_edit(self, player, gp):
-        self.edited_scores[int(gp)].pop(player)
-       
-        
     def get_rxx(self):
         ret = ""
         if len(self.prev_rxxs)>0:
@@ -919,6 +852,7 @@ class Table():
         return self.player_list
     
     def penalty(self,player, pen, reundo=False):
+        
         try:
             p_indx = player
             player = self.player_ids[player]
@@ -927,8 +861,6 @@ class Table():
         if pen[0] == '=':
             pen = int(pen.lstrip('=').lstrip('-'))
             self.pens[player] = pen
-            if self.pens[player] == 0: self.pens.pop(player)
-            
             if not reundo:
                 self.modifications.append([('?pen {} {}'.format(p_indx, '='+str(pen)), p_indx, '='+str(pen))])
                 self.undos.clear()
@@ -941,8 +873,7 @@ class Table():
                 self.pens[player]+=pen
             else:
                 self.pens[player] = pen
-            if self.pens[player] == 0: self.pens.pop(player)
-            
+      
             if not reundo:
                 self.modifications.append([('?pen {} {}'.format(p_indx, pen), p_indx, pen)])
                 self.undos.clear()
@@ -969,7 +900,6 @@ class Table():
             else:
                 self.pens[player] -= unpen
                 if self.pens[player] == 0: self.pens.pop(player)
-                
                 if not reundo: 
                     self.modifications.append([('?unpen {} {}'.format(p_indx, unpen), p_indx, unpen)])
                     self.undos.clear()
@@ -989,8 +919,6 @@ class Table():
         if pen[0] == '=':
             pen = int(pen.lstrip('=').lstrip('-'))
             self.team_pens[team] = pen
-            if self.team_pens[team] == 0: self.team_pens.pop(team)
-            
             if not reundo:
                 self.modifications.append([('?teampen {} {}'.format(team, '='+str(pen)), team, '='+str(pen))])
                 self.undos.clear()
@@ -1003,8 +931,7 @@ class Table():
                 self.team_pens[team]+=pen
             else:
                 self.team_pens[team] = pen
-            if self.team_pens[team] == 0: self.team_pens.pop(team)
-            
+      
             if not reundo:
                 self.modifications.append([('?teampen {} {}'.format(team, pen), team, pen)])
                 self.undos.clear()
@@ -1036,7 +963,6 @@ class Table():
             else:
                 self.team_pens[team] -= unpen
                 if self.team_pens[team] == 0: self.team_pens.pop(team)
-                
                 if not reundo: 
                     self.modifications.append([('?teamunpen {} {}'.format(team, unpen), team, unpen)])
                     self.undos.clear()
@@ -1060,7 +986,7 @@ class Table():
         for i, fc in players:
         
             if i not in self.players:
-                self.players[i] = [0,[0]*self.gps, [0]*self.gps*4]
+                self.players[i] = [0,[0]*self.gps]
                 self.fcs[fc] = i
                 #print(i)
             else:
@@ -1072,7 +998,7 @@ class Table():
                     name = i+"-"+str(x)
                     x+=1
                     
-                self.players[name] = [0,[0]*self.gps, [0]*self.gps*4]
+                self.players[name] = [0,[0]*self.gps]
                 self.fcs[fc]= name
                 
         for i in self.dup_players:
@@ -1080,10 +1006,9 @@ class Table():
                 indx = list(self.fcs.values()).index(i)
                 self.fcs[list(self.fcs.items())[indx][0]] = i+'-1'
                 del self.players[i]
-                self.players[i+'-1'] = [0,[0]*self.gps, [0]*self.gps*4]
+                self.players[i+'-1'] = [0,[0]*self.gps]
         
         self.room_sizes.append(len(self.players))
-        self.room_players.append(list(self.players.keys()))
         self.all_players = list(self.players.keys())
         self.players = dict(sorted(self.players.items(), key=lambda item: item[0]))
         if self.format[0].lower() == 'f': print(self.players.keys())
@@ -1119,7 +1044,7 @@ class Table():
                      break
          
          self.all_players.append(player)
-         self.players[player] = [0,[0]*self.gps, [0]*self.gps*4]
+         self.players[player] = [0,[0]*self.gps]
          self.fcs[fc] = player
          if self.format[0].lower()!='f':
              if "SUBS" not in self.tags:
@@ -1164,22 +1089,14 @@ class Table():
                 tag = t[0]
                 self.tags[tag].pop(t[1].index(out_player))
                 break
-
-        for t in self.tags.items():
-            try:
-                t[1].remove(in_player)
-                in_tag = t[0]
-                break
-            except:
-                pass
-            
         if in_player not in self.tags[tag]:
             self.tags[tag].append(in_player)
-       
+        if in_player in self.tags['SUBS']:
+            self.tags['SUBS'].pop(self.tags['SUBS'].index(in_player))
         self.tags = {k:v for k,v in self.tags.items() if len(v)!=0}
             
         if not reundo: 
-            restore = {'pts':pts, 'fc':fc, 'out_tag':tag, 'id':pid, 'in_tag': in_tag}
+            restore = {'pts':pts, 'fc':fc, 'tag':tag, 'id':pid}
             if out_pens!=None:
                 restore['pens'] = out_pens
             self.modifications.append([('?sub {} {} {}'.format(out, out_races, _in), in_player, out_player, out_races, restore)])
@@ -1190,19 +1107,7 @@ class Table():
         self.sub_names.pop(in_player)
         self.players[out_player] = restore['pts']
         self.fcs[restore['fc']] = out_player
-        for tag in self.tags.items():
-            try:
-                tag[1].remove(in_player)
-                try:
-                    self.tags[[restore['in_tag']]].append(in_player)
-                except:
-                    self.tags[restore['in_tag']] = [in_player]
-                break
-            except:
-                pass
-        
-        self.tags[restore['out_tag']].append(out_player)
-        
+        self.tags[restore['tag']].append(out_player)
         
         self.players[in_player][1] = [a-b for a, b in zip(self.players[in_player][1], self.players[out_player][1])]
         self.players[in_player][0] = self.players[in_player][0] - self.players[out_player][0]
@@ -1211,9 +1116,11 @@ class Table():
             self.pens[in_player] = self.pens[in_player]-restore['pens']
             if self.pens[in_player]==0:
                 self.pens.pop(in_player)
-        
-        
-        
+        '''
+        if "SUBS" not in self.tags:
+            self.tags['SUBS'] = []
+        self.tags["SUBS"].append(in_player)
+        '''
             
     
     def edit_sub_races(self, indx, races, is_in, out_index = 1, reundo=False):
@@ -1263,20 +1170,14 @@ class Table():
                  orig_status = 'on'
                  if player not in players:
                      orig_status = "before"
-                     self.change_room_size([[raceNum, len(self.races[raceNum-1])+1]], self_call=True)
+                     mes = self.change_room_size([[raceNum, len(self.races[raceNum-1])+1]], self_call=True)
+                     #print(mes)
                      self.races[raceNum-1].append((player, 'DC', list(self.fcs.keys())[list(self.fcs.values()).index(player)]))
                      self.finish_times[raceNum-1][player] = 'DC'
                      
                      if raceNum %4 != 1:
                          gp = int((raceNum-1)/4)
                          self.players[player][1][gp] -=3
-                         self.players[player][2][raceNum-1] = 0
-                         
-                         for indx,i in enumerate(self.dc_pts[player]):
-                             if i[0]==raceNum:
-                                 self.dc_pts[player][indx][1].pop(0)
-                                 break
-                             
                          for indx,i in enumerate(self.warnings[raceNum]):
                              if i.find(player) == 0 and ("before" in i or "missing" in i):
                                  if (4-(raceNum%4))%4 == 0:
@@ -1302,18 +1203,12 @@ class Table():
                  orig_status = 'before'
                  if player in players:
                      orig_status = 'on'
-                     self.change_room_size([[raceNum, len(self.races[raceNum-1])-1]], self_call=True)
+                     mes = self.change_room_size([[raceNum, len(self.races[raceNum-1])-1]], self_call=True)
                      #print(mes)
                      
                      if raceNum %4 != 1:
                          gp = int((raceNum-1)/4)
                          self.players[player][1][gp] +=3
-                         self.players[player][2][raceNum-1] = 3
-
-                         for indx,i in enumerate(self.dc_pts[player]):
-                             if i[0]==raceNum:
-                                 self.dc_pts[player][indx][1].insert(0, raceNum)
-                                 break
                          
                          for indx,i in enumerate(self.warnings[raceNum]):
                              if i.find(player) == 0 and ("during" in i or "on" in i):
@@ -1347,9 +1242,6 @@ class Table():
                 raceNum = int(i[0])-1
                 assert(raceNum>=0)
                 orig_room_size = len(self.races[raceNum]) #find way to keep track of room size that has changed (orig size should change if command previously used)
-                if raceNum+1 in self.changed_room_sizes:
-                    orig_room_size = self.changed_room_sizes[raceNum+1]
-                    
                 gp = int(raceNum/4)
             except:
                 ret+= "Invalid <race number>. Race number must be between 1-{}.\n".format(len(self.races))
@@ -1361,10 +1253,10 @@ class Table():
             except:
                 
                 if cor_room_size> orig_room_size and cor_room_size<=len(self.players):
-                    ret+="**Note: If a race is missing player(s) due to DCs, it is advised to use the ?dcs command instead.\nOnly use this command if no DCs were shown for the race in question.\n\n**"
+                    ret+="Invalid <corrected room size> for race {}. The corrected room size command cannot be used to add players.\n**If a race is missing player(s) due to DCs, use the ?dcs command instead.**".format(raceNum+1)
                 else:
                     ret+= "Invalid <corrected room size> for race {}. The corrected room size must be between 1-{}.\n".format(raceNum+1, len(self.players))
-                    continue
+                continue
             
             if cor_room_size == orig_room_size:
                 ret+='Changed race {} room size to {}.\n'.format(raceNum+1, cor_room_size)
@@ -1375,6 +1267,7 @@ class Table():
                 player = self.fcs[p[2]]
                 pts = self.pts[orig_room_size][place]
                 orig_pts[player] = pts
+                
             
             fixed_pts = {}
             self.races[raceNum] = self.races[raceNum][:cor_room_size]
@@ -1388,7 +1281,6 @@ class Table():
                 
             for player in list(fixed_pts.items()):
                 self.players[player[0]][1][gp] += player[1] - orig_pts[player[0]]
-                self.players[player[0]][2][raceNum] = player[1]
                 
             if not self_call:
                 done = False
@@ -1401,8 +1293,6 @@ class Table():
                     self.warnings[raceNum+1].append("Room size changed to {} by the tabler for this race.".format(cor_room_size))
         
             ret+='Changed race {} room size to {}.\n'.format(raceNum+1, cor_room_size)
-            if not self_call:
-                self.changed_room_sizes[raceNum+1] = cor_room_size
             mods.append(("?changeroomsize {} {}".format(raceNum+1, cor_room_size), raceNum+1, orig_room_size, cor_room_size))
      
         if not reundo and not self_call and len(mods)>0: 
@@ -1430,7 +1320,7 @@ class Table():
                 return "The race number {} was invalid. It must be between 1-{}".format(raceNum, len(self.races))
             
             corresponding_rr = [self.fcs[i[2]] for i in corresponding_rr]
-            
+            #corresponding_rr = [self.fcs[i] for i in corresponding_rr]
             orig_pos = corresponding_rr.index(player)
             orig_pts = self.pts[len(corresponding_rr)][orig_pos]
             try:   
@@ -1449,8 +1339,10 @@ class Table():
             
             correct_ft_order = list(self.finish_times[raceNum-1].keys())
             correct_ft_order.insert(correct_pos, correct_ft_order.pop(orig_pos))
+            #correct_ft_order[correct_pos], correct_ft_order[orig_pos]= correct_ft_order[orig_pos], correct_ft_order[correct_pos]
             self.finish_times[raceNum-1] = {k : self.finish_times[raceNum-1][k] for k in correct_ft_order}
             
+            #self.races[raceNum-1][correct_pos], self.races[raceNum-1][orig_pos] = self.races[raceNum-1][orig_pos], self.races[raceNum-1][correct_pos]
             self.races[raceNum-1].insert(correct_pos, self.races[raceNum-1].pop(orig_pos))
 
             aff_new_pts = {}
@@ -1464,12 +1356,12 @@ class Table():
 
             self.players[player][0] += (cor_pts-orig_pts)
             self.players[player][1][gp] += (cor_pts-orig_pts)
-            self.players[player][2][raceNum-1] = cor_pts
 
             for a in aff:
+               # print(a)
+                #print((aff_new_pts[a] - aff_orig_pts[a]))
                 self.players[a][0]+= (aff_new_pts[a] - aff_orig_pts[a])
                 self.players[a][1][gp] += (aff_new_pts[a] - aff_orig_pts[a])
-                self.players[a][2][raceNum-1] = aff_new_pts[a]
             
             ret+='{} race {} placement changed to {}.{}'.format(Extra.dis_clean(player), raceNum, correct_pos+1, '\n' if num==len(l)-1 else "")
             try:
@@ -1516,7 +1408,7 @@ class Table():
         self.dc_list_ids = {k:v for k, v in self.dc_list_ids.items() if v[1]<=len(self.races)}
         
         for p in list(self.players.keys()):
-            self.players[p] = [0,[0]*self.gps, [0]*self.gps*4]
+            self.players[p] = [0,[0]*self.gps]
         
         recorded_players = []
         for raceNum,race in enumerate(self.races):
@@ -1526,14 +1418,12 @@ class Table():
                 for j in dc[1]:
                     if raceNum+1 in j[1]:
                         self.players[dc[0]][1][self.gp]+=3
-                        self.players[dc[0]][2][raceNum]=3
                         break
             for placement, player in enumerate(race):
                 fc = player[2]
                 miiName = self.fcs[fc]
                 recorded_players.append(fc)
                 self.players[miiName][1][gp] += self.pts[cur_room_size][placement]
-                self.players[miiName][2][raceNum] += self.pts[cur_room_size][placement]
                 self.players[miiName][0] += self.pts[cur_room_size][placement]
         
         x = copy.deepcopy(self.fcs)
@@ -1552,37 +1442,15 @@ class Table():
             assert(raceNum<=len(self.races))
         except:
             return "{} was not a valid race number. The race number must be between 1-{}.".format(raceNum,len(self.races))
+
+        self.removed_races[raceNum] = self.races.pop(raceNum-1)
         
-        track = self.tracks.pop(raceNum-1)
-        self.removed_races[raceNum] = [self.races.pop(raceNum-1), track]
-        
-        #don't know if I need to keep the removed warnings and dcs for the removed race (since the dc_pts and warnings might need to be recalculated)
-        removed_dc_pts = defaultdict(list)
-        for player in copy.deepcopy(self.dc_pts).items():
-            for num, dc in enumerate(player[1]):
-                if dc[0] == raceNum:
-                    removed_dc_pts[player[0]].append(player[1].pop(num))
-        self.dc_pts = {k:v for k,v in self.dc_pts.items() if len(v)>0}
-        
-        removed_dc_list_ids = {}
-        for _id, dc in copy.deepcopy(self.dc_list_ids).items():
-            if dc[1]==raceNum:
-                removed_dc_list_ids[_id] = self.dc_list_ids.pop(_id)
-        try:
-            rem_warn = self.warnings.pop(raceNum)
-        except:
-            rem_warn = None
-        try:
-            rem_dc_list = self.dc_list.pop(raceNum)
-        except:
-            rem_dc_list = None
-            
-        self.removed_warn_dcs[raceNum] = {'warnings':rem_warn, 'dc_list':rem_dc_list, 'dc_list_ids': removed_dc_list_ids, 'dc_pts':removed_dc_pts}
-        #self.shift_warnings(start=raceNum, direction='left')
-        self.recalc_table(start=raceNum)
+        self.removed_tracks[raceNum] = track = self.tracks.pop(raceNum-1)
+                
+        self.recalc_table()
         
         if not redo: 
-            self.modifications.append([('?removerace {}'.format(raceNum), raceNum, track)])
+            self.modifications.append([('?removerace {}'.format(raceNum), raceNum)])
             self.undos.clear()
         try:
             self.warnings[-1].append("Race #{} (originally) - {} has been removed by the tabler.".format(raceNum, track))
@@ -1592,74 +1460,34 @@ class Table():
         return "Removed race {} - {} from table.".format(raceNum, track)
     
     def restore_removed_race(self, raceNum):
-       restore_race, restore_track = self.removed_races.pop(raceNum)
+       restore_race = self.removed_races.pop(raceNum)
        self.races.insert(raceNum-1, restore_race)
-       self.tracks.insert(raceNum-1, restore_track)
-       
-       #self.shift_warnings(start=raceNum+1, direction='right')
-       self.recalc_table(start=raceNum)
-       
-    def shift_warnings(self, start, direction):
-        direction = 1 if direction == 'right' else -1
-        
-        #shift warnings
-        for race in list(self.warnings.keys()):
-            if race>=start:
-                self.warnings[race+direction] = self.warnings.pop(race)
-        
-        #shift dc_list
-        for race in list(self.dc_list.keys()):
-            if race>=start:
-                self.dc_list[race+direction] = self.warnings.pop(race)
-        
-        #shift dc_list_ids
-        for num, dc in self.dc_list_ids.items():
-            if dc[1] >=start:
-                dc[1] = dc[1]+direction
-        
+       self.tracks.insert(raceNum-1, self.removed_tracks.pop(raceNum))
+      
+       self.recalc_table()
     
-    def recalc_table(self, start = 0): #TODO: write shift_warnings (for manual warnings and dc edits)
-                                        #make the recalc_table method only recalculate pts and dc pts from affected GPs 
-                                        
-        self.gp = int((start-1)/4)
-        for player in self.players.items():
-            for num,gp in enumerate(player[1][1]):
-                if num>=self.gp:
-                    self.players[player[0]][1][num] = 0
-            for num, race in enumerate(player[1][2]):
-                if int(num/4)>=self.gp:
-                    self.players[player[0]][2][num] = 0
+    def recalc_table(self):
+        for p in list(self.players.keys()):
+            self.players[p] = [0,[0]*self.gps]
+        self.gp = 0
+        self.warnings = {}
         
-        self.warnings = {k:v for k,v in self.warnings.items() if k<self.gp*4+1}
-        self.dc_list = {k:v for k, v in self.dc_list.items() if k<self.gp*4+1}
-                
-        self.finish_times = {k:v for k,v in self.finish_times.items() if k+1<(self.gp+1)*4-3}
-        self.ties = {k:v for k,v in self.ties.items() if k<(self.gp+1)*4-3} 
-        self.gp_dcs = {k:v for k,v in self.gp_dcs.items() if k<self.gp} 
+        self.dc_list = {}
+        self.room_sizes = [self.room_sizes[0]]
+        self.finish_times = {}
+        self.ties = {} 
+        self.gp_dcs = {} 
+        self.dc_pts = {} 
+        self.dc_list_ids = {} 
         
-        for player, dcs in self.dc_pts.items():
-            for indx, dc in enumerate(dcs):
-                if dc[0]>=(self.gp+1)*4-3:
-                    self.dc_pts[player].pop(indx)
-        self.dc_pts = {k:v for k, v in self.dc_pts.items() if len(v)>0}
+        self.room_sizes_error_affected = [[]]
+        self.room_error_index = [[-1,-1]]
         
-        self.dc_list_ids = {k:v for k,v in self.dc_list_ids.items() if v[1]<(self.gp+1)*4-3} 
         
-        self.room_sizes_error_affected = [i for indx, i in enumerate(self.room_players) if indx<self.gp]
-        self.room_error_index = [i for indx, i in enumerate(self.room_error_index) if indx<self.gp]
-        self.room_players = [i for indx, i in enumerate(self.room_players) if indx<self.gp]
-        self.room_sizes = [i for indx, i in enumerate(self.room_sizes) if indx<self.gp]
-        
-       
-        last_race_players = []
-        begin = self.gp*4
-        for raceNum, race in enumerate(self.races[self.gp*4:]):
-            raceNum+=begin
-            if raceNum%4 == 0:
-                if raceNum-begin!=0:
-                    self.gp+=1
+        for raceNum, race in enumerate(self.races):
+            if raceNum%4 == 0 and raceNum!=0: 
+                self.gp+=1
                 self.room_sizes.append(len(race))
-                self.room_players.append([self.fcs[i[2]] for i in race])
                 self.room_sizes_error_affected.append([])
                 self.room_error_index.append([-1,-1])
                 if self.gp>=self.gps: 
@@ -1667,29 +1495,21 @@ class Table():
                         i[1].append(0)
                         
             cur_room_size = len(race)
-            cur_race_players = [self.fcs[i[2]] for i in race]
-            
+            #TODO: add check for changed players mid-GP (MKWX BUG), could either keep track of room players or look for `X` on "tr"(track name if differ)
             if cur_room_size < self.room_sizes[self.gp]:
                 self.room_sizes[self.gp] = cur_room_size
-                
-            #check for mid_GP room size increases (mkwx bug)
             if cur_room_size > self.room_sizes[self.gp]:
                 self.room_sizes_error_affected[self.gp].append(raceNum+1)
                 
                 if raceNum+1 not in self.warnings and self.room_error_index[self.gp][1]==-1:
-                    self.warnings[raceNum+1] = ["Room size increased mid-GP (race {}) from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.".format(raceNum+1, self.room_sizes[self.gp], cur_room_size, self.room_sizes_error_affected[self.gp])]
+                    self.warnings[raceNum+1] = ["Room size increased mid-GP (race {}) from {} to {}. This is impossible unless if there was a reset, and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.".format(raceNum+1, self.room_sizes[self.gp], cur_room_size, self.room_sizes_error_affected[self.gp])]
                     self.room_error_index[self.gp][1] = len(self.warnings[raceNum+1])-1
                     self.room_error_index[self.gp][0] = raceNum+1
                 else:
-                    self.warnings[self.room_error_index[self.gp][0]][self.room_error_index[self.gp][1]] = ("Room size increased mid-GP (race {}) from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.".format(self.room_sizes_error_affected[self.gp][0],self.room_sizes[self.gp], cur_room_size, self.room_sizes_error_affected[self.gp])) 
-            #check for changed players mid-GP (mkwx bug)
-            elif not all(elem in self.room_players[self.gp] for elem in cur_race_players) and not all(elem in last_race_players for elem in cur_race_players):
-                try:
-                    self.warnings[raceNum+1].append("Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX BUG. Table could be inaccurate for this GP ({}).".format(raceNum+1, self.gp+1))
-                except:
-                    self.warnings[raceNum+1] = ["Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX BUG. Table could be inaccurate for this GP ({}).".format(raceNum+1, self.gp+1)]
-            last_race_players = cur_race_players     
+                    self.warnings[self.room_error_index[self.gp][0]][self.room_error_index[self.gp][1]] = ("Room size increased mid-GP (race {}) from {} to {}. This is impossible unless if there was a reset, and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.".format(self.room_sizes_error_affected[self.gp][0],self.room_sizes[self.gp], cur_room_size, self.room_sizes_error_affected[self.gp])) 
+                
             
+            last_finish_times = {}
             
             if cur_room_size<self.num_players and len(self.players)<self.num_players and (len(self.races)+raceNum)%4 == 0:
                 if raceNum+1 not in self.warnings:
@@ -1748,14 +1568,16 @@ class Table():
                                 self.gp_dcs[self.gp].append(mp)
                             
             for dc in list(self.dc_pts.items()):
+                #self.players[dc[0]][1][self.gp] +=3
+                #self.dc_pts[dc[0]] -=1
+                #if self.dc_pts[dc[0]] ==0: del self.dc_pts[dc[0]]
+                #print(dc)  
                 for j in dc[1]:
                     if raceNum+1 in j[1]:
                         self.players[dc[0]][1][self.gp]+=3
-                        self.players[dc[0]][2][raceNum]=3
                         break
                     
-            last_finish_times = {}
-            
+        
             for place,player in enumerate(race):
                 time = player[1]
                 fc = player[2]
@@ -1772,7 +1594,6 @@ class Table():
         
                 try:
                     self.players[miiName][1][self.gp] += self.pts[cur_room_size][place]
-                    self.players[miiName][2][raceNum] = self.pts[cur_room_size][place]
                     self.players[miiName][0] += self.pts[cur_room_size][place]
                     
                     #check for ties
@@ -1827,6 +1648,7 @@ class Table():
                                 self.dc_list[raceNum+1].append("{}**  -  DCed during the race (on results). Giving 3 DC points per race for remaining {} races in GP {} ({} pts total).".format(Extra.dis_clean(miiName), (4-((raceNum+1)%4))%4, self.gp+1,3*((4-((raceNum+1)%4))%4)))
                             
                             if (4-((raceNum+1)%4))%4!=0:
+                                #self.dc_pts[miiName] = (4-((len(self.races)+raceNum+1)%4))%4
                                 try:
                                     self.dc_pts[miiName].append([raceNum+1, [i for i in range(raceNum+2, raceNum+2+(4-((raceNum+1)%4))%4)]])
                                     
@@ -1858,7 +1680,6 @@ class Table():
     def change_gps(self,gps): 
         for player in list(self.players.keys()):
             self.players[player][1]+=[0]*(gps-self.gps)
-            self.players[player][2]+=[0]*(gps-self.gps)*4
         self.gps = gps
         if not self.check_mkwx_update.is_running():
             try:
@@ -1870,10 +1691,6 @@ class Table():
     async def check_updated(self):
         if self.last_race_update !=None and datetime.datetime.now() - self.last_race_update < datetime.timedelta(seconds=45): return False
         soup = await self.fetch(self.current_url)
-        if isinstance(soup, str) and 'error' in soup:
-            print("Wiimmfi error.")
-            return False
-                    
         elems = soup.select('tr[id*=r]')
         prev_elems_len = sum(map(len, self.prev_elems))
         
@@ -1919,11 +1736,6 @@ class Table():
     async def update_table(self, prnt=True, auto=False):
         rID = self.rxx
         soup = await self.fetch(self.current_url)
-        if isinstance(soup, str) and 'error' in soup:
-            if 'response' in soup:
-                return "Wiimmfi appears to be down. The table could not be updated. Try again later."
-            else:
-                return "I am currently experiencing some issues with Wiimmfi. The table could not be updated. Try again later."
         
         new_races = []
         new_tracks = []
@@ -1978,13 +1790,12 @@ class Table():
             self.recorded_elems=self.recorded_elems[:self.gps*4]
        
         #start_room_size = len(self.players)
-        last_race_players = []
+        
+        #increment gp
         for raceNum, race in enumerate(new_races):
-            #increment gp
             if (len(self.races)+raceNum)%4 == 0 and len(self.races)+raceNum!=0: 
                 self.gp+=1
                 self.room_sizes.append(len(race))
-                self.room_players.append([self.fcs[i[2]] for i in race])
                 self.room_sizes_error_affected.append([])
                 self.room_error_index.append([-1,-1])
                 if self.gp>=self.gps: 
@@ -1992,28 +1803,21 @@ class Table():
                         i[1].append(0)
                         
             cur_room_size = len(race)
-            cur_race_players = [self.fcs[i[2]] for i in race]
-            
-            #check for room size increases (mkwx bug)
+            #TODO: add check for changed players mid-GP (MKWX BUG), could either keep track of room players or look for `X` on "tr"
             if cur_room_size < self.room_sizes[self.gp]:
                 self.room_sizes[self.gp] = cur_room_size
             if cur_room_size > self.room_sizes[self.gp]:
                 self.room_sizes_error_affected[self.gp].append(len(self.races)+raceNum+1)
                 
                 if len(self.races)+raceNum+1 not in self.warnings and self.room_error_index[self.gp][1]==-1:
-                    self.warnings[len(self.races)+raceNum+1] = ["Room size increased mid-GP (race {}) from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.".format(len(self.races)+raceNum+1, self.room_sizes[self.gp], cur_room_size, self.room_sizes_error_affected[self.gp])]
+                    self.warnings[len(self.races)+raceNum+1] = ["Room size increased mid-GP (race {}) from {} to {}. This is impossible unless if there was a reset, and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.".format(len(self.races)+raceNum+1, self.room_sizes[self.gp], cur_room_size, self.room_sizes_error_affected[self.gp])]
                     self.room_error_index[self.gp][1] = len(self.warnings[len(self.races)+raceNum+1])-1
                     self.room_error_index[self.gp][0] = len(self.races)+raceNum+1
                 else:
-                    self.warnings[self.room_error_index[self.gp][0]][self.room_error_index[self.gp][1]] = ("Room size increased mid-GP (race {}) from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.".format(self.room_sizes_error_affected[self.gp][0],self.room_sizes[self.gp], cur_room_size, self.room_sizes_error_affected[self.gp])) 
+                    self.warnings[self.room_error_index[self.gp][0]][self.room_error_index[self.gp][1]] = ("Room size increased mid-GP (race {}) from {} to {}. This is impossible unless if there was a reset, and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.".format(self.room_sizes_error_affected[self.gp][0],self.room_sizes[self.gp], cur_room_size, self.room_sizes_error_affected[self.gp])) 
+                
             
-            #check for changed players mid-GP (mkwx bug)
-            elif not all(elem in self.room_players[self.gp] for elem in cur_race_players) and not all(elem in last_race_players for elem in cur_race_players):
-                try:
-                    self.warnings[len(self.races)+raceNum+1].append("Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX BUG. Table could be inaccurate for this GP ({}).".format(len(self.races)+raceNum+1, self.gp+1))
-                except:
-                    self.warnings[len(self.races)+raceNum+1] = ["Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX BUG. Table could be inaccurate for this GP ({}).".format(len(self.races)+raceNum+1, self.gp+1)]
-            last_race_players = cur_race_players   
+            last_finish_times = {}
             
             if cur_room_size<self.num_players and len(self.players)<self.num_players and (len(self.races)+raceNum)%4 == 0:
                 if len(self.races)+raceNum+1 not in self.warnings:
@@ -2060,6 +1864,7 @@ class Table():
                                 self.warnings[len(self.races)+raceNum+1].append("{} DCed before race. 3 DC points per race for the next {} races in GP {} ({} pts total).".format(mp, 4-((len(self.races)+raceNum)%4), self.gp+1, 3*(4-((len(self.races)+raceNum)%4))))
                                 self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total).".format(Extra.dis_clean(mp), len(self.races)+raceNum+1, self.gp+1, 3*(4-((len(self.races)+raceNum)%4))))
                                 
+                                #self.dc_pts[mp] = (4-((len(self.races)+raceNum)%4))%4
                                 try:
                                     self.dc_pts[mp].append([len(self.races)+raceNum+1, [i for i in range(len(self.races)+raceNum+1, len(self.races)+raceNum+1+(4-((len(self.races)+raceNum)%4))%4)]])
                                 
@@ -2072,12 +1877,14 @@ class Table():
                                 self.gp_dcs[self.gp].append(mp)
                             
             for dc in list(self.dc_pts.items()):
+                #self.players[dc[0]][1][self.gp] +=3
+                #self.dc_pts[dc[0]] -=1
+                #if self.dc_pts[dc[0]] ==0: del self.dc_pts[dc[0]]
+                #print(dc)
                 for j in dc[1]:
                     if len(self.races)+raceNum+1 in j[1]:
                         self.players[dc[0]][1][self.gp]+=3
-                        self.players[dc[0]][2][raceNum]=3
                         break
-            
             dc_count = 0
             for i, r in enumerate(race):
                 if r[1] == '—':
@@ -2095,9 +1902,7 @@ class Table():
                 self.finish_times[len(self.races)+raceNum] = fin_times
                 
                 continue
-            
-            last_finish_times = {}
-            
+        
             for place,player in enumerate(race):
                 time = player[1]
                 fc = player[2]
@@ -2114,11 +1919,11 @@ class Table():
         
                 try:
                     self.players[miiName][1][self.gp] += self.pts[cur_room_size][place]
-                    self.players[miiName][2][len(self.races)+raceNum] = self.pts[cur_room_size][place]
                     self.players[miiName][0] += self.pts[cur_room_size][place]
                     
                     #check for ties
                     if time in list(last_finish_times.values()):
+                        
                         for index,t in enumerate(list(last_finish_times.values())):
                             if t == time:
                                 if len(self.races)+raceNum+1 not in self.ties:
@@ -2214,38 +2019,17 @@ class Table():
         return "Table {}updated. Room {} has finished {} {}. Last race: {}.".format("auto-" if auto else "",rID, len(self.races), "race" if len(self.races)==1 else "races",self.tracks[len(self.races)-1])
                 
 
-    def create_string(self, by_race = False):
+    def create_string(self):
         self.tags = {k:v for k,v in self.tags.items() if len(v)>0}
-        
                 
         ret = "#title {} {}".format(len(self.races), "race" if len(self.races)==1 else 'races')
         if self.format[0] == 'f':
             ret+='\nFFA'
             for p in self.players.keys():
                 ret+="\n{} ".format(p)
-                if by_race: 
-                    scores = self.players[p][2]
-                else:
-                    scores = self.players[p][1]
-                for num,gp in enumerate(scores):
-                    if by_race:
-                        if int(num/4)+1 in self.edited_scores and p in self.edited_scores[int(num/4)+1]:
-                            if num/4 +1 in self.edited_scores:
-                                ret+="{}".format(self.edited_scores[int(num/4)+1][p])
-                            else:
-                                ret+='0'
-                            if num+1!=len(scores):
-                                ret+='|'
-                            continue
-                    else:
-                        if num+1 in self.edited_scores and p in self.edited_scores[num+1]:
-                            ret+='{}'.format(self.edited_scores[num+1][p])
-                            if num+1!=len(scores):
-                                ret+='|'
-                            continue
-
+                for num,gp in enumerate(self.players[p][1]):
                     ret+="{}".format(gp)
-                    if num+1!=len(scores):
+                    if num+1!=len(self.players[p][1]):
                         ret+='|'
                 if p in self.pens:
                     ret+='-{}'.format(self.pens[p])
@@ -2261,29 +2045,9 @@ class Table():
                                 p2 += '{}({})/'.format(x, r)
                             p2+='{}({})'.format(p, self.sub_names[p]['in_races'])
                         ret+="\n\nNO TEAM\n{} ".format(p2)
-                        if by_race: 
-                            scores = self.players[p][2]
-                        else:
-                            scores = self.players[p][1]
-                        for num,gp in enumerate(scores):
-                            if by_race:
-                                if int(num/4)+1 in self.edited_scores and p in self.edited_scores[int(num/4)+1]:
-                                    if num/4 +1 in self.edited_scores:
-                                        ret+="{}".format(self.edited_scores[int(num/4)+1][p])
-                                    else:
-                                        ret+='0'
-                                    if num+1!=len(scores):
-                                        ret+='|'
-                                    continue        
-                            else:
-                                if num+1 in self.edited_scores and p in self.edited_scores[num+1]:
-                                    ret+='{}'.format(self.edited_scores[num+1][p])
-                                    if num+1!=len(scores):
-                                        ret+='|'
-                                    continue
-                            
+                        for num,gp in enumerate(self.players[p][1]):
                             ret+="{}".format(gp)
-                            if num+1!=len(scores):
+                            if num+1!=len(self.players[p][1]):
                                 ret+='|'
                         if p in self.pens:
                             ret+='-{}'.format(self.pens[p])
@@ -2298,29 +2062,9 @@ class Table():
                                 p2 += '{}({})/'.format(x, r)
                             p2+='{}({})'.format(p, self.sub_names[p]['in_races'])
                         ret+="\n{} ".format(p2)
-                        if by_race: 
-                            scores = self.players[p][2]
-                        else:
-                            scores = self.players[p][1]
-                        for num,gp in enumerate(scores):
-                            if by_race:
-                                if int(num/4)+1 in self.edited_scores and p in self.edited_scores[int(num/4)+1]:
-                                    if num/4 +1 in self.edited_scores:
-                                        ret+="{}".format(self.edited_scores[int(num/4)+1][p])
-                                    else:
-                                        ret+='0'
-                                    if num+1!=len(scores):
-                                        ret+='|'
-                                    continue      
-                            else:
-                                if num+1 in self.edited_scores and p in self.edited_scores[num+1]:
-                                    ret+='{}'.format(self.edited_scores[num+1][p])
-                                    if num+1!=len(scores):
-                                        ret+='|'
-                                    continue
-                                
+                        for num,gp in enumerate(self.players[p][1]):
                             ret+="{}".format(gp)
-                            if num+1!=len(scores):
+                            if num+1!=len(self.players[p][1]):
                                 ret+='|'
                         if p in self.pens:
                             ret+='-{}'.format(self.pens[p])
@@ -2334,15 +2078,9 @@ class Table():
         self.table_str = self.create_string()
         return Extra.dis_clean(self.table_str)
     
-    async def get_table_img(self, by_race = False):
-        if by_race:
-            temp_string = self.create_string(by_race=by_race)
-            png_link = "https://gb.hlorenzi.com/table.png?data={}".format(quote(temp_string))
-            
-        else:
-            png_link = "https://gb.hlorenzi.com/table.png?data={}".format(quote(self.table_str))
-            
-        self.table_link = png_link.replace('.png', "")
+    async def get_table_img(self):
+        png_link = "https://gb.hlorenzi.com/table.png?data={}".format(quote(self.table_str))
+        self.table_link = "https://gb.hlorenzi.com/table?data={}".format(quote(self.table_str))
         with urlopen(png_link) as url:
             output = BytesIO(url.read())
         
@@ -2405,14 +2143,6 @@ class Table():
                 for indx,i in enumerate(self.warnings[raceNum]):
                     if i.find(player)==0:
                         self.warnings[raceNum][indx] = self.warnings[raceNum][indx].replace(' - determined by tabler', '')
-        elif "?removerace" in mod_type:
-            raceNum= int(mod[1])
-            track = mod[2]
-            for indx,i in enumerate(self.warnings[-1]):
-                if 'Race #{}'.format(raceNum) in i and track in i and 'has been removed' in i:
-                    self.warnings[-1].pop(indx)
-                    break
-        
         else:
             raceNum= int(mod[1])
             count=0
@@ -2425,18 +2155,18 @@ class Table():
                     if i.find("Room size changed")==0:
                         self.warnings[raceNum].pop(indx)
                         break
-                    
-        self.warnings = {k:v for k,v in self.warnings.items() if len(v)>0}      
+        removal = []
+        for x in self.warnings.items():
+            if len(x[1])==0: removal.append(x[0])
+        for i in removal:
+            self.warnings.pop(i)      
     
     def undo(self, j):
-        if '?edit ' in j[0]:
-            '''
+        if '?edit ' in j[0]: 
             if "+" in j[0] or '-' in j[0]:
-                self.edit(j[1], j[2], str(int(j[3])-2*int(j[3])), restore_races=j[4], reundo=True)
+                self.edit(j[1], j[2], str(int(j[3])-2*int(j[3])), reundo=True)
             else:
-                self.edit(j[1], j[2], str(j[3]), restore_races=j[5], reundo=True)
-            '''
-            self.undo_edit(j[1], j[2])
+                self.edit(j[1], j[2], str(j[3]), reundo=True)
             self.undo_warning(j)
                 
         elif '?editrace' in j[0]: 
@@ -2465,7 +2195,6 @@ class Table():
         
         elif '?removerace' in j[0]:
             self.restore_removed_race(j[1])
-            self.undo_warning(j)
             
         elif '?sub' in j[0]:
             self.undo_sub(j[1], j[2], j[4])
@@ -2482,9 +2211,9 @@ class Table():
     def redo(self, j):
         if '?edit ' in j[0]:
             if "+" in j[0] or '-' in j[0]:
-                self.edit(j[1], j[2], str(j[3]), redo=True)
+                self.edit(j[1], j[2], str(j[3]), reundo=True)
             else:
-                self.edit(j[1], j[2], str(j[4]), redo=True)
+                self.edit(j[1], j[2], str(j[4]), reundo=True)
                 
         elif 'editrace' in j[0]:
             self.edit_race([[j[2], j[1], j[4]]], reundo=True)
@@ -2543,6 +2272,29 @@ class Table():
                 del self.modifications[-1]
                 return "Last table modification ({}) has been undone.".format(mod[0][0])
             return "No manual modifications to the table to undo."
+        '''
+        else:
+            if len(self.modifications)>0 and num<=len(self.modifications):
+                for i in self.modifications[num-1]:
+                    self.undo(i)
+                    
+                n = num%10
+                if num%100>10 and num%100<20:
+                    e_str = 'th'
+                elif n == 1: e_str = "st"
+                elif n==2: e_str = "nd"
+                elif n==3: e_str = 'rd'
+                else: e_str = 'th'
+                    
+                mod = self.modifications[num-1]
+                self.undos.append(mod)
+                del self.modifications[num-1]
+                return "{}{} table modification ({}) has been undone.".format(num, e_str, mod[0][0])
+            
+            if len(self.modifications)<num:
+                return "No such table modification number '{}'. The modification number must be between 1-{}".format(num, len(self.modifications))    
+            return "No manual modifications to the table have been made."
+        '''
         
     def redo_commands(self, num):
         if num == 0: #redo all
@@ -2566,23 +2318,37 @@ class Table():
                 del self.undos[-1]
                 return "Last table modification undo ({}) has been redone.".format(mod[0][0])
             return "No manual modifications undos to redo."
+        '''
+        else: #redo specific undo
+            if len(self.undos)>0 and num<=len(self.undos):
+                for i in self.undos[num-1]:
+                    self.redo(i)
+                    
+                n = num%10
+                if num%100>10 and num%100<20:
+                    e_str = 'th'
+                elif n == 1: e_str = "st"
+                elif n==2: e_str = "nd"
+                elif n==3: e_str = 'rd'
+                else: e_str = 'th'
+                    
+                mod = self.undos[num-1]
+                self.modifications.append(mod)
+                del self.undos[num-1]
+                return "{}{} table modification undo ({}) has been redone.".format(num, e_str, mod[0][0])
+            
+            if len(self.undos)<num:
+                return "No such table modification undo number '{}'. The modification undo number must be between 1-{}".format(num, len(self.undos))    
+            return "No manual modifications to the table have been undone."
+        '''
         
-        
-    async def fetch(self, url, headers=None): 
-        timeout = aiohttp.ClientTimeout(total=15)
+    async def fetch(self, url, headers=None):
         async with aiohttp.ClientSession() as session:
             if headers == None:
-                try:
-                    async with session.get(url, timeout=timeout) as response:
-                        if response.status!=200:
-                            return 'response error'
-                        resp = await response.text()
-                        soup = BeautifulSoup(resp, 'html.parser')
-                        return soup
-                except:
-                    return 'timeout error'
-                
-                
+                async with session.get(url) as response:
+                    resp = await response.text()
+                    soup = BeautifulSoup(resp, 'html.parser')
+                    return soup
             else:
                 async with session.get(url, headers=headers) as response:
                     return await response.text()
