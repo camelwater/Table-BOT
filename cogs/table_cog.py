@@ -28,7 +28,6 @@ class table_bot(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        print("Bot logged in as {0.user}".format(self.bot))
         if not self.cycle_presences.is_running():
             try:
                 self.cycle_presences.start()
@@ -53,31 +52,21 @@ class table_bot(commands.Cog):
         return count
     
     def set_instance(self, ctx):
-        channel_id = ctx.message.channel.id
+        channel_id = ctx.channel.id
         if channel_id not in self.table_instances:
             self.table_instances[channel_id] = Table()
         self.table_instances[ctx.channel.id].ctx = ctx
+        if self.table_instances[ctx.channel.id].bot is None:
+            self.table_instances[ctx.channel.id].bot = self.bot
      
     async def send_temp_messages(self,ctx, *args):
         await ctx.send('\n'.join(args), delete_after=25)
     async def send_messages(self,ctx, *args):
         await ctx.send('\n'.join(args))
-       
-    @commands.Cog.listener()
-    async def on_command_error(self,ctx, error):
-        self.set_instance(ctx)
-        
-        if isinstance(error, commands.CommandNotFound):
-            await ctx.send("{}.\nType ?help for a list of commands.".format(error.__str__().replace("is not found", "doesn't exist")))
-        elif isinstance(error, commands.CommandOnCooldown):
-            await ctx.send("This command can only be used once every {} seconds. You can retry in {:.1f} seconds.".format(error.cooldown.per, error.retry_after))
-        elif isinstance(error, commands.MaxConcurrencyReached):
-            await ctx.send("This command can only be used by {} user at a time. Try again later.".format(error.number))
-        elif isinstance(error, commands.MissingRequiredArgument):
-            raise error
-        else:
-            await ctx.send("There was an unidentified internal bot error. Wait a bit and try again later.\nIf the issue persists, ?reset the table.")
-            raise error
+      
+    # @commands.Cog.listener()
+    # async def on_command_error(self,ctx, error):
+    #     self.set_instance(ctx)
 
     async def check_callable(self, ctx, command): #for most commands
         if self.table_instances[ctx.channel.id].confirm_room or self.table_instances[ctx.channel.id].confirm_reset:
@@ -983,4 +972,4 @@ class table_bot(commands.Cog):
     
 
 def setup(bot):
-    bot.add_cog(table_bot((bot)))
+    bot.add_cog(table_bot(bot))

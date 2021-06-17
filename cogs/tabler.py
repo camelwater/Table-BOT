@@ -106,6 +106,7 @@ class Table():
         self.table_running = False
         self.picture_running = False
         self.ctx = None
+        self.bot = None
         ##### Stuff for bot instances #####
         
     
@@ -1886,6 +1887,7 @@ class Table():
             print("Mkwx check {}.".format(cur_iter))
             
         if await self.check_updated():
+            self.bot.command_stats['picture_generated']+=1
             self.picture_running = True
             detect_mes = await self.ctx.send("Detected race finish.")
             wait_mes = await self.ctx.send("Updating scores...")
