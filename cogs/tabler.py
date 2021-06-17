@@ -864,7 +864,6 @@ class Table():
     def undo_edit(self, player, gp):
         self.edited_scores[int(gp)].pop(player)
        
-        
     def get_rxx(self):
         ret = ""
         if len(self.prev_rxxs)>0:
