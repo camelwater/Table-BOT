@@ -109,7 +109,7 @@ class Table():
         ##### Stuff for bot instances #####
         
     
-    async def find_room(self, rid = None, mii = None, merge=False, redo=False):
+    async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple:
         """
         find mkwx room using either rxx or mii name search
         """
