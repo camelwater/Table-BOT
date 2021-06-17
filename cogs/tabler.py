@@ -59,15 +59,14 @@ class Table():
         self.room_error_index = [[-1,-1]] #to update room size warnings
         self.room_players = []
         
-        self.changed_room_sizes = {}
-        self.edited_scores = defaultdict(lambda: defaultdict(int))
+        self.changed_room_sizes = {} #races that have edited room sizes (?changeroomsize)
+        self.edited_scores = defaultdict(lambda: defaultdict(int)) #players with edited gp scores
                    
         self.tags = {} #list of team tags and their respective players
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
         self.table_img = None
-        self.image_loc = '' #image uri
-        self.table_link = ''
-        self.sui = False
+        self.table_link = '' #image png link
+        self.sui = False 
         
         self.prev_rxxs = [] # for rooms that have been merged
         self.prev_elems = []
@@ -78,7 +77,7 @@ class Table():
         self.gps = 3 #number of total gps
         self.rxx = '' #rxx that table is watching
         self.gp = 0 #current gp
-        self.num_players = 0
+        self.num_players = 0 #number of players room is supposed to have (based on format and teams)
         self.player_list = '' #string for bot printout of players and their ids
         
         self.pts= {12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
