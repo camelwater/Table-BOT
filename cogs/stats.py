@@ -1,12 +1,18 @@
 import discord
 from discord.ext import tasks, commands
 from collections import Counter
+import json
 
-from discord.message import DeletedReferencedMessage
+#TODO: add pickle file and atexit thing (to store command usage)
 
 class Stats(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+    @commands.Cog.listener()
+    async def on_ready(self):
+        load = load_stats_json()
+        if load:
+            self.bot.command_stats = Counter(load)
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
@@ -33,7 +39,10 @@ class Stats(commands.Cog):
 
         out = "Total commands processed: {}\nPictures generated: {}\n\n".format(total, pic_total)
         out+='Most used commands:\n'
-        out += '\n'.join("{}: {}".format(k, c) for k,c in common)
+        if len(common)==0:
+            out+="Commands haven't been used yet."
+        else:
+            out += '\n'.join("{}: {}".format(k, c) for k,c in common)
          
         await ctx.send("```\n{}\n```".format(out))
     
@@ -50,6 +59,12 @@ class Stats(commands.Cog):
         e.add_field(name='\u200b', value= value_field, inline=False)
 
         await ctx.send(embed=e)
+
+def load_stats_json():
+    with open('stats.json', 'r') as sjson:
+        return json.load(sjson)
+        
+
 
 def setup(bot):
     if not hasattr(bot, "command_stats"):

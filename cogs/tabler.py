@@ -59,7 +59,7 @@ class Table():
         self.room_error_index = [[-1,-1]] #to update room size warnings
         self.room_players = []
         
-        self.changed_room_sizes = {} #races that have edited room sizes (?changeroomsize)
+        self.changed_room_sizes = defaultdict(list) #races that have edited room sizes (?changeroomsize)
         self.edited_scores = defaultdict(lambda: defaultdict(int)) #players with edited gp scores
                    
         self.tags = {} #list of team tags and their respective players
@@ -597,7 +597,7 @@ class Table():
                     ret+="'{}' vs ".format(i)
         ret+="({} {})".format(len(self.races), 'race' if len(self.races)==1 else 'races')
         return ret
-    
+    #TODO: make edit_tag, change_tag, tags all undoable (they are modifications)
     def edit_tag_name(self, l):  
         ret = ''
         for num,e in enumerate(l):
@@ -786,79 +786,58 @@ class Table():
             i+=1
         self.dc_list_ids[i] = [player,race]
         
-    def edit(self,player, gp, score, restore_races = None, redo=False): 
-        if not redo:    
-            try:
-                p_indx = player
-                player = self.player_ids[player]
-            except:
-                return "{} was not a valid player index. The index must be between 1-{}".format(player, len(self.players))
-      
-        try:
-            assert(int(gp)-1 <=self.gp)
-        except:
-            return "{} was not a valid gp. The gp number must be between 1-{}".format(gp, self.gp+1)
+    def edit(self,l, redo=False): 
+        ret= ''
+
+        for elem in l:
+            player = elem[0]
+            gp = elem[1]
+            score = elem[2]
+            if not redo:    
+                try:
+                    p_indx = int(player)
+                    player = self.player_ids[player]
+                except:
+                    ret+="{} was not a valid player index. The index must be between 1-{}.\n".format(player, len(self.players))
+                    continue
         
-       
-        if '-' in score or '+' in score:
-            self.edited_scores[int(gp)][player] = self.players[player][1][int(gp)-1] + int(score)
-            
-            '''
-            if not reundo and restore_races is None:
-                race_restore = (len(self.races)-1, self.players[player][2][len(self.races)-1])
-                #race_restore = [score for score in self.players[player][2][(int(gp)-1)*4:int(gp)*4]]
-            if restore_races is not None:
-                self.players[player][2][race_restore[0]] = race_restore[1]
-                
-                for indx,race in enumerate(self.players[player][2]):
-                    if indx>=(int(gp)-1)*4 and indx<=int(gp)*4: 
-                        self.players[player][2][indx] = restore_races.pop(0)
-                
-                    
-            self.players[player][1][int(gp)-1] += int(score)
-            if restore_races is None:
-                self.players[player][2][len(self.races)-1] += int(score)
-                
-                for indx, race in enumerate(self.players[player][2]):
-                    if indx>=(int(gp)-1)*4 and indx<=int(gp)*4:
-                        self.players[player][2][indx] = 0
-                self.players[player][2][(int(gp)-1)*4] = self.players[player][1][int(gp)-1]
-                
-            '''    
-            if not redo:
-                self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
-                self.undos.clear()
-            
             try:
-                if self.warnings[int(gp)*4-3][0] != "Scores have been manually modified by the tabler for this GP ({}).".format(gp):
-                    self.warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
+                assert(int(gp)-1 <=self.gp)
             except:
-                self.warnings[int(gp)*4-3] = ["Scores have been manually modified by the tabler for this GP ({}).".format(gp)]
+                ret+="{} was not a valid gp (player number {}). The gp number must be between 1-{}.\n".format(p_indx,gp, self.gp+1)
+                continue
+            
+        
+            if '-' in score or '+' in score:
+                self.edited_scores[int(gp)][player] = self.players[player][1][int(gp)-1] + int(score)
                 
-            return "{} GP {} score changed to {}".format(player, gp, self.players[player][1][int(gp)-1])
-        else:
-            #orig_score = self.players[player][1][int(gp)-1]
-            self.edited_scores[int(gp)][player] = int(score)
-            '''
-            self.players[player][1][int(gp)-1] = int(score)
-            if restore_races is None:
-                for indx, race in enumerate(self.players[player][2]):
-                    if indx>=(int(gp)-1)*4 and indx<=int(gp)*4:
-                        self.players[player][2][indx] = 0
-                self.players[player][2][(int(gp)-1)*4] = int(score)
-            '''
-            
-            if not redo:
-                self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
-                self.undos.clear()
-            
-            try:
-                if self.warnings[int(gp)*4-3][0] != "Scores have been manually modified by the tabler for this GP ({}).".format(gp):
-                    self.warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
-            except:
-                self.warnings[int(gp)*4-3] = ["Scores have been manually modified by the tabler for this GP ({}).".format(gp)]
+                if not redo:
+                    self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
+                    self.undos.clear()
+                
+                try:
+                    if self.warnings[int(gp)*4-3][0] != "Scores have been manually modified by the tabler for this GP ({}).".format(gp):
+                        self.warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
+                except:
+                    self.warnings[int(gp)*4-3] = ["Scores have been manually modified by the tabler for this GP ({}).".format(gp)]
                     
-            return "{} GP {} score changed to {}".format(player, gp, score)
+                return "{} GP {} score changed to {}".format(player, gp, self.players[player][1][int(gp)-1])
+            else:
+                #orig_score = self.players[player][1][int(gp)-1]
+                self.edited_scores[int(gp)][player] = int(score)
+                
+                if not redo:
+                    self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
+                    self.undos.clear()
+                
+                try:
+                    if self.warnings[int(gp)*4-3][0] != "Scores have been manually modified by the tabler for this GP ({}).".format(gp):
+                        self.warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
+                except:
+                    self.warnings[int(gp)*4-3] = ["Scores have been manually modified by the tabler for this GP ({}).".format(gp)]
+                        
+                ret+="{} GP {} score changed to {}.\n".format(player, gp, score)
+        return ret
     
     def undo_edit(self, player, gp):
         self.edited_scores[int(gp)].pop(player)
@@ -917,18 +896,19 @@ class Table():
         return self.player_list
     
     def penalty(self,player, pen, reundo=False):
-        try:
-            p_indx = player
-            player = self.player_ids[player]
-        except:
-            return "Invalid player number {}.".format(player)
+        if not reundo:
+            try:
+                p_indx = player
+                player = self.player_ids[player]
+            except:
+                return "Invalid player number {}.".format(player)
         if pen[0] == '=':
             pen = int(pen.lstrip('=').lstrip('-'))
             self.pens[player] = pen
             if self.pens[player] == 0: self.pens.pop(player)
             
             if not reundo:
-                self.modifications.append([('?pen {} {}'.format(p_indx, '='+str(pen)), p_indx, '='+str(pen))])
+                self.modifications.append([('?pen {} {}'.format(p_indx, '='+str(pen)), player, '='+str(pen))])
                 self.undos.clear()
                 
             return "{} penalty set to -{}".format(player, pen)
@@ -942,18 +922,19 @@ class Table():
             if self.pens[player] == 0: self.pens.pop(player)
             
             if not reundo:
-                self.modifications.append([('?pen {} {}'.format(p_indx, pen), p_indx, pen)])
+                self.modifications.append([('?pen {} {}'.format(p_indx, pen), player, pen)])
                 self.undos.clear()
             return "-{} penalty given to {}".format(pen, player)
     
     def unpenalty(self, player, unpen, reundo=False):
         if unpen !=None:
             unpen = int(unpen.lstrip('='))
-        try:
-            p_indx = player
-            player = self.player_ids[player]
-        except:
-            return "Invalid player number {}.".format(player)
+        if not reundo:
+            try:
+                p_indx = player
+                player = self.player_ids[player]
+            except:
+                return "Invalid player number {}.".format(player)
         if player not in self.pens:
             return "{} doesn't have any penalties.".format(player)
         else:
@@ -961,7 +942,7 @@ class Table():
                 orig_pen = self.pens[player]
                 self.pens.pop(player)
                 if not reundo:
-                    self.modifications.append([('?unpen {}'.format(p_indx), p_indx, orig_pen)])
+                    self.modifications.append([('?unpen {}'.format(p_indx), player, orig_pen)])
                     self.undos.clear()
                 return "Penalties for {} have been removed.".format(player)
             else:
@@ -969,7 +950,7 @@ class Table():
                 if self.pens[player] == 0: self.pens.pop(player)
                 
                 if not reundo: 
-                    self.modifications.append([('?unpen {} {}'.format(p_indx, unpen), p_indx, unpen)])
+                    self.modifications.append([('?unpen {} {}'.format(p_indx, unpen), player, unpen)])
                     self.undos.clear()
                 return "Penalty for {} reduced by {}".format(player, unpen)
             
@@ -1337,16 +1318,17 @@ class Table():
          return ret
                 
                  
-    def change_room_size(self, l, self_call = False, reundo=False): 
+    def change_room_size(self, l, self_call = False, reundo=False, undo=False): 
         ret = ''
-        mods = []
         for i in l:
             try:
                 raceNum = int(i[0])-1
                 assert(raceNum>=0)
-                orig_room_size = len(self.races[raceNum]) #find way to keep track of room size that has changed (orig size should change if command previously used)
+                orig_room_size = len(self.races[raceNum]) 
                 if raceNum+1 in self.changed_room_sizes:
-                    orig_room_size = self.changed_room_sizes[raceNum+1]
+                    orig_room_size = self.changed_room_sizes[raceNum+1][-1]
+                print("ROOM SIZES:",self.changed_room_sizes[raceNum+1])
+                print("ORIG ROOM SIZE:", orig_room_size)
                     
                 gp = int(raceNum/4)
             except:
@@ -1365,60 +1347,84 @@ class Table():
                     continue
             
             if cor_room_size == orig_room_size:
-                ret+='Changed race {} room size to {}.\n'.format(raceNum+1, cor_room_size)
+                ret+='Race {} room size is already {} - no change made.\n'.format(raceNum+1, cor_room_size)
                 continue
             
             orig_pts = {}
             for place, p in enumerate(self.races[raceNum]):
                 player = self.fcs[p[2]]
-                pts = self.pts[orig_room_size][place]
+                try:
+                    pts = self.pts[orig_room_size][place]
+                except KeyError:
+                    pts = 0
                 orig_pts[player] = pts
             
             fixed_pts = {}
-            self.races[raceNum] = self.races[raceNum][:cor_room_size]
-            removal = list(self.finish_times[raceNum].keys())[:cor_room_size]
-            self.finish_times[raceNum] = {k : self.finish_times[raceNum][k] for k in removal}
+            
             
             for place, p in enumerate(self.races[raceNum]):
                 player = self.fcs[p[2]]
-                pts = self.pts[cor_room_size][place]
+                try:
+                    pts = self.pts[cor_room_size][place]
+                except KeyError:
+                    pts = 0
                 fixed_pts[player] = pts
                 
             for player in list(fixed_pts.items()):
-                self.players[player[0]][1][gp] += player[1] - orig_pts[player[0]]
+                self.players[player[0]][1][gp] += (player[1] - orig_pts[player[0]])
                 self.players[player[0]][2][raceNum] = player[1]
+
+            if not reundo:
+                restore = (self.races[raceNum], self.finish_times[raceNum])
+                self.races[raceNum] = self.races[raceNum][:cor_room_size]
+                removal = list(self.finish_times[raceNum].keys())[:cor_room_size]
+                self.finish_times[raceNum] = {k : self.finish_times[raceNum][k] for k in removal}
                 
             if not self_call:
                 done = False
-                for indx,i in enumerate(self.warnings[raceNum+1]):
-                    if i.find("Room size changed to") == 0:
-                        self.warnings[raceNum+1][indx] = "Room size changed to {} by the tabler for this race.".format(cor_room_size)
-                        done = True
-                        break
-                if not done:
-                    self.warnings[raceNum+1].append("Room size changed to {} by the tabler for this race.".format(cor_room_size))
+                try:
+                    for indx,i in enumerate(self.warnings[raceNum+1]):
+                        if i.find("Room size changed to") == 0:
+                            self.warnings[raceNum+1][indx] = "Room size changed to {} by the tabler for this race.".format(cor_room_size)
+                            done = True
+                            break
+                    if not done:
+                        self.warnings[raceNum+1].append("Room size changed to {} by the tabler for this race.".format(cor_room_size))
+                except KeyError:
+                    self.warnings[raceNum+1] = ["Room size changed to {} by the tabler for this race.".format(cor_room_size)]
         
             ret+='Changed race {} room size to {}.\n'.format(raceNum+1, cor_room_size)
-            if not self_call:
-                self.changed_room_sizes[raceNum+1] = cor_room_size
-            mods.append(("?changeroomsize {} {}".format(raceNum+1, cor_room_size), raceNum+1, orig_room_size, cor_room_size))
-     
-        if not reundo and not self_call and len(mods)>0: 
-            self.modifications.append(mods)
-            self.undos.clear()
+            
+            if not self_call and not undo:
+                self.changed_room_sizes[raceNum+1].append(cor_room_size)
+            if not reundo and not self_call:
+                self.modifications.append([("?changeroomsize {} {}".format(raceNum+1, cor_room_size), raceNum+1, orig_room_size, cor_room_size, restore)])
+                self.undos.clear()
+
         return ret
             
-    
+    def undo_crs(self, raceNum, orig_size, restore): #FIXME: this isn't working when multiple undos for same race
+        raceNum -=1
+
+        self.races[raceNum] =  restore[0]
+        self.finish_times[raceNum] = restore[1]
+        self.change_room_size([[raceNum+1, orig_size]], undo=True,reundo=True)
+        print(raceNum+1)
+        print(self.changed_room_sizes)
+        if raceNum+1 in self.changed_room_sizes:
+            self.changed_room_sizes[raceNum+1].pop()
+
     def edit_race(self, l, reundo=False):
         ret = ''
         mods = []
         for num, elem in enumerate(l):
             raceNum = elem[0]
             player =p_indx= elem[1]
-            try:
-                player = self.player_ids[player]
-            except:
-                return "The player index {} was invalid. The player id must be between 1-{}".format(player,len(self.players))
+            if not reundo:
+                try:
+                    player = self.player_ids[player]
+                except:
+                    return "The player index {} was invalid. The player id must be between 1-{}".format(player,len(self.players))
                 
             correct_pos = int(elem[2])-1
             try:
@@ -1476,7 +1482,7 @@ class Table():
             except KeyError:
                 self.warnings[raceNum] = ["Placements for this race have been manually altered by the tabler."]
                 
-            mods.append(('?editrace {} {} {}'.format(raceNum, p_indx, correct_pos+1), p_indx, raceNum, orig_pos+1, correct_pos+1))
+            mods.append(('?editrace {} {} {}'.format(raceNum, p_indx, correct_pos+1), player, raceNum, orig_pos+1, correct_pos+1))
      
         if not reundo and len(mods)>0:
             self.modifications.append(mods)
@@ -1496,7 +1502,7 @@ class Table():
         
         return error, mes
 
-    def un_merge_room(self, merge_num): #TODO: need testing
+    def un_merge_room(self, merge_num): #TEST: need testing
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  
         self.races = self.races[:len(self.prev_elems[merge_indx])-len(self.removed_races)]
@@ -2458,7 +2464,7 @@ class Table():
             self.undo_warning(j)
             
         elif '?changeroomsize' in j[0]:
-            self.change_room_size([[j[1], j[2]]], reundo=True)
+            self.undo_crs(j[1], j[2], j[4])
             self.undo_warning(j)
         
         elif '?removerace' in j[0]:
@@ -2588,10 +2594,4 @@ class Table():
     
 if __name__ == "__main__":
     pass
-    #import scrapy
-    #from scrapy_splash import SplashRequests
-    
-    
-    
-
-    
+   

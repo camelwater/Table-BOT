@@ -9,6 +9,9 @@ from discord.ext import commands
 import os
 from dotenv import load_dotenv
 import sys
+import json
+import atexit
+import signal
 
 sys.path.append('C:\\Users\\ryanz\\Anaconda3\\Lib\\site-packages')
 
@@ -17,6 +20,12 @@ KEY = os.getenv('KEY')
 SERVER_ID = 775253594848886785
 INIT_EXT = ['cogs.table_cog', 'cogs.Stats']
 bot = commands.Bot(command_prefix = ('?', '^'), case_insensitive=True, intents = discord.Intents.all(), help_command = None)      
+
+@atexit.register
+def dump_stats_json():
+    print("\nDumping command stats to stats.json...")
+    with open('stats.json', 'w') as sjson:
+        json.dump(dict(bot.command_stats), sjson)
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -36,10 +45,15 @@ async def on_command_error(ctx, error):
 async def on_ready():
     print("Bot logged in as {0.user}".format(bot))  
 
-
 if __name__ == "__main__":
+
     for l in INIT_EXT:
         bot.load_extension(l)  
         
     bot.run(KEY, reconnect=True)
+
+
+
+
+
 

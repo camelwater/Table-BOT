@@ -543,7 +543,7 @@ class table_bot(commands.Cog):
                 await self.send_temp_messages(ctx, "Error: Missing <DC number>.", self.table_instances[ctx.channel.id].dc_list_str(), usage)
                 return
             if len(i)<2:
-                await self.send_temp_messages(ctx, "Error processing command: missing DC status for DC number {}.".format(i[0]), self.table_instances[ctx.channel.id].dc_list_str(), usage)
+                await self.send_temp_messages(ctx, "Error processing command: missing <DC status> for DC number {}.".format(i[0]), self.table_instances[ctx.channel.id].dc_list_str(), usage)
                 return
             if len(i)>2:
                 await self.send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <DC number> and <DC status>.".format(i[0]), self.table_instances[ctx.channel.id].dc_list_str(), usage)
@@ -551,7 +551,7 @@ class table_bot(commands.Cog):
                 await self.send_temp_messages(ctx, "DC numbers must be numeric.", self.table_instances[ctx.channel.id].dc_list_str(), usage)
                 return
             if not (i[1] == "on" or i[1]=='during') and not (i[1]=='off' or i[1] == "before"):
-                await self.send_temp_messages(ctx, "The DC status argument must be either 'on'/'during' or 'off'/'before'.", self.table_instances[ctx.channel.id].dc_list_str(), usage)
+                await self.send_temp_messages(ctx, "The <DC status> argument must be either 'on'/'during' or 'off'/'before'.", self.table_instances[ctx.channel.id].dc_list_str(), usage)
             
         mes = self.table_instances[ctx.channel.id].edit_dc_status(arg)
         await self.send_messages(ctx, mes)
@@ -654,14 +654,38 @@ class table_bot(commands.Cog):
         await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list())
     
     @commands.command()
-    async def edit(self,ctx, *args):
+    async def edit(self,ctx, * , arg):
         
         usage = "Usage: ?edit <player id> <gp number> <gp score>"
         if await self.check_callable(ctx, "edit"): return
         
-        if len(args)==0:
+        if len(arg)==0:
             await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), '\n',usage)
             return
+        arg = [i.strip() for i in arg.strip().split("/")]
+        arg  = [i.split(" ") for i in arg]
+        
+        for i in arg:
+            if len(i)<1:
+                await self.send_temp_messages(ctx, "Error: Missing <player number>.", self.table_instances[ctx.channel.id].dc_list_str(), usage)
+                return
+            if len(i)<2:
+                await self.send_temp_messages(ctx, "Error processing command: missing <gp number> for player number {}.".format(i[0]), self.table_instances[ctx.channel.id].dc_list_str(), usage)
+                return
+            if len(i)<3:
+                await self.send_temp_messages(ctx, "Error: missing <gp score> for player number {}.")
+                return
+            if len(i)>3:
+                await self.send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <player number>, <gp number>, and <gp score>.".format(i[0]), self.table_instances[ctx.channel.id].dc_list_str(), usage)
+                return
+            for j in i:
+                if not j.lstrip('-').lstrip('+').isnumeric():
+                    await self.send_temp_messages(ctx, "All arguments for this command must be numeric.")
+                    return
+                    
+        mes = self.table_instances[ctx.channel.id].edit(arg)
+        await ctx.send(mes)
+        '''
         if len(args)<3:
             if len(args)<2:
                 await self.send_temp_messages(ctx, "Missing <gp number>.", usage)
@@ -682,8 +706,13 @@ class table_bot(commands.Cog):
             return
         mes = self.table_instances[ctx.channel.id].edit(pID, gp, score)
         await self.send_messages(ctx, mes)
-    
-        
+        '''
+    @edit.error
+    async def edit_error(self, ctx, error): 
+        if await self.check_callable(ctx, "edit"): return
+        if isinstance(error, commands.MissingRequiredArgument): 
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), "\nUsage: ?edit <player id> <gp number> <gp score>")
+
     @commands.command(aliases = ['rr', 'res', 'results', 'race'])
     async def raceresults(self,ctx, *args):
         
