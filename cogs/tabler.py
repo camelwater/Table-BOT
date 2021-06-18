@@ -1325,10 +1325,10 @@ class Table():
                 raceNum = int(i[0])-1
                 assert(raceNum>=0)
                 orig_room_size = len(self.races[raceNum]) 
-                if raceNum+1 in self.changed_room_sizes:
+                if raceNum+1 in self.changed_room_sizes and len(self.changed_room_sizes[raceNum+1])>0:
                     orig_room_size = self.changed_room_sizes[raceNum+1][-1]
-                print("ROOM SIZES:",self.changed_room_sizes[raceNum+1])
-                print("ORIG ROOM SIZE:", orig_room_size)
+                # print("ROOM SIZES:",self.changed_room_sizes[raceNum+1])
+                # print("ORIG ROOM SIZE:", orig_room_size)
                     
                 gp = int(raceNum/4)
             except:
@@ -1409,10 +1409,9 @@ class Table():
         self.races[raceNum] =  restore[0]
         self.finish_times[raceNum] = restore[1]
         self.change_room_size([[raceNum+1, orig_size]], undo=True,reundo=True)
-        print(raceNum+1)
-        print(self.changed_room_sizes)
         if raceNum+1 in self.changed_room_sizes:
             self.changed_room_sizes[raceNum+1].pop()
+        
 
     def edit_race(self, l, reundo=False):
         ret = ''

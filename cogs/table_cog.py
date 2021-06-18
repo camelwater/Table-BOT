@@ -682,7 +682,7 @@ class table_bot(commands.Cog):
                 if not j.lstrip('-').lstrip('+').isnumeric():
                     await self.send_temp_messages(ctx, "All arguments for this command must be numeric.")
                     return
-                    
+
         mes = self.table_instances[ctx.channel.id].edit(arg)
         await ctx.send(mes)
         '''
@@ -981,7 +981,6 @@ class table_bot(commands.Cog):
     @changeroomsize.error
     async def changeroomsize_error(self, ctx, error):
         self.set_instance(ctx)
-        
         if await self.check_callable(ctx, "changeroomsize"): return
         
         if isinstance(error, commands.MissingRequiredArgument):
