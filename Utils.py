@@ -114,6 +114,9 @@ def is_CJK(char):
                  (131072, 196607)]
                 ])
 
+import re 
+from unidecode import unidecode
+
 def strip_CJK(string):
     '''
     strip all cjk characters from string
@@ -128,10 +131,10 @@ def strip_CJK(string):
     for ind,i in enumerate(string):
         if is_CJK(i):
             del ret[ind]
-    return ''.join(ret)
+    no_cjk = ''.join(ret)
+    no_special = re.sub(r'\W+', '', no_cjk, re.UNICODE)
+    return no_special
 
-
-from unidecode import unidecode
 
 def replace_brackets(string):
     string = string.lstrip('[').lstrip(']').lstrip('(').lstrip(')').lstrip('{').lstrip('}')

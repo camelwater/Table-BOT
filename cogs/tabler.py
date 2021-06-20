@@ -567,7 +567,7 @@ class Table():
     
     def get_warnings(self):
         if len(self.warnings)==0:
-            return "Room had no warnings/errors. This table should be accurate."
+            return "Room had no warnings/errors. Table should be accurate."
         ret = 'Room warnings/errors that could affect the table{}:\n'.format(" (?dcs to fix dcs)" if len(self.dc_list)>0 else "")
         self.warnings = dict(sorted(self.warnings.items(), key=lambda item: item[0]))
         for i in self.warnings.items():
@@ -627,7 +627,7 @@ class Table():
                 self.tags[new] = data
                 ret+= "Edited tag '{}' to '{}'.{}".format(orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
                 
-            if not reundo:
+            if not reundo and self.table_running:
                 self.modifications.append([('?edittag {} {}'.format(t_orig, new), new, orig)])
                 self.undos.clear()
 
@@ -698,9 +698,9 @@ class Table():
             del self.tags[k]
 
         ret = "{} tag changed from {} to {}".format(self.display_names[player], old_tag, tag)  
-        if not reundo:
+        if not reundo and self.table_running:
             self.modifications.append([("?changetag {} {}".format(p_indx, tag), player, tag, old_tag, old_indx)])
-
+        
         return ret
        
     def group_tags(self,dic, redo=False):
@@ -748,7 +748,7 @@ class Table():
         for i in removal:
             self.tags.pop(i)
         
-        if not redo:
+        if not redo and self.table_running:
             self.modifications.append([("?tags {}".format(dic_str), orig_tags, dic)])
 
         return "Tags updated."
