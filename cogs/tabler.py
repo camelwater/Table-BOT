@@ -756,7 +756,7 @@ class Table():
     def undo_group_tags(self, restore_tags):
         self.tags = restore_tags
 
-    def change_name(self, l, redo=False): #FIXME: update after fc change
+    def change_name(self, l, redo=False): 
         ret = ''
         for j in l:
             player = p_indx = j[0]
@@ -1153,6 +1153,8 @@ class Table():
         self.all_players.sort(key=lambda x: unidecode(self.display_names[x].lower()))
         for i,p in enumerate(self.all_players):
             ret+="\n{}. {}".format(i+1, Utils.dis_clean(self.display_names[p]))
+            if p in self.deleted_players:
+                ret+=' (removed by tabler)'
         
         return ret
             

@@ -33,6 +33,15 @@ class table_bot(commands.Cog):
                 self.cycle_presences.start()
             except:
                 pass
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author == self.bot or message.author.bot: return
+        if not self.bot.user.mentioned_in(message): return
+
+        if message.content.rstrip() in ['<@!{}>'.format(self.bot.user.id), '<@{}>'.format(self.bot.user.id)]:
+            await self._help(await self.bot.get_context(message))
+            if hasattr(self.bot, "command_stats"):
+                self.bot.command_stats['help']+=1
     
     @tasks.loop(seconds=15)
     async def cycle_presences(self):
@@ -447,7 +456,7 @@ class table_bot(commands.Cog):
         if self.table_instances[ctx.channel.id].confirm_room:
             self.table_instances[ctx.channel.id].confirm_room = False
             self.table_instances.pop(ctx.message.channel.id)
-            await self.send_messages(ctx, "Start a new table with ?start.")
+            await self.send_messages(ctx, "Table stopped. ?start to start a new table")
            
         elif self.table_instances[ctx.channel.id].confirm_reset:
             self.table_instances[ctx.channel.id].confirm_reset = False
@@ -1022,8 +1031,7 @@ class table_bot(commands.Cog):
         
     @commands.command(name='help',aliases = ['h'])
     async def _help(self,ctx):
-        
-        info = 'List of commands:\n\t**?start**\n\t**?search**\n\t**?reset**\n\t**?players**\n\t**?tracks**\n\t**?rxx**\n\t**?raceresults\n\t?editrace\n\t?changeroomsize\n\t?removerace\n\t?mergeroom\n\t?dcs\n\t?penalty, ?unpenalty\n\t?tags\n\t?edittag\n\t?changetag\n\t?changegps\n\t?edit\n\t?sub, ?editsub\n\t?tabletext\n\t?undo, ?redo\n\t?pic**'
+        info = '**List of commands:**```\n?start\n?search\n?reset\n?players\n?tracks\n?rxx\n?raceresults\n?editrace\n?changeroomsize\n?removerace\n?mergeroom\n?dcs\n?penalty, ?unpenalty\n?tags\n?edittag\n?changetag\n?changegps\n?edit\n?sub, ?editsub\n?tabletext\n?undo, ?redo\n?pic```'
         await self.send_messages(ctx, info)
     
 
