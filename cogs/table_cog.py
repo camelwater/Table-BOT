@@ -275,16 +275,42 @@ class table_bot(commands.Cog):
     @search.error
     async def search_error(self,ctx, error):
         self.set_instance(ctx)
-        
-        
         if isinstance(error, commands.MissingRequiredArgument):
             await self.send_messages(ctx, "Usage: ?search <rxx or mii> <rxx or name(s)>\nmkwx room list: {}".format(self.home_url)) 
+    
+    @commands.command(aliases=['name'])
+    async def changename(self, ctx, *, arg):
+        usage = 'Usage: ?changename <player number> <name>'
+        if await self.check_callable(ctx, "changename"): return
+        
+        arg = [i.strip() for i in arg.strip().split("/")]
+        arg  = [i.split(" ") for i in arg]
+
+        for i in arg:
+            if len(i)<1:
+                await self.send_temp_messages(ctx, "Missing player number(s) for command.", self.table_instances[ctx.channel.id].get_player_list(), '\n',usage)
+                return
+            # if len(i)<2:
+            #     await self.send_temp_messages(ctx, "Error processing command: missing <name> for player '{}'".format(i[0]), self.table_instances[ctx.channel.id].get_player_list(), usage)
+            #     return
+            if not i[0].isnumeric():
+                await self.send_temp_messages(ctx, "<player number>(s) must be numeric.")
+                return
+        
+        mes = self.table_instances[ctx.channel.id].change_name(arg) #TODO:
+        await ctx.send(mes)
+        
+    
+    @changename.error
+    async def changename_error(self,ctx, error):
+        self.set_instance(ctx)
+        if await self.check_callable(ctx, "changename"): return
+        if isinstance(error, commands.MissingRequiredArgument):
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(),'\nUsage: ?changename <player number> <name>')       
     
     #change one player's tag
     @commands.command()
     async def changetag(self,ctx, *args): 
-        
-        
         if await self.check_special_callable(ctx): return
         
         usage = "Usage: ?changetag <player id> <corrected tag>"
@@ -573,9 +599,10 @@ class table_bot(commands.Cog):
         
         if await self.check_callable(ctx, "sub"): return
         
-        usage = "\nUsage: ?sub <sub out> <sub out races played> <sub in>"
+        usage = "\n**Note: It is advised to use this command when all races have finished, rather than right when the subsitution occurs.** \
+                \nUsage: ?sub <sub out> <sub out races played> <sub in>"
         if len(args)==0:
-            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), usage)
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), usage) 
             return
         if len(args)<2:
             await self.send_temp_messages(ctx, "Missing <sub out races played> and <sub in>.", self.table_instances[ctx.channel.id].get_player_list(), usage)
@@ -906,6 +933,7 @@ class table_bot(commands.Cog):
         try:
             if args[0][0] == '+' or args[0][0] == '-':
                 gps = int(args[0])
+                assert(self.table_instances[ctx.channel.id].gps+gps>0)
                 self.table_instances[ctx.channel.id].change_gps(self.table_instances[ctx.channel.id].gps+gps)
             else:   
                 gps = int(args[0])
@@ -915,8 +943,8 @@ class table_bot(commands.Cog):
             await self.send_temp_messages(ctx, "<num gps> must be a real number.", usage)
             return
         
-        await self.send_messages(ctx, "Changed total gps to {}.".format(gps))
-        self.table_instances[ctx.channel.id].check_mkwx_update.start()
+        await self.send_messages(ctx, "Changed total gps to {}.".format(self.table_instances[ctx.channel.id].gps))
+        
         
     @commands.command(aliases=['quickedit', 'qedit'])
     async def editrace(self,ctx, *, arg):

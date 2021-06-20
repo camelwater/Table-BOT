@@ -23,9 +23,10 @@ bot = commands.Bot(command_prefix = ('?', '^'), case_insensitive=True, intents =
 
 @atexit.register
 def dump_stats_json():
+    if not hasattr(bot, "command_stats"): return
     print("\nDumping command stats to stats.json...")
     with open('stats.json', 'w') as sjson:
-        json.dump(dict(bot.command_stats), sjson)
+        json.dump(dict(bot.command_stats), sjson, ensure_ascii=True, indent=4)
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -36,6 +37,7 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.MaxConcurrencyReached):
         await ctx.send("This command can only be used by {} user at a time. Try again later.".format(error.number))
     elif isinstance(error, commands.MissingRequiredArgument):
+        #pass
         raise error
     else:
         await ctx.send("There was an unidentified internal bot error. Wait a bit and try again later.\nIf the issue persists, ?reset the table.")
@@ -51,9 +53,3 @@ if __name__ == "__main__":
         bot.load_extension(l)  
         
     bot.run(KEY, reconnect=True)
-
-
-
-
-
-

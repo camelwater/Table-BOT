@@ -1,1 +1,27 @@
-{"start": 3, "yes": 2, "picture_generated": 9, "changeroomsize": 5, "picture": 13, "undo": 5, "tabletext": 2, "raceresults": 2}
+{
+    "start": 9,
+    "no": 1,
+    "yes": 8,
+    "picture_generated": 22,
+    "raceresults": 6,
+    "tabletext": 4,
+    "penalties": 4,
+    "playerlist": 6,
+    "tracklist": 3,
+    "edit": 4,
+    "picture": 14,
+    "undo": 12,
+    "editrace": 4,
+    "changename": 10,
+    "sub": 8,
+    "editsub": 7,
+    "undos": 3,
+    "stats": 2,
+    "about": 1,
+    "redos": 1,
+    "penalty": 2,
+    "teampenalty": 1,
+    "help": 1,
+    "dcs": 4,
+    "allplayers": 3
+}

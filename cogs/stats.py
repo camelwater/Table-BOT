@@ -8,6 +8,7 @@ import json
 class Stats(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
     @commands.Cog.listener()
     async def on_ready(self):
         load = load_stats_json()
@@ -52,19 +53,17 @@ class Stats(commands.Cog):
 
         #e.add_field(name='\u200b', value= "\u200b", inline=False)
         e.add_field(name='Written in:', value='python', inline=False)
-        e.add_field(name='Lines of code:', value='3750', inline=False)
+        e.add_field(name='Lines of code:', value='3800', inline=False)
         e.add_field(name="Libraries used:", value='discord.py, collections, urllib, aiohttp, and others', inline=False)
 
-        value_field = "[Github Repository](https://github.com/camelwater/Table-BOT)"
-        e.add_field(name='\u200b', value= value_field, inline=False)
+        link = "[Github Repository](https://github.com/camelwater/Table-BOT)"
+        e.add_field(name='\u200b', value= link, inline=False)
 
         await ctx.send(embed=e)
 
 def load_stats_json():
     with open('stats.json', 'r') as sjson:
         return json.load(sjson)
-        
-
 
 def setup(bot):
     if not hasattr(bot, "command_stats"):
