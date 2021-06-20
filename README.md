@@ -1,2 +1,2 @@
 # Table-BOT
-MKW table discord bot
+discord bot for MKW that tables (scores) private rooms
