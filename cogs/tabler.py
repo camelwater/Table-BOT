@@ -1513,7 +1513,7 @@ class Table():
                         
                         for indx,i in enumerate(self.warnings[raceNum]):
                             if i.get('player') == player and "on" in i.get('type'):
-                                self.warnings[raceNum][indx] = {'type': "dc_before", 'player':player, 'race':raceNum, 'rem_races':4-(raceNum%4), 'pts':3*(4-(raceNum%4)), 'gp':self.gp+1, 'is_edited':True}
+                                self.warnings[raceNum][indx] = {'type': "dc_before", 'player':player, 'race':raceNum, 'rem_races':4-((raceNum-1)%4), 'pts':3*(4-((raceNum-1)%4)), 'gp':self.gp+1, 'is_edited':True}
                         for indx, i in enumerate(self.dc_list[raceNum]):
                             if i.find(self.display_names[player]) == 0 and ("during" in i or "on" in i):
                                 self.dc_list[raceNum][indx] = "{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total) - determined by tabler.".format(Utils.dis_clean(self.display_names[player]), raceNum, self.gp+1, 3*(4-(raceNum%4)))
@@ -2551,7 +2551,7 @@ class Table():
                 for j in x:
                     if '?edit ' in j[0] and int(j[2])==gp:
                         count+=1
-            if count==1: self.warnings[raceNum].pop(0)
+            if count==1: self.manual_warnings[raceNum].pop(0)
             
         elif '?editrace' in mod_type:
             raceNum = int(mod[2])
@@ -2565,7 +2565,6 @@ class Table():
                 self.manual_warnings[raceNum].pop(self.manual_warnings[raceNum].index("Placements for this race have been manually altered by the tabler."))
                 
         elif '?dcs' in mod_type:
-            
             count = 0
             for x in self.modifications:
                 for j in x:
@@ -2579,7 +2578,7 @@ class Table():
                         self.dc_list[raceNum][indx] = self.dc_list[raceNum][indx].replace(' - determined by tabler', '')
                 for indx,i in enumerate(self.warnings[raceNum]):
                     if i.get('player') == player:
-                        self.warnings[raceNum][indx]['is_edited'] = True
+                        self.warnings[raceNum][indx]['is_edited'] = False
         elif "?removerace" in mod_type:
             raceNum= int(mod[1])
             track = mod[2]
@@ -2601,7 +2600,8 @@ class Table():
                         self.manual_warnings[raceNum].pop(indx)
                         break
                     
-        self.warnings = {k:v for k,v in self.warnings.items() if len(v)>0}      
+        self.warnings = {k:v for k,v in self.warnings.items() if len(v)>0}
+        self.manual_warnings = {k:v for k,v in self.manual_warnings.items() if len(v)>0}    
     
     def undo(self, j):
         if '?edit ' in j[0]:
