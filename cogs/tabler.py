@@ -46,7 +46,7 @@ class Table():
         self.warnings = defaultdict(list) #race: list of warnings
         self.manual_warnings = defaultdict(list)
 
-        self.dc_list = {} # race: list of player dcs (?dcs)
+        self.dc_list = defaultdict(list) # race: list of player dcs (?dcs)
         self.tracks = [] #track list
         self.dup_players = [] #in case some players have same mii name. fc: edited mii name (ex. 'Player-1' instead of 'Player') for clarity purposes on table
         self.ties = {} #tied race times
@@ -647,7 +647,12 @@ class Table():
     #TODO: rewrite with new warnings update
     def get_warnings(self):
         #merge self.warnings with self.manual_warnings
-        warnings = self.warnings | dict(self.manual_warnings)
+        warnings = defaultdict(list)
+        for race, warn_list in self.manual_warnings.items():
+            warnings[race] += warn_list
+
+        for race, warn_list in self.warnings.items():
+            warnings[race]+=warn_list
 
         if len(warnings)==0:
             return "No warnings or room errors. Table should be accurate."
@@ -923,14 +928,42 @@ class Table():
         #string = string.replace("no name", "Player")
         self.player_list = string
         return self.player_list
-        
+
+    def dc_to_str(self, dc):
+        dc_map = {
+            "dc_on": "{}** - DCed during the race (on results). Awarding 3 DC points per race for next {} races in GP {} ({} pts total).",
+            ("dc_on", 1): "{}** - DCed during the first race of GP {} (on results). 15 DC points for GP {}.",
+            ("dc_on", -1): "{}** - DCed during the race (on results). No DC points for GP {}.", 
+
+            "dc_before": "{}** - DCed before race. 3 DC points per race for the next {} races in GP {} ({} pts total).", 
+            ("dc_before", 1): "{}** - is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war)."
+        }  
+        dc_type = dc.get('type')
+        is_edited = dc.get('is_edited', False)
+        race = dc.get('race', 0)
+        ret = ""
+        if '_on' in dc_type:
+            if race == 1:
+                ret = dc_map.get(dc_type).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('gp'))
+            elif race == -1:
+                ret = dc_map.get(dc_type).format(self.display_names[dc.get('player'), dc.get('gp')])
+            else:
+                ret = dc_map.get(dc_type).format(self.display_names[dc.get('player')], dc.get('rem_races'), dc.get('gp'), dc.get('pts'))
+
+        else:
+            if race == 1:
+                ret = dc_map.get(dc_type).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('gp'), dc.get('gp'))
+            else:
+                ret = dc_map.get(dc_type).format(self.display_names[dc.get('player')], dc.get('rem_races'), dc.get('gp'), dc.get('pts'))
+        return ret + '{}'.format(' - edited by tabler' if is_edited else "")
+
     def dc_list_str(self): 
         ret = "DCs in the room:\n"
         dc_count = 1
         for race in list(self.dc_list.items()):
             ret+='Race #{}: {}\n'.format(race[0], self.tracks[int(race[0]-1)])
-            for mes in race[1]:
-                ret+='\t- **{}. {}\n'.format(dc_count,mes)
+            for dc in race[1]:
+                ret+='\t- **{}. {}\n'.format(dc_count, self.dc_to_str(dc))
                 dc_count+=1
                 
         if len(self.dc_list)==0:
@@ -973,8 +1006,12 @@ class Table():
                     self.undos.clear()
                 
                 
-                if "Scores have been manually modified by the tabler for this GP ({}).".format(gp) not in self.manual_warnings[int(gp)*4-3]:
-                    self.manual_warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
+                #if "Scores have been manually modified by the tabler for this GP ({}).".format(gp) not in self.manual_warnings[int(gp)*4-3]:
+                try:
+                    self.manual_warnings[int(gp)*4-3].remove("Scores have been manually modified by the tabler for this GP ({}).".format(gp))
+                except:
+                    pass
+                self.manual_warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
                     
                 return "{} GP {} score changed to {}".format(self.display_names[player], gp, self.players[player][1][int(gp)-1])
             else:
@@ -985,8 +1022,12 @@ class Table():
                     self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
                     self.undos.clear()
                 
-                if "Scores have been manually modified by the tabler for this GP ({}).".format(gp) not in self.manual_warnings[int(gp)*4-3]:
-                    self.manual_warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
+                #if "Scores have been manually modified by the tabler for this GP ({}).".format(gp) not in self.manual_warnings[int(gp)*4-3]:
+                try:
+                    self.manual_warnings[int(gp)*4-3].remove("Scores have been manually modified by the tabler for this GP ({}).".format(gp))
+                except:
+                    pass
+                self.manual_warnings[int(gp)*4-3].insert(0, "Scores have been manually modified by the tabler for this GP ({}).".format(gp))
                         
                 ret+="{} GP {} score changed to {}.\n".format(self.display_names[player], gp, score)
         return ret
@@ -1250,7 +1291,7 @@ class Table():
             for dc_item, warn_item in zip(enumerate(self.dc_list[1]), enumerate(self.warnings[1])):
                 if "should've started with" in dc_item[1]:
                     #print(ind,i)
-                    self.dc_list[1].append("{}** missing from GP 1. 18 DC pts for GP (mogi) or 15 pts (war).".format(Utils.dis_clean(self.display_names[fc])))
+                    self.dc_list[1].append({'type': 'dc_before', 'race':1, 'player': fc})
                     self.warnings[1].append({'type': 'dc_before','race': 1, 'player': fc})
                     self.dc_ids_append(fc, 1)
                     if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
@@ -1440,7 +1481,7 @@ class Table():
         return "Changed {} sub {}{} races to {}.".format(self.display_names[player], 'in' if is_in else 'out', '' if is_in else ' ({})'.format(self.sub_names[player]['sub_out'][out_index-1]), races)
          
     def edit_dc_status(self,L, reundo=False): 
-        mods = []
+        #mods = []
         ret=''
         for i in L:
             try:
@@ -1479,22 +1520,22 @@ class Table():
                                 if (4-(raceNum%4))%4 == 0:
                                     self.warnings[raceNum][indx] = {'type': 'dc_on', 'race': -1, 'player': player, 'is_edited':True}
                                 else: 
-                                    self.warnings[raceNum][indx] = {'type':"dc_on", 'race': raceNum, 'player': player, 'gp': self.gp+1, 'pts':3*(4-(raceNum%4))%4, 'rem_races':(4-(raceNum%4))%4, 'is_edited':True}
+                                    self.warnings[raceNum][indx] = {'type':"dc_on", 'race': raceNum, 'player': player, 'gp': gp+1, 'pts':3*(4-(raceNum%4))%4, 'rem_races':(4-(raceNum%4))%4, 'is_edited':True}
                         
                         for indx, i in enumerate(self.dc_list[raceNum]):
-                            if i.find(self.display_names[player]) == 0 and ("before" in i or "missing" in i):
+                            if i.get('player') == player and "before" in i.get('type'):
                                 if (4-(raceNum%4))%4 == 0:
-                                    self.dc_list[raceNum][indx] = "{}**  -  DCed during the race (on results). No DC points for GP {} - determined by tabler.".format(Utils.dis_clean(self.display_names[player]), self.gp+1)
+                                    self.dc_list[raceNum][indx] = {'type': 'dc_on', 'race': -1, 'player': player, 'gp':gp+1, 'is_edited':True}
                                 else:    
-                                    self.dc_list[raceNum][indx] = "{}**  -  DCed during the race (on results). Giving 3 DC points per race for remaining {} races in GP {} ({} pts total) - determined by tabler.".format(Utils.dis_clean(self.display_names[player]), (4-(raceNum%4))%4, self.gp+1, 3*(4-(raceNum%4))%4)
+                                    self.dc_list[raceNum][indx]= {'type': 'dc_on', 'race': raceNum, 'player':player, 'gp':gp+1, 'rem_races': (4-(raceNum%4))%4, 'pts':3*(4-(raceNum%4))%4, 'is_edited':True}
                     
                     else:
                         for indx,i in enumerate(self.warnings[raceNum]):
                             if i.get('player') == player and "before" in i.get('type'):
-                                self.warnings[raceNum][indx] = {'type':"dc_on", 'race':1, 'gp':self.gp+1, 'player':player, 'is_edited':True}
+                                self.warnings[raceNum][indx] = {'type':"dc_on", 'race':1, 'gp':gp+1, 'player':player, 'is_edited':True}
                         for indx, i in enumerate(self.dc_list[raceNum]):
-                            if i.find(self.display_names[player]) == 0 and ("before" in i or "missing" in i):
-                                self.dc_list[raceNum][indx] = "{}**  -  DCed on the first race of GP {}. 15 DC points for GP {} - determined by tabler.".format(Utils.dis_clean(self.display_names[player]), self.gp+1, self.gp+1)
+                            if i.get('player') == player and "before" in i.get('type'):
+                                self.dc_list[raceNum][indx] = {'type': 'dc_on', 'race': 1, 'gp': gp+1, 'player': player, 'is_edited':True}
             else:
                 orig_status = 'before'
                 if player in players:
@@ -1514,25 +1555,25 @@ class Table():
                         
                         for indx,i in enumerate(self.warnings[raceNum]):
                             if i.get('player') == player and "on" in i.get('type'):
-                                self.warnings[raceNum][indx] = {'type': "dc_before", 'player':player, 'race':raceNum, 'rem_races':4-((raceNum-1)%4), 'pts':3*(4-((raceNum-1)%4)), 'gp':self.gp+1, 'is_edited':True}
+                                self.warnings[raceNum][indx] = {'type': "dc_before", 'player':player, 'race':raceNum, 'rem_races':4-((raceNum-1)%4), 'pts':3*(4-((raceNum-1)%4)), 'gp':gp+1, 'is_edited':True}
                         for indx, i in enumerate(self.dc_list[raceNum]):
-                            if i.find(self.display_names[player]) == 0 and ("during" in i or "on" in i):
-                                self.dc_list[raceNum][indx] = "{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total) - determined by tabler.".format(Utils.dis_clean(self.display_names[player]), raceNum, self.gp+1, 3*(4-(raceNum%4)))
+                            if i.get('player') == player and "on" in i.get('type'):
+                                self.dc_list[raceNum][indx] = {'type': 'dc_before', 'player': player, 'race':raceNum, 'rem_races':4-((raceNum-1)%4), 'pts': 3*(4-((raceNum-1)%4)), 'gp':gp+1, 'is_edited':True}
                                         
                     else:     
                         for indx,i in enumerate(self.warnings[raceNum]):
                             if i.get('player') == player and "on" in i.get('type'):
-                                self.warnings[raceNum][indx] = {'type': "dc_before", 'race':1, 'gp':self.gp+1, 'is_edited':True}
+                                self.warnings[raceNum][indx] = {'type': "dc_before", 'race':1, 'gp':gp+1, 'is_edited':True}
                         for indx, i in enumerate(self.dc_list[raceNum]):
-                            if i.find(self.display_names[player]) == 0 and ("during" in i or "on" in i):
-                                self.dc_list[raceNum][indx]="{}**  -  DCed before race {} (missing from GP {}). 18 pts for GP {} (mogi), 15 pts for GP {} (war) - determined by tabler.".format(Utils.dis_clean(self.display_names[player]), raceNum,self.gp+1,self.gp+1, self.gp+1)
+                            if i.get('player') == player and "on" in i.get('type'):
+                                self.dc_list[raceNum][indx] = {'type':'dc_before', 'race':1, 'gp':gp+1, 'is_edited':True}
 
-            mods.append(('?dcs {} {}'.format(dc_num, status), dc_num, orig_status, status))         
+            if not reundo:
+                self.modifications.append([('?dcs {} {}'.format(dc_num, status), dc_num, orig_status, status)]) 
+                self.undos.clear()   
+
             ret+= "Changed {} DC status for race {} to '{}'.\n".format(Utils.dis_clean(self.display_names[player]), raceNum, status)
-        
-        if not reundo and len(mods)>0: 
-            self.modifications.append(mods)
-            self.undos.clear()
+       
         return ret
                 
                  
@@ -1691,8 +1732,12 @@ class Table():
             
             ret+='{} race {} placement changed to {}.{}'.format(Utils.dis_clean(self.display_names[player]), raceNum, correct_pos+1, '\n' if num==len(l)-1 else "")
             
-            if "Placements for this race have been manually altered by the tabler." not in self.manual_warnings[raceNum]:
-                self.manual_warnings[raceNum].append("Placements for this race have been manually altered by the tabler.")
+            #if "Placements for this race have been manually altered by the tabler." not in self.manual_warnings[raceNum]:
+            try:
+                self.manual_warnings[raceNum].remove("Placements for this race have been manually altered by the tabler.")
+            except:
+                pass
+            self.manual_warnings[raceNum].append("Placements for this race have been manually altered by the tabler.")
             
             mods.append(('?editrace {} {} {}'.format(raceNum, p_indx, correct_pos+1), player, raceNum, orig_pos+1, correct_pos+1))
      
@@ -1720,12 +1765,13 @@ class Table():
             self.dc_list = self.restore_merged[4]
             self.dc_list_ids = self.restore_merged[5]
             self.players = self.restore_merged[6]
+            self.manual_warnings = self.restore_merged[7]
             self.restore_merged = None
         
         return error, mes
 
     def un_merge_room(self, merge_num): #TEST: need testing, especially after "fix" for redoing mergerooms
-        self.restore_merged = (self.races, self.tracks, self.finish_times, self.warnings, self.dc_list, self.dc_list_ids, copy.deepcopy(self.players))
+        self.restore_merged = (self.races, self.tracks, self.finish_times, copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), self.dc_list_ids, copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings))
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  
         self.races = self.races[:len(self.prev_elems[merge_indx])-len(self.removed_races)]
@@ -1737,8 +1783,9 @@ class Table():
         self.current_url = self.ROOM_URL.format(self.rxx)
         
         self.finish_times = {k:v for k,v in self.finish_times.items() if k<len(self.races)}
-        self.warnings = {k:v for k,v in self.warnings.items() if k<=len(self.races)}
-        self.dc_list = {k:v for k, v in self.dc_list.items() if k<=len(self.races)}
+        self.warnings = defaultdict(list,{k:v for k,v in self.warnings.items() if k<=len(self.races)})
+        self.manual_warnings = defaultdict(list,{k:v for k,v in self.manual_warnings.items() if k<=len(self.races)})
+        self.dc_list = defaultdict(list, {k:v for k, v in self.dc_list.items() if k<=len(self.races)})
         
         self.dc_list_ids = {k:v for k, v in self.dc_list_ids.items() if v[1]<=len(self.races)}
         
@@ -1843,7 +1890,7 @@ class Table():
                 dc[1] = dc[1]+direction
         
     
-    def recalc_table(self, start = 0): #TODO: figure out how to shift warnings to keep manual warnings
+    def recalc_table(self, start = 0): #TODO: figure out how to shift warnings to keep manual warnings (add manual warnings)
                                         
         self.gp = int((start-1)/4)
         for player in self.players.items():
@@ -1854,8 +1901,8 @@ class Table():
                 if int(num/4)>=self.gp:
                     self.players[player[0]][2][num] = 0
         
-        self.warnings = {k:v for k,v in self.warnings.items() if k<self.gp*4+1}
-        self.dc_list = {k:v for k, v in self.dc_list.items() if k<self.gp*4+1}
+        self.warnings = defaultdict(list,{k:v for k,v in self.warnings.items() if k<self.gp*4+1})
+        self.dc_list = defaultdict(list, {k:v for k, v in self.dc_list.items() if k<self.gp*4+1})
                 
         self.finish_times = {k:v for k,v in self.finish_times.items() if k+1<(self.gp+1)*4-3}
         self.ties = {k:v for k,v in self.ties.items() if k<(self.gp+1)*4-3} 
@@ -1913,12 +1960,10 @@ class Table():
             
             
             if cur_room_size<self.num_players and len(self.players)<self.num_players and (len(self.races)+raceNum)%4 == 0:
-                if raceNum+1 not in self.dc_list:   
-                    self.dc_list[raceNum+1] = []
                     
                 self.warnings[raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
-                self.dc_list[raceNum+1].append("GP {} is missing player(s). GP started with {} players, but should've started with {} players.".format(self.gp+1, cur_room_size,self.num_players))
-                           
+                self.dc_list[raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
+
             elif cur_room_size<len(self.players):
                 f_codes = [i[2] for i in race]
                 missing_players = []
@@ -1933,11 +1978,10 @@ class Table():
                     if (raceNum)%4 == 0:
                         for mp in missing_players:
                             if self.gp not in self.gp_dcs or mp not in self.gp_dcs[self.gp]:
-                                if raceNum+1 not in self.dc_list:   
-                                    self.dc_list[raceNum+1] = []
                                     
                                 self.warnings[raceNum+1].append({'type': 'dc_before', 'race':1, 'gp': self.gp+1, 'player':mp})
-                                self.dc_list[raceNum+1].append("{}**  -  DCed before race {} (missing from GP {}). 18 pts for GP {} (mogi), 15 pts for GP {} (war).".format(Utils.dis_clean(self.display_names[mp]), raceNum+1,self.gp+1,self.gp+1, self.gp+1))
+                                self.dc_list[raceNum+1].append({'type': 'dc_before', 'race':1, 'gp': self.gp+1, 'player':mp})
+
                                 self.dc_ids_append(mp, raceNum+1)
                                 if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                                 self.gp_dcs[self.gp].append(mp)
@@ -1945,12 +1989,9 @@ class Table():
                     else:
                         for mp in missing_players:
                             if self.gp not in self.gp_dcs or mp not in self.gp_dcs[self.gp]:
-                                if raceNum+1 not in self.dc_list:   
-                                    self.dc_list[raceNum+1] = []
 
                                 self.warnings[raceNum+1].append({'type':'dc_before', 'race':raceNum+1, 'rem_races':4-((raceNum)%4), 'pts':3*(4-((raceNum)%4)), 'gp':self.gp+1,'player':mp})    
-                                self.dc_list[raceNum+1].append("{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total).".format(Utils.dis_clean(self.display_names[mp]), raceNum+1, self.gp+1, 3*(4-((raceNum)%4))))
-                                
+                                self.dc_list[raceNum+1].append({'type':'dc_before', 'race':raceNum+1, 'rem_races':4-((raceNum)%4), 'pts':3*(4-((raceNum)%4)), 'gp':self.gp+1,'player':mp})    
                                 try:
                                     self.dc_pts[mp].append([raceNum+1, [i for i in range(raceNum+1, raceNum+1+(4-((raceNum)%4))%4)]])
                                     
@@ -2029,21 +2070,19 @@ class Table():
                     
                 except:
                     if self.gp not in self.gp_dcs or fc not in self.gp_dcs[self.gp]:
-                        if raceNum+1 not in self.dc_list:   
-                            self.dc_list[raceNum+1] = []
                         
                         if (raceNum)%4==0:
                             self.warnings[raceNum+1].append({'type': 'dc_on', 'race':1, 'gp':self.gp+1, 'player':fc})
-                            self.dc_list[raceNum+1].append("{}**  -  DCed on the first race of GP {} (on results). 15 DC points for GP {}.".format(Utils.dis_clean(miiName), self.gp+1, self.gp+1))
+                            self.dc_list[raceNum+1].append({'type': 'dc_on', 'race':1, 'gp':self.gp+1, 'player':fc})
                             
                         else: 
                             if (4-((raceNum+1)%4))%4 == 0:
                                 self.warnings[raceNum+1].append({'type': "dc_on", 'race':-1, 'player':fc, 'gp':self.gp+1})
-                                self.dc_list[raceNum+1].append("{}**  -  DCed during the race (on results). No DC points for GP {}.".format(Utils.dis_clean(miiName), self.gp+1))
+                                self.dc_list[raceNum+1].append({'type': "dc_on", 'race':-1, 'player':fc, 'gp':self.gp+1})
                         
                             else:
                                 self.warnings[raceNum+1].append({'type': "dc_on", 'race':raceNum+1, 'rem_races': (4-((raceNum+1)%4))%4, 'pts':3*((4-((raceNum+1)%4))%4), 'player':fc, 'gp':self.gp+1})
-                                self.dc_list[raceNum+1].append("{}**  -  DCed during the race (on results). Giving 3 DC points per race for remaining {} races in GP {} ({} pts total).".format(Utils.dis_clean(miiName), (4-((raceNum+1)%4))%4, self.gp+1,3*((4-((raceNum+1)%4))%4)))
+                                self.dc_list[raceNum+1].append({'type': "dc_on", 'race':raceNum+1, 'rem_races': (4-((raceNum+1)%4))%4, 'pts':3*((4-((raceNum+1)%4))%4), 'player':fc, 'gp':self.gp+1})
                             
                             if (4-((raceNum+1)%4))%4!=0:
                                 try:
@@ -2233,7 +2272,7 @@ class Table():
                     self.dc_list[len(self.races)+raceNum+1] = []
                 #TEST:  
                 self.warnings[len(self.races)+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
-                self.dc_list[len(self.races)+raceNum+1].append("GP {} is missing player(s). GP started with {} players, but should've started with {} players.".format(self.gp+1, cur_room_size,self.num_players))
+                self.dc_list[len(self.races)+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
                            
             elif cur_room_size<len(self.players):
                 f_codes = [i[2] for i in race]
@@ -2249,11 +2288,9 @@ class Table():
                     if (len(self.races)+raceNum)%4 == 0:
                         for mp in missing_players:
                             if self.gp not in self.gp_dcs or mp not in self.gp_dcs[self.gp]:
-                                if len(self.races)+raceNum+1 not in self.dc_list:   
-                                    self.dc_list[len(self.races)+raceNum+1] = []
                                     
                                 self.warnings[len(self.races)+raceNum+1].append({'type': 'dc_before', 'race':1, 'gp': self.gp+1, 'player':mp})
-                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed before race {} (missing from GP {}). 18 pts for GP {} (mogi), 15 pts for GP {} (war).".format(Utils.dis_clean(self.display_names[mp]), len(self.races)+raceNum+1,self.gp+1,self.gp+1, self.gp+1))
+                                self.dc_list[len(self.races)+raceNum+1].append({'type': 'dc_before', 'race':1, 'gp': self.gp+1, 'player':mp})
                                 self.dc_ids_append(mp, len(self.races)+raceNum+1)
                                 if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                                 self.gp_dcs[self.gp].append(mp)
@@ -2261,11 +2298,9 @@ class Table():
                     else:
                         for mp in missing_players:
                             if self.gp not in self.gp_dcs or mp not in self.gp_dcs[self.gp]:
-                                if len(self.races)+raceNum+1 not in self.dc_list:   
-                                    self.dc_list[len(self.races)+raceNum+1] = []
-                                    
+                                
                                 self.warnings[len(self.races)+raceNum+1].append({'type':'dc_before', 'race':len(self.races)+raceNum+1, 'rem_races':4-((len(self.races)+raceNum)%4), 'pts':3*(4-((len(self.races)+raceNum)%4)), 'gp':self.gp+1,'player':mp})    
-                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed before race {} (missing from results). 3 pts per race for remaining races in GP {} ({} pts total).".format(Utils.dis_clean(self.display_names[mp]), len(self.races)+raceNum+1, self.gp+1, 3*(4-((len(self.races)+raceNum)%4))))
+                                self.dc_list[len(self.races)+raceNum+1].append({'type':'dc_before', 'race':len(self.races)+raceNum+1, 'rem_races':4-((len(self.races)+raceNum)%4), 'pts':3*(4-((len(self.races)+raceNum)%4)), 'gp':self.gp+1,'player':mp})    
                                 
                                 try:
                                     self.dc_pts[mp].append([len(self.races)+raceNum+1, [i for i in range(len(self.races)+raceNum+1, len(self.races)+raceNum+1+(4-((len(self.races)+raceNum)%4))%4)]])
@@ -2344,21 +2379,19 @@ class Table():
                     
                 except:
                     if self.gp not in self.gp_dcs or fc not in self.gp_dcs[self.gp]:
-                        if len(self.races)+raceNum+1 not in self.dc_list:   
-                            self.dc_list[len(self.races)+raceNum+1] = []
                         
                         if (len(self.races)+raceNum)%4==0:
                             self.warnings[len(self.races)+raceNum+1].append({'type': 'dc_on', 'race':1, 'gp':self.gp+1, 'player':fc})
-                            self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed on the first race of GP {} (on results). 15 DC points for GP {}.".format(Utils.dis_clean(miiName), self.gp+1, self.gp+1))
+                            self.dc_list[len(self.races)+raceNum+1].append({'type': 'dc_on', 'race':1, 'gp':self.gp+1, 'player':fc})
                             
                         else: 
                             if (4-((len(self.races)+raceNum+1)%4))%4 == 0:
                                 self.warnings[len(self.races)+raceNum+1].append({'type': "dc_on", 'race':-1, 'player':fc, 'gp':self.gp+1})
-                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed during the race (on results). No DC points for GP {}.".format(Utils.dis_clean(miiName), self.gp+1))
+                                self.dc_list[len(self.races)+raceNum+1].append({'type': "dc_on", 'race':-1, 'player':fc, 'gp':self.gp+1})
                         
                             else:
                                 self.warnings[len(self.races)+raceNum+1].append({'type': "dc_on", 'race':len(self.races)+raceNum+1, 'rem_races': (4-((len(self.races)+raceNum+1)%4))%4, 'pts':3*((4-((len(self.races)+raceNum+1)%4))%4), 'player':fc, 'gp':self.gp+1})
-                                self.dc_list[len(self.races)+raceNum+1].append("{}**  -  DCed during the race (on results). Giving 3 DC points per race for remaining {} races in GP {} ({} pts total).".format(Utils.dis_clean(miiName), (4-((len(self.races)+raceNum+1)%4))%4, self.gp+1,3*((4-((len(self.races)+raceNum+1)%4))%4)))
+                                self.dc_list[len(self.races)+raceNum+1].append({'type': "dc_on", 'race':len(self.races)+raceNum+1, 'rem_races': (4-((len(self.races)+raceNum+1)%4))%4, 'pts':3*((4-((len(self.races)+raceNum+1)%4))%4), 'player':fc, 'gp':self.gp+1})
                             
                             if (4-((len(self.races)+raceNum+1)%4))%4!=0:
                                 try:
@@ -2586,8 +2619,8 @@ class Table():
                 raceNum = self.dc_list_ids[int(mod[1])][1]
                 player = self.dc_list_ids[int(mod[1])][0]
                 for indx, i in enumerate(self.dc_list[raceNum]):
-                    if i.find(player) == 0:
-                        self.dc_list[raceNum][indx] = self.dc_list[raceNum][indx].replace(' - determined by tabler', '')
+                    if i.get('player') == player:
+                        self.dc_list[raceNum][indx]['is_edited'] = False
                 for indx,i in enumerate(self.warnings[raceNum]):
                     if i.get('player') == player:
                         self.warnings[raceNum][indx]['is_edited'] = False
@@ -2612,8 +2645,8 @@ class Table():
                         self.manual_warnings[raceNum].pop(indx)
                         break
                     
-        self.warnings = {k:v for k,v in self.warnings.items() if len(v)>0}
-        self.manual_warnings = {k:v for k,v in self.manual_warnings.items() if len(v)>0}    
+        self.warnings = defaultdict(list,{k:v for k,v in self.warnings.items() if len(v)>0})
+        self.manual_warnings = defaultdict(list,{k:v for k,v in self.manual_warnings.items() if len(v)>0})  
     
     def undo(self, j):
         if '?edit ' in j[0]:
