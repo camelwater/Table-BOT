@@ -129,11 +129,11 @@ def strip_CJK(string):
     string = list(string)
     ret = string
     for ind,i in enumerate(string):
-        if is_CJK(i):
+        if is_CJK(i) or unidecode(i)=='':
             del ret[ind]
     no_cjk = ''.join(ret)
     no_special = re.sub(r'\W+', '', no_cjk, re.UNICODE)
-    return no_special
+    return no_cjk
 
 
 def replace_brackets(string):

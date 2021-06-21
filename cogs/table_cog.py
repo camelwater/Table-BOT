@@ -541,7 +541,7 @@ class table_bot(commands.Cog):
                 args = 0
             else:
                 args = -1
-        mes = self.table_instances[ctx.channel.id].redo_commands(args)
+        mes = await self.table_instances[ctx.channel.id].redo_commands(args)
         await self.send_messages(ctx,mes)
     
     @commands.command(aliases=['redolist'])

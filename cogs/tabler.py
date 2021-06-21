@@ -4,7 +4,6 @@ Created on Tue May 18 15:05:35 2021
 
 @author: ryanz
 """
-from re import X
 from bs4 import BeautifulSoup
 import copy
 #from PIL import Image
@@ -346,6 +345,7 @@ class Table():
         per_team = int(f)
         teams = {} #tag: list of players
         player_copy = list(self.display_names.values())
+        print(player_copy)
         post_players = []
         un_players = []
         
@@ -361,19 +361,20 @@ class Table():
                 indx-=1
                 matches = 1
                 for j in range(len(player_copy)):
+                    #print("s")
                     if i!=j and indx>0 and unidecode(Utils.strip_CJK(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx] == unidecode(Utils.strip_CJK(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx]:
                         matches+=1
-                            
+                        
                         if matches == per_team: break 
                 
-            
-            tag = player_copy[i].replace("[","").replace(']','')[:indx]
+            tag = Utils.strip_CJK(player_copy[i].replace("[","").replace(']',''))[:indx]
             if len(tag)>0 and tag[-1]=="-": 
                 tag = tag[:-1]
                 indx-=1
             if len(tag)==1: tag = tag.upper()
             
             temp_tag = tag
+            print(tag)
             if tag == "": 
                 post_players.append(player_copy.pop(i))
                 continue
@@ -384,7 +385,7 @@ class Table():
             teams[temp_tag] = []
             ind = 0
             while ind<len(player_copy):
-                if unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(player_copy[ind].strip().lower().replace("[","").replace(']',''))[:indx]: 
+                if unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(Utils.strip_CJK(player_copy[ind].strip().lower().replace("[","").replace(']','')))[:indx]: 
                     if len(teams[temp_tag])<per_team:
                         teams[temp_tag].append(player_copy.pop(ind))
                         ind = 0
@@ -393,7 +394,7 @@ class Table():
                 
             i = 0
             
-            
+        print(post_players)   
         #find postfix tags
         i = 0
         all_tag_matches= {}
@@ -519,7 +520,7 @@ class Table():
                 match = 0
                 
                 for j in range(len(un_players)):
-                    m = Utils.LCS(unidecode(un_players[i].strip().lower().replace("[","").replace(']','')), unidecode(un_players[j].strip().lower().replace("[","").replace(']','')))
+                    m = Utils.LCS(unidecode(Utils.strip_CKJ(un_players[i].strip().lower().replace("[","").replace(']',''))), unidecode(Utils.strip_CJK(un_players[j].strip().lower().replace("[","").replace(']',''))))
                     if un_players[i]!=un_players[j] and len(m)>longest_match:
                         longest_match = len(m)
                         match= un_players[i], un_players[j]
@@ -1700,20 +1701,31 @@ class Table():
             self.undos.clear()
         return ret
     
-    async def merge_room(self, arg):
+    async def merge_room(self, arg, redo=False):
         is_rxx = False
         check = arg[0]
         if len(arg)==1 and (len(check)==8 and check[1:].isnumeric() and check[0]=='r') or (len(check)==4 and check[2:].isnumeric()):
             is_rxx = True
             
         if is_rxx:
-            error, mes = await self.find_room(rid = arg, merge=True)
+            error, mes = await self.find_room(rid = arg, merge=True, redo=redo)
         else:
-            error, mes= await self.find_room(mii=arg, merge=True)
+            error, mes= await self.find_room(mii=arg, merge=True, redo=redo)
+        
+        if redo:
+            self.races = self.restore_merged[0]
+            self.tracks = self.restore_merged[1]
+            self.finish_times = self.restore_merged[2]
+            self.warnings = self.restore_merged[3]
+            self.dc_list = self.restore_merged[4]
+            self.dc_list_ids = self.restore_merged[5]
+            self.players = self.restore_merged[6]
+            self.restore_merged = None
         
         return error, mes
 
-    def un_merge_room(self, merge_num): #TEST: need testing
+    def un_merge_room(self, merge_num): #TEST: need testing, especially after "fix" for redoing mergerooms
+        self.restore_merged = (self.races, self.tracks, self.finish_times, self.warnings, self.dc_list, self.dc_list_ids, copy.deepcopy(self.players))
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  
         self.races = self.races[:len(self.prev_elems[merge_indx])-len(self.removed_races)]
@@ -2660,7 +2672,7 @@ class Table():
         else:
             print("undo error:",j[0])
     
-    def redo(self, j):
+    async def redo(self, j):
         if '?edit ' in j[0]:
             if "+" in j[0] or '-' in j[0]:
                 self.edit(j[1], j[2], str(j[3]), redo=True)
@@ -2698,7 +2710,7 @@ class Table():
             self.edit_sub_races(j[1], j[2], j[4], out_index=j[5], reundo=True)   
             
         elif '?mergeroom' in j[0]:
-            self.merge_room(j[2])
+            await self.merge_room(j[2], redo=True)
         
         elif '?edittag' in j[0]:
             self.edit_tag_name([[j[1], j[2]]], reundo=True)
@@ -2737,28 +2749,28 @@ class Table():
                 return "Last table modification ({}) has been undone.".format(mod[0][0])
             return "No manual modifications to the table to undo."
         
-    def redo_commands(self, num):
+    async def redo_commands(self, num):
         if num == 0: #redo all
             if len(self.undos)>0:
                 for i in list(reversed(self.undos)):
                     for j in i:
-                        self.redo(j)
+                        await self.redo(j)
                 
                 self.modifications = list(reversed(self.undos))
                 self.undos = []
                 return "All manual table modifications undos have been redone."
-            return "No manual modification undos to redo."
+            return "No table modification undos to redo."
         
         else: #redo last undo
             if len(self.undos)>0:
                 for i in self.undos[-1]:
-                    self.redo(i)
+                    await self.redo(i)
                     
                 mod = self.undos[-1]
                 self.modifications.append(mod)
                 del self.undos[-1]
                 return "Last table modification undo ({}) has been redone.".format(mod[0][0])
-            return "No manual modifications undos to redo."
+            return "No table modification undos to redo."
         
         
     async def fetch(self, url, headers=None): 
@@ -2774,8 +2786,7 @@ class Table():
                         return soup
                 except:
                     return 'timeout error'
-                
-                
+
             else:
                 async with session.get(url, headers=headers) as response:
                     return await response.text()
