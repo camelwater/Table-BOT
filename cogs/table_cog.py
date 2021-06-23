@@ -21,10 +21,7 @@ class table_bot(commands.Cog):
         self.TESTING = False
         
         if self.TESTING:
-            table = Table()
-            table.players = {'pringle@MV':0,'5headMV':0,'hello MV':0,'LTAX':0,'jaja LTA':0,'stupid@LTA':0,'MV poop':0,'MVMVMVMV':0,
-                            'LTA Valpo':0,"Mom's LTA":0}
-            table.split_teams('5', 2)
+            table = Table(testing=True)
         
     
     @commands.Cog.listener()

@@ -21,7 +21,13 @@ import Utils
 
 #TODO: add graph and style options
 class Table():
-    def __init__(self):
+    def __init__(self, testing = False):
+        self.TESTING = testing
+        self.IGNORE_FCS = False
+        if self.TESTING:
+            self.init_testing()
+        
+
         self.URL = "https://wiimmfi.de/stats/mkwx"
         self.ROOM_URL = "https://wiimmfi.de/stats/mkwx/list/{}"
         self.current_url = ""
@@ -113,7 +119,12 @@ class Table():
         self.last_command_sent = None
         ##### Stuff for bot instances #####
         
-    
+    def init_testing(self):
+        self.players = {'pringle@MV':0,'5headMV':0,'hello bro':0,'LTAX':0,'jaja LTA':0,'stupid@LTA':0,'MV poop':0,'MVMVMVMV':0,
+                            'LTA Valpo':0,"Mom's spaghetti":0}
+        self.IGNORE_FCS = True
+        self.split_teams('5', 2)
+
     async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple:
         """
         find mkwx room using either rxx or mii name search
@@ -345,7 +356,7 @@ class Table():
             return
         per_team = int(f)
         teams = {} #tag: list of players
-        player_copy = list(self.display_names.values())
+        player_copy = list(self.display_names.values()) if not self.IGNORE_FCS else list(copy.deepcopy(self.players).keys())
         print(player_copy)
         post_players = []
         un_players = []
@@ -493,23 +504,28 @@ class Table():
                 else:
                     all_tag_matches[item[0]] = item[1]
         
+
         teams_needed = num_teams-len(teams.keys())
         if(len(all_tag_matches)>=teams_needed):
             for t in range(teams_needed):
-                all_tag_matches = dict(sorted(all_tag_matches.items(), key=lambda item: len(item[1]), reverse=True))
+                all_tag_matches = defaultdict(list,dict(sorted(all_tag_matches.items(), key=lambda item: len(item[1]), reverse=True)))
                 teams[list(all_tag_matches.keys())[0]] = all_tag_matches[list(all_tag_matches.keys())[0]]
                 for p in all_tag_matches[list(all_tag_matches.keys())[0]]:
-                    post_players.remove(p)
-                    for x in tag_matches.items():
-                        try:
-                            x[1].remove(p)
-                        except:
-                            pass
+                    try:
+                        post_players.remove(p)
+                    except:
+                        pass
+                all_tag_matches.pop(list(all_tag_matches.keys())[0])
+                for x in copy.deepcopy(all_tag_matches).items():
+                    for player in x[1]:
+                        if player not in post_players:
+                            all_tag_matches[x[0]].remove(player)
+                    if len(x[1]) == 0:
+                        all_tag_matches.pop(x[0])
                         
         un_players = copy.deepcopy(post_players)
         post_players.clear()
       
-        
         #substring (unconventional) tag for 2v2s
         if per_team==2:
             i = 0
@@ -557,8 +573,9 @@ class Table():
                             continue
         
         print(teams)
-        for i in teams.items():
-            teams[i[0]] = [self.fcs[j] for j in i[1]]  
+        if not self.IGNORE_FCS:
+            for i in teams.items():
+                teams[i[0]] = [self.fcs[j] for j in i[1]]  
         self.tags = teams
         self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].lower())))
         self.tags = {k.strip(): v for (k, v) in self.tags.items()}
