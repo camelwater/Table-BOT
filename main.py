@@ -30,7 +30,7 @@ class TableBOT(commands.Bot):
             
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
-            await ctx.send("{}.\nType ?help for a list of commands.".format(error.__str__().replace("is not found", "doesn't exist")))
+            await ctx.send("{}.\nType `?help` for a list of commands.".format(error.__str__().replace("is not found", "doesn't exist")))
         elif isinstance(error, commands.CommandOnCooldown):
             await ctx.send("This command can only be used once every {:.0f} seconds. You can retry in {:.1f} seconds.".format(error.cooldown.per, error.retry_after))
         elif isinstance(error, commands.MaxConcurrencyReached):
@@ -39,7 +39,7 @@ class TableBOT(commands.Bot):
             #pass
             raise error
         else:
-            await ctx.send("An unidentified internal bot error occurred. Wait a bit and try again later.\nIf this issue persists, ?reset the table.")
+            await ctx.send("An unidentified internal bot error occurred. Wait a bit and try again later.\nIf this issue persists, `?reset` the table.")
             raise error
 
     async def on_ready(self):

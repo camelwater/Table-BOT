@@ -29,23 +29,35 @@ class Stats(commands.Cog):
         self.bot.command_stats[command]+=1
 
     @commands.command(aliases=['commandstats'])
-    async def stats(self, ctx):
+    async def stats(self, ctx, num = None):
         counter = self.bot.command_stats
-        
+        if num is None:
+            num = 5
+        else:
+            try:
+                num = int(num)
+            except:
+                num = len(counter) if num.lower()=='all' else 5
+
         pic_total = counter['picture_generated']
         counter = Counter({k:v for k,v in dict(counter).items() if "generated" not in k})
         
         total = sum(counter.values())
-        common = counter.most_common(5)
+
+        if num>len(counter):
+            num = len(counter)
+        common = counter.most_common(num)
+        spaces = max([len(k[0]) for k in common])+1
 
         out = "Total commands processed: {}\nPictures generated: {}\n\n".format(total, pic_total)
-        out+='Most used commands:\n'
+        out+='{}:\n'.format('{} most used commands'.format(num) if num<len(counter) else "Command stats")
         if len(common)==0:
             out+="Commands haven't been used yet."
         else:
-            out += '\n'.join("{}: {}".format(k, c) for k,c in common)
+            out += '\n'.join("{}{}: {}".format(k, " "*(spaces-len(k)), c) for k,c in common)
          
         await ctx.send("```\n{}\n```".format(out))
+    
     
     @commands.command(aliases=['info'])
     async def about(self, ctx):
@@ -53,7 +65,7 @@ class Stats(commands.Cog):
 
         #e.add_field(name='\u200b', value= "\u200b", inline=False)
         e.add_field(name='Written in:', value='python', inline=False)
-        e.add_field(name='Lines of code:', value='4100', inline=False)
+        e.add_field(name='Lines of code:', value='4150', inline=False)
         e.add_field(name="Libraries used:", value='discord.py, collections, urllib, aiohttp, and others', inline=False)
 
         link = "[Github Repository](https://github.com/camelwater/Table-BOT)"

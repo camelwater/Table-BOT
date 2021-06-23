@@ -71,7 +71,10 @@ class table_bot(commands.Cog):
     async def send_temp_messages(self,ctx, *args):
         await ctx.send('\n'.join(args), delete_after=25)
     async def send_messages(self,ctx, *args):
-        await ctx.send('\n'.join(args))
+        try:
+            await ctx.send('\n'.join(args))
+        except discord.errors.Forbidden:
+            await ctx.send("I do not have adequate permissions. Check `?help` for a list of the permissions that I need.".format('s'))
       
     # @commands.Cog.listener()
     # async def on_command_error(self,ctx, error):
@@ -83,11 +86,11 @@ class table_bot(commands.Cog):
             return True
         if command in ['yes', 'no']:
             if not self.table_instances[ctx.channel.id].choose_room:
-                await self.send_temp_messages(ctx, "You can only use ?{} if the bot prompts you to do so.".format(command))
+                await self.send_temp_messages(ctx, "You can only use `?{}` if the bot prompts you to do so.".format(command))
                 return True
         else:
             if not self.table_instances[ctx.channel.id].table_running:
-                await self.send_temp_messages(ctx, "You need to have an active table before using ?{}.".format(command))
+                await self.send_temp_messages(ctx, "You need to have an active table before using `?{}`.".format(command))
                 return True
             
     async def check_special_callable(self, ctx): #used for commands that can be used when confirm_room == True
@@ -138,10 +141,10 @@ class table_bot(commands.Cog):
             self.table_instances[ctx.channel.id].confirm_reset = True
             self.table_instances[ctx.channel.id].reset_args = args
             #print(self.table_instances[ctx.channel.id].reset_args)
-            self.table_instances[ctx.channel.id].choose_message= "A tabler watching room {} is currently active.\nAre you sure you want to start a new table? (?yes/?no)".format(self.table_instances[ctx.channel.id].rxx)
+            self.table_instances[ctx.channel.id].choose_message= "A tabler watching room {} is currently active.\nAre you sure you want to start a new table? (`?yes` / `?no`)".format(self.table_instances[ctx.channel.id].rxx)
             await self.send_messages(ctx, self.table_instances[ctx.channel.id].choose_message)
             return
-        usage = "`Usage: ?start <format> <number of teams> <gps = 3>`"
+        usage = "Usage: `?start <format> <number of teams> <gps = 3>`"
         
         #print(args)
         if len(args)<1:
@@ -168,7 +171,7 @@ class table_bot(commands.Cog):
             try:
                 teams = int(args[1].lower())
             except:
-                await self.send_messages(ctx, "Invalid use of ?start: <teams> must be an integer.", usage)
+                await self.send_messages(ctx, "Invalid use of `?start`: <teams> must be an integer.", usage)
                 return
         
         if Utils.check_teams(_format, teams):
@@ -226,7 +229,7 @@ class table_bot(commands.Cog):
             return
        
         if not self.table_instances[ctx.channel.id].searching_room:
-            await self.send_temp_messages(ctx, "You cannot search for a room if a table is currently running or a table hasn't been started yet.")
+            await self.send_temp_messages(ctx, "You cannot search for a room right now. You can only use this command after the `?sw` command.")
             return
         
         arg = arg.strip()
@@ -260,7 +263,7 @@ class table_bot(commands.Cog):
             wait_mes = await ctx.send('Searching for room...')
             error, ask, self.table_instances[ctx.channel.id].choose_message = await self.table_instances[ctx.channel.id].find_room(mii = search_args)
         else:
-            await self.send_messages(ctx, "Invalid argument for ?search: <search type> must be 'rxx' or 'mii'", usage)
+            await self.send_messages(ctx, "Invalid argument for `?search`: <search type> must be 'rxx' or 'mii'", usage)
             return
         
         if error:
@@ -285,6 +288,10 @@ class table_bot(commands.Cog):
     async def search_error(self,ctx, error):
         self.set_instance(ctx)
         if isinstance(error, commands.MissingRequiredArgument):
+            if not self.table_instances[ctx.channel.id].searching_room:
+                await self.send_temp_messages(ctx, "You cannot search for a room right now. You can only use this command after the `?sw` command.")
+                return
+
             await self.send_messages(ctx, "Usage: `?search <rxx or mii> <rxx or name(s)>`\nmkwx room list: {}".format(self.home_url)) 
     
     @commands.command(aliases=['name'])
@@ -338,8 +345,8 @@ class table_bot(commands.Cog):
         tag = args[1]
         mes= self.table_instances[ctx.channel.id].change_tag(pID, tag)
         if self.table_instances[ctx.channel.id].confirm_room:
-            self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].get_player_list() +"\n**Is this correct?** (?yes / ?no)"
-            await self.send_messages(ctx, mes, self.table_instances[ctx.channel.id].get_player_list(), "\n**Is this correct?** (?yes / ?no)")
+            self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].get_player_list() +"\n**Is this correct?** (`?yes` / `?no`)"
+            await self.send_messages(ctx, mes, self.table_instances[ctx.channel.id].get_player_list(), "\n**Is this correct?** (`?yes` / `?no`)")
         else:
             await self.send_messages(ctx, mes)
         
@@ -364,8 +371,8 @@ class table_bot(commands.Cog):
         
         mes = self.table_instances[ctx.channel.id].edit_tag_name(arg)
         if self.table_instances[ctx.channel.id].confirm_room:
-            self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].get_player_list() +"\n**Is this correct?** (?yes / ?no)"
-            await self.send_messages(ctx, mes, self.table_instances[ctx.channel.id].get_player_list(), "\n**Is this correct?** (?yes / ?no)")
+            self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].get_player_list() +"\n**Is this correct?** (`?yes` / `?no`)"
+            await self.send_messages(ctx, mes, self.table_instances[ctx.channel.id].get_player_list(), "\n**Is this correct?** (`?yes` / `?no`)")
         else:
             await self.send_messages(ctx, mes)
             
@@ -406,8 +413,8 @@ class table_bot(commands.Cog):
         
         mes = self.table_instances[ctx.channel.id].group_tags(dic)
         if self.table_instances[ctx.channel.id].confirm_room:
-            self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].get_player_list() +"\n**Is this correct?** (?yes / ?no)"
-            await self.send_messages(ctx, mes, self.table_instances[ctx.channel.id].get_player_list(), "\n**Is this correct?** (?yes / ?no)")
+            self.table_instances[ctx.channel.id].choose_message = self.table_instances[ctx.channel.id].get_player_list() +"\n**Is this correct?** (`?yes` / `?no`)"
+            await self.send_messages(ctx, mes, self.table_instances[ctx.channel.id].get_player_list(), "\n**Is this correct?** (`?yes` / `?no`)")
         else:
             await self.send_messages(ctx, mes, self.table_instances[ctx.channel.id].get_player_list())
         
@@ -424,7 +431,7 @@ class table_bot(commands.Cog):
     async def yes(self,ctx, *args):
         
         if not self.table_instances[ctx.channel.id].confirm_room and not self.table_instances[ctx.channel.id].confirm_reset:
-            await self.send_temp_messages(ctx, "You can only use ?yes if the bot prompts you to do so.")
+            await self.send_temp_messages(ctx, "You can only use `?yes` if the bot prompts you to do so.")
             return
         
         if self.table_instances[ctx.channel.id].confirm_room:
@@ -451,7 +458,7 @@ class table_bot(commands.Cog):
     async def no(self,ctx, *args):
         
         if not self.table_instances[ctx.channel.id].confirm_room and not self.table_instances[ctx.channel.id].confirm_reset:
-            await self.send_temp_messages(ctx, "You can only use ?no if the bot prompts you to do so.")
+            await self.send_temp_messages(ctx, "You can only use `?no` if the bot prompts you to do so.")
             return 
         if self.table_instances[ctx.channel.id].confirm_room:
             self.table_instances[ctx.channel.id].confirm_room = False
@@ -522,7 +529,7 @@ class table_bot(commands.Cog):
                 args = 0
             else:
                 args=-1
-        mes = self.table_instances[ctx.channel.id].undo_commands(args)
+        mes = await self.table_instances[ctx.channel.id].undo_commands(args)
         await self.send_messages(ctx,mes)
     
     @commands.command(aliases=['undolist'])
@@ -747,7 +754,7 @@ class table_bot(commands.Cog):
     async def edit_error(self, ctx, error): 
         if await self.check_callable(ctx, "edit"): return
         if isinstance(error, commands.MissingRequiredArgument): 
-            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), "\nUsage: ?edit <player id> <gp number> <gp score>")
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), "\nUsage: `?edit <player id> <gp number> <gp score>`")
 
     @commands.command(aliases = ['rr', 'res', 'results', 'race'])
     async def raceresults(self,ctx, *args):
@@ -836,7 +843,7 @@ class table_bot(commands.Cog):
         if self.table_instances[ctx.channel.id].format[0].lower()=='f':
             await self.send_temp_messages(ctx, "You cannot use team penalty commands in FFAs.")
             return
-        usage = "?teampen <team> <penalty>"
+        usage = "Usage: `?teampen <team> <penalty>`"
         
         if len(args)==0:
             await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_pen_player_list(), '\n'+usage)
@@ -910,7 +917,7 @@ class table_bot(commands.Cog):
         
         if len(arg)==0:
             await ctx.send("**Note: This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally this command should be used immediately after the table picture updates with the race that needs to be removed.**")
-            mes = self.table_instances[ctx.channel.id].remove_race(-1)
+            mes = await self.table_instances[ctx.channel.id].remove_race(-1)
             await self.send_messages(ctx, mes)
             return
         arg = arg[0]
@@ -919,7 +926,7 @@ class table_bot(commands.Cog):
             return
         
         await ctx.send("**Note: This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally this command should be used immediately after the table picture updates with the race that needs to be removed.**")
-        mes = self.table_instances[ctx.channel.id].remove_race(int(arg))
+        mes = await self.table_instances[ctx.channel.id].remove_race(int(arg))
         await self.send_messages(ctx, mes)
         
     @removerace.error
