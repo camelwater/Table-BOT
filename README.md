@@ -6,7 +6,9 @@ It scrapes the data of a room on www.wiimmfi.de/stats/mkwx and calculates scores
 ## Important information
 
 Here is some terminology that the bot uses:
+
 **rxx** - room id (on www.wiimmfi.de/stats/mkwx website)
+
 **mii** - a player's in-game display name
 
 ## Bot Usage
