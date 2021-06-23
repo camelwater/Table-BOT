@@ -10,6 +10,7 @@ from discord.ext import commands, tasks
 from cogs.tabler import Table
 from itertools import cycle
 import Utils
+from datetime import datetime, timedelta
 
 class table_bot(commands.Cog):
     def __init__(self, bot):
@@ -52,6 +53,20 @@ class table_bot(commands.Cog):
             if active_tables==1: next_pres = next_pres.replace("tables", "table")
         pres = discord.Activity(type=discord.ActivityType.watching, name=next_pres)
         await self.bot.change_presence(status=discord.Status.online, activity=pres)
+    
+    @commands.Cog.listener()
+    async def on_command(self, ctx):
+        self.set_instance(ctx)
+        if ctx.command not in self.bot.get_cog('table_bot').get_commands(): return
+        self.table_instances[ctx.channel.id].last_command_sent = datetime.now()
+        
+    
+    #remove inactive bot instances (inactivity > 45 minutes)
+    @tasks.loop(minutes = 15)
+    async def check_inactivity(self):
+        for channel, instance in self.table_instances.items():
+            if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes = 45):
+                self.table_instances.pop(channel)
                 
     def get_active_tables(self):
         count = 0
@@ -62,11 +77,11 @@ class table_bot(commands.Cog):
     
     def set_instance(self, ctx):
         channel_id = ctx.channel.id
-        if channel_id not in self.table_instances:
-            self.table_instances[channel_id] = Table()
-        self.table_instances[ctx.channel.id].ctx = ctx
-        if self.table_instances[ctx.channel.id].bot is None:
-            self.table_instances[ctx.channel.id].bot = self.bot
+        if channel_id in self.table_instances: return
+
+        self.table_instances[channel_id] = Table()
+        self.table_instances[channel_id].ctx = ctx
+        self.table_instances[channel_id].bot = self.bot
      
     async def send_temp_messages(self,ctx, *args):
         await ctx.send('\n'.join(args), delete_after=25)
@@ -76,10 +91,6 @@ class table_bot(commands.Cog):
         except discord.errors.Forbidden:
             await ctx.send("I do not have adequate permissions. Check `?help` for a list of the permissions that I need.".format('s'))
       
-    # @commands.Cog.listener()
-    # async def on_command_error(self,ctx, error):
-    #     self.set_instance(ctx)
-
     async def check_callable(self, ctx, command): #for most commands
         if self.table_instances[ctx.channel.id].confirm_room or self.table_instances[ctx.channel.id].confirm_reset:
             await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.table_instances[ctx.channel.id].choose_message)
@@ -428,7 +439,7 @@ class table_bot(commands.Cog):
             await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), "\nUsage: `?tags <tag> <pID(s)> / <tag> <pID(s)>`\n**ex.** `?tags Player 1 3 / Z 2 4 / B 5 6`")
     
     @commands.command(aliases=['y'])
-    async def yes(self,ctx, *args):
+    async def yes(self,ctx):
         
         if not self.table_instances[ctx.channel.id].confirm_room and not self.table_instances[ctx.channel.id].confirm_reset:
             await self.send_temp_messages(ctx, "You can only use `?yes` if the bot prompts you to do so.")
@@ -455,7 +466,7 @@ class table_bot(commands.Cog):
             await self.start(ctx, self.table_instances[ctx.channel.id].reset_args)
         
     @commands.command(aliases=['n'])
-    async def no(self,ctx, *args):
+    async def no(self,ctx):
         
         if not self.table_instances[ctx.channel.id].confirm_room and not self.table_instances[ctx.channel.id].confirm_reset:
             await self.send_temp_messages(ctx, "You can only use `?no` if the bot prompts you to do so.")
@@ -752,6 +763,7 @@ class table_bot(commands.Cog):
         '''
     @edit.error
     async def edit_error(self, ctx, error): 
+        self.set_instance(ctx)
         if await self.check_callable(ctx, "edit"): return
         if isinstance(error, commands.MissingRequiredArgument): 
             await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), "\nUsage: `?edit <player id> <gp number> <gp score>`")
@@ -869,7 +881,7 @@ class table_bot(commands.Cog):
             await self.send_temp_messages(ctx, "You cannot use team penalty commands in FFAs.")
             return
         
-        usage = "Usage: `?unpen <team> <unpen amount = current pen>`"
+        usage = "Usage: `?teamunpen <team> <unpen amount = current pen>`"
         
         if len(args)==0:
             await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_pen_player_list(), '\n'+usage)
@@ -904,7 +916,7 @@ class table_bot(commands.Cog):
         
     @mergeroom.error
     async def mergeroom_error(self, ctx, error):
-        
+        self.set_instance(ctx)
         if await self.check_callable(ctx, "mergeroom"): return
         if isinstance(error, commands.MissingRequiredArgument):
             await self.send_temp_messages(ctx, 'Usage: `?mergeroom <rxx or mii name(s) in room>`')
@@ -931,6 +943,7 @@ class table_bot(commands.Cog):
         
     @removerace.error
     async def removerace_error(self, ctx, error):
+        self.set_instance(ctx)
         if await self.check_callable(ctx, "removerace"): return
         
         if isinstance(error, commands.MissingRequiredArgument):

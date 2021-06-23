@@ -36,8 +36,8 @@ class TableBOT(commands.Bot):
         elif isinstance(error, commands.MaxConcurrencyReached):
             await ctx.send("This command can only be used by {} user at a time. Try again later.".format(error.number))
         elif isinstance(error, commands.MissingRequiredArgument):
-            #pass
-            raise error
+            pass
+            #raise error
         else:
             await ctx.send("An unidentified internal bot error occurred. Wait a bit and try again later.\nIf this issue persists, `?reset` the table.")
             raise error

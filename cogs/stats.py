@@ -3,8 +3,6 @@ from discord.ext import tasks, commands
 from collections import Counter
 import json
 
-#TODO: add pickle file and atexit thing (to store command usage)
-
 class Stats(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

@@ -127,24 +127,18 @@ def strip_CJK(string):
 
     '''
     string = list(string)
-    ret = string
-    for ind,i in enumerate(string):
-        if is_CJK(i) or unidecode(i)=='':
-            del ret[ind]
+    ret = [i for i in string if not is_CJK(i) or unidecode(i)==""]
     no_cjk = ''.join(ret)
-    no_special = re.sub(r'\W+', '', no_cjk, re.UNICODE)
     return no_cjk
 
 
 def replace_brackets(string):
     string = string.lstrip('[').lstrip(']').lstrip('(').lstrip(')').lstrip('{').lstrip('}')
     string = list(unidecode(string))
-    ret = string
-    for ind,i in enumerate(string):
-        if not i.isalpha():
-            del ret[ind]
+    ret = [i for i in string if i.isalnum()]
+    
     return ''.join(ret)
 
 def dis_clean(string):
-    return string.replace("*", "\*").replace("`",'\`').replace("_", "\_")
+    return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~")
     
