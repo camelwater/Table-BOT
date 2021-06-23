@@ -31,6 +31,7 @@ ex. `?picture byrace=yes`
 
 Fetches a table picture (from www.gb.hlorenzi.com/table) of the room's scores. `byrace` is an optional argument that can be used if you would like to see the table scores organized by each race (it defaults to every gp, which is every 4 races).
 
+
 ### Correction commands
 
 These commands are used to correct the table. These commands are sometimes necessary, as the website from where room data comes from (www.wiimmfi.de/stats/mkwx) is quite unreliable and often reports information that contradicts in-game results.
@@ -40,6 +41,7 @@ These commands are used to correct the table. These commands are sometimes neces
 `?editrace`
 
 `?changeroomsize`
+
 
 ### Utility commands
 
