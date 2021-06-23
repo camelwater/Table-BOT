@@ -27,7 +27,6 @@ class Table():
         if self.TESTING:
             self.init_testing()
         
-
         self.URL = "https://wiimmfi.de/stats/mkwx"
         self.ROOM_URL = "https://wiimmfi.de/stats/mkwx/list/{}"
         self.current_url = ""
@@ -357,23 +356,20 @@ class Table():
         per_team = int(f)
         teams = {} #tag: list of players
         player_copy = list(self.display_names.values()) if not self.IGNORE_FCS else list(copy.deepcopy(self.players).keys())
-        print(player_copy)
+        #print(player_copy)
         post_players = []
         un_players = []
         
         i = 0
         while i< len(player_copy):
-            
             tag = ''
             matches = 1
-            #most_matches = [1, '']
             indx = len(player_copy[i])+1
 
             while matches < per_team and indx>0:
                 indx-=1
                 matches = 1
                 for j in range(len(player_copy)):
-                    #print("s")
                     if i!=j and indx>0 and unidecode(Utils.strip_CJK(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx] == unidecode(Utils.strip_CJK(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx]:
                         matches+=1
                         
@@ -489,8 +485,7 @@ class Table():
                                     except:
                                         pass
                                 i = 1
-                            cont=True
-                                
+                            cont=True  
                             break
                                 
                 if cont:
@@ -508,7 +503,7 @@ class Table():
         teams_needed = num_teams-len(teams.keys())
         if(len(all_tag_matches)>=teams_needed):
             for t in range(teams_needed):
-                all_tag_matches = defaultdict(list,dict(sorted(all_tag_matches.items(), key=lambda item: len(item[1]), reverse=True)))
+                all_tag_matches = dict(sorted(all_tag_matches.items(), key=lambda item: len(item[1]), reverse=True))
                 teams[list(all_tag_matches.keys())[0]] = all_tag_matches[list(all_tag_matches.keys())[0]]
                 for p in all_tag_matches[list(all_tag_matches.keys())[0]]:
                     try:
@@ -572,8 +567,8 @@ class Table():
                         else:
                             continue
         
-        print(teams)
         if not self.IGNORE_FCS:
+            print(teams)
             for i in teams.items():
                 teams[i[0]] = [self.fcs[j] for j in i[1]]  
         self.tags = teams
@@ -2011,6 +2006,7 @@ class Table():
         shift = len(self.races) if not recalc else 0
         reference_warnings = self.warnings if reference_warnings is None else reference_warnings
         rID = self.rxx
+
         if not recalc:
             soup = await self.fetch(self.current_url)
             if isinstance(soup, str) and 'error' in soup:
@@ -2151,7 +2147,6 @@ class Table():
                                 except:
                                     self.dc_pts[mp] = [[shift+raceNum+1, [i for i in range(shift+raceNum+1, shift+raceNum+1+(4-((shift+raceNum)%4))%4)]]]
                                     
-                            
                                 self.dc_ids_append(mp, shift+raceNum+1)
                                 if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                                 self.gp_dcs[self.gp].append(mp)
@@ -2190,36 +2185,36 @@ class Table():
                         self.warnings[shift+raceNum+1].append({'type':'sub', 'player': fc})
 
                 miiName = self.display_names[fc]
-        
-                try:
-                    self.players[fc][1][self.gp] += self.pts[cur_room_size][place]
-                    self.players[fc][2][shift+raceNum] = self.pts[cur_room_size][place]
-                    self.players[fc][0] += self.pts[cur_room_size][place]
+                
+                self.players[fc][1][self.gp] += self.pts[cur_room_size][place]
+                self.players[fc][2][shift+raceNum] = self.pts[cur_room_size][place]
+                self.players[fc][0] += self.pts[cur_room_size][place]
+                
+                #check for ties
+                if time in list(last_finish_times.values()):
+                    for index,t in enumerate(list(last_finish_times.values())):
+                        if t == time:
+                            if shift+raceNum+1 not in self.ties:
+                                self.ties[shift+raceNum+1] = {}
+                            if time in self.ties[shift+raceNum+1]:
+                                self.ties[shift+raceNum+1][time].append(list(last_finish_times.keys())[index])
+                            else:
+                                self.ties[shift+raceNum+1][time] = [list(last_finish_times.keys())[index]]
                     
-                    #check for ties
-                    if time in list(last_finish_times.values()):
-                        for index,t in enumerate(list(last_finish_times.values())):
-                            if t == time:
-                                if shift+raceNum+1 not in self.ties:
-                                    self.ties[shift+raceNum+1] = {}
-                                if time in self.ties[shift+raceNum+1]:
-                                    self.ties[shift+raceNum+1][time].append(list(last_finish_times.keys())[index])
-                                else:
-                                    self.ties[shift+raceNum+1][time] = [list(last_finish_times.keys())[index]]
-                        
-                        self.ties[shift+raceNum+1][time].append(fc)
-                    
-                    if ":" in time and int(time[0:time.find(':')])>=5:
-                        if self.sui:
-                            if "Large finish times occurred, but are being ignored. Table could be inaccurate." not in self.warnings[-1]:
-                                self.warnings[-1].append("Large finish times occurred, but are being ignored. Table could be inaccurate.")
+                    self.ties[shift+raceNum+1][time].append(fc)
+                
+                if ":" in time and int(time[0:time.find(':')])>=5:
+                    if self.sui:
+                        if "Large finish times occurred, but are being ignored. Table could be inaccurate." not in self.warnings[-1]:
+                            self.warnings[-1].append("Large finish times occurred, but are being ignored. Table could be inaccurate.")
 
-                        else:
-                            self.warnings[shift+raceNum+1].append({'type': 'large_time', 'player':fc, 'time':time})
- 
-                    last_finish_times[fc] = time
+                    else:
+                        self.warnings[shift+raceNum+1].append({'type': 'large_time', 'player':fc, 'time':time})
+
+                last_finish_times[fc] = time
+
+                try:
                     assert(time!='DC')
-                    
                 except AssertionError:
                     if self.gp not in self.gp_dcs or fc not in self.gp_dcs[self.gp]:
                         if (shift+raceNum)%4==0:
@@ -2275,7 +2270,6 @@ class Table():
     def create_string(self, by_race = False):
         self.tags = {k:v for k,v in self.tags.items() if len(v)>0}
         
-                
         ret = "#title {} {}".format(len(self.races), "race" if len(self.races)==1 else 'races')
         if self.format[0] == 'f':
             ret+='\nFFA'
@@ -2449,7 +2443,6 @@ class Table():
                     if '?editrace' in j[0] and int(j[2])==raceNum:
                         count+=1
             if count==1: 
-                #print("ASD")
                 self.manual_warnings[raceNum].pop(self.manual_warnings[raceNum].index("Placements for this race have been manually altered by the tabler."))
                 
         elif '?dcs' in mod_type:
