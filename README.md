@@ -29,7 +29,7 @@ Searches for a room on www.wiimmfi.de/stats/mkwx that best fits the arguments pr
 `?picture (byrace=no)`\
 ex. `?picture byrace=yes`
 
-Fetches a table picture (from www.gb.hlorenzi.com/table) of the room's scores. `byrace` is an optional argument that can be used if you would like to see the table scores organized by each race (it defaults to every gp, which is every 4 races).
+Fetches a table picture (from gb.hlorenzi.com/table) of the room's scores. `byrace` is an optional argument that can be used if you would like to see the table scores organized by each race (it defaults to every gp, which is every 4 races).
 
 
 ### Correction commands
