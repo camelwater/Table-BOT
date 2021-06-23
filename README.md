@@ -45,7 +45,7 @@ These commands are used to correct the table. These commands are sometimes neces
 
 ### Utility commands
 
-These commands can be used to edit the table based on your custom rules. For example, penalizing players.
+These commands can be used to edit the table based on your custom ruleset outside of MKW's basic system. For example, penalizing players.
 
 `?edit`
 
