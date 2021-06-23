@@ -6,8 +6,8 @@ It scrapes the data of a room on www.wiimmfi.de/stats/mkwx and calculates scores
 ## Important information
 
 Here is some terminology that the bot uses:
-[rxx] - room id (on www.wiimmfi.de/stats/mkwx website)
-[mii] - a player's in-game display name
+**rxx** - room id (on www.wiimmfi.de/stats/mkwx website)
+**mii** - a player's in-game display name
 
 ## Bot Usage
 
@@ -16,7 +16,7 @@ Commands are executed by providing the required arguments (in brackets) and addi
 `?start [format] [numTeams] (room rxx) (gps=3) (sui=no)`
 ex. `?start 5v5 2 sui=yes`
 
-Initializes a table instance with the given format (FFA 2v2, 3v3, etc.) and number of teams. Optionally, if you already know the room id (rxx) of the desired room, you can input that to skip the next step.
+Initializes a table instance with the given format (FFA 2v2, 3v3, etc.) and number of teams. Optionally, if you already know the room id (rxx) of the desired room, you can provide it to the command to skip the next step.
 
 `?search [mii|rxx] [<miiName>,...|rxx]`
 ex. `?search mii camelwater123, beffjeff`
@@ -30,6 +30,8 @@ Fetches a table picture (from www.gb.hlorenzi.com/table) of the room's scores. `
 
 ### Correction commands
 
+These commands are used to correct the table. These commands are sometimes necessary, as the website from where room data comes from (www.wiimmfi.de/stats/mkwx) is quite unreliable and often reports information that contradicts in-game results.
+
 `?dcs`
 
 `?editrace`
@@ -37,6 +39,8 @@ Fetches a table picture (from www.gb.hlorenzi.com/table) of the room's scores. `
 `?changeroomsize`
 
 ### Utility commands
+
+These commands can be used to edit the table based on your custom rules. For example, penalizing players.
 
 `?edit`
 
@@ -57,6 +61,8 @@ Fetches a table picture (from www.gb.hlorenzi.com/table) of the room's scores. `
 `?reset`
 
 ### Information commands
+
+These commands provide extra information and useful insight to the room.
 
 `?players`
 
