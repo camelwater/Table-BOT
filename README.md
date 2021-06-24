@@ -3,7 +3,7 @@
 Table BOT is a discord bot made to automate the process of scoring and tabling an MKW private room, especially wars and lounge matches.
 It scrapes the data of rooms from www.wiimmfi.de/stats/mkwx and calculates scores for the teams and the players to create a table picture, as well as providing additional tools to edit and correct tables.
 
-## Important information
+## Important Information
 
 Here is some terminology that the bot uses:
 
@@ -32,7 +32,7 @@ ex. `?picture byrace=yes`
 Fetches a table picture (from https://gb.hlorenzi.com/table) of the room's scores. `byrace` is an optional argument that can be included if you would like to see the table scores organized by each race (it defaults to every gp, which is every 4 races).
 
 
-### Correction commands
+### Correction Commands
 
 These commands are used to correct the table. These commands are sometimes necessary, as the website from where room data comes from (www.wiimmfi.de/stats/mkwx) is quite unreliable and often reports information that contradicts in-game results.
 
@@ -43,7 +43,7 @@ These commands are used to correct the table. These commands are sometimes neces
 `?changeroomsize`
 
 
-### Utility commands
+### Utility Commands
 
 These commands can be used to edit the table based on your custom ruleset outside of MKW's basic system. For example, penalizing players.
 
@@ -65,7 +65,7 @@ These commands can be used to edit the table based on your custom ruleset outsid
 
 `?reset`
 
-### Information commands
+### Information Commands
 
 These commands provide extra information and useful insight to the room.
 
