@@ -23,7 +23,7 @@ class table_bot(commands.Cog):
         if self.TESTING:
             table = Table(testing=True)
         
-    
+
     @commands.Cog.listener()
     async def on_ready(self):
         if not self.cycle_presences.is_running():
@@ -154,7 +154,6 @@ class table_bot(commands.Cog):
             return
         usage = "Usage: `?start <format> <number of teams> <gps = 3>`"
         
-        #print(args)
         if len(args)<1:
             await self.send_temp_messages(ctx, usage)
             return
@@ -165,19 +164,21 @@ class table_bot(commands.Cog):
             
         _format = args[0].lower()
         
-        if len(args)<2 and _format[0]!='f':
-            await self.send_temp_messages(ctx, "Missing <teams>.", usage)
-            return
-        
+        # if len(args)<2 and _format[0]!='f':
+        #     await self.send_temp_messages(ctx, "Missing <teams>.", usage)
+        #     return
+
+        teams = Utils.max_teams(_format)
+        if len(args)<2 or not args[1].isnumeric():
+            args.insert(1, teams)
         
         if _format not in ['ffa', '2v2', '3v3', '4v4', '5v5', '6v6', '2', '3', '4', '5', '6']:
             await self.send_messages(ctx, "Invalid format. Format must be FFA, 2v2, 3v3, 4v4, 5v5, or 6v6.", usage)
             return
         
-        teams = Utils.max_teams(_format)
         if len(args)>1:
             try:
-                teams = int(args[1].lower())
+                teams = int(args[1])
             except:
                 await self.send_messages(ctx, "Invalid use of `?start`: <teams> must be an integer.", usage)
                 return
@@ -192,7 +193,7 @@ class table_bot(commands.Cog):
         gps = 3
         sui=None
         for i in args:
-            if 'sui=' in i:
+            if isinstance(i, str) and 'sui=' in i:
                 sui = args.pop(args.index(i))
                 break
         if sui!=None:

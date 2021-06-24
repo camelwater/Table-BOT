@@ -14,7 +14,7 @@ def max_teams(f):
         return 12
     else:
         f = int(f)
-        return 12/f
+        return int(12/f)
     
 #check if number of teams exceeds max possible teams for format
 def check_teams(f, teams):

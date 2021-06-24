@@ -22,6 +22,7 @@ import Utils
 #TODO: add graph and style options
 class Table():
     def __init__(self, testing = False):
+        print("test:",unidecode('νε'))
         self.TESTING = testing
         self.IGNORE_FCS = False
         if self.TESTING:
@@ -369,7 +370,7 @@ class Table():
             while matches < per_team and indx>0:
                 indx-=1
                 matches = 1
-                for j in range(len(player_copy)):
+                for j in range(len(player_copy)):                    
                     if i!=j and indx>0 and unidecode(Utils.strip_CJK(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx] == unidecode(Utils.strip_CJK(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx]:
                         matches+=1
                         
@@ -530,12 +531,12 @@ class Table():
                 match = 0
                 
                 for j in range(len(un_players)):
-                    m = Utils.LCS(unidecode(Utils.strip_CJK(un_players[i].strip().lower().replace("[","").replace(']',''))), unidecode(Utils.strip_CJK(un_players[j].strip().lower().replace("[","").replace(']',''))))
+                    m = Utils.LCS(unidecode(Utils.strip_CJK(un_players[i].strip().lower().replace("[","").replace(']','').replace(" ", ""))), unidecode(Utils.strip_CJK(un_players[j].strip().lower().replace("[","").replace(']','').replace(" ",""))))
                     if un_players[i]!=un_players[j] and len(m)>longest_match:
                         longest_match = len(m)
                         match= un_players[i], un_players[j]
                         tag = m
-                
+
                 if match == 0 or tag == '':
                     i+=1
                 else:
@@ -572,6 +573,7 @@ class Table():
             for i in teams.items():
                 teams[i[0]] = [self.fcs[j] for j in i[1]]  
         self.tags = teams
+        self.all_players = copy.deepcopy(self.tags)
         self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].lower())))
         self.tags = {k.strip(): v for (k, v) in self.tags.items()}
         print()
@@ -1277,7 +1279,6 @@ class Table():
                 self.fcs[miiName] = fc
                 self.display_names[fc] = miiName
         
-        self.all_players = list(self.players.keys())
         self.players = dict(sorted(self.players.items(), key=lambda item: item[0]))
         if self.format[0].lower() == 'f': print(self.players.keys())
         
@@ -1292,12 +1293,28 @@ class Table():
     
     def get_all_players(self): 
         ret = ''
+        for tag, players in self.tags.items():
+            if tag not in self.all_players:
+                for t1 in self.all_players.items():
+                    for p in players:
+                        if p in t1[1]:
+                            self.all_players[t1[0]].remove(p)
+                self.all_players[tag] = players
+                continue
+            
+            for p in players: 
+                if p not in self.all_players[tag]:
+                    self.all_players[tag].append(p)
+
+        self.all_players = dict(sorted(self.all_players.items(), key=lambda item: unidecode(item[0].upper())))
         
-        self.all_players.sort(key=lambda x: unidecode(self.display_names[x].lower()))
-        for i,p in enumerate(self.all_players):
-            ret+="\n{}. {}".format(i+1, Utils.dis_clean(self.display_names[p]))
-            if p in self.deleted_players:
-                ret+=' (removed by tabler)'
+        count = 0
+        for tag in self.all_players.items():
+            for p in tag[1]:
+                count+=1
+                ret+="\n{}. {}".format(count, Utils.dis_clean(self.display_names[p]))
+                if p in self.deleted_players:
+                    ret+=' (removed by tabler)'
         
         return ret
             
