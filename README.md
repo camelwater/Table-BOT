@@ -1,6 +1,6 @@
 # Table BOT
 
-Table BOT is a discord bot made to automate the process of scoring and tabling an MKW private room, especially wars and lounge matches.
+Table BOT is a discord bot made to automate the process of scoring and tabling MKW private rooms, which is especially useful for wars and lounge matches.
 It scrapes the data of rooms from www.wiimmfi.de/stats/mkwx and calculates scores for the teams and the players to create a table picture, as well as providing additional tools to edit and correct tables.
 
 ## Important Information
