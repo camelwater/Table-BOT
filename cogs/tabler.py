@@ -22,7 +22,6 @@ import Utils
 #TODO: add graph and style options
 class Table():
     def __init__(self, testing = False):
-        print("test:",unidecode('νε'))
         self.TESTING = testing
         self.IGNORE_FCS = False
         if self.TESTING:
@@ -500,10 +499,17 @@ class Table():
                 else:
                     all_tag_matches[item[0]] = item[1]
         
-
+        #print(post_players)
         teams_needed = num_teams-len(teams.keys())
         if(len(all_tag_matches)>=teams_needed):
             for t in range(teams_needed):
+                for x in copy.deepcopy(all_tag_matches).items():
+                    for player in x[1]:
+                        if player not in post_players:
+                            all_tag_matches[x[0]].remove(player)
+                    if len(x[1]) == 0:
+                        all_tag_matches.pop(x[0])
+
                 all_tag_matches = dict(sorted(all_tag_matches.items(), key=lambda item: len(item[1]), reverse=True))
                 teams[list(all_tag_matches.keys())[0]] = all_tag_matches[list(all_tag_matches.keys())[0]]
                 for p in all_tag_matches[list(all_tag_matches.keys())[0]]:
@@ -512,12 +518,7 @@ class Table():
                     except:
                         pass
                 all_tag_matches.pop(list(all_tag_matches.keys())[0])
-                for x in copy.deepcopy(all_tag_matches).items():
-                    for player in x[1]:
-                        if player not in post_players:
-                            all_tag_matches[x[0]].remove(player)
-                    if len(x[1]) == 0:
-                        all_tag_matches.pop(x[0])
+                
                         
         un_players = copy.deepcopy(post_players)
         post_players.clear()
@@ -622,7 +623,7 @@ class Table():
             else:
                 race = warning.get('race')
                 if race == 1:
-                    ret = warning_map.get((warning_type,race)).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('gp'))
+                    ret = warning_map.get((warning_type,race)).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('gp'), warning.get('gp'))
                 else:
                     ret = warning_map.get(warning_type).format(self.display_names[warning.get('player')], warning.get('rem_races'), warning.get('gp'), warning.get('pts'))
         
@@ -734,18 +735,26 @@ class Table():
                 data = self.tags.pop(orig)
                 new = self.check_tags(new)
                 self.tags[new]= data
+                self.all_players[new] = self.all_players.pop(orig)
                 ret+= "Edited tag '{}' to '{}'.{}".format(orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
                 
             else:
+                comp = orig.upper()
                 try:
-                    data = self.tags.pop(orig)
+                    data = None
+                    for i in self.tags.keys():
+                        if comp == i.upper():
+                            data = self.tags.pop(i)
+                            break
+                    assert(data is not None)
                 except:
-                    string = "Tag '{}' not a valid tag. Tags are case-sensitive.\nThe tag to edit must be one of the following:\n".format(orig)
+                    string = "Tag '{}' not a valid tag. The tag to edit must be one of the following:\n".format(orig)
                     for i in list(self.tags.keys()):
                         string+='**   - {}**\n'.format(i)
                     return string
                 new = self.check_tags(new)
                 self.tags[new] = data
+                self.all_players[new] = self.all_players.pop(orig)
                 ret+= "Edited tag '{}' to '{}'.{}".format(orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
                 
             if not reundo and self.table_running:
@@ -800,20 +809,25 @@ class Table():
             try:
                 player = self.player_ids[player]
             except:
-                return "Player id: {} not valid. It must be from {}-{}".format(player, 0,len(self.players))
+                return "Player id: {} is not valid. It must be from {}-{}".format(player, 0,len(self.players))
         old_tag = ""
         for i in self.tags.items():
             if player in i[1]:
                 old_tag = i[0]
                 old_indx = i[1].index(player)
                 i[1].remove(player)
+                self.all_players[i[0]].remove(player)
         if tag not in self.tags:
             self.tags[tag] = [player]
+            self.all_players[tag] = [player]
         else:
             if reundo and restore_indx is not None:
                 self.tags[tag].insert(restore_indx, player)
+                self.all_players[tag].insert(restore_indx, player)
             else:
                 self.tags[tag].append(player)
+                self.all_players[tag].append(player)
+
         empty_keys = [k[0] for k in list(self.tags.items()) if len(k[1])==0]
         for k in empty_keys:
             del self.tags[k]
@@ -1029,7 +1043,11 @@ class Table():
                 continue
             
             if '-' in score or '+' in score:
-                self.edited_scores[int(gp)][player] = self.players[player][1][int(gp)-1] + int(score)
+                if int(gp) in self.edited_scores[player]:
+                    self.edited_scores[player][int(gp)] += int(score)                    
+                else:
+                    self.edited_scores[player][int(gp)] = self.players[player][1][int(gp)-1] + int(score)
+                    
                 
                 if not redo:
                     self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
@@ -1041,9 +1059,9 @@ class Table():
                     pass
                 self.manual_warnings[-1].append("GP {} scores have been manually modified by the tabler.".format(gp))
                     
-                return "{} GP {} score changed to {}".format(self.display_names[player], gp, self.players[player][1][int(gp)-1])
+                return "{} GP {} score changed to {}".format(self.display_names[player], gp, self.edited_scores[player][int(gp)])
             else:
-                self.edited_scores[int(gp)][player] = int(score)
+                self.edited_scores[player][int(gp)] = int(score)
                 
                 if not redo:
                     self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
@@ -1059,7 +1077,7 @@ class Table():
         return ret
     
     def undo_edit(self, player, gp):
-        self.edited_scores[int(gp)].pop(player)
+        self.edited_scores[player].pop(int(gp))
        
     def get_rxx(self):
         ret = ""
@@ -1307,7 +1325,7 @@ class Table():
                     self.all_players[tag].append(p)
 
         self.all_players = dict(sorted(self.all_players.items(), key=lambda item: unidecode(item[0].upper())))
-        
+
         count = 0
         for tag in self.all_players.items():
             for p in tag[1]:
@@ -1320,17 +1338,18 @@ class Table():
             
     def add_sub_player(self,player, fc):
         if fc in self.all_players: return 'failed'
-        self.all_players.append(fc)
+        #self.all_players.append(fc)
         self.players[fc] = [0,[0]*self.gps, [0]*self.gps*4]
         self.fcs[player] = fc
         self.display_names[fc] = player
 
         if len(self.players)-1<self.num_players:
+            print("asd")
             for dc_item, warn_item in zip(enumerate(self.dc_list[1]), enumerate(self.warnings[1])):
-                if "should've started with" in dc_item[1]:
+                if dc_item[1].get('type') == "missing":
                     #print(ind,i)
-                    self.dc_list[1].append({'type': 'dc_before', 'race':1, 'player': fc})
-                    self.warnings[1].append({'type': 'dc_before','race': 1, 'player': fc})
+                    self.dc_list[1].append({'type': 'dc_before', 'race':1, 'player': fc, 'gp': 1})
+                    self.warnings[1].append({'type': 'dc_before','race': 1, 'player': fc, 'gp': 1})
                     self.dc_ids_append(fc, 1)
                     if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                     self.gp_dcs[self.gp].append(fc)
@@ -1339,7 +1358,7 @@ class Table():
                         self.warnings[1].pop(warn_item[0])
                     
                     self.find_tag(player, fc)
-                    return 'success'
+                    return 'not sub'
         
         if self.format[0].lower()!='f':
             if "SUBS" not in self.tags:
@@ -1355,6 +1374,7 @@ class Table():
             for tag in self.tags.items():
                 if len(tag[1])<per_team:
                     self.tags[tag[0]].append(fc)
+                    self.all_players[tag[0]].append(fc)
                     return
 
         #prefix matching
@@ -1365,6 +1385,7 @@ class Table():
                     match = [tag, len(tag)]
         if match[1]>0:
             self.tags[match[0]].append(fc)
+            self.all_players[match[0]].append(fc)
             return
 
         #suffix matching
@@ -1375,6 +1396,7 @@ class Table():
                     match = [tag, len(tag)]
         if match[1]>0:
             self.tags[match[0]].append(fc)
+            self.all_players[match[0]].append(fc)
             return
         
         #common substring matching if 2v2
@@ -1387,16 +1409,19 @@ class Table():
                         match = [lcs, len(lcs)]
             if match[0]!="":   
                 self.tags[match[0]].append(fc)
+                self.all_players[match[0]].append(fc)
                 return
         
         #no tags matched, so randomly fill
         for i in self.tags.items():
             if len(i[1])<per_team:
                 self.tags[i[0]].append(fc)
+                self.all_players[i[0]].append(fc)
                 return
 
         #all tags were full, so create new tag
         self.tags[player[0]] = [fc]
+        self.all_players[player[0]] = [fc]
 
     def sub_in(self, _in, out, out_races, reundo=False): 
         in_player, out_player = _in, out
@@ -1421,6 +1446,16 @@ class Table():
         self.players[in_player][1] = [a+b for a, b in zip(self.players[in_player][1], self.players[out_player][1])]
         self.players[in_player][2] = [a+b for a, b in zip(self.players[in_player][2], self.players[out_player][2])]
         self.players[in_player][0] = self.players[out_player][0]+self.players[in_player][0]
+
+        out_edited_scores = self.edited_scores.pop(out_player, None)
+        in_edited_scores = self.edited_scores.get(in_player, None)
+        for i in out_edited_scores.items():
+            if i[0] in self.edited_scores[in_player]:
+                self.edited_scores[in_player][i[0]] += i[1]
+            else:
+                self.edited_scores[in_player][i[0]] = i[1]
+        
+
         out_pens = None
         if out_player in self.pens:
             self.pens[in_player] = out_pens = self.pens.pop(out_player) 
@@ -1449,11 +1484,12 @@ class Table():
             
         if in_player not in self.tags[tag]:
             self.tags[tag].append(in_player)
+            self.all_players[tag].append(in_player)
        
         self.tags = {k:v for k,v in self.tags.items() if len(v)!=0}
             
         if not reundo: 
-            restore = {'pts':pts, 'name': self.display_names.pop(out_player), 'out_tag':tag, 'id':pid, 'in_tag': in_tag}
+            restore = {'pts':pts, 'name': self.display_names.get(out_player), 'out_tag':tag, 'id':pid, 'in_tag': in_tag, 'out_edited_scores': out_edited_scores, 'in_edited_scores': in_edited_scores}
             if out_pens!=None:
                 restore['pens'] = out_pens
             self.modifications.append([('?sub {} {} {}'.format(out, out_races, _in), in_player, out_player, out_races, restore)])
@@ -1465,20 +1501,32 @@ class Table():
         self.players[out_player] = restore['pts']
         self.fcs[restore['name']] = out_player
         self.display_names[out_player] = restore['name']
+
+        if restore['in_edited_scores'] is not None and len(restore['in_edited_scores']) >0:
+            self.edited_scores[in_player] = restore['in_edited_scores'] 
+        if restore['out_edited_scores'] is not None and len(restore['out_edited_scores']) >0:
+            self.edited_scores[out_player] = restore['out_edited_scores'] 
+
         for tag in self.tags.items():
             try:
                 tag[1].remove(in_player)
+                self.all_players[tag[0]].remove(in_player)
                 try:
                     self.tags[restore['in_tag']].append(in_player)
+                    self.all_players[restore['in_tag']].append(in_player)
                 except KeyError:
                     self.tags[restore['in_tag']] = [in_player]
+                    self.all_players[restore['in_tag']] = [in_player]
+
                 break
             except:
                 pass
         try:
             self.tags[restore['out_tag']].append(out_player)
+            self.all_players[restore['out_tag']].append(out_player)
         except KeyError:
             self.tags[restore['out_tag']] = [out_player]
+            self.all_players[restore['out_tag']] = [out_player]
         
         
         self.players[in_player][1] = [a-b for a, b in zip(self.players[in_player][1], self.players[out_player][1])]
@@ -2198,7 +2246,7 @@ class Table():
                 
                 if fc not in self.players and fc not in self.deleted_players: #sub player
                     status = self.add_sub_player(self.check_name(player[0]), fc)
-                    if self.format[0].lower()!='f' and status !='failed':
+                    if self.format[0].lower()!='f' and status == 'success':
                         self.warnings[shift+raceNum+1].append({'type':'sub', 'player': fc})
 
                 miiName = self.display_names[fc]
@@ -2298,17 +2346,17 @@ class Table():
                     scores = self.players[p][1]
                 for num,gp in enumerate(scores):
                     if by_race:
-                        if int(num/4)+1 in self.edited_scores and p in self.edited_scores[int(num/4)+1]:
-                            if num/4 +1 in self.edited_scores:
-                                ret+="{}".format(self.edited_scores[int(num/4)+1][p])
+                        if int(num/4)+1 in self.edited_scores[p]:
+                            if num/4 +1 in self.edited_scores[p]:
+                                ret+="{}".format(self.edited_scores[p][int(num/4)+1])
                             else:
                                 ret+='0'
                             if num+1!=len(scores):
                                 ret+='|'
                             continue
                     else:
-                        if num+1 in self.edited_scores and p in self.edited_scores[num+1]:
-                            ret+='{}'.format(self.edited_scores[num+1][p])
+                        if num+1 in self.edited_scores[p]:
+                            ret+='{}'.format(self.edited_scores[p][num+1])
                             if num+1!=len(scores):
                                 ret+='|'
                             continue
@@ -2339,17 +2387,17 @@ class Table():
                             scores = self.players[p][1]
                         for num,gp in enumerate(scores):
                             if by_race:
-                                if int(num/4)+1 in self.edited_scores and p in self.edited_scores[int(num/4)+1]:
-                                    if num/4 +1 in self.edited_scores:
-                                        ret+="{}".format(self.edited_scores[int(num/4)+1][p])
+                                if int(num/4)+1 in self.edited_scores[p]:
+                                    if num/4 +1 in self.edited_scores[p]:
+                                        ret+="{}".format(self.edited_scores[p][int(num/4)+1])
                                     else:
                                         ret+='0'
                                     if num+1!=len(scores):
                                         ret+='|'
                                     continue        
                             else:
-                                if num+1 in self.edited_scores and p in self.edited_scores[num+1]:
-                                    ret+='{}'.format(self.edited_scores[num+1][p])
+                                if num+1 in self.edited_scores[p]:
+                                    ret+='{}'.format(self.edited_scores[p][num+1])
                                     if num+1!=len(scores):
                                         ret+='|'
                                     continue
@@ -2379,17 +2427,17 @@ class Table():
                             scores = self.players[p][1]
                         for num,gp in enumerate(scores):
                             if by_race:
-                                if int(num/4)+1 in self.edited_scores and p in self.edited_scores[int(num/4)+1]:
-                                    if num/4 +1 in self.edited_scores:
-                                        ret+="{}".format(self.edited_scores[int(num/4)+1][p])
+                                if int(num/4)+1 in self.edited_scores[p]:
+                                    if num/4 +1 in self.edited_scores[p]:
+                                        ret+="{}".format(self.edited_scores[p][int(num/4)+1])
                                     else:
                                         ret+='0'
                                     if num+1!=len(scores):
                                         ret+='|'
                                     continue      
                             else:
-                                if num+1 in self.edited_scores and p in self.edited_scores[num+1]:
-                                    ret+='{}'.format(self.edited_scores[num+1][p])
+                                if num+1 in self.edited_scores[p]:
+                                    ret+='{}'.format(self.edited_scores[p][num+1])
                                     if num+1!=len(scores):
                                         ret+='|'
                                     continue
