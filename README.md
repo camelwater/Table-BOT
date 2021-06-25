@@ -30,7 +30,7 @@ Searches for a room on www.wiimmfi.de/stats/mkwx that best fits the arguments pr
 `?picture (byrace/race)`\
 ex. `?picture byrace`
 
-Fetches a table picture (from https://gb.hlorenzi.com/table) of the room's scores. `byrace` is an optional argument that can be included if you would like to see the table scores organized by each race (it defaults to every gp, which is every 4 races).
+Fetches a table picture (from https://gb.hlorenzi.com/table) of the room's scores. `byrace` is an optional argument that can be included if you would like to see the table scores organized by each race (by default it is every gp, which is every 4 races).
 
 ## Additional Commands
 
@@ -62,7 +62,13 @@ These commands can be used to edit the table based on your custom ruleset outsid
 
 `?sub [subOutNum] [subOutRacesPlayed] [subInNum]` and `?editsub [playerNum] [races] [in|out] (outIndex=last)`
 
-`?changename [playerNum] [name]`, `?changetag [playerNum] [tag]`, `?edittag [tagName|tagNum] [tag]`, and `?tags [tag] [<playerNum>,...]`
+`?changename [playerNum] [name]`
+
+`?changetag [playerNum] [tag]`
+
+`?edittag [tagName|tagNum] [tag]`
+
+`?tags [tag] [<playerNum>,...]`
 
 `?undo (all)` and `?redo (all)`
 
