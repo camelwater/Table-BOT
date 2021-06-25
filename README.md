@@ -1,6 +1,6 @@
 # Table BOT
 
-Table BOT is a discord bot made to automate the process of scoring and tabling Mario Kart Wii (MKW) private rooms, which is particularly useful for wars and lounge matches. It scrapes room data from www.wiimmfi.de/stats/mkwx and calculates scores for the teams and the players to create a table picture.Additionally, the bot provides several helpful commands to edit and correct tables.
+Table BOT is a discord bot made to automate the process of scoring and tabling Mario Kart Wii (MKW) private rooms, which is particularly useful for wars and lounge matches. It scrapes room data from www.wiimmfi.de/stats/mkwx and calculates scores for the teams and the players to create a table picture. Additionally, the bot provides several helpful commands to edit and correct tables.
 
 ## Important Information
 
