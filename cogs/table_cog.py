@@ -439,7 +439,10 @@ class table_bot(commands.Cog):
         
         if self.table_instances[ctx.channel.id].confirm_room:
             if self.table_instances[ctx.channel.id].choose_room: self.table_instances[ctx.channel.id].choose_room = False
-            mes = "Table successfully started. Watching room {}{}.".format(self.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.table_instances[ctx.channel.id].sui else '')
+            if len(self.table_instances[ctx.channel.id].players)> self.table_instances[ctx.channel.id].num_players:
+                mes = "**Warning:** *The number of players in the room doesn't match the given format and teams.*\nTable started, but will likely be inaccurate. Watching room {}{}.".format(self.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.table_instances[ctx.channel.id].sui else '')
+            else:   
+                mes = "Table successfully started. Watching room {}{}.".format(self.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.table_instances[ctx.channel.id].sui else '')
             self.table_instances[ctx.channel.id].table_running = True
             
             self.table_instances[ctx.channel.id].searching_room = False

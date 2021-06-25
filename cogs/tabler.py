@@ -594,6 +594,7 @@ class Table():
             ("dc_before", 1): "{} is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war).", 
 
             "missing": "GP {} is missing player(s). GP started with {} players, but should've started with {} players.",
+            "overflow": "GP {} has too many players. GP started with {} players, but should've started with {} players.",
 
             "blank_time": "{} had a blank race time and was on results. If this wasn't a DC, this is an MKWX BUG.",
 
@@ -644,6 +645,9 @@ class Table():
                 return warning_map.get(warning_type).format(warning.get('gp'))
 
         elif warning_type == "missing":
+            return warning_map.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
+        
+        elif warning_type == "overflow":
             return warning_map.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
         
         elif warning_type == "blank_time":
@@ -964,7 +968,7 @@ class Table():
                             p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                          else:
                              p2 = self.display_names[p2]
-                         string+="\n**NO TEAM**\n\t{}{} ".format('`{}.` '.format(counter) if p_form else '{}. '.format(counter),Utils.dis_clean(p2))
+                         string+="\n**NO TEAM**\n\t{}{}".format('`{}.` '.format(counter) if p_form else '{}. '.format(counter),Utils.dis_clean(p2))
                          
                          counter+=1
                 else:   
@@ -1027,7 +1031,7 @@ class Table():
         for race in list(self.dc_list.items()):
             ret+='**Race #{}: {}**\n'.format(race[0], self.tracks[int(race[0]-1)])
             for dc in race[1]:
-                ret+='\t`{}.`**{}\n'.format(dc_count, self.dc_to_str(dc))
+                ret+='\t`{}.` **{}\n'.format(dc_count, self.dc_to_str(dc))
                 dc_count+=1
                 
         if len(self.dc_list)==0:
@@ -1123,7 +1127,7 @@ class Table():
                     p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                 else:
                     p2 = self.display_names[p2]
-                string+="\n`{}.`{} {}".format(counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                string+="\n`{}.` {} {}".format(counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                 
                 counter+=1
         else:
@@ -1131,7 +1135,7 @@ class Table():
                 if tag == "":
                      for p in self.tags[tag]:
                          self.player_ids[str(counter)] = p
-                         string+="\n**NO TEAM**\n\t`{}.`{} {}".format(counter,Utils.dis_clean(self.display_names[p]), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                         string+="\n**NO TEAM**\n\t`{}.` {} {}".format(counter,Utils.dis_clean(self.display_names[p]), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                          
                          counter+=1
                 else:   
@@ -1149,7 +1153,7 @@ class Table():
                             p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                         else:
                             p2 = self.display_names[p2]
-                        string+="\n\t`{}.`{} {}".format(counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                        string+="\n\t`{}.` {} {}".format(counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                         
                         counter+=1
                     
@@ -1631,9 +1635,9 @@ class Table():
                     self.change_room_size([[raceNum, len(self.races[raceNum-1])+1]], self_call=True)
                     self.races[raceNum-1].append((self.display_names[player], 'DC', player))
                     self.finish_times[raceNum-1][player] = 'DC'
-                    
+                    gp = int((raceNum-1)/4)
+
                     if raceNum %4 != 1:
-                        gp = int((raceNum-1)/4)
                         self.players[player][1][gp] -=3
                         self.players[player][2][raceNum-1] = 0
                         
@@ -1669,9 +1673,9 @@ class Table():
                     orig_status = 'on'
                     self.change_room_size([[raceNum, len(self.races[raceNum-1])-1]], self_call=True)
                     #print(mes)
+                    gp = int((raceNum-1)/4)
                     
                     if raceNum %4 != 1:
-                        gp = int((raceNum-1)/4)
                         self.players[player][1][gp] +=3
                         self.players[player][2][raceNum-1] = 3
                         
@@ -2216,7 +2220,11 @@ class Table():
                 #TEST: test if player missing race one and comes back later gp
                 self.warnings[shift+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
                 self.dc_list[shift+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
-                           
+
+            elif cur_room_size > self.num_players and (shift+raceNum)%4 == 0:
+                self.warnings[shift+raceNum+1].append({'type': 'overflow', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
+                #self.dc_list[shift+raceNum+1].append({'type': 'overflow', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
+             
             elif cur_room_size<len(self.players):
                 f_codes = [i[2] for i in race]
                 total_missing_players = []
