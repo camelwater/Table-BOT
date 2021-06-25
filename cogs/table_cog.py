@@ -7,7 +7,7 @@ Created on Wed May 19 08:33:13 2021
 
 import discord
 from discord.ext import commands, tasks
-from cogs.tabler import Table
+from tabler import Table
 from itertools import cycle
 import Utils
 from datetime import datetime, timedelta

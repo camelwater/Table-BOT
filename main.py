@@ -26,7 +26,8 @@ class TableBOT(commands.Bot):
         super().__init__(command_prefix = ('<@!{}> '.format(BOT_ID), '<@{}> '.format(BOT_ID),'?', '^'), case_insensitive=True, intents = discord.Intents.all(), help_command = None)      
         for l in INIT_EXT:
             self.load_extension(l)  
-            
+
+    #TODO: catch invalid form errors (too long fields)        
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
             await ctx.send("{}.\nType `?help` for a list of commands.".format(error.__str__().replace("is not found", "doesn't exist")))

@@ -6,7 +6,7 @@ Table BOT is a discord bot made to automate the process of scoring and tabling M
 
 Here is some terminology that Table BOT uses:
 
-**rxx** - an eight character long room id beginning with an 'r' and followed by seven numbers or a four character long room name that begins with two letters followed by two numbers (based on www.wiimmfi.de/stats/mkwx website)\
+**rxx** - an eight character long room id beginning with an *r* and followed by seven numbers or a four character long room name that begins with two letters followed by two numbers (based on www.wiimmfi.de/stats/mkwx website)\
 ex. **r3066483** or **TN67**
 
 **mii** - a player's in-game display name, can be non-ASCII
@@ -38,7 +38,7 @@ Additional helpful commands used alongside the primary commands to better table 
 
 ### Correction Commands
 
-These commands are used to correct the table. These commands are sometimes necessary, as the website from where room data comes from (www.wiimmfi.de/stats/mkwx) is quite unreliable and often reports information that contradicts in-game results.
+These commands are used to correct the table. These commands are sometimes necessary, as the website from which the room data comes from (www.wiimmfi.de/stats/mkwx) is quite unreliable and often reports information that contradicts in-game results.
 
 `?dc [dcNum] ["on"/"during"|"off"/"before"]`
 
