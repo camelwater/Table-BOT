@@ -32,7 +32,7 @@ def get_num_players(f, teams):
 
 
 
-#------------- Tabler.py methods --------------#
+#============= Tabler.py stuff ==============#
 
 def convert_format(f):
     """
@@ -114,7 +114,6 @@ def is_CJK(char):
                  (131072, 196607)]
                 ])
 
-import re 
 from unidecode import unidecode
 
 def strip_CJK(string):
@@ -141,4 +140,46 @@ def replace_brackets(string):
 
 def dis_clean(string):
     return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~")
+
+
+warning_map = {
+            "dc_on": "{} DCed during the race (on results), unless MKWX BUG. Awarding 3 DC points per missing race in GP {} ({} pts).",
+            ("dc_on", 1): "{} DCed during the first race of GP {} (on results), unless MKWX BUG. 15 DC points for GP {}.",
+            ("dc_on", -1): "{} DCed during the race (on results), unless MKWX BUG. No DC points for GP {}.", 
+
+            "dc_on_confirmed": "{} DCed during the race (on results). Awarding 3 DC points per missing race in GP {} ({} pts).",
+            ("dc_on_confirmed", 1): "{} DCed during the first race of GP {} (on results). 15 DC points for GP {}.",
+            ("dc_on_confirmed", -1): "{} DCed during the race (on results). No DC points for GP {}.",
+
+            "dc_before": "{} DCed before race. Giving 3 DC points per missing race in GP {} ({} pts).", 
+            ("dc_before", 1): "{} is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war).", 
+
+            "missing": "GP {} is missing player(s). GP started with {} players, but should've started with {} players.",
+            "overflow": "GP {} has too many players. GP started with {} players, but should've started with {} players.",
+
+            "blank_time": "{} had a blank race time and was on results. If this wasn't a DC, this is an MKWX BUG.",
+
+            "tie": "{} had tied race times ({}). Check ?rr for errors.", 
+
+            "mkwx_bug_increase": "Room size increased mid-GP from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.", 
+            "mkwx_bug_change": "Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX BUG. Table could be inaccurate for this GP ({}).", 
+            "mkwx_bug_blank": "All players in the race had blank race times. This is an MKWX BUG if there was no room reset. Table is inaccurate for this GP ({}).", 
+
+            "sub": "{}  -  Potential sub detected. If this player is a sub, use ?sub.", 
+
+            "large_time": "{} had a large finish time - {}. Check ?rr for errors."
+        }
+
+dc_map = {
+            "dc_on": "{}** - DCed during the race (on results), unless MKWX BUG. Awarding 3 DC points per missing race in GP {} ({} pts).",
+            ("dc_on", 1): "{}** - DCed during the first race of GP {} (on results), unless MKWX BUG. 15 DC points for GP {}.",
+            ("dc_on", -1): "{}** - DCed during the race (on results), unless MKWX BUG. No DC points for GP {}.", 
+
+            "dc_on_confirmed": "{}** - DCed during the race (on results). Awarding 3 DC points per missing race in GP {} ({} pts).",
+            ("dc_on_confirmed", 1): "{}** - DCed during the first race of GP {} (on results). 15 DC points for GP {}.",
+            ("dc_on_confirmed", -1): "{}** - DCed during the race (on results). No DC points for GP {}.", 
+
+            "dc_before": "{}** - DCed before race. 3 DC points per missing race in GP {} ({} pts).", 
+            ("dc_before", 1): "{}** - is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war)."
+        }  
     
