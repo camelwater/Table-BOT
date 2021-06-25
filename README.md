@@ -1,11 +1,10 @@
 # Table BOT
 
-Table BOT is a discord bot made to automate the process of scoring and tabling MKW private rooms, which is particularly useful for wars and lounge matches.
-It scrapes room data from www.wiimmfi.de/stats/mkwx and calculates scores for the teams and the players to create a table picture, and additionally, provides tools to edit and correct tables.
+Table BOT is a discord bot made to automate the process of scoring and tabling Mario Kart Wii (MKW) private rooms, which is particularly useful for wars and lounge matches. It scrapes room data from www.wiimmfi.de/stats/mkwx and calculates scores for the teams and the players to create a table picture.Additionally, the bot provides several helpful commands to edit and correct tables.
 
 ## Important Information
 
-Here is some terminology that the bot uses:
+Here is some terminology that Table BOT uses:
 
 **rxx** - an eight character long room id beginning with an 'r' and followed by seven numbers or a four character long room name that begins with two letters followed by two numbers (based on www.wiimmfi.de/stats/mkwx website)\
 ex. **r3066483** or **TN67**
@@ -14,7 +13,9 @@ ex. **r3066483** or **TN67**
 
 ## Bot Usage
 
-Commands are executed by providing the required arguments (in brackets) and additional, optional arguments (in parentheses). Arguments with an `=` sign have default values if nothing is provided.
+Commands are executed by providing the required arguments (in brackets) and additional, optional arguments (in parentheses). Optional arguments are by default excluded and arguments with an `=` sign have default values if nothing is provided.
+
+To watch a room and score it with Table BOT, these primary commands are used:
 
 `?start [format] [numTeams] (room rxx) (gps=3) (sui=no)`\
 ex. `?start 5v5 2 sui=yes`
@@ -26,50 +27,54 @@ ex. `?search mii camelwater123, beffjeff`
 
 Searches for a room on www.wiimmfi.de/stats/mkwx that best fits the arguments provided. If your search arguments are too broad and apply to multiple rooms (for example you provide a very common miiName such as 'Player'), you will need to narrow your search by providing better arguments. 
 
-`?picture (byrace|race)`\
+`?picture (byrace/race)`\
 ex. `?picture byrace`
 
 Fetches a table picture (from https://gb.hlorenzi.com/table) of the room's scores. `byrace` is an optional argument that can be included if you would like to see the table scores organized by each race (it defaults to every gp, which is every 4 races).
 
+## Additional Commands
+
+Additional helpful commands used alongside the primary commands to better table MKW rooms. 
 
 ### Correction Commands
 
 These commands are used to correct the table. These commands are sometimes necessary, as the website from where room data comes from (www.wiimmfi.de/stats/mkwx) is quite unreliable and often reports information that contradicts in-game results.
 
-`?dcs`
+`?dc [dcNum] ["on"/"during"|"off"/"before"]`
 
-`?editrace`
+`?editrace [raceNum] [playerNum] [position]`
 
-`?changeroomsize`
-
+`?changeroomsize [raceNum] [roomSize]`
 
 ### Utility Commands
 
 These commands can be used to edit the table based on your custom ruleset outside of MKW's basic system. For example, penalizing players.
 
-`?edit`
+`?edit [playerNum] [gpNum] [score]`
 
-`?pen` and `?unpen`
+`?pen [playerNum] [pen]` and `?unpen [playerNum] [pen]`
 
-`?teampen` and `?teamunpen`
+`?teampen [teamName|teamNum] [pen]` and `?teamunpen [teamName|teamNum] [pen]`
 
-`?removerace`
+`?removerace (raceNum=lastRace)`
 
-`?mergeroom`
+`?mergeroom [rxx|<miiName>,...]`
 
-`?sub` and `?editsub`
+`?sub [subOutNum] [subOutRacesPlayed] [subInNum]` and `?editsub [playerNum] [races] [in|out] (outIndex=last)`
 
-`?changename`, `?changetag`, `?edittag`, and `?tags`
+`?changename [playerNum] [name]`, `?changetag [playerNum] [tag]`, `?edittag [tagName|tagNum] [tag]`, and `?tags [tag] [<playerNum>,...]`
 
-`?undo` and `?redo`
+`?undo (all)` and `?redo (all)`
 
 `?reset`
 
-### Information Commands
+### Informational Commands
 
 These commands provide extra information and useful insight to the room.
 
 `?players`
+
+`?pens`
 
 `?allplayers`
 
@@ -77,9 +82,6 @@ These commands provide extra information and useful insight to the room.
 
 `?tabletext`
 
-`?raceresults`
+`?raceresults (raceNum=last)`
 
 `?rxx`
-
-`?picture`
-

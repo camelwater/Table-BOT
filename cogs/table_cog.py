@@ -654,7 +654,7 @@ class table_bot(commands.Cog):
         
         if await self.check_callable(ctx, "editsub"): return
         
-        usage = "\nUsage: `?editsub <player number> <correct races> <in/out> <(sub out index)>`"
+        usage = "\nUsage: `?editsub <player number> <correct races> <in/out> (sub out index)`"
         if len(args)==0:
             await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), usage)
             return
