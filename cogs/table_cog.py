@@ -196,32 +196,27 @@ class table_bot(commands.Cog):
             if isinstance(i, str) and 'sui=' in i:
                 sui = args.pop(args.index(i))
                 break
+        for i in args:
+            if isinstance(i, str) and "gps=" in i:
+                gps = args.pop(args.index(i))[4:]
+                if not gps.isnumeric() or int(gps)<1:
+                    await self.sent_temp_messages(ctx, "Invalid number of gps. `gps` must a positive non-zero number.")
+                break
+
         if sui!=None:
             self.table_instances[ctx.channel.id].sui = True if sui[4:]=='yes' or sui[4:]=='y' else False 
+        self.table_instances[ctx.channel.id].gps = int(gps)
         
-        if len(args)==3:
-            
-            arg3 = args[2].lower()
-            if arg3.isnumeric():
-                gps = int(arg3)
-                self.table_instances[ctx.channel.id].gps = gps
-            else:
-                try:
-                    assert((arg3[0]=='r' and len(arg3)==8) or (arg3[2:].isnumeric() and len(arg3)==4))
-                except:
-                    await self.send_temp_messages(ctx, "Invalid rxx/room name.")
-                    return
-                rxx = [arg3]
-                await self.skip_search(ctx,rxx)
-                return
-        if len(args)>3:
+
+        if len(args)>2:
+            arg3 = args[2]
             try:
                 assert((arg3[0]=='r' and len(arg3)==8) or (arg3[2:].isnumeric() and len(arg3)==4))
             except:
                 await self.send_temp_messages(ctx, "Invalid rxx/room name.")
                 return
-            arg4 = args[3]
-            rxx = [arg4]
+                
+            rxx = [arg3]
             await self.skip_search(ctx, rxx)
             return
             
@@ -262,7 +257,6 @@ class table_bot(commands.Cog):
             return
         
         if search_type == 'roomid' or search_type=='rxx':
-            print("ds")
             if search_args[0].isnumeric():
                 await self.send_messages(ctx, "Invalid room id: missing an 'r' or not in format 'XX00'.", usage)
                 return
@@ -703,7 +697,7 @@ class table_bot(commands.Cog):
     async def playerlist(self,ctx):
         
         if await self.check_callable(ctx, "players"): return
-        await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list())
+        await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(p_form=False))
     
     @commands.command()
     async def edit(self,ctx, * , arg):
@@ -932,7 +926,7 @@ class table_bot(commands.Cog):
             return
         arg = arg[0]
         if not arg.isnumeric():
-            await self.send_temp_messages(ctx, "The <race number> must be a real number.", usage)
+            await self.send_temp_messages(ctx, "The <race number> must be a number.", usage)
             return
         
         await ctx.send("**Note: This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally this command should be used immediately after the table picture updates with the race that needs to be removed.**")
