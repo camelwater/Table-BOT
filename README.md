@@ -93,5 +93,5 @@ These commands provide extra information and useful insight to the room.
 `?rxx`
 
 
-[mkwxWebsite]: www.wiimmfi.de/stats/mkwx
+[mkwxWebsite]: https://www.wiimmfi.de/stats/mkwx
 [hlorenziWebsite]: https://gb.hlorenzi.com/table 
