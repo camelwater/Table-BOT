@@ -314,8 +314,6 @@ class Table():
                     return True, type_ask, "The room either doesn't exist or hasn't finished at least one race yet.\nRetry the ?search command when the room has finished one race and make sure the room id is in rxx or XX00 format."
                 else:
                     self.find_players(room_url, soup)
-                    #if len(self.players) != self.convert_format(self.format)*self.teams:
-                            #return True, 'reset', "Room {} was found.\nHowever, the number of players in the room ({}) did not match the format and teams you provided in the ?start command.\nThe tabler has been reset, and you must redo the ?start command.".format(rid, len(self.players))
                     self.split_teams(self.format, self.teams)
                     type_ask = "confirm"
                     self.current_url = room_url
@@ -342,7 +340,7 @@ class Table():
                                     string+="\n\t{}. {}".format(counter,Utils.dis_clean(self.display_names[p]))
                                     self.player_ids[str(counter)] = p
                                     counter+=1
-                    string = string.replace("no name", "Player")
+                    #string = string.replace("no name", "Player")
                     self.player_list = string
                     return False, type_ask, "Room {} found.\n{}\n\n**Is this room correct?** (`?yes` / `?no`)".format(self.rxx, string)
     
@@ -1629,7 +1627,7 @@ class Table():
                         for indx, i in enumerate(self.dc_list[raceNum]):
                             if i.get('player') == player and "before" in i.get('type'):
                                 self.dc_list[raceNum][indx] = {'type': 'dc_on', 'race': 1, 'gp': gp+1, 'player': player, 'is_edited':True}                
-            else: #CHANGE TO 'DURING'
+            else: #CHANGE TO 'BEFORE'
                 orig_status = 'before'
                 if player in players:
                     orig_status = 'on'
@@ -1691,7 +1689,7 @@ class Table():
             except:
                 
                 if cor_room_size> orig_room_size and cor_room_size<=len(self.players):
-                    ret+="**Note: If a race is missing player(s) due to DCs, it is advised to use the ?dcs command instead.\nOnly use this command if no DCs were shown for the race in question.\n\n**"
+                    ret+="**Note:** *If a race is missing player(s) due to DCs, it is advised to use the ?dcs command instead.\nOnly use this command if no DCs were shown for the race in question.*\n\n"
                 else:
                     ret+= "Invalid <corrected room size> for race `{}`. The corrected room size must be a number from 1-{}.\n".format(raceNum+1, len(self.players))
                     continue
@@ -2235,12 +2233,10 @@ class Table():
                     race[i] = (r[0], 'DC', r[2])
             if dc_count == cur_room_size:
                 self.warnings[shift+raceNum+1].append({"type": "mkwx_bug_blank", 'gp':self.gp+1})
-                
                 fin_times = {}
                 for i in race:
                     fin_times[i[0]] = i[1]
                 self.finish_times[shift+raceNum] = fin_times
-                
                 continue
             
             last_finish_times = {}
@@ -2480,7 +2476,6 @@ class Table():
                 if tag in self.team_pens.keys():
                     ret+='\nPenalty -{}'.format(self.team_pens[tag])
                             
-        ret = ret.replace("no name", "Player")
         return ret
     
     def get_table_text(self):
@@ -2635,6 +2630,7 @@ class Table():
 
         else:
             print("undo error:",j[0])
+            raise AssertionError
     
     async def redo(self, j):
         if '?edit ' in j[0]:
@@ -2690,6 +2686,7 @@ class Table():
         
         else:
             print("redo error:",j[0])
+            raise AssertionError
             
     async def undo_commands(self, num): #TODO: clearing "manually edited" warnings needs further testing and additions for new commands
         if num == 0: #undo all

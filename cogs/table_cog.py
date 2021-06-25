@@ -621,7 +621,7 @@ class table_bot(commands.Cog):
         
         if await self.check_callable(ctx, "sub"): return
         
-        usage = "\n**Note: It is advised to use this command when all races have finished, rather than right when the subsitution occurs.** \
+        usage = "\n**Note:** *It is advised to use this command when all races have finished, rather than right when the subsitution occurs.* \
                 \nUsage: `?sub <sub out> <sub out races played> <sub in>`"
         if len(args)==0:
             await self.send_messages(ctx, self.table_instances[ctx.channel.id].get_player_list(), usage) 
@@ -923,7 +923,7 @@ class table_bot(commands.Cog):
         usage = "Usage: `?removerace <race number>`"
         
         if len(arg)==0:
-            await ctx.send("**Note: This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally this command should be used immediately after the table picture updates with the race that needs to be removed.**")
+            await ctx.send("**Note:** *This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally, this command should be used immediately after the table picture updates with the race that needs to be removed.*")
             mes = await self.table_instances[ctx.channel.id].remove_race(-1)
             await self.send_messages(ctx, mes)
             return
@@ -932,7 +932,7 @@ class table_bot(commands.Cog):
             await self.send_temp_messages(ctx, "The <race number> must be a number.", usage)
             return
         
-        await ctx.send("**Note: This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally this command should be used immediately after the table picture updates with the race that needs to be removed.**")
+        await ctx.send("**Note:** *This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally, this command should be used immediately after the table picture updates with the race that needs to be removed.*")
         mes = await self.table_instances[ctx.channel.id].remove_race(int(arg))
         await self.send_messages(ctx, mes)
         
@@ -942,7 +942,7 @@ class table_bot(commands.Cog):
         if await self.check_callable(ctx, "removerace"): return
         
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("**Note: This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally this command should be used immediately after the table picture updates with the race that needs to be removed.**")
+            await ctx.send("**Note:** *This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally, this command should be used immediately after the table picture updates with the race that needs to be removed.*")
             mes = self.table_instances[ctx.channel.id].remove_race(-1)
             await self.send_messages(ctx, mes)
     
