@@ -1,7 +1,6 @@
 discord
 python-dotenv
 unidecode
-os
 datetime
 itertools
 collections
