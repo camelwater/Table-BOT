@@ -2,11 +2,6 @@ discord
 python-dotenv
 unidecode
 datetime
-itertools
-collections
-copy
 aiohttp
 bs4
 urllib
-time
-io
