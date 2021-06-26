@@ -1,0 +1,15 @@
+discord
+dotenv
+unidecode
+json
+atexit
+os
+datetime
+itertools
+collections
+copy
+aiohttp
+bs4
+urllib
+time
+io
