@@ -13,9 +13,9 @@ ex. **r3066483** or **TN67**
 
 ## Bot Usage
 
-Commands are executed by providing the required arguments (in brackets) and additional, optional arguments (in parentheses). Optional arguments are by default excluded and arguments with an `=` sign have default values if nothing is provided.
+> Commands are executed by providing the required arguments (in brackets) and additional, optional arguments (in parentheses). Optional arguments are by default excluded and arguments with an `=` sign have default values if nothing is provided.
 
-To watch a room and score it with Table BOT, these primary commands are used:
+To watch a room and score it with Tablse BOT, these primary commands are used:
 
 `?start [format] [numTeams] (room rxx) (gps=3) (sui=no)`\
 ex. `?start 5v5 2 sui=yes`
