@@ -74,7 +74,7 @@ These commands can be used to edit the table based on your custom ruleset outsid
 
 `?reset`
 
-### Informational Commands
+### Information Commands
 
 These commands provide extra information and useful insight to the room.
 
