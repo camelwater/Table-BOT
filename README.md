@@ -19,21 +19,21 @@ To watch a room and score it with Tablse BOT, these primary commands are used:
 
 ```
 ?start [format] [numTeams] (room rxx) (gps=3) (sui=no)
-```\
+``` 
 ex. `?start 5v5 2 sui=yes`
 
 Initializes a table instance with the given format (FFA 2v2, 3v3, etc.) and number of teams. Optionally, if you already know the room id (rxx) of the desired room, you can include it to skip the next step.
 
 ```
 ?search [mii|rxx] [<miiName>,...|rxx]
-```\
+```
 ex. `?search mii camelwater123, beffjeff`
 
 Searches for a room on [Wiimmfi][mkwxWebsite] that best fits the arguments provided. If your search arguments are too broad and apply to multiple rooms (for example you provide a very common miiName such as 'Player'), you will need to narrow your search by providing better arguments. 
 
 ```
 ?picture (byrace/race)
-```\
+```
 ex. `?picture byrace`
 
 Fetches a [table picture][hlorenziWebsite] of the room's scores. `byrace` is an optional argument that can be included if you would like to see the table scores organized by each race (by default it is every gp, which is every 4 races).
@@ -68,14 +68,14 @@ These commands can be used to edit the table based on your custom ruleset outsid
 
 ```
 ?pen [playerNum] [pen]
-```\
+```
 ```
 ?unpen [playerNum] [pen]
 ```
 
 ```
 ?teampen [teamName|teamNum] [pen]
-```\
+```
 ```
 ?teamunpen [teamName|teamNum] [pen]
 ```
@@ -90,7 +90,7 @@ These commands can be used to edit the table based on your custom ruleset outsid
 
 ```
 ?sub [subOutNum] [subOutRacesPlayed] [subInNum]
-```\
+```
 ```
 ?editsub [playerNum] [races] [in|out] (outIndex=last)
 ```
@@ -113,7 +113,7 @@ These commands can be used to edit the table based on your custom ruleset outsid
 
 ```
 ?undo (all)
-```\
+```
 ```
 ?redo (all)
 ```
