@@ -796,7 +796,7 @@ class table_bot(commands.Cog):
     @commands.command(aliases=['pens'])
     async def penalties(self, ctx):
         if await self.check_callable(ctx, "penalties"): return
-        await ctx.send(self.table_instances[ctx.channel.id].get_pen_player_list())
+        await ctx.send(self.table_instances[ctx.channel.id].get_pen_player_list(c_form=False))
         
     @commands.command(aliases=['pen'])
     async def penalty(self, ctx, *args):

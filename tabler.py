@@ -1071,7 +1071,7 @@ class Table():
         ret+= 'Current room: {} | {}'.format(self.rxx, self.ROOM_URL.format(self.rxx))
         return ret
         
-    def get_pen_player_list(self):
+    def get_pen_player_list(self, c_form=True):
         counter = 1
         string =''
         self.tags = dict(sorted(self.tags.items(), key=lambda item: item[0].upper()))
@@ -1087,7 +1087,7 @@ class Table():
                     p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                 else:
                     p2 = self.display_names[p2]
-                string+="\n`{}.` {} {}".format(counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                string+="\n{}. {} {}".format('`{}`'.format(counter) if c_form else counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                 
                 counter+=1
         else:
@@ -1095,7 +1095,7 @@ class Table():
                 if tag == "":
                      for p in self.tags[tag]:
                          self.player_ids[str(counter)] = p
-                         string+="\n**NO TEAM**\n\t`{}.` {} {}".format(counter,Utils.dis_clean(self.display_names[p]), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                         string+="\n**NO TEAM**\n\t{}. {} {}".format('`{}`'.format(counter) if c_form else counter,Utils.dis_clean(self.display_names[p]), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                          
                          counter+=1
                 else:   
@@ -1113,7 +1113,7 @@ class Table():
                             p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                         else:
                             p2 = self.display_names[p2]
-                        string+="\n\t`{}.` {} {}".format(counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                        string+="\n\t{}. {} {}".format('`{}`'.format(counter) if c_form else counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                         
                         counter+=1
                     
@@ -2179,7 +2179,7 @@ class Table():
             if cur_room_size<self.num_players and len(self.players)<self.num_players and (shift+raceNum)%4 == 0:
                 #TEST: test if player missing race one and comes back later gp
                 self.warnings[shift+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
-                self.dc_list[shift+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
+                #self.dc_list[shift+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
 
             elif cur_room_size > self.num_players and (shift+raceNum)%4 == 0:
                 self.warnings[shift+raceNum+1].append({'type': 'overflow', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
