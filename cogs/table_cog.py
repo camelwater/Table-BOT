@@ -53,11 +53,10 @@ class table_bot(commands.Cog):
     
     @commands.Cog.listener()
     async def on_command(self, ctx):
-        self.set_instance(ctx)
         if ctx.command not in self.bot.get_cog('table_bot').get_commands(): return
+        self.set_instance(ctx)
         self.table_instances[ctx.channel.id].last_command_sent = datetime.now()
         
-    
     #remove inactive bot instances (inactivity > 45 minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):

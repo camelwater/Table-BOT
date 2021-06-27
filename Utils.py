@@ -126,7 +126,7 @@ def strip_CJK(string):
 
     '''
     string = list(string)
-    ret = [i for i in string if not is_CJK(i) or unidecode(i)==""]
+    ret = [i for i in string if not is_CJK(i) and unidecode(i)!=""]
     no_cjk = ''.join(ret)
     return no_cjk
 
