@@ -17,17 +17,23 @@ ex. **r3066483** or **TN67**
 
 To watch a room and score it with Tablse BOT, these primary commands are used:
 
-```?start [format] [numTeams] (room rxx) (gps=3) (sui=no)```\
+```
+?start [format] [numTeams] (room rxx) (gps=3) (sui=no)
+```\
 ex. `?start 5v5 2 sui=yes`
 
 Initializes a table instance with the given format (FFA 2v2, 3v3, etc.) and number of teams. Optionally, if you already know the room id (rxx) of the desired room, you can include it to skip the next step.
 
-```?search [mii|rxx] [<miiName>,...|rxx]```\
+```
+?search [mii|rxx] [<miiName>,...|rxx]
+```\
 ex. `?search mii camelwater123, beffjeff`
 
 Searches for a room on [Wiimmfi][mkwxWebsite] that best fits the arguments provided. If your search arguments are too broad and apply to multiple rooms (for example you provide a very common miiName such as 'Player'), you will need to narrow your search by providing better arguments. 
 
-```?picture (byrace/race)```\
+```
+?picture (byrace/race)
+```\
 ex. `?picture byrace`
 
 Fetches a [table picture][hlorenziWebsite] of the room's scores. `byrace` is an optional argument that can be included if you would like to see the table scores organized by each race (by default it is every gp, which is every 4 races).
@@ -40,61 +46,113 @@ Additional helpful commands used alongside the primary commands to better table 
 
 These commands are used to correct the table. These commands are sometimes necessary, as the [website from which the room data comes from][mkwxWebsite] is quite unreliable and often reports information that contradicts in-game results.
 
-```?dc [dcNum] ["on"/"during"|"off"/"before"]```
+```
+?dc [dcNum] ["on"/"during"|"off"/"before"]
+```
 
-```?editrace [raceNum] [playerNum] [position]```
+```
+?editrace [raceNum] [playerNum] [position]
+```
 
-```?changeroomsize [raceNum] [roomSize]```
+```
+?changeroomsize [raceNum] [roomSize]
+```
 
 ### Utility Commands
 
 These commands can be used to edit the table based on your custom ruleset outside of MKW's basic system. For example, penalizing players.
 
-```?edit [playerNum] [gpNum] [score]```
+```
+?edit [playerNum] [gpNum] [score]
+```
 
-```?pen [playerNum] [pen]```\
-```?unpen [playerNum] [pen]```
+```
+?pen [playerNum] [pen]
+```\
+```
+?unpen [playerNum] [pen]
+```
 
-`?teampen [teamName|teamNum] [pen]`\
-```?teamunpen [teamName|teamNum] [pen]```
+```
+?teampen [teamName|teamNum] [pen]
+```\
+```
+?teamunpen [teamName|teamNum] [pen]
+```
 
-```?removerace (raceNum=lastRace)```
+```
+?removerace (raceNum=lastRace)
+```
 
-```?mergeroom [rxx|<miiName>,...]```
+```
+?mergeroom [rxx|<miiName>,...]
+```
 
-```?sub [subOutNum] [subOutRacesPlayed] [subInNum]```\
-```?editsub [playerNum] [races] [in|out] (outIndex=last)```
+```
+?sub [subOutNum] [subOutRacesPlayed] [subInNum]
+```\
+```
+?editsub [playerNum] [races] [in|out] (outIndex=last)
+```
 
-```?changename [playerNum] [name]```
+```
+?changename [playerNum] [name]
+```
 
-```?changetag [playerNum] [tag]```
+```
+?changetag [playerNum] [tag]
+```
 
-```?edittag [tagName|tagNum] [tag]```
+```
+?edittag [tagName|tagNum] [tag]
+```
 
-```?tags [tag] [<playerNum>,...]```
+```
+?tags [tag] [<playerNum>,...]
+```
 
-```?undo (all)```\
-```?redo (all)```
+```
+?undo (all)
+```\
+```
+?redo (all)
+```
 
-```?reset```
+```
+?reset
+```
 
 ### Information Commands
 
 These commands provide extra information and useful insight to the room.
 
-```?players```
+```
+?players
+```
 
-```?pens```
+```
+?pens
+```
 
-```?allplayers```
+```
+?allplayers
+```
 
-```?races```
+```
+?races
+```
 
-```?tabletext```
+```
+?tabletext
+```
 
-```?raceresults (raceNum=last)```
+```
+?raceresults (raceNum=last)
+```
 
-```?rxx```
+```
+?rxx
+```
 
 
 [mkwxWebsite]: https://www.wiimmfi.de/stats/mkwx
