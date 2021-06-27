@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 sudo pip3 install virtualenv
 cd /home/ec2-user/app
 virtualenv environment
