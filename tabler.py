@@ -488,6 +488,7 @@ class Table():
         
         #print(post_players)
         teams_needed = num_teams-len(teams.keys())
+        print("teams needed:",teams_needed)
         if(len(all_tag_matches)>=teams_needed):
             for t in range(teams_needed):
                 for x in copy.deepcopy(all_tag_matches).items():
@@ -536,9 +537,9 @@ class Table():
                     teams[temp_tag] = list(match)
                     for p in match:
                         un_players.remove(p)
-                
+        print(un_players)
         #randomly tag the rest
-        if len(un_players)>0 and len(un_players) <per_team and len(teams)==num_teams:
+        if len(un_players)>0 and len(teams)==num_teams:
             for item in teams.items():
                 while len(item[1])<per_team and len(un_players)>0:
                     item[1].append(un_players.pop(0))

@@ -217,7 +217,7 @@ dc_map = {
 graph_map = {
         1: {"table": "none", "type": "None"},
         2: {"table": "abs", "type": "Absolute"},
-        3: {"table": "diff", "type": "Difference (2 teams only)"}   
+        3: {"table": "diff", "type": "Difference"}   
 }
 
 style_map = {
