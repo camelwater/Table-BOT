@@ -18,9 +18,9 @@ import time
 from unidecode import unidecode
 from collections import defaultdict
 import Utils
-from Utils import warning_map, dc_map
+from Utils import warning_map, dc_map, style_map, graph_map, pts_map
 
-#TODO: add graph and style options
+
 class Table():
     def __init__(self, testing = False):
         self.TESTING = testing
@@ -73,6 +73,8 @@ class Table():
                    
         self.tags = {} #list of team tags and their respective players
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
+        self.graph = None
+        self.style = None
         self.table_img = None
         self.table_link = '' #image png link
         self.sui = False 
@@ -90,20 +92,6 @@ class Table():
         self.player_list = '' #string for bot printout of players and their ids
 
         self.unrecog_chars = [] #TODO: implement
-        
-        self.pts= {12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
-              11:{0:15, 1:12, 2:10, 3:8, 4:6, 5:5, 6:4, 7:3, 8:2, 9:1, 10:0},
-              10:{0:15, 1:12, 2:10, 3:8, 4:6, 5:4, 6:3, 7:2, 8:1, 9:0},
-              9:{0:15, 1:11, 2:8, 3:6, 4:4, 5:3, 6:2, 7:1, 8:0},
-              8:{0:15, 1:11, 2:8, 3:6, 4:4, 5:2, 6:1, 7:0},
-              7:{0:15, 1:10, 2:7, 3:5, 4:3, 5:1, 6:0},
-              6:{0:15, 1:10, 2:6, 3:3, 4:1, 5:0},
-              5:{0:15, 1:9, 2:5, 3:2, 4:1},
-              4:{0:15, 1:9, 2:4, 3:1},
-              3:{0:15, 1:8, 2:2},
-              2:{0:15, 1:7},
-              1:{0:15}
-              }
         
         ##### Stuff for bot instances #####
         self.choose_message = ""
@@ -370,12 +358,12 @@ class Table():
                 indx-=1
                 matches = 1
                 for j in range(len(player_copy)):                    
-                    if i!=j and indx>0 and unidecode(Utils.strip_CJK(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx] == unidecode(Utils.strip_CJK(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx]:
+                    if i!=j and indx>0 and unidecode(Utils.sanitize_uni(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx] == unidecode(Utils.sanitize_uni(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx]:
                         matches+=1
                         
                         if matches == per_team: break 
                 
-            tag = Utils.strip_CJK(player_copy[i].replace("[","").replace(']',''))[:indx]
+            tag = Utils.sanitize_uni(player_copy[i].replace("[","").replace(']',''))[:indx]
             if len(tag)>0 and tag[-1]=="-": 
                 tag = tag[:-1]
                 indx-=1
@@ -392,7 +380,7 @@ class Table():
             teams[temp_tag] = []
             ind = 0
             while ind<len(player_copy):
-                if unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(Utils.strip_CJK(player_copy[ind].strip().lower().replace("[","").replace(']','')))[:indx]: 
+                if unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(Utils.sanitize_uni(player_copy[ind].strip().lower().replace("[","").replace(']','')))[:indx]: 
                     if len(teams[temp_tag])<per_team:
                         teams[temp_tag].append(player_copy.pop(ind))
                         ind = 0
@@ -419,7 +407,7 @@ class Table():
                 while indx>0:
                     indx-=1
                     for tag, _list in teams.items():
-                        if len(_list)<per_team and unidecode(Utils.strip_CJK(post_players[i].strip().lower().replace("[","").replace(']','')))[::-1][:indx][::-1] == unidecode(tag.lower().strip().replace("[","").replace(']','')):
+                        if len(_list)<per_team and unidecode(Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']','')))[::-1][:indx][::-1] == unidecode(tag.lower().strip().replace("[","").replace(']','')):
                             teams[tag].append(post_players.pop(i))
                             i = 0
                             cont = True
@@ -438,8 +426,8 @@ class Table():
                 temp_indx-=1
                
                 for j in range(len(post_players)):
-                    i_tag = unidecode(Utils.strip_CJK(post_players[i].strip().replace("[","").replace(']','')))
-                    j_tag = unidecode(Utils.strip_CJK(post_players[j].strip().replace("[","").replace(']','')))
+                    i_tag = unidecode(Utils.sanitize_uni(post_players[i].strip().replace("[","").replace(']','')))
+                    j_tag = unidecode(Utils.sanitize_uni(post_players[j].strip().replace("[","").replace(']','')))
                     
                     if i!=j and temp_indx>0 and (i_tag[:temp_indx] == j_tag[::-1][:temp_indx][::-1]
                                                  or i_tag[:temp_indx] == j_tag[:temp_indx]):
@@ -532,7 +520,7 @@ class Table():
                 match = 0
                 
                 for j in range(len(un_players)):
-                    m = Utils.LCS(unidecode(Utils.strip_CJK(un_players[i].strip().lower().replace("[","").replace(']','').replace(" ", ""))), unidecode(Utils.strip_CJK(un_players[j].strip().lower().replace("[","").replace(']','').replace(" ",""))))
+                    m = Utils.LCS(unidecode(Utils.sanitize_uni(un_players[i].strip().lower().replace("[","").replace(']','').replace(" ", ""))), unidecode(Utils.sanitize_uni(un_players[j].strip().lower().replace("[","").replace(']','').replace(" ",""))))
                     if un_players[i]!=un_players[j] and len(m)>longest_match:
                         longest_match = len(m)
                         match= un_players[i], un_players[j]
@@ -677,6 +665,117 @@ class Table():
         
         return ret
     
+    def set_teams(self, teams):
+        self.teams = teams
+        if self.teams!=2 and 3 in graph_map:
+            graph_map.pop(3)
+
+    def style_options(self):
+        ret = 'Table style options:'
+        for num,style in style_map.items():
+            ret+="\n   `{}.` {}".format(num, style.get('type'))
+        return ret
+    
+    def graph_options(self):
+        ret = 'Table graph options:'
+        for num,graph in graph_map.items():
+            ret+="\n   `{}.` {}".format(num, graph.get('type'))
+        return ret
+
+    def change_style(self, choice, reundo=False):
+        if choice is None:
+            self.style=choice
+            return
+
+        if choice.lstrip('+').lstrip('-').isnumeric():
+            c_indx = int(choice)
+            choice = style_map.get(c_indx, None)
+            if not choice:
+                return "`{}` is not a valid style number. The style number must be from 1-{}. Look at `?style` for reference.".format(c_indx, len(style_map))
+            
+            if not reundo:
+                self.modifications.append([("?style {}".format(c_indx), self.style.get('type') if self.style is not None else None, choice.get('type'))])
+                self.undos.clear()
+            
+            self.style = choice
+            return "Table style set to `{}`.".format(choice.get('type'))
+
+        else:
+            o_choice = choice
+            not_in = True
+            for i in list(style_map.values()):
+                if choice.lower() in map(lambda l: l.lower(), i.values()):
+                    not_in=False
+                    break
+            if not_in:
+                options = ''
+                for i in list(style_map.values()):
+                    options+='   - {}\n'.format(" | ".join(map(lambda orig: "`{}`".format(orig), i.values())))
+                    
+                return "`{}` is not a valid style. The following are the only available style options:\n".format(o_choice)+options
+            
+            for i in list(style_map.values()):
+                if choice.lower() in map(lambda l: l.lower(), i.values()):
+                    choice = i
+                    break
+            
+            if not reundo:
+                self.modifications.append([("?style {}".format(o_choice), self.style.get('type') if self.style is not None else None, choice.get('type'))])
+                self.undos.clear()
+            
+            self.style = choice
+            return "Table style set to `{}`.".format(choice.get('type'))
+
+    def change_graph(self, choice, reundo=False):
+        if choice is None:
+            self.graph = choice
+            return
+     
+        if choice.lstrip('+').lstrip('-').isnumeric():
+            c_indx = int(choice)
+            choice = graph_map.get(c_indx, None)
+            if not choice:
+                return "`{}` is not a valid graph number. The graph number must be from 1-{}. Look at `?graph` for reference.".format(c_indx, len(graph_map))
+            
+            if self.teams != 2 and choice.get('table') == 'diff':
+                return "The graph type `{}` can only be used when there are two teams.".format('Difference')
+
+            if not reundo:
+                self.modifications.append([("?graph {}".format(c_indx), self.graph.get('type') if self.graph is not None else None, choice.get('type'))])
+                self.undos.clear()
+            
+            self.graph = choice
+            return "Table graph set to `{}`.".format(choice.get('type'))
+
+        else:
+            o_choice = choice
+            not_in = True
+            for i in list(graph_map.values()):
+                if choice.lower() in map(lambda l: l.lower(), i.values()):
+                    not_in=False
+                    break
+            if not_in:
+                options = ''
+                for i in list(graph_map.values()):
+                    options+='   - {}\n'.format(" | ".join(map(lambda orig: "`{}`".format(orig), i.values())))
+                    
+                return "`{}` is not a valid graph. The following are the only available graph options:\n".format(o_choice)+options
+            
+            for i in list(graph_map.values()):
+                if choice.lower() in map(lambda l: l.lower(), i.values()):
+                    choice = i
+                    break
+            
+            if self.teams != 2 and choice.get('table') == 'diff':
+                return "The graph type `{}` can only be used when there are two teams.".format('Difference')
+            
+            if not reundo:
+                self.modifications.append([("?graph {}".format(o_choice), self.graph.get('type') if self.graph is not None else None, choice.get('type'))])
+                self.undos.clear()
+            
+            self.graph= choice
+            return "Table graph set to `{}`.".format(choice.get('type'))
+
     def tag_str(self):
         ret = '{}{} '.format(Utils.full_format(self.format), "" if Utils.full_format(self.format)=="FFA" else ":")
         tags_copy = list(self.tags.keys())
@@ -773,7 +872,7 @@ class Table():
                     if i[0] in t[1]:
                         tag_places[t[0]].append(count)
             
-        tag_places = dict(sorted(tag_places.items(), key=lambda item: sum([self.pts[count][i-1] for i in item[1]]), reverse=True))
+        tag_places = dict(sorted(tag_places.items(), key=lambda item: sum([pts_map[count][i-1] for i in item[1]]), reverse=True))
 
         if self.format[0]!='f':
             ret+="\n"
@@ -781,7 +880,7 @@ class Table():
                 ret+="{} -".format(tag)
                 for p in placements:
                     ret+=' {}{}'.format(p, '' if p==placements[-1] else ',')
-                ret+=" ({} pts)".format(sum([self.pts[count][i-1] for i in placements]))
+                ret+=" ({} pts)".format(sum([pts_map[count][i-1] for i in placements]))
                 ret+="{}".format("" if tag==list(tag_places.items())[-1][0] else "   |   ")
         return False,ret
     
@@ -1702,7 +1801,7 @@ class Table():
             for place, p in enumerate(self.races[raceNum]):
                 player = p[2]
                 try:
-                    pts = self.pts[orig_room_size][place]
+                    pts = pts_map[orig_room_size][place]
                 except KeyError:
                     pts = 0
                 orig_pts[player] = pts
@@ -1712,7 +1811,7 @@ class Table():
             for place, p in enumerate(self.races[raceNum]):
                 player = p[2]
                 try:
-                    pts = self.pts[cor_room_size][place]
+                    pts = pts_map[cor_room_size][place]
                 except KeyError:
                     pts = 0
                 fixed_pts[player] = pts
@@ -1780,9 +1879,9 @@ class Table():
             corresponding_rr = [i[2] for i in corresponding_rr]
             
             orig_pos = corresponding_rr.index(player)
-            orig_pts = self.pts[len(corresponding_rr)][orig_pos]
+            orig_pts = pts_map[len(corresponding_rr)][orig_pos]
             try:   
-                cor_pts = self.pts[len(corresponding_rr)][int(correct_pos)]
+                cor_pts = pts_map[len(corresponding_rr)][int(correct_pos)]
             except:
                 return "Corrected position `{}` was invalid. It must be a number from 1-{}.".format(correct_pos, len(corresponding_rr))
             
@@ -1793,7 +1892,7 @@ class Table():
                 
             aff_orig_pts = {}
             for a in aff:
-                aff_orig_pts[a] = self.pts[len(corresponding_rr)][corresponding_rr.index(a)]
+                aff_orig_pts[a] = pts_map[len(corresponding_rr)][corresponding_rr.index(a)]
             
             correct_ft_order = list(self.finish_times[raceNum-1].keys())
             correct_ft_order.insert(correct_pos, correct_ft_order.pop(orig_pos))
@@ -1806,7 +1905,7 @@ class Table():
             corresponding_rr = [i[2] for i in corresponding_rr]
             
             for a in aff:
-                aff_new_pts[a] = self.pts[len(corresponding_rr)][corresponding_rr.index(a)]
+                aff_new_pts[a] = pts_map[len(corresponding_rr)][corresponding_rr.index(a)]
             
             gp = int((raceNum-1)/4)
 
@@ -1893,9 +1992,9 @@ class Table():
             for placement, player in enumerate(race):
                 player = player[2]
                 recorded_players.append(player)
-                self.players[player][1][gp] += self.pts[cur_room_size][placement]
-                self.players[player][2][raceNum] += self.pts[cur_room_size][placement]
-                self.players[player][0] += self.pts[cur_room_size][placement]
+                self.players[player][1][gp] += pts_map[cur_room_size][placement]
+                self.players[player][2][raceNum] += pts_map[cur_room_size][placement]
+                self.players[player][0] += pts_map[cur_room_size][placement]
         
         x = copy.deepcopy(self.players)
         for i in x.keys():
@@ -2259,9 +2358,9 @@ class Table():
 
                 miiName = self.display_names[fc]
                 
-                self.players[fc][1][self.gp] += self.pts[cur_room_size][place]
-                self.players[fc][2][shift+raceNum] = self.pts[cur_room_size][place]
-                self.players[fc][0] += self.pts[cur_room_size][place]
+                self.players[fc][1][self.gp] += pts_map[cur_room_size][place]
+                self.players[fc][2][shift+raceNum] = pts_map[cur_room_size][place]
+                self.players[fc][0] += pts_map[cur_room_size][place]
                 
                 #check for ties
                 if time != 'DC' and time in list(last_finish_times.values()):
@@ -2353,6 +2452,11 @@ class Table():
         self.tags = {k:v for k,v in self.tags.items() if len(v)>0}
         
         ret = "#title {} {}".format(len(self.races), "race" if len(self.races)==1 else 'races')
+        if self.style:
+            ret+="\n#style {}".format(self.style.get('table'))
+        if self.graph:
+            ret+="\n#graph {}".format(self.graph.get('table'))
+
         if self.format[0] == 'f':
             ret+='\nFFA'
             for p in self.players.keys():
@@ -2627,7 +2731,13 @@ class Table():
         
         elif '?changename ' in j[0]:
             self.undo_change_name(j[1], j[3],j[4])
-
+        
+        elif '?graph ' in j[0]:
+            self.change_graph(j[1], reundo=True)
+        
+        elif '?style ' in j[0]:
+            self.change_style(j[1], reundo=True)
+        
         else:
             print("undo error:",j[0])
             raise AssertionError
@@ -2683,6 +2793,12 @@ class Table():
 
         elif '?changename ' in j[0]:
             self.change_name([[j[1], j[2]]], redo=True)
+        
+        elif '?graph ' in j[0]:
+            self.change_graph(j[2], reundo=True)
+        
+        elif '?style ' in j[0]:
+            self.change_style(j[2], reundo=True)
         
         else:
             print("redo error:",j[0])

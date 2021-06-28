@@ -116,13 +116,13 @@ def is_CJK(char):
 
 from unidecode import unidecode
 
-def strip_CJK(string):
+def sanitize_uni(string):
     '''
-    strip all cjk characters from string
+    strip all cjk and non-unicode characters from string
 
     Returns
     -------
-    string with no CJK characters
+    string with no CJK or non-unicode characters
 
     '''
     string = list(string)
@@ -141,6 +141,19 @@ def replace_brackets(string):
 def dis_clean(string):
     return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~")
 
+pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
+              11:{0:15, 1:12, 2:10, 3:8, 4:6, 5:5, 6:4, 7:3, 8:2, 9:1, 10:0},
+              10:{0:15, 1:12, 2:10, 3:8, 4:6, 5:4, 6:3, 7:2, 8:1, 9:0},
+              9:{0:15, 1:11, 2:8, 3:6, 4:4, 5:3, 6:2, 7:1, 8:0},
+              8:{0:15, 1:11, 2:8, 3:6, 4:4, 5:2, 6:1, 7:0},
+              7:{0:15, 1:10, 2:7, 3:5, 4:3, 5:1, 6:0},
+              6:{0:15, 1:10, 2:6, 3:3, 4:1, 5:0},
+              5:{0:15, 1:9, 2:5, 3:2, 4:1},
+              4:{0:15, 1:9, 2:4, 3:1},
+              3:{0:15, 1:8, 2:2},
+              2:{0:15, 1:7},
+              1:{0:15}
+            }
 
 warning_map = {
             "dc_on": "{} DCed during the race (on results), unless MKWX BUG. Awarding 3 DC points per missing race in GP {} ({} pts).",
@@ -182,4 +195,24 @@ dc_map = {
             "dc_before": "{}** - DCed before race. 3 DC points per missing race in GP {} ({} pts).", 
             ("dc_before", 1): "{}** - is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war)."
         }  
+
+graph_map = {
+        1: {"table": "none", "type": "None"},
+        2: {"table": "abs", "type": "Absolute"},
+        3: {"table": "diff", "type": "Difference (2 teams only)"}   
+}
+
+style_map = {
+        1: {"table": "default", "type": "Default Style"},
+        2: {"table": "dark", "type": "Dark Theme"},
+        3: {"table": "rank", "type": "Color by Ranking"},
+        4: {"table": "mku", "type": "Mario Kart Universal"},
+        5: {"table": "200L", "type": "200 League"},
+        6: {"table": "americas", "type": "Americas Cup"},
+        7: {"table": "euro", "type": "EuroLeague"},
+        8: {"table": "japan", "type": "マリオカートチームリーグ戦"},
+        9: {"table": "cwl", "type": "Clan War League"},
+        10: {"table": "runners", "type": "Runners Assemble"},
+        11: {"table": "mkworlds", "type": "Mario Kart Worlds"},
+}
     

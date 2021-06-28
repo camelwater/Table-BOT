@@ -186,7 +186,7 @@ class table_bot(commands.Cog):
             await self.send_messages(ctx, "Invalid number of teams. The number of teams cannot exceed 12 players.", usage)
             return
         self.table_instances[ctx.channel.id].format = _format
-        self.table_instances[ctx.channel.id].teams = teams
+        self.table_instances[ctx.channel.id].set_teams(teams)
         num_players = Utils.get_num_players(_format, teams) 
         self.table_instances[ctx.channel.id].num_players = num_players
         gps = 3
@@ -225,7 +225,6 @@ class table_bot(commands.Cog):
     #?search   
     @commands.command(aliases=['sr'])  
     async def search(self,ctx, *, arg):
-        
         
         if self.table_instances[ctx.channel.id].confirm_room or self.table_instances[ctx.channel.id].confirm_reset:
             await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.table_instances[ctx.channel.id].choose_message)
@@ -491,6 +490,36 @@ class table_bot(commands.Cog):
         
         #await send_messages(ctx, )
     '''
+
+    @commands.command()
+    async def style(self, ctx, *, choice):
+        if await self.check_callable(ctx, "style"): return
+
+        usage = "\nUsage: `?style <styleNumber|styleName>`"
+        mes = self.table_instances[ctx.channel.id].change_style(choice)
+        await ctx.send(mes)
+    
+    @style.error
+    async def style_error(self, ctx, error):
+        self.set_instance(ctx)
+        if await self.check_callable(ctx, "style"): return
+        if isinstance(error, commands.MissingRequiredArgument):
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].style_options(), "\nUsage: `?style <styleNumber|styleName>`")
+
+    @commands.command()
+    async def graph(self, ctx, *, choice):
+        if await self.check_callable(ctx, "graph"): return
+
+        mes = self.table_instances[ctx.channel.id].change_graph(choice)
+        await ctx.send(mes)
+
+    @graph.error
+    async def graph_error(self, ctx, error):
+        self.set_instance(ctx)
+        if await self.check_callable(ctx, "graph"): return
+
+        if isinstance(error, commands.MissingRequiredArgument):
+            await self.send_messages(ctx, self.table_instances[ctx.channel.id].graph_options(), "\nUsage: `?graph <graphNumber|graphName>`")        
     
     #?picture
     @commands.command(aliases=['p', 'pic', 'wp'])
@@ -501,7 +530,7 @@ class table_bot(commands.Cog):
             await self.send_temp_messages(ctx, "This command is currently in use. Please wait.")
             return
         
-        if await self.check_callable(ctx, "pic"): return
+        if await self.check_callable(ctx, "picture"): return
         byrace = False
         if len(arg)>0 and arg[0] in ['byrace', 'race']:
             byrace = True
