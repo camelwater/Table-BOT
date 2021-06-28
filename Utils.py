@@ -57,6 +57,11 @@ def full_format(f):
         return 'FFA'
     return '{}v{}'.format(int(f[0]), int(f[0]))
 
+def isFFA(f):
+    if not f[0].isnumeric():
+        return True
+    return False
+
 def chunks(l, n):
     """
     split list into smaller lists
@@ -126,6 +131,7 @@ def sanitize_uni(string):
 
     '''
     string = list(string)
+    string = [char_map.get(i, i) for i in string]
     ret = [i for i in string if not is_CJK(i) and unidecode(i)!=""]
     no_cjk = ''.join(ret)
     return no_cjk
@@ -141,6 +147,8 @@ def replace_brackets(string):
 def dis_clean(string):
     return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~")
 
+
+
 pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
               11:{0:15, 1:12, 2:10, 3:8, 4:6, 5:5, 6:4, 7:3, 8:2, 9:1, 10:0},
               10:{0:15, 1:12, 2:10, 3:8, 4:6, 5:4, 6:3, 7:2, 8:1, 9:0},
@@ -154,6 +162,16 @@ pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:
               2:{0:15, 1:7},
               1:{0:15}
             }
+
+char_map = {
+    "Λ":"A",
+    "λ": "A",
+    "ß": "B",
+    "Ξ": "E", 
+    "や": "P",
+    "ν": "v", 
+    "γ": "y"
+}
 
 warning_map = {
             "dc_on": "{} DCed during the race (on results), unless MKWX BUG. Awarding 3 DC points per missing race in GP {} ({} pts).",

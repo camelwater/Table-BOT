@@ -18,7 +18,7 @@ import time
 from unidecode import unidecode
 from collections import defaultdict
 import Utils
-from Utils import warning_map, dc_map, style_map, graph_map, pts_map
+from Utils import isFFA, warning_map, dc_map, style_map, graph_map, pts_map
 
 
 class Table():
@@ -90,9 +90,8 @@ class Table():
         self.gp = 0 #current gp
         self.num_players = 0 #number of players room is supposed to have (based on format and teams)
         self.player_list = '' #string for bot printout of players and their ids
-
-        self.unrecog_chars = [] #TODO: implement
         
+
         ##### Stuff for bot instances #####
         self.choose_message = ""
         self.searching_room = False
@@ -258,7 +257,7 @@ class Table():
                     string = ""
                 
                     counter = 1
-                    if self.format[0].lower() == 'f':
+                    if isFFA(self.format):
                         string+='\n__FFA__'
                         for p in self.players.keys():
                             string+="\n{}. {}".format(counter,self.display_names[p])
@@ -308,7 +307,7 @@ class Table():
                     string = ""
                     
                     counter = 1
-                    if self.format[0].lower() == 'f':
+                    if isFFA(self.format):
                         string+='\n_FFA_'
                         for p in self.players.keys():
                             string+="\n{}. {}".format(counter,self.display_names[p])
@@ -867,14 +866,14 @@ class Table():
         for i in list(x.items()):
             count+=1
             ret+="   {}. {} - {}\n".format(count, Utils.dis_clean(self.display_names[i[0]]), i[1])
-            if self.format[0]!='f':
+            if not isFFA(self.format):
                 for t in self.tags.items():
                     if i[0] in t[1]:
                         tag_places[t[0]].append(count)
             
         tag_places = dict(sorted(tag_places.items(), key=lambda item: sum([pts_map[count][i-1] for i in item[1]]), reverse=True))
 
-        if self.format[0]!='f':
+        if not isFFA(self.format):
             ret+="\n"
             for tag, placements in tag_places.items():
                 ret+="{} -".format(tag)
@@ -1012,7 +1011,7 @@ class Table():
         counter = 1
         string =''
         self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].upper())))
-        if self.format[0].lower() == 'f':
+        if isFFA(self.format):
             for p in list(self.players.keys()):
                 p2 = p
                 if p in self.deleted_players: continue
@@ -1174,7 +1173,7 @@ class Table():
         counter = 1
         string =''
         self.tags = dict(sorted(self.tags.items(), key=lambda item: item[0].upper()))
-        if self.format[0].lower() == 'f':
+        if isFFA(self.format):
             for p in list(self.players.keys()):
                 self.player_ids[str(counter)] = p
                 p2 = p
@@ -1380,7 +1379,7 @@ class Table():
                 self.display_names[fc] = miiName
         
         self.players = dict(sorted(self.players.items(), key=lambda item: item[0]))
-        if self.format[0].lower() == 'f': 
+        if isFFA(self.format): 
             self.all_players = list(copy.deepcopy(self.players).keys())
             print(self.players.keys())
         
@@ -1395,7 +1394,7 @@ class Table():
     
     def get_all_players(self): 
         ret = ''
-        if self.format[0].lower()=='f':
+        if isFFA(self.format):
             for i, p in enumerate(self.all_players):
                 ret+="\n{}. {}".format(i+1, Utils.dis_clean(self.display_names[p]))
                 if p in self.deleted_players:
@@ -1429,7 +1428,7 @@ class Table():
             
     def add_sub_player(self,player, fc):
         if fc in self.all_players: return 'failed'
-        if self.format[0].lower()=='f': self.all_players.append(fc)
+        if isFFA(self.format): self.all_players.append(fc)
         self.players[fc] = [0,[0]*self.gps, [0]*self.gps*4]
         self.fcs[player] = fc
         self.display_names[fc] = player
@@ -1448,10 +1447,10 @@ class Table():
                         self.dc_list[1].pop(dc_item[0])
                         self.warnings[1].pop(warn_item[0])
                     
-                    if self.format[0].lower()!='f': self.find_tag(player, fc)
+                    if not isFFA(self.format): self.find_tag(player, fc)
                     return 'not sub'
         
-        if self.format[0].lower()!='f':
+        if not isFFA(self.format):
             if "SUBS" not in self.tags:
                 self.tags['SUBS'] = []
             self.tags["SUBS"].append(fc)
@@ -1560,7 +1559,7 @@ class Table():
             pid = None
         tag = ""
         in_tag = ''
-        if self.format[0]!='f':
+        if not isFFA(self.format):
             for t in self.tags.items():
                 if out_player in t[1]:
                     tag = t[0]
@@ -1610,7 +1609,7 @@ class Table():
             except:
                 pass
 
-        if self.format[0]!='f':
+        if not isFFA(self.format):
             for tag in self.tags.items():
                 try:
                     tag[1].remove(in_player)
@@ -2278,11 +2277,9 @@ class Table():
             if cur_room_size<self.num_players and len(self.players)<self.num_players and (shift+raceNum)%4 == 0:
                 #TEST: test if player missing race one and comes back later gp
                 self.warnings[shift+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
-                #self.dc_list[shift+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
 
             elif cur_room_size > self.num_players and (shift+raceNum)%4 == 0:
                 self.warnings[shift+raceNum+1].append({'type': 'overflow', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
-                #self.dc_list[shift+raceNum+1].append({'type': 'overflow', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
              
             elif cur_room_size<len(self.players):
                 f_codes = [i[2] for i in race]
@@ -2351,9 +2348,10 @@ class Table():
                             self.dc_pts[dc[0]].pop(indx)
                             continue
                 
-                if fc not in self.players and fc not in self.deleted_players: #sub player
+                #sub player
+                if fc not in self.players and fc not in self.deleted_players:
                     status = self.add_sub_player(self.check_name(player[0]), fc)
-                    if self.format[0].lower()!='f' and status == 'success':
+                    if not isFFA(self.format) and status == 'success':
                         self.warnings[shift+raceNum+1].append({'type':'sub', 'player': fc})
 
                 miiName = self.display_names[fc]
@@ -2457,7 +2455,7 @@ class Table():
         if self.graph:
             ret+="\n#graph {}".format(self.graph.get('table'))
 
-        if self.format[0] == 'f':
+        if isFFA(self.format):
             ret+='\nFFA'
             for p in self.players.keys():
                 p2 = p
@@ -2739,7 +2737,7 @@ class Table():
             self.change_style(j[1], reundo=True)
         
         else:
-            print("undo error:",j[0])
+            print("UNKNOWN UNDO TYPE:",j[0])
             raise AssertionError
     
     async def redo(self, j):
@@ -2801,7 +2799,7 @@ class Table():
             self.change_style(j[2], reundo=True)
         
         else:
-            print("redo error:",j[0])
+            print("UNKNOWN REDO TYPE:",j[0])
             raise AssertionError
             
     async def undo_commands(self, num): #TODO: clearing "manually edited" warnings needs further testing and additions for new commands
