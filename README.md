@@ -112,6 +112,13 @@ These commands can be used to edit the table based on your custom ruleset outsid
 ```
 
 ```
+?style
+```
+```
+?graph
+```
+
+```
 ?undo (all)
 ```
 ```

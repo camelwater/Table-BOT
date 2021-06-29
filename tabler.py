@@ -537,7 +537,7 @@ class Table():
                     teams[temp_tag] = list(match)
                     for p in match:
                         un_players.remove(p)
-        print(un_players)
+
         #randomly tag the rest
         if len(un_players)>0 and len(teams)==num_teams:
             for item in teams.items():
@@ -673,13 +673,13 @@ class Table():
     def style_options(self):
         ret = 'Table style options:'
         for num,style in style_map.items():
-            ret+="\n   `{}.` {}".format(num, style.get('type'))
+            ret+="\n   {} {}".format("**{}.**".format(num) if self.style and self.style.get('type') == style.get('type') else "`{}.`".format(num), style.get('type'))
         return ret
     
     def graph_options(self):
         ret = 'Table graph options:'
         for num,graph in graph_map.items():
-            ret+="\n   `{}.` {}".format(num, graph.get('type'))
+            ret+="\n   {} {}".format("**{}.**".format(num) if self.graph and self.graph.get('type') == graph.get('type') else "`{}.`".format(num), graph.get('type'))
         return ret
 
     def change_style(self, choice, reundo=False):
@@ -939,15 +939,18 @@ class Table():
             for j in affected_players:
                 if j in i[1]:
                     i[1].remove(j)
+                    self.all_players[i[0]].remove(j)
         leftovers = []
         for i in dic.items():
             if i[0] not in self.tags:
                 self.tags[i[0]] = i[1]
+                self.all_players[i[0]] = i[1]
             else:
                 for j in self.tags[i[0]]:
                     if j not in i[1] and j not in affected_players:
                         leftovers.append(j)
                 self.tags[i[0]] = i[1]
+                self.all_players[i[0]] = i[1]
         
         per_team = Utils.convert_format(self.format)
         if len(leftovers)>0:
@@ -955,6 +958,7 @@ class Table():
                 while len(i[1])!=per_team:
                     try:
                         i[1].append(leftovers[0])
+                        self.all_players[i[0]].append(leftovers[0])
                         del leftovers[0]
                     except:
                         break
@@ -1433,11 +1437,11 @@ class Table():
         self.players[fc] = [0,[0]*self.gps, [0]*self.gps*4]
         self.fcs[player] = fc
         self.display_names[fc] = player
-
+        print(self.num_players)
         if len(self.players)-1<self.num_players:
             print("asd")
-            for dc_item, warn_item in zip(enumerate(self.dc_list[1]), enumerate(self.warnings[1])):
-                if dc_item[1].get('type') == "missing":
+            for warn_item in enumerate(self.warnings[1]):
+                if warn_item[1].get('type') == "missing":
                     #print(ind,i)
                     self.dc_list[1].append({'type': 'dc_before', 'race':1, 'player': fc, 'gp': 1})
                     self.warnings[1].append({'type': 'dc_before','race': 1, 'player': fc, 'gp': 1})
@@ -1445,7 +1449,6 @@ class Table():
                     if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                     self.gp_dcs[self.gp].append(fc)
                     if len(self.players)==self.num_players:
-                        self.dc_list[1].pop(dc_item[0])
                         self.warnings[1].pop(warn_item[0])
                     
                     if not isFFA(self.format): self.find_tag(player, fc)

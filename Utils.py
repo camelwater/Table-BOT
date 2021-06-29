@@ -167,7 +167,8 @@ char_map = {
     "Λ":"A",
     "λ": "A",
     "ß": "B",
-    "Ξ": "E", 
+    "Ξ": "E",
+    "σ": "o", 
     "や": "P",
     "ν": "v", 
     "γ": "y"
@@ -211,7 +212,7 @@ dc_map = {
             ("dc_on_confirmed", -1): "{}** - DCed during the race (on results). No DC points for GP {}.", 
 
             "dc_before": "{}** - DCed before race. 3 DC points per missing race in GP {} ({} pts).", 
-            ("dc_before", 1): "{}** - is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war)."
+            ("dc_before", 1): "{}** - missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war)."
         }  
 
 graph_map = {
