@@ -18,9 +18,17 @@ load_dotenv()
 KEY = os.getenv('KEY')
 #SERVER_ID = 775253594848886785
 
-INIT_EXT = ['cogs.table_cog', 'cogs.Stats', 'cogs.Settings']
+INIT_EXT = ['cogs.Stats', 'cogs.Settings', 'cogs.table_cog']
 
 log = logging.getLogger(__name__) #TODO: implement logging, also change prefixes to server settings in general
+
+def load_settings():
+    with open('settings.json') as d:
+        load = json.load(d)
+        if load:
+            return load
+        else:
+            return {}
 
 def load_prefixes():
     with open('prefixes.json') as p:
@@ -46,6 +54,7 @@ class TableBOT(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix = callable_prefix, case_insensitive=True, intents = discord.Intents.all(), help_command = None)      
         self.prefixes = load_prefixes()
+        self.settings = load_settings()
         
         self.table_instances = {}
         self.BOT_ID = 844640178630426646
@@ -55,9 +64,12 @@ class TableBOT(commands.Bot):
     #TODO: catch invalid form errors (too long fields)        
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
-            #await ctx.send("I don't recognize command that command.\nType `?help` for a list of commands.")
+            if not ctx.guild:
+                await(await ctx.send("I don't recognize that command. Use `?help` for a list of available commands.")).delete(delay=25)
             pass
-        if isinstance(error, commands.MissingPermissions):
+        elif isinstance(error, commands.NoPrivateMessage):
+            await(await ctx.send("This command cannot be used in DMs.")).delete(delay=7)
+        elif isinstance(error, commands.MissingPermissions):
             #await(await ctx.send("Sorry, you don't have permission to use this command. You are missing the following permission(s):\n{}".format(','.join(map(lambda l: '`{}`'.format(l), error.missing_perms))))).delete(delay=10.0)
             await(await ctx.send("Sorry {}, you don't have permission to use this command.".format(ctx.author.mention))).delete(delay=10.0)
         elif isinstance(error, commands.CommandOnCooldown):
@@ -76,7 +88,7 @@ class TableBOT(commands.Bot):
         print("Bot logged in as {0.user}".format(self)) 
 
     def get_guild_prefixes(self, guild, local_inject = callable_prefix):
-        fill_msg = discord.Object(id=1)
+        fill_msg = discord.Object(id=0)
         fill_msg.guild = guild
 
         return local_inject(self, fill_msg, mention=False)
@@ -102,18 +114,18 @@ class TableBOT(commands.Bot):
     def remove_prefix(self, guild, prefix):
         guild = str(guild)
 
-        if prefix in ['<@!{}>'.format(self.BOT_ID), '<@{}>'.format(self.BOT_ID)]:
+        if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
             return "The bot mention is a default prefix and cannot be removed."
 
         try:
             self.prefixes[guild].remove(prefix)
             self.write_prefix_json()
 
-            return "Prefix `{}` has been removed.".format(prefix)
+            return f"Prefix `{prefix}` has been removed."
         except KeyError:
             return "You don't have any custom prefixes registered."
         except:
-            return "`{}` is not a registered prefix.".format(prefix)
+            return f"`{prefix}` is not a registered prefix."
         
     
     def set_prefix(self, guild, prefix):
@@ -130,10 +142,52 @@ class TableBOT(commands.Bot):
         self.write_prefix_json()
 
         return "`{}` has been set as the prefix.".format(prefix)
+
+    def get_guild_settings(self, guild):
+        guild = str(guild)
+        default = {'style': None, 'graph': None}
+      
+        if self.settings.get(guild) is None:
+            self.settings[guild] = default
+            self.write_settings_json()
+        return self.settings.get(guild, default)
     
+    def set_setting(self, guild, setting, default):
+        guild = str(guild)
+        if not default:
+            try:
+                self.settings.get(guild, {}).pop(setting)
+            except:
+                pass
+            self.write_settings_json()
+            return "`{}` setting restored to default.".format(setting)
+        
+        try:
+            self.settings[guild][setting] = default
+        except:
+            self.settings[guild] = {}
+            self.settings[guild][setting] = default
+        
+        self.write_settings_json()
+        return "`{}` setting set as `{}`.".format(setting, default.get('type') if setting in ['graph', 'style'] else default)
+    
+    def get_setting(self, type, guild, raw = False):
+        guild = str(guild)
+        if type in ['graph', 'style']:
+            if raw:
+                return self.settings.get(guild, {'style': None, 'graph': None}).get(type)
+            return self.settings.get(guild, {'style': None, 'graph': None}).get(type).get('type')
+        else:
+            pass
+            #for other settings to be added in the future
+
     def write_prefix_json(self):
         with open("prefixes.json", 'w') as p:
             json.dump(self.prefixes, p, ensure_ascii=True, indent=4)
+    
+    def write_settings_json(self):
+        with open("settings.json", 'w') as d:
+            json.dump(self.settings, d, ensure_ascii=True, indent=4)
     
     def dump_stats_json(self):
         if not hasattr(self, "command_stats"): return
@@ -154,4 +208,3 @@ if __name__ == "__main__":
     @atexit.register
     def on_exit():
         bot.dump_stats_json()
-        #bot.write_prefix_json()

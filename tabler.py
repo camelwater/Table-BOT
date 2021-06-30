@@ -18,11 +18,13 @@ import time
 from unidecode import unidecode
 from collections import defaultdict
 import Utils
-from Utils import isFFA, warning_map, dc_map, style_map, graph_map, pts_map
+from Utils import isFFA, warning_map, dc_map, style_map, pts_map
+from Utils import graph_map as gm
+graph_map = copy.deepcopy(gm)
 
 
 class Table():
-    def __init__(self, testing = False):
+    def __init__(self, ctx = None, bot = None, graph = None, style = None, testing = False):
         self.TESTING = testing
         self.IGNORE_FCS = False
         if self.TESTING:
@@ -73,8 +75,8 @@ class Table():
                    
         self.tags = {} #list of team tags and their respective players
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
-        self.graph = None
-        self.style = None
+        self.graph = graph
+        self.style = style
         self.table_img = None
         self.table_link = '' #image png link
         self.sui = False 
@@ -103,8 +105,8 @@ class Table():
         self.redo_empty = False
         self.table_running = False
         self.picture_running = False
-        self.ctx = None
-        self.bot = None
+        self.ctx = ctx
+        self.bot = bot
         self.last_command_sent = None
         ##### Stuff for bot instances #####
         
@@ -161,7 +163,7 @@ class Table():
                         return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
                     
                 if "No match found!" in list(soup.stripped_strings):
-                    return True, "The room ({}) hasn't finished at least one race yet.\nRetry the ?mergeroom command when the room has finished one race.".format(rxx)
+                    return True, "The room ({}) hasn't finished a race yet.\nRetry `?mergeroom` when the room has finished one race.".format(rxx)
                 
                 self.current_url = room_url
                 self.prev_rxxs.append(self.rxx)
@@ -191,7 +193,7 @@ class Table():
                 
                 stripped = list(soup.stripped_strings)
                 if "No match found!" in stripped:
-                    return True, "The room ({}) hasn't finished at least one race yet.\nRetry the ?mergeroom command when the room has finished at least one race.".format(rid)
+                    return True, "The room ({}) hasn't finished at least one race yet.\nRetry `?mergeroom` when the room has finished at least one race.".format(rid)
                 
                 self.current_url = room_url
                 self.prev_rxxs.append(self.rxx)
@@ -248,7 +250,7 @@ class Table():
                         return True,type_ask, "I am currently experiencing some issues with Wiimmfi. Try again later."
 
                 if "No match found!" in list(soup.stripped_strings):
-                    return True, type_ask, "The room hasn't finished at least one race yet.\nRetry the ?search command when the room has finished one race."
+                    return True, type_ask, "The room hasn't finished at a race yet.\nRetry `?search` when the room has finished one race."
                 else:
                     self.find_players(room_url, soup)
                     self.split_teams(self.format, self.teams)
@@ -298,7 +300,7 @@ class Table():
                 
                 stripped = list(soup.stripped_strings)
                 if "No match found!" in stripped:
-                    return True, type_ask, "The room either doesn't exist or hasn't finished at least one race yet.\nRetry the ?search command when the room has finished one race and make sure the room id is in rxx or XX00 format."
+                    return True, type_ask, "The room either doesn't exist or hasn't finished a race yet.\nRetry `?search` when the room has finished one race and make sure the room id is in rxx or XX00 format."
                 else:
                     self.find_players(room_url, soup)
                     self.split_teams(self.format, self.teams)
@@ -332,7 +334,7 @@ class Table():
                     return False, type_ask, "Room {} found.\n{}\n\n**Is this room correct?** (`?yes` / `?no`)".format(self.rxx, string)
     
     
-    def split_teams(self, f, num_teams): #TODO: unidecode doesn't work fully, need to find another method
+    def split_teams(self, f, num_teams):
         """
         split players into teams based on tags
         """
@@ -359,7 +361,7 @@ class Table():
                 for j in range(len(player_copy)):                    
                     if i!=j and indx>0 and unidecode(Utils.sanitize_uni(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx] == unidecode(Utils.sanitize_uni(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx]:
                         matches+=1
-                        
+                        #print(unidecode(Utils.sanitize_uni(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx], unidecode(Utils.sanitize_uni(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx])
                         if matches == per_team: break 
                 
             tag = Utils.sanitize_uni(player_copy[i].replace("[","").replace(']',''))[:indx]
@@ -669,6 +671,8 @@ class Table():
         self.teams = teams
         if self.teams!=2 and 3 in graph_map:
             graph_map.pop(3)
+        if self.graph and self.graph.get('table') == 'diff':
+            self.graph = None
 
     def style_options(self):
         ret = 'Table style options:'
@@ -1886,7 +1890,7 @@ class Table():
             try:   
                 cor_pts = pts_map[len(corresponding_rr)][int(correct_pos)]
             except:
-                return "Corrected position `{}` was invalid. It must be a number from 1-{}.".format(correct_pos, len(corresponding_rr))
+                return "Corrected position `{}` was invalid. It must be a number from 1-{}.".format(correct_pos+1, len(corresponding_rr))
             
             if orig_pos<correct_pos:
                 aff = [self.races[raceNum-1][i][2] for i in range(orig_pos+1,correct_pos+1)]
@@ -2806,7 +2810,7 @@ class Table():
             print("UNKNOWN REDO TYPE:",j[0])
             raise AssertionError
             
-    async def undo_commands(self, num): #TODO: clearing "manually edited" warnings needs further testing and additions for new commands
+    async def undo_commands(self, num): 
         if num == 0: #undo all
             if len(self.modifications)>0:
                 for i in list(reversed(copy.deepcopy(self.modifications))):

@@ -167,6 +167,7 @@ char_map = {
     "Λ":"A",
     "λ": "A",
     "ß": "B",
+    "¢": "c",
     "Ξ": "E",
     "σ": "o", 
     "や": "P",
@@ -233,5 +234,10 @@ style_map = {
         9: {"table": "cwl", "type": "Clan War League"},
         10: {"table": "runners", "type": "Runners Assemble"},
         11: {"table": "mkworlds", "type": "Mario Kart Worlds"},
+}
+
+settings = {
+    "graph": graph_map, 
+    "style": style_map
 }
     

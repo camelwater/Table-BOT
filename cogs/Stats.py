@@ -63,7 +63,7 @@ class Stats(commands.Cog):
 
         #e.add_field(name='\u200b', value= "\u200b", inline=False)
         e.add_field(name='Written in:', value='python', inline=False)
-        e.add_field(name='Lines of code:', value="~4250 (cba to figure out exact number)", inline=False)
+        e.add_field(name='Lines of code:', value="~4600 (cba to figure out exact number)", inline=False)
         e.add_field(name="Libraries used:", value='discord.py, collections, urllib, aiohttp, and others', inline=False)
 
         link = "[Github Repository](https://github.com/camelwater/Table-BOT)"

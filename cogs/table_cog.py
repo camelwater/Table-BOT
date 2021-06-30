@@ -73,9 +73,12 @@ class table_bot(commands.Cog):
         channel_id = ctx.channel.id
         if channel_id in self.bot.table_instances: return
 
-        self.bot.table_instances[channel_id] = Table()
-        self.bot.table_instances[channel_id].ctx = ctx
-        self.bot.table_instances[channel_id].bot = self.bot
+        self.bot.table_instances[channel_id] = Table(ctx=ctx, bot=self.bot)
+        if ctx.guild:
+            self.bot.table_instances[channel_id].graph = self.bot.get_setting('graph',ctx.guild.id, raw=True)
+            self.bot.table_instances[channel_id].stylr = self.bot.get_setting('style', ctx.guild.id, raw=True)
+        #self.bot.table_instances[channel_id].ctx = ctx
+        #self.bot.table_instances[channel_id].bot = self.bot
      
     async def send_temp_messages(self,ctx, *args):
         await ctx.send('\n'.join(args), delete_after=25)
@@ -315,7 +318,7 @@ class table_bot(commands.Cog):
                 await self.send_temp_messages(ctx, "<player number>(s) must be numeric.")
                 return
         
-        mes = self.bot.table_instances[ctx.channel.id].change_name(arg) #TODO:
+        mes = self.bot.table_instances[ctx.channel.id].change_name(arg)
         await ctx.send(mes)
         
     
@@ -452,8 +455,8 @@ class table_bot(commands.Cog):
                 mes = "**Warning:** *The number of players in the room doesn't match the given format and teams.*\nTable started, but will likely be inaccurate. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.bot.table_instances[ctx.channel.id].sui else '')
             else:   
                 mes = "Table successfully started. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.bot.table_instances[ctx.channel.id].sui else '')
+
             self.bot.table_instances[ctx.channel.id].table_running = True
-            
             self.bot.table_instances[ctx.channel.id].searching_room = False
             self.bot.table_instances[ctx.channel.id].confirm_room = False
             self.bot.table_instances[ctx.channel.id].check_mkwx_update.start()
