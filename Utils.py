@@ -132,8 +132,8 @@ def sanitize_uni(string):
     '''
     string = [char_map.get(i, i) for i in string]
     ret = [i for i in string if not is_CJK(i) and unidecode(i)!=""]
-    no_cjk = ''.join(ret)
-    return no_cjk
+    return ''.join(ret)
+
 
 def sanitize_uni_tag(string):
     '''

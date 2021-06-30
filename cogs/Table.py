@@ -17,7 +17,7 @@ class Table_cog(commands.Cog):
         self.home_url = "https://wiimmfi.de/stats/mkwx/list/"
         self.bot = bot
         self.presences = cycle(['?help for help', '{} active tables'])
-        self.TESTING = True
+        self.TESTING = False
         
         if self.TESTING:
             table = Table(testing=True)
@@ -182,12 +182,13 @@ class Table_cog(commands.Cog):
         if len(args)>1:
             try:
                 teams = int(args[1])
+                assert(teams>0)
             except:
-                await self.send_messages(ctx, "Invalid use of `?start`: <teams> must be an integer.", usage)
+                await self.send_messages(ctx, "<teams> must be a postive number.", usage)
                 return
         
         if Utils.check_teams(_format, teams):
-            await self.send_messages(ctx, "Invalid number of teams. The number of teams cannot exceed 12 players.", usage)
+            await self.send_messages(ctx, f"Invalid number of teams. For a {Utils.full_format(_format)}, the maximum number of teams you can have is {Utils.max_teams(_format)}.", usage)
             return
         self.bot.table_instances[ctx.channel.id].format = _format
         self.bot.table_instances[ctx.channel.id].set_teams(teams)

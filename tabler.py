@@ -111,11 +111,11 @@ class Table():
         ##### Stuff for bot instances #####
         
     def init_testing(self):
-        #self.players = {'pringle@mv':0,'5headMV':0,'hello lta':0,'LTAX':0,
-            # 'jaja LTA':0,'stupid@LTA':0,'MV poop':0,'MVMVMVMV':0,'LTA Valpo':0,"mv sp":0}
+        # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
+        #     'jaja LTA':0,'stupid@LTA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"mom's mv":0}
         self.players = {'x#1':0, 'xxx':0, 'Z':0, '¢unt':0, 'ZZZ': 0, 'cool kid': 0, "i am": 0, "IS U DUMB": 0, 'gas mob':0, "gassed up":0}
         self.IGNORE_FCS = True
-        self.split_teams('2', 5)
+        self.split_teams('2', 1)
 
     async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple:
         """
@@ -346,6 +346,7 @@ class Table():
         per_team = int(f)
         teams = {} #tag: list of players
         player_copy = list(self.display_names.values()) if not self.IGNORE_FCS else list(copy.deepcopy(self.players).keys())
+        #print(player_copy)
         post_players = []
         
         i = 0
@@ -387,8 +388,7 @@ class Table():
                         continue
                 ind+=1
                 
-            i = 0
-               
+            i = 0     
         #find suffix tags
         i = 0
         all_tag_matches= {}
@@ -420,7 +420,6 @@ class Table():
             temp_tag = ''
             tag_matches = defaultdict(list)
             temp_indx = len(post_players[i])+1
-            
             while temp_indx>0:
                 cont=False
                 temp_indx-=1
@@ -436,6 +435,11 @@ class Table():
                         m_tag = Utils.sanitize_uni_tag(post_players[i].strip().replace("[","").replace(']',''))[:temp_indx]
                         if len(m_tag) == 1: 
                             m_tag = Utils.sanitize_uni(m_tag).upper()
+                        temp = m_tag
+                        d = 1
+                        while m_tag.lower().strip() in map(lambda o: o.lower().strip(), list(teams)):
+                            m_tag = f"{temp}-{d}"
+                            d+=1
 
                         if len(tag_matches[m_tag])==0:
                             tag_matches[m_tag].append(post_players[i])
@@ -456,7 +460,6 @@ class Table():
                             cont=True
                             break
                         
-                        
                     elif i!=j and temp_indx>0 and (i_tag[::-1][:temp_indx][::-1] == j_tag[::-1][:temp_indx][::-1]
                                    or i_tag[::-1][:temp_indx][::-1] == j_tag[:temp_indx]):
                         
@@ -464,6 +467,11 @@ class Table():
                         m_tag = Utils.sanitize_uni_tag(post_players[i].strip().replace("[","").replace(']',''))[::-1][:temp_indx][::-1]
                         if len(m_tag) == 1: 
                             m_tag = Utils.sanitize_uni(m_tag).upper()
+                        temp = m_tag
+                        d = 1
+                        while m_tag.lower().strip() in map(lambda o: o.lower().strip(), list(teams)):
+                            m_tag = f"{temp}-{d}"
+                            d+=1
 
                         if len(tag_matches[m_tag])==0:
                             tag_matches[m_tag].append(post_players[i])
@@ -480,7 +488,7 @@ class Table():
                                         all_tag_matches[1].remove(p)
                                     except:
                                         pass
-                                i = 1
+                                i = -1
                             cont=True  
                             break
                                 
@@ -492,9 +500,18 @@ class Table():
                 if item[0] in all_tag_matches:
                     if len(item[1]) > len(all_tag_matches[item[0]]):
                         all_tag_matches[item[0]] = item[1]
+                    # if len(item[1]) > len(all_tag_matches[item[0]]) and len(all_tag_matches[item[0]])!=per_team:
+                    #     all_tag_matches[item[0]] = item[1]
+                    # else:
+                    #     temp = check = item[0]
+                    #     d = 1
+                    #     while check in all_tag_matches:
+                    #         check = f"{temp}-{d}"
+                    #         d+=1
+                    #     all_tag_matches[check] = item[1]
                 else:
                     all_tag_matches[item[0]] = item[1]
-        
+
         #print(post_players)
         teams_needed = num_teams-len(teams.keys())
         #print("teams needed:",teams_needed)
@@ -504,9 +521,10 @@ class Table():
                     for player in x[1]:
                         if player not in post_players:
                             all_tag_matches[x[0]].remove(player)
-                    if len(x[1]) == 0:
+                    if len(all_tag_matches[x[0]]) == 0:
                         all_tag_matches.pop(x[0])
-
+                if len(all_tag_matches) == 0:
+                    continue
                 all_tag_matches = dict(sorted(all_tag_matches.items(), key=lambda item: len(item[1]), reverse=True))
                 teams[list(all_tag_matches.keys())[0]] = all_tag_matches[list(all_tag_matches.keys())[0]]
                 for p in all_tag_matches[list(all_tag_matches.keys())[0]]:
@@ -547,28 +565,40 @@ class Table():
                     for p in match:
                         un_players.remove(p)
 
-        #randomly tag the rest
-        if len(un_players)>0 and len(teams)==num_teams:
+        #randomly tag the rest (tag could not be determined)
+        if len(un_players)>0:
+            is_all_filled = True
             for item in teams.items():
-                while len(item[1])<per_team and len(un_players)>0:
-                    item[1].append(un_players.pop(0))
-        else:
-            split = list(Utils.chunks(un_players, per_team))
-            for i in split:
-                for ind,j in enumerate(i):
-                    try:
-                        temp = check = Utils.replace_brackets(j)[0]
-                        d = 1
-                        while check in teams:
-                            check = f"{temp}-{d}"
-                        teams[check] = i
+                    if len(item[1])<per_team:
+                        is_all_filled = False
                         break
+            def split():
+                split = list(Utils.chunks(un_players, per_team))
+                for i in split:
+                    for ind,j in enumerate(i):
+                        try:
+                            temp = check = Utils.replace_brackets(j)[0]
+                            d = 1
+                            while check.lower() in map(lambda o: o.lower(), list(teams)):
+                                check = f"{temp}-{d}"
+                                d+=1
+                            teams[check] = i
+                            break
+                        
+                        except:
+                            if ind+1==len(i):
+                                teams[j[0][0]] = i
+                            else:
+                                continue
                     
-                    except:
-                        if ind+1==len(i):
-                            teams[j[0][0]] = i
-                        else:
-                            continue
+            if len(teams)==num_teams and not is_all_filled:
+                for item in teams.items():
+                    while len(item[1])<per_team and len(un_players)>0:
+                        item[1].append(un_players.pop(0))
+                if len(un_players)>0:
+                    split()
+            else:
+                split()
         
         if not self.IGNORE_FCS:
             print(teams)
