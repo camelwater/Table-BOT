@@ -123,11 +123,11 @@ from unidecode import unidecode
 
 def sanitize_uni(string):
     '''
-    strip all cjk and non-unicode characters from string
+    convert known/common un-unidecodable strings to unicode, then strip all cjk and non-unicode characters from string
 
     Returns
     -------
-    string with no CJK or non-unicode characters
+    string with no CJK and non-unicode characters
 
     '''
     string = [char_map.get(i, i) for i in string]
@@ -136,12 +136,15 @@ def sanitize_uni(string):
     return no_cjk
 
 def sanitize_uni_tag(string):
+    '''
+    get rid of non-unicode characters that cannot be converted, but keep convertable characters in original form
+    '''
     string = [i for i in string if not is_CJK(i) and (unidecode(i)!="" or i not in char_map)]
     return ''.join(string)
 
 def replace_brackets(string):
     string = string.lstrip('[').lstrip(']').lstrip('(').lstrip(')').lstrip('{').lstrip('}')
-    string = list(unidecode(string))
+    string = list(unidecode(sanitize_uni(string)))
     ret = [i for i in string if i.isalnum()]
     
     return ''.join(ret)
