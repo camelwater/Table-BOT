@@ -18,7 +18,7 @@ load_dotenv()
 KEY = os.getenv('KEY')
 #SERVER_ID = 775253594848886785
 
-INIT_EXT = ['cogs.Stats', 'cogs.Settings', 'cogs.table_cog']
+INIT_EXT = ['cogs.Stats', 'cogs.Settings', 'cogs.Table']
 
 log = logging.getLogger(__name__) #TODO: implement logging, also change prefixes to server settings in general
 

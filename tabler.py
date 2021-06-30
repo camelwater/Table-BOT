@@ -364,7 +364,7 @@ class Table():
                         #print(unidecode(Utils.sanitize_uni(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx], unidecode(Utils.sanitize_uni(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx])
                         if matches == per_team: break 
                 
-            tag = Utils.sanitize_uni(player_copy[i].replace("[","").replace(']',''))[:indx]
+            tag = Utils.sanitize_uni_tag(player_copy[i].replace("[","").replace(']',''))[:indx]
             if len(tag)>0 and tag[-1]=="-": 
                 tag = tag[:-1]
                 indx-=1
@@ -381,7 +381,7 @@ class Table():
             teams[temp_tag] = []
             ind = 0
             while ind<len(player_copy):
-                if unidecode(tag.lower().replace("[","").replace(']','')) == unidecode(Utils.sanitize_uni(player_copy[ind].strip().lower().replace("[","").replace(']','')))[:indx]: 
+                if unidecode(Utils.sanitize_uni(tag.lower().replace("[","").replace(']',''))) == unidecode(Utils.sanitize_uni(player_copy[ind].strip().lower().replace("[","").replace(']','')))[:indx]: 
                     if len(teams[temp_tag])<per_team:
                         teams[temp_tag].append(player_copy.pop(ind))
                         ind = 0
@@ -408,7 +408,7 @@ class Table():
                 while indx>0:
                     indx-=1
                     for tag, _list in teams.items():
-                        if len(_list)<per_team and unidecode(Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']','')))[::-1][:indx][::-1] == unidecode(tag.lower().strip().replace("[","").replace(']','')):
+                        if len(_list)<per_team and unidecode(Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']','')))[::-1][:indx][::-1] == unidecode(Utils.sanitize_uni(tag.lower().strip().replace("[","").replace(']',''))):
                             teams[tag].append(post_players.pop(i))
                             i = 0
                             cont = True
@@ -434,12 +434,13 @@ class Table():
                                                  or i_tag[:temp_indx] == j_tag[:temp_indx]):
                         
                         #print(temp_indx, post_players[i], post_players[j])
-                        if len(tag_matches[i_tag[:temp_indx]])==0:
-                            tag_matches[i_tag[:temp_indx]].append(post_players[i])
-                        tag_matches[i_tag[:temp_indx]].append(post_players[j])
-                        if len(tag_matches[i_tag[:temp_indx]])==per_team:
-                            teams[i_tag[:temp_indx]] = tag_matches.pop(i_tag[:temp_indx])
-                            for p in teams[i_tag[:temp_indx]]:
+                        m_tag = Utils.sanitize_uni_tag(post_players[i].strip().replace("[","").replace(']',''))
+                        if len(tag_matches[m_tag[:temp_indx]])==0:
+                            tag_matches[m_tag[:temp_indx]].append(post_players[i])
+                        tag_matches[m_tag[:temp_indx]].append(post_players[j])
+                        if len(tag_matches[m_tag[:temp_indx]])==per_team:
+                            teams[m_tag[:temp_indx]] = tag_matches.pop(m_tag[:temp_indx])
+                            for p in teams[m_tag[:temp_indx]]:
                                 try:
                                     post_players.remove(p)
                                 except:
@@ -458,12 +459,14 @@ class Table():
                                    or i_tag[::-1][:temp_indx][::-1] == j_tag[:temp_indx]):
                         
                         #print(temp_indx, post_players[i], post_players[j])
-                        if len(tag_matches[i_tag[::-1][:temp_indx][::-1]])==0:
-                            tag_matches[i_tag[::-1][:temp_indx][::-1]].append(post_players[i])
-                        tag_matches[i_tag[::-1][:temp_indx][::-1]].append(post_players[j])
-                        if len(tag_matches[i_tag[::-1][:temp_indx][::-1]])==per_team:
-                            teams[i_tag[::-1][:temp_indx][::-1]] = tag_matches.pop(i_tag[::-1][:temp_indx][::-1])
-                            for p in teams[i_tag[::-1][:temp_indx][::-1]]:
+                        m_tag = Utils.sanitize_uni_tag(post_players[i].strip().replace("[","").replace(']',''))
+
+                        if len(tag_matches[m_tag[::-1][:temp_indx][::-1]])==0:
+                            tag_matches[m_tag[::-1][:temp_indx][::-1]].append(post_players[i])
+                        tag_matches[m_tag[::-1][:temp_indx][::-1]].append(post_players[j])
+                        if len(tag_matches[m_tag[::-1][:temp_indx][::-1]])==per_team:
+                            teams[m_tag[::-1][:temp_indx][::-1]] = tag_matches.pop(m_tag[::-1][:temp_indx][::-1])
+                            for p in teams[m_tag[::-1][:temp_indx][::-1]]:
                                 try:
                                     post_players.remove(p)
                                 except:

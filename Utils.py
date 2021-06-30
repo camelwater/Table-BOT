@@ -130,12 +130,14 @@ def sanitize_uni(string):
     string with no CJK or non-unicode characters
 
     '''
-    string = list(string)
     string = [char_map.get(i, i) for i in string]
     ret = [i for i in string if not is_CJK(i) and unidecode(i)!=""]
     no_cjk = ''.join(ret)
     return no_cjk
 
+def sanitize_uni_tag(string):
+    string = [i for i in string if not is_CJK(i) and (unidecode(i)!="" or i not in char_map)]
+    return ''.join(string)
 
 def replace_brackets(string):
     string = string.lstrip('[').lstrip(']').lstrip('(').lstrip(')').lstrip('{').lstrip('}')
