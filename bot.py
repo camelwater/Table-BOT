@@ -10,7 +10,7 @@ import os
 from dotenv import load_dotenv
 import json
 import atexit
-import logging
+#import logging
 
 #sys.path.append('C:\\Users\\ryanz\\Anaconda3\\Lib\\site-packages')
 

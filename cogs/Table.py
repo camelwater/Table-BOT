@@ -17,7 +17,7 @@ class Table_cog(commands.Cog):
         self.home_url = "https://wiimmfi.de/stats/mkwx/list/"
         self.bot = bot
         self.presences = cycle(['?help for help', '{} active tables'])
-        self.TESTING = False
+        self.TESTING = False 
         
         if self.TESTING:
             table = Table(testing=True)
