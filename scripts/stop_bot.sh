@@ -1,3 +1,4 @@
 #!/bin/bash
 cd /home/ec2-user/app
-sudo -f pkill "bot.py"
+source environment/bin/activate
+sudo pkill -f "bot.py"
