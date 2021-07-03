@@ -46,8 +46,7 @@ def callable_prefix(bot, msg, mention=True):
         base.extend(bot.prefixes.get(str(msg.guild.id), default))
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
-    else:
-        return base
+    return base
 
 
 class TableBOT(commands.Bot):

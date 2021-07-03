@@ -4,4 +4,4 @@ unidecode
 datetime
 aiohttp
 bs4
-#logging
+asyncio
