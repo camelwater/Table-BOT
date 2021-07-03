@@ -4,4 +4,3 @@ unidecode
 datetime
 aiohttp
 bs4
-asyncio
