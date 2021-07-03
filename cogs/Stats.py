@@ -72,7 +72,7 @@ class Stats(commands.Cog):
         await ctx.send(embed=e)
 
 def load_stats_json():
-    with open('stats.json', 'r') as sjson:
+    with open('resources/stats.json', 'r') as sjson:
         return json.load(sjson)
 
 def setup(bot):

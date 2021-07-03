@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 from Utils import settings
 
@@ -77,6 +76,10 @@ class Settings(commands.Cog):
         if settingType is None:
             await ctx.send("Usage: `?set <settingName> <setting>`\nSee `?settings` for a list of available settingNames.")
             return
+        
+        if not get_avail_settings(settingType):
+            return await ctx.send("Invalid setting `{}`. Here is a list of customizable settings:\n{}".format(settingType, await self.settings(ctx, mes=False)))
+
         if default is None:
             avail_settings = get_avail_settings(settingType)
             if not avail_settings:

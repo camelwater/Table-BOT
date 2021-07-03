@@ -20,10 +20,10 @@ KEY = os.getenv('KEY')
 
 INIT_EXT = ['cogs.Stats', 'cogs.Settings', 'cogs.Table']
 
-log = logging.getLogger(__name__) #TODO: implement logging, also change prefixes to server settings in general
+#log = logging.getLogger(__name__) #TODO: implement logging, also change prefixes to server settings in general
 
 def load_settings():
-    with open('settings.json') as d:
+    with open('resources/settings.json') as d:
         load = json.load(d)
         if load:
             return load
@@ -31,7 +31,7 @@ def load_settings():
             return {}
 
 def load_prefixes():
-    with open('prefixes.json') as p:
+    with open('resources/prefixes.json') as p:
         load = json.load(p)
         if load: 
             return load
@@ -182,17 +182,17 @@ class TableBOT(commands.Bot):
             #for other settings to be added in the future
 
     def write_prefix_json(self):
-        with open("prefixes.json", 'w') as p:
+        with open("resources/prefixes.json", 'w') as p:
             json.dump(self.prefixes, p, ensure_ascii=True, indent=4)
     
     def write_settings_json(self):
-        with open("settings.json", 'w') as d:
+        with open("resources/settings.json", 'w') as d:
             json.dump(self.settings, d, ensure_ascii=True, indent=4)
     
     def dump_stats_json(self):
         if not hasattr(self, "command_stats"): return
         print("\nDumping command stats to stats.json...")
-        with open('stats.json', 'w') as sjson:
+        with open('resources/stats.json', 'w') as sjson:
             json.dump(dict(self.command_stats), sjson, ensure_ascii=True, indent=4)
 
     async def close(self):
