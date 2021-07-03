@@ -79,16 +79,17 @@ class Table_cog(commands.Cog):
         if ctx.guild:
             self.bot.table_instances[channel_id].graph = self.bot.get_setting('graph',ctx.guild.id, raw=True)
             self.bot.table_instances[channel_id].style = self.bot.get_setting('style', ctx.guild.id, raw=True)
-        #self.bot.table_instances[channel_id].ctx = ctx
-        #self.bot.table_instances[channel_id].bot = self.bot
      
     async def send_temp_messages(self,ctx, *args):
-        await ctx.send('\n'.join(args), delete_after=25)
+        try:
+            await ctx.send('\n'.join(args), delete_after=25)
+        except discord.errors.Forbidden:
+            await ctx.send("I do not have adequate permissions. Check `?help` for a list of the permissions that I need.")
     async def send_messages(self,ctx, *args):
         try:
             await ctx.send('\n'.join(args))
         except discord.errors.Forbidden:
-            await ctx.send("I do not have adequate permissions. Check `?help` for a list of the permissions that I need.".format('s'))
+            await ctx.send("I do not have adequate permissions. Check `?help` for a list of the permissions that I need.")
       
     async def check_callable(self, ctx, command): #for most commands
         if self.bot.table_instances[ctx.channel.id].confirm_room or self.bot.table_instances[ctx.channel.id].confirm_reset:
@@ -96,7 +97,7 @@ class Table_cog(commands.Cog):
             return True
         if command in ['yes', 'no']:
             if not self.bot.table_instances[ctx.channel.id].choose_room:
-                await self.send_temp_messages(ctx, "You can only use `?{}` if the bot prompts you to do so.".format(command))
+                await self.send_temp_messages(ctx, "You can only use `?{}` when the bot prompts you to do so.".format(command))
                 return True
         else:
             if not self.bot.table_instances[ctx.channel.id].table_running:
@@ -108,7 +109,7 @@ class Table_cog(commands.Cog):
             await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.bot.table_instances[ctx.channel.id].choose_message)
             return True
         if not (self.bot.table_instances[ctx.channel.id].confirm_room and not self.bot.table_instances[ctx.channel.id].table_running) and not self.bot.table_instances[ctx.channel.id].table_running:
-            await self.send_temp_messages(ctx, "You can only use this command if the bot prompts you or a table is currently active.")
+            await self.send_temp_messages(ctx, "You can only use this command when the bot prompts you or when a table is active.")
             return True
         
     async def skip_search(self, ctx, arg, is_rxx):
@@ -189,8 +190,8 @@ class Table_cog(commands.Cog):
                 return
         
         if Utils.check_teams(_format, teams):
-            await self.send_messages(ctx, f"Invalid number of teams. For a {Utils.full_format(_format)}, the maximum number of teams you can have is {Utils.max_teams(_format)}.", usage)
-            return
+            return await self.send_messages(ctx, f"Invalid number of teams. For a {Utils.full_format(_format)}, the maximum number of teams you can have is {Utils.max_teams(_format)}.", usage)
+
         self.bot.table_instances[ctx.channel.id].format = _format
         self.bot.table_instances[ctx.channel.id].set_teams(teams)
         num_players = Utils.get_num_players(_format, teams) 
@@ -253,9 +254,8 @@ class Table_cog(commands.Cog):
         search_args = arg[arg_indx+1:].split(",")
         search_args = [i.lower().strip() for i in search_args]
         
-        #print(search_args)
         if len(search_args)<1:
-            await self.send_messages("You need to provide <rxx or mii name(s)>.", usage)
+            return await self.send_messages("You need to provide <rxx or mii name(s)>.", usage)
         if len(search_args)>self.bot.table_instances[ctx.channel.id].num_players:
             await self.send_messages(ctx, "You cannot provide more than {} mii names.".self.format(self.bot.table_instances[ctx.channel.id].num_players), usage)
             return

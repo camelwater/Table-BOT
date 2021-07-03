@@ -67,7 +67,6 @@ class Stats(commands.Cog):
         # e.add_field(name="Libraries used:", value='discord.py, collections, urllib, aiohttp, and others', inline=False)
         e.add_field(name='\u200b', value='WRITTEN IN: python\nLINES OF CODE: ~4675\nLIBRARIES: discord.py, \
         collections, urllib, aiohttp, and others', inline=False)
-        
 
         link = "[GitHub Repository](https://github.com/camelwater/Table-BOT)"
         e.add_field(name='\u200b', value= link, inline=False)

@@ -388,7 +388,8 @@ class Table():
                         continue
                 ind+=1
                 
-            i = 0     
+            i = 0 
+
         #find suffix tags
         i = 0
         all_tag_matches= {}
@@ -548,7 +549,7 @@ class Table():
                 
                 for j in range(len(un_players)):
                     m = Utils.LCS(unidecode(Utils.sanitize_uni(un_players[i].strip().lower().replace("[","").replace(']','').replace(" ", ""))), unidecode(Utils.sanitize_uni(un_players[j].strip().lower().replace("[","").replace(']','').replace(" ",""))))
-                    if un_players[i]!=un_players[j] and len(m)>longest_match:
+                    if i!=j and len(m)>longest_match:
                         longest_match = len(m)
                         match= un_players[i], un_players[j]
                         tag = m
@@ -713,8 +714,8 @@ class Table():
         self.teams = teams
         if self.teams!=2 and 3 in graph_map:
             graph_map.pop(3)
-        if self.graph and self.graph.get('table') == 'diff':
-            self.graph = None
+            if self.graph and self.graph.get('table') == 'diff':
+                self.graph = None
 
     def style_options(self):
         ret = 'Table style options:'
@@ -1837,7 +1838,7 @@ class Table():
             except:
                 
                 if cor_room_size> orig_room_size and cor_room_size<=len(self.players):
-                    ret+="**Note:** *If a race is missing player(s) due to DCs, it is advised to use the ?dcs command instead.\nOnly use this command if no DCs were shown for the race in question.*\n\n"
+                    ret+="**Note:** *If a race is missing player(s) due to DCs, it is advised to use `?dcs` instead.\nOnly use this command if no DCs were shown for the race in question.*\n\n"
                 else:
                     ret+= "Invalid <corrected room size> for race `{}`. The corrected room size must be a number from 1-{}.\n".format(raceNum+1, len(self.players))
                     continue
@@ -2006,7 +2007,7 @@ class Table():
         
         return error, mes
 
-    def un_merge_room(self, merge_num): #TEST: needs more testing, especially after "fix" for redoing mergerooms
+    def un_merge_room(self, merge_num): #TODO: update pts recalculation (maybe use update_table?)
         self.restore_merged = (self.races, self.tracks, self.finish_times, copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), self.dc_list_ids, copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings))
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  

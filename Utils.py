@@ -5,9 +5,9 @@ Created on Sat Jun 5 15:30:03 2021
 @author: ryanz
 """
 
-#-------------- table_cog.py methods --------------#
+#-------------- Table.py methods --------------#
 
-#default max teams based on format (currently used for ffa format only)
+#default max teams based on format 
 def max_teams(f):
     f = f[0]
     if f == 'f':
@@ -32,7 +32,7 @@ def get_num_players(f, teams):
 
 
 
-#============= Tabler.py stuff ==============#
+#============= tabler.py stuff ==============#
 
 def convert_format(f):
     """

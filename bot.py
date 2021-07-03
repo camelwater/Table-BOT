@@ -85,10 +85,10 @@ class TableBOT(commands.Bot):
 
     async def on_ready(self):
         print("Bot logged in as {0.user}".format(self)) 
-        try:
-            self.routine_stats_dump.start()
-        except:
-            pass
+        # try:
+        #     self.routine_stats_dump.start()
+        # except:
+        #     pass
 
     def get_guild_prefixes(self, guild, local_inject = callable_prefix):
         fill_msg = discord.Object(id=0)
@@ -192,7 +192,7 @@ class TableBOT(commands.Bot):
         with open("resources/settings.json", 'w') as s:
             json.dump(self.settings, s, ensure_ascii=True, indent=4)
     
-    @tasks.loop(minutes=30)
+    @tasks.loop(hours=1)
     async def routine_stats_dump(self):
         self.dump_stats_json()
 
