@@ -4,10 +4,6 @@ files:
  - source: .
    destination: /home/ec2-user/app
 hooks:
-  ApplicationStop:
-   - location: scripts/stop_bot.sh
-     timeout: 300
-     runas: root
   AfterInstall:
    - location: scripts/install_bot_dependencies.sh
      timeout: 300
