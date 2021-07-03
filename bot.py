@@ -5,7 +5,7 @@ Created on Wed Jun  2 11:51:05 2021
 @author: ryanz
 """
 import discord
-from discord.ext import commands
+from discord.ext import tasks, commands
 import os
 from dotenv import load_dotenv
 import json
@@ -85,6 +85,10 @@ class TableBOT(commands.Bot):
 
     async def on_ready(self):
         print("Bot logged in as {0.user}".format(self)) 
+        try:
+            self.routine_stats_dump.start()
+        except:
+            pass
 
     def get_guild_prefixes(self, guild, local_inject = callable_prefix):
         fill_msg = discord.Object(id=0)
@@ -97,18 +101,18 @@ class TableBOT(commands.Bot):
         if len(self.prefixes.get(guild, [])) >=3:
             return "You cannot have more than 3 custom prefixes."
 
-        if prefix in ['<@!{}>'.format(self.BOT_ID), '<@{}>'.format(self.BOT_ID)]:
+        if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
             return "The bot mention is a default prefix and cannot be added as a custom prefix."
 
         if prefix in self.prefixes.get(guild, []):
-            return "`{}` is already registered as a prefix.".format(prefix)
+            return f"`{prefix}` is already registered as a prefix."
         
         prefixes = self.prefixes.get(guild, [])
         prefixes.append(prefix)
         self.prefixes[guild] = prefixes
         self.write_prefix_json()
         
-        return "`{}` has been registered as a prefix.".format(prefix)
+        return f"`{prefix}` has been registered as a prefix."
     
     def remove_prefix(self, guild, prefix):
         guild = str(guild)
@@ -134,13 +138,13 @@ class TableBOT(commands.Bot):
             self.write_prefix_json()
             return "All custom prefixes have been removed. Use the bot mention as a prefix."
         
-        if prefix in ['<@!{}>'.format(self.BOT_ID), '<@{}>'.format(self.BOT_ID)]:
+        if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
             return "The bot mention is a default prefix and cannot be set as a custom prefix."
         
         self.prefixes[guild] = [prefix]
         self.write_prefix_json()
 
-        return "`{}` has been set as the prefix.".format(prefix)
+        return f"`{prefix}` has been set as the prefix."
 
     def get_guild_settings(self, guild):
         guild = str(guild)
@@ -159,7 +163,7 @@ class TableBOT(commands.Bot):
             except:
                 pass
             self.write_settings_json()
-            return "`{}` setting restored to default.".format(setting)
+            return f"`{setting}` setting restored to default."
         
         try:
             self.settings[guild][setting] = default
@@ -185,12 +189,16 @@ class TableBOT(commands.Bot):
             json.dump(self.prefixes, p, ensure_ascii=True, indent=4)
     
     def write_settings_json(self):
-        with open("resources/settings.json", 'w') as d:
-            json.dump(self.settings, d, ensure_ascii=True, indent=4)
+        with open("resources/settings.json", 'w') as s:
+            json.dump(self.settings, s, ensure_ascii=True, indent=4)
     
+    @tasks.loop(minutes=30)
+    async def routine_stats_dump(self):
+        self.dump_stats_json()
+
     def dump_stats_json(self):
-        if not hasattr(self, "command_stats"): return
-        print("\nDumping command stats to stats.json...")
+        if not hasattr(self, "command_stats") or len(self.command_stats) == 0: return
+        print("\nDumping command stats...")
         with open('resources/stats.json', 'w') as sjson:
             json.dump(dict(self.command_stats), sjson, ensure_ascii=True, indent=4)
 

@@ -14,9 +14,9 @@ from datetime import datetime, timedelta
 
 class Table_cog(commands.Cog):
     def __init__(self, bot):
-        self.home_url = "https://wiimmfi.de/stats/mkwx/list/"
+        self.HOME_URL = "https://wiimmfi.de/stats/mkwx/list/"
         self.bot = bot
-        self.presences = cycle(['?help for help', '{} active tables'])
+        self.presences = cycle(['?help', '{} tables'])
         self.TESTING = False 
         
         if self.TESTING:
@@ -29,8 +29,10 @@ class Table_cog(commands.Cog):
                 self.cycle_presences.start()
             except:
                 pass
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        #print(message)
         if message.author == self.bot or message.author.bot: return
         if not self.bot.user.mentioned_in(message): return
 
@@ -42,7 +44,7 @@ class Table_cog(commands.Cog):
     @tasks.loop(seconds=15)
     async def cycle_presences(self):
         next_pres = next(self.presences)
-        if "active tables" in next_pres:
+        if "tables" in next_pres:
             active_tables= self.get_active_tables()
             next_pres = next_pres.format(active_tables)
             if active_tables==1: next_pres = next_pres.replace("tables", "table")
@@ -76,7 +78,7 @@ class Table_cog(commands.Cog):
         self.bot.table_instances[channel_id] = Table(ctx=ctx, bot=self.bot)
         if ctx.guild:
             self.bot.table_instances[channel_id].graph = self.bot.get_setting('graph',ctx.guild.id, raw=True)
-            self.bot.table_instances[channel_id].stylr = self.bot.get_setting('style', ctx.guild.id, raw=True)
+            self.bot.table_instances[channel_id].style = self.bot.get_setting('style', ctx.guild.id, raw=True)
         #self.bot.table_instances[channel_id].ctx = ctx
         #self.bot.table_instances[channel_id].bot = self.bot
      
@@ -142,7 +144,7 @@ class Table_cog(commands.Cog):
         self.set_instance(ctx)
     
     #?start
-    @commands.command(aliases=['st', 'starttable', 'sw'])
+    @commands.command(aliases=['st', 'starttable', 'sw', 'startwar'])
     async def start(self,ctx, *args):
         
         if self.bot.table_instances[ctx.channel.id].confirm_room or self.bot.table_instances[ctx.channel.id].confirm_reset:
@@ -151,7 +153,6 @@ class Table_cog(commands.Cog):
         if self.bot.table_instances[ctx.channel.id].table_running:
             self.bot.table_instances[ctx.channel.id].confirm_reset = True
             self.bot.table_instances[ctx.channel.id].reset_args = args
-            #print(self.bot.table_instances[ctx.channel.id].reset_args)
             self.bot.table_instances[ctx.channel.id].choose_message= "A tabler watching room {} is currently active.\nAre you sure you want to start a new table? (`?yes` / `?no`)".format(self.bot.table_instances[ctx.channel.id].rxx)
             await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message)
             return
@@ -241,7 +242,7 @@ class Table_cog(commands.Cog):
         
         arg = arg.strip()
         
-        usage = "\nUsage: `?search <rxx or mii> <rxx or name(s)>`\nmkwx room list: {}".format(self.home_url)
+        usage = "\nUsage: `?search <rxx or mii> <rxx or name(s)>`\nmkwx room list: {}".format(self.HOME_URL)
         if len(arg)<1:
             await self.send_temp_messages(ctx, usage)
             return
@@ -298,7 +299,7 @@ class Table_cog(commands.Cog):
                 await self.send_temp_messages(ctx, "You cannot search for a room right now. You can only use this command after the `?start` command.")
                 return
 
-            await self.send_messages(ctx, "Usage: `?search <rxx or mii> <rxx or name(s)>`\nmkwx room list: {}".format(self.home_url)) 
+            await self.send_messages(ctx, "Usage: `?search <rxx or mii> <rxx or name(s)>`\nmkwx room list: {}".format(self.HOME_URL)) 
     
     @commands.command(aliases=['name'])
     async def changename(self, ctx, *, arg):
@@ -331,7 +332,7 @@ class Table_cog(commands.Cog):
             await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_player_list(),'\nUsage: `?changename <player number> <name>`')       
     
     #change one player's tag
-    @commands.command()
+    @commands.command(aliases=['ct'])
     async def changetag(self,ctx, *args): 
         if await self.check_special_callable(ctx): return
         if Utils.isFFA(self.bot.table_instances[ctx.channel.id].format): 
@@ -506,7 +507,7 @@ class Table_cog(commands.Cog):
         #await send_messages(ctx, )
     '''
 
-    @commands.command()
+    @commands.command(aliases=['theme'])
     async def style(self, ctx, *, choice):
         if await self.check_callable(ctx, "style"): return
 
@@ -537,7 +538,7 @@ class Table_cog(commands.Cog):
             await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].graph_options(), "\nUsage: `?graph <graphNumber|graphName>`")        
     
     #?picture
-    @commands.command(aliases=['p', 'pic', 'wp'])
+    @commands.command(aliases=['p', 'pic', 'wp', 'warpicture'])
     @commands.max_concurrency(number=1, wait=True, per = commands.BucketType.channel)
     @commands.cooldown(1, 10, type=commands.BucketType.channel)
     async def picture(self,ctx, *arg):
@@ -608,9 +609,9 @@ class Table_cog(commands.Cog):
      
     #?reset
     @commands.command(aliases=['stop'])
-    async def reset(self,ctx, *args):
+    async def reset(self,ctx):
         if not self.bot.table_instances[ctx.channel.id].table_running and not self.bot.table_instances[ctx.channel.id].confirm_room:
-            await self.send_temp_messages(ctx, "You need to have an active table to be able to reset.")
+            await self.send_temp_messages(ctx, "You don't have an active table to reset.")
             return
         
         self.bot.table_instances[ctx.channel.id].check_mkwx_update.stop()
@@ -624,7 +625,7 @@ class Table_cog(commands.Cog):
         
         if await self.check_callable(ctx, "dcs"): return
         
-        usage = '\nUsage: `?dcs <DC number> <"on"/"during" or "off"/"before">`' if len(self.bot.table_instances[ctx.channel.id].dc_list)>0 else ""
+        usage = '\nUsage: `?dc <DC number> <"on"/"during" or "off"/"before">`' if len(self.bot.table_instances[ctx.channel.id].dc_list)>0 else ""
         
         arg = [i.strip() for i in arg.strip().split("/")]
         arg  = [i.split(" ") for i in arg]
@@ -659,7 +660,7 @@ class Table_cog(commands.Cog):
             await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
             return
     
-    @commands.command(aliases=['substitute'])
+    @commands.command(aliases=['substitute', 'subin', 'subout'])
     async def sub(self, ctx, *args): #NOTE: needs more testing but seems to work fine 
         
         if await self.check_callable(ctx, "sub"): return
@@ -745,7 +746,7 @@ class Table_cog(commands.Cog):
         if await self.check_callable(ctx, "players"): return
         await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_player_list(p_form=False))
     
-    @commands.command()
+    @commands.command(aliases=['e'])
     async def edit(self,ctx, * , arg):
         
         usage = "Usage: `?edit <player id> <gp number> <gp score>`"
@@ -803,7 +804,7 @@ class Table_cog(commands.Cog):
         await self.send_messages(ctx, mes)
         
     @commands.command(aliases=['tl', 'tracks', 'races'])
-    async def tracklist(self,ctx, *args):
+    async def tracklist(self,ctx):
         
         if await self.check_callable(ctx, "tracklist"): return
         await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].tracklist())
@@ -968,7 +969,7 @@ class Table_cog(commands.Cog):
             mes = self.bot.table_instances[ctx.channel.id].remove_race(-1)
             await self.send_messages(ctx, mes)
     
-    @commands.command(aliases=['gp', 'gps', 'changegp'])
+    @commands.command(aliases=['gps'])
     async def changegps(self, ctx, *args):
         
         if await self.check_callable(ctx, "changegps"): return
@@ -992,7 +993,7 @@ class Table_cog(commands.Cog):
         await self.send_messages(ctx, "Changed total gps to {}.".format(self.bot.table_instances[ctx.channel.id].gps))
         
         
-    @commands.command(aliases=['quickedit', 'qedit'])
+    @commands.command(aliases=['quickedit', 'qe', 'er', 'editplace', 'editpos', 'ep', 'pe'])
     async def editrace(self,ctx, *, arg):
         
         if await self.check_callable(ctx, "editrace"): return
@@ -1060,7 +1061,7 @@ class Table_cog(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await self.send_messages(ctx, "Usage: `?changeroomsize <race number> <corrected room size>`")
     
-    @commands.command(aliases=['tt', 'text'])
+    @commands.command(aliases=['tt', 'text', 'str', 'ts', 'tablestring', 'tablestr'])
     async def tabletext(self, ctx):
         
         if await self.check_callable(ctx, "tabletext"): return

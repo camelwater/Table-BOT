@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from discord.ext import commands
 from Utils import settings
 
@@ -8,12 +9,12 @@ class Settings(commands.Cog):
     @commands.command(aliases=['getprefixes', 'pxs'])
     async def prefixes(self, ctx):
         prefixes = self.bot.get_guild_prefixes(ctx.guild)
-        mes = "{} prefixes:\n".format("Server" if ctx.guild else "DM")
+        mes = "{} prefixes:\n".format(f'{ctx.guild.name} server' if ctx.guild else "DM")
         if len(prefixes) == 0:
             mes+="No custom prefixes."
         for i, p in enumerate(prefixes):
-            mes+="{}. {}\n".format(i+1, p)
-        await ctx.send("```{}```".format(mes))
+            mes+=f"{i+1}. {p}\n"
+        await ctx.send(f"```{mes}```")
 
     @commands.group(invoke_without_command=True, aliases=['px'])
     @commands.has_guild_permissions(manage_guild=True)
@@ -37,8 +38,8 @@ class Settings(commands.Cog):
         if prefix is None:
             guild_prefixes = ''
             for p in self.bot.get_guild_prefixes(ctx.guild):
-                guild_prefixes+="- `{}`\n".format(p)
-            await ctx.send("You need to specify a prefix to be removed:\n{}".format(guild_prefixes))
+                guild_prefixes+=f"- `{p}`\n"
+            await ctx.send(f"You need to specify a prefix to be removed:\n{guild_prefixes}")
             return
         
         mes = self.bot.remove_prefix(ctx.guild.id, prefix)
@@ -51,12 +52,12 @@ class Settings(commands.Cog):
         mes = self.bot.set_prefix(ctx.guild.id, prefix)
         await ctx.send(mes)
     
-    @commands.command()
+    @commands.command(aliases=['sets'])
     @commands.guild_only()
     async def settings(self, ctx, mes=True):
         settings = self.bot.get_guild_settings(ctx.guild.id)
         spaces = max([len(k[0]) for k in settings.items()])+1
-        out = 'css\n[ Server settings ]'
+        out = f'css\n[ {ctx.guild.name} server settings ]'
         for name, set in settings.items():
             try:
                 set = set['type']
@@ -92,11 +93,18 @@ class Settings(commands.Cog):
         default = default.lower()
         if settingType in ['style', 'graph']:
             valid = False
-            for i in list(settings.get(settingType).values()):
-                if default.lower() in map(lambda l: l.lower(), i.values()):
-                    default = i
-                    valid = True
-                    break
+            if default.isnumeric():
+                try:
+                    default = settings.get(settingType)[int(default)]
+                    valid=True
+                except:
+                    pass
+            else:
+                for i in list(settings.get(settingType).values()):
+                    if default.lower() in map(lambda l: l.lower(), i.values()):
+                        default = i
+                        valid = True
+                        break
             if not valid:
                 await ctx.send(f"Invalid value `{default}` for setting `{settingType}`. The value must be one of the following:\n{get_avail_settings(settingType)}")
                 return
@@ -111,7 +119,7 @@ def get_avail_settings(setting):
 
     ret = ""
     for ind,dic in setting.items():
-        ret+='- {}\n'.format(" | ".join(map(lambda orig: "`{}`".format(orig), dic.values())))
+        ret+='`{}.` {}\n'.format(ind," | ".join(map(lambda orig: "`{}`".format(orig), dic.values())))
     
     return ret
     
