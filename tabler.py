@@ -2271,7 +2271,7 @@ class Table():
                     fc = next_elem.select('span[title*=PID]')[0].text
                     tr = next_elem.find_all('td',{"align" : "center"})[4].text
                     tr = False if tr=="✓" else True
-                    delta = next_elem.select('td[data-tooltip*=delay').text
+                    delta = next_elem.select('td[title*=delay]')[0].text
                     
                     race.append((miiName, fin_time, fc, tr, delta))
                     next_elem = next_elem.findNext('tr')
@@ -2946,5 +2946,8 @@ class Table():
         
     
 if __name__ == "__main__":
-    pass
-   
+    import urllib3
+    http = urllib3.PoolManager()
+    page = http.request('GET', "www.wiimmfi.de/stats/mkwx/list/r3120806")
+    soup = BeautifulSoup(page.data, "html.parser")
+    
