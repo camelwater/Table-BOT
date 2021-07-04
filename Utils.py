@@ -162,8 +162,10 @@ def check_repeat_times(race, prev_races):
             if player1[2] == player2[2]:
                 if player1[1] == player2[1]:
                     repetitions[c_indx+1] += 1
-
-    most_rep = max(repetitions.items(), key=lambda x : x[1])
+    try:
+        most_rep = max(repetitions.items(), key=lambda x : x[1])
+    except ValueError:
+        most_rep =0
     return True if most_rep>0 else False, most_rep
 
 

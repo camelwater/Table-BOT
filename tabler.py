@@ -14,7 +14,7 @@ from urllib.request import urlopen
 import datetime
 import discord
 from discord.ext import tasks
-import time
+import time as timer
 from unidecode import unidecode
 from collections import defaultdict, Counter
 import Utils
@@ -339,7 +339,7 @@ class Table():
         """
         split players into teams based on tags
         """
-        tick=time.time()
+        tick=timer.perf_counter_ns()
         f = f[0]
         if not f.isnumeric():
             return
@@ -612,7 +612,7 @@ class Table():
 
         print()
         print(self.tags)
-        print("tag algo time:",time.time()-tick)
+        print("tag algo time:",timer.perf_counter_ns()-tick)
 
     def warn_to_str(self, warning):                
         warning_type = warning.get('type')
@@ -2319,7 +2319,9 @@ class Table():
             cur_race_players = [i[2] for i in race]
 
             #repeat times check
+            #t = timer.perf_counter()
             check_repeat_times = Utils.check_repeat_times(race, self.races+iter_races[:raceNum])
+            #print("repeat time check:", timer.perf_counter()-t)
             if check_repeat_times[0]:
                 self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'num_affected':check_repeat_times[1], 'gp': self.gp+1})
 
@@ -2329,7 +2331,7 @@ class Table():
                 self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_tr", 'aff_players': tr_count, 'gp': self.gp+1})
             
             #delay check
-            delay_count = len([i[4] for i in race if i[4].replace('.','').isnumeric() and (int(i[4])>6 or int(i[4]<-1))])
+            delay_count = len([i[4] for i in race if i[4].replace('.','').isnumeric() and (float(i[4])>6.0 or float(i[4])<-1.0)])
             if delay_count>0:
                 self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_delta", 'aff_players':delay_count, 'gp': self.gp+1})
 
