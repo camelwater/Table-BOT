@@ -16,7 +16,7 @@ import discord
 from discord.ext import tasks
 import time
 from unidecode import unidecode
-from collections import defaultdict
+from collections import defaultdict, Counter
 import Utils
 from Utils import isFFA, warning_map, dc_map, style_map, pts_map
 from Utils import graph_map as gm
@@ -646,6 +646,12 @@ class Table():
 
             elif "_change" in warning_type:
                 return warning_map.get(warning_type).format(warning.get('race'), warning.get('gp'))
+            
+            elif "_tr" in warning_type:
+                return warning_map.get(warning_type).format(warning.get("aff_players"), warning.get("gp"))
+
+            elif "_delta" in warning_type:
+                return warning_map.get(warning_type).format(warning.get("aff_players"), warning.get('gp'))
 
             else:
                 return warning_map.get(warning_type).format(warning.get('gp'))
@@ -2260,8 +2266,11 @@ class Table():
                     miiName = next_elem.find('td', class_='mii-font').text
                     if miiName == "no name": miiName = "Player"
                     fc = next_elem.select('span[title*=PID]')[0].text
+                    tr = next_elem.find_all('td',{"align" : "center"})[4].text
+                    tr = False if tr=="✓" else True
+                    delta = next_elem.select('td[data-tooltip*=delay').text
                     
-                    race.append((miiName, fin_time, fc))
+                    race.append((miiName, fin_time, fc, tr, delta))
                     next_elem = next_elem.findNext('tr')
                     
                 new_races.append(race)
@@ -2305,7 +2314,21 @@ class Table():
                         
             cur_room_size = len(race)
             cur_race_players = [i[2] for i in race]
+
+            check_repeat_times = Utils.check_repeat_times(race, self.races+iter_races[:raceNum])
+            if check_repeat_times[0]:
+                self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'num_affected':check_repeat_times[1]})
+
+            #tr check
+            tr_count = Counter([i[3] for i in race])[True]
+            if tr_count>0:
+                self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_tr", 'aff_players': tr_count, 'gp': self.gp+1})
             
+            #delay check
+            delay_count = len([i[4] for i in race if i[4].replace('.','').isnumeric() and (int(i[4])>6 or int(i[4]<-1))])
+            if delay_count>0:
+                self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_delta", 'aff_players':delay_count, 'gp': self.gp+1})
+
             #check for room size increases (mkwx bug)
             if cur_room_size < self.room_sizes[self.gp]:
                 self.room_sizes[self.gp] = cur_room_size

@@ -152,6 +152,19 @@ def replace_brackets(string):
 def dis_clean(string):
     return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~")
 
+from collections import defaultdict
+
+def check_repeat_times(race, all_races):
+    repetitions = defaultdict(int)
+
+    for c_indx, compare in enumerate(all_races[::-1]):
+        for player1, player2 in zip(race, compare):
+            if player1[2] == player2[2]:
+                if player1[1] == player2[1]:
+                    repetitions[c_indx+1] += 1
+
+    most_rep = max(repetitions.items(), key=lambda x : x[1])
+    return True if most_rep>0 else False, most_rep
 
 
 pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
@@ -201,7 +214,10 @@ warning_map = {
 
             "mkwx_bug_increase": "Room size increased mid-GP from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.", 
             "mkwx_bug_change": "Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX BUG. Table could be inaccurate for this GP ({}).", 
-            "mkwx_bug_blank": "All players in the race had blank race times. This is an MKWX BUG if there was no room reset. Table is inaccurate for this GP ({}).", 
+            "mkwx_bug_blank": "All players in the race had blank finish times. This is an MKWX BUG if there was no room reset. Table is inaccurate for this GP ({}).", 
+            "mkwx_bug_repeat": "{} player(s) had the same finish as they had in a previous race. Check for errors as this is highly improbable and likely an MKWX BUG. Table could be inaccurate for this GP ({}).",
+            "mkwx_bug_tr":"Room had players with track errors ({} players). Check ?rr for errors. Table could be inaccurate for this GP ({}).", 
+            "mkwx_bug_delta": "Room had time delay (lag) errors ({} players). Check ?rr for errors. Table could be inaccuate for this GP ({}).",
 
             "sub": "{}  -  Potential sub detected. If this player is a sub, use ?sub.", 
 
