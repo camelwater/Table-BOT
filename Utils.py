@@ -154,10 +154,10 @@ def dis_clean(string):
 
 from collections import defaultdict
 
-def check_repeat_times(race, all_races):
+def check_repeat_times(race, prev_races):
     repetitions = defaultdict(int)
 
-    for c_indx, compare in enumerate(all_races[::-1]):
+    for c_indx, compare in enumerate(prev_races[::-1]):
         for player1, player2 in zip(race, compare):
             if player1[2] == player2[2]:
                 if player1[1] == player2[1]:

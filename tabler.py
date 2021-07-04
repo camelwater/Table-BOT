@@ -652,6 +652,9 @@ class Table():
 
             elif "_delta" in warning_type:
                 return warning_map.get(warning_type).format(warning.get("aff_players"), warning.get('gp'))
+            
+            elif "_repeat" in warning_type:
+                return warning_map.get(warning_type).format(warning.get("num_affected"), warning.get('gp'))
 
             else:
                 return warning_map.get(warning_type).format(warning.get('gp'))
@@ -2315,9 +2318,10 @@ class Table():
             cur_room_size = len(race)
             cur_race_players = [i[2] for i in race]
 
+            #repeat times check
             check_repeat_times = Utils.check_repeat_times(race, self.races+iter_races[:raceNum])
             if check_repeat_times[0]:
-                self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'num_affected':check_repeat_times[1]})
+                self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'num_affected':check_repeat_times[1], 'gp': self.gp+1})
 
             #tr check
             tr_count = Counter([i[3] for i in race])[True]
