@@ -69,7 +69,6 @@ class TableBOT(commands.Bot):
         elif isinstance(error, commands.NoPrivateMessage):
             await(await ctx.send("This command cannot be used in DMs.")).delete(delay=7)
         elif isinstance(error, commands.MissingPermissions):
-            #await(await ctx.send("Sorry, you don't have permission to use this command. You are missing the following permission(s):\n{}".format(','.join(map(lambda l: '`{}`'.format(l), error.missing_perms))))).delete(delay=10.0)
             await(await ctx.send("Sorry {}, you don't have permission to use this command.".format(ctx.author.mention))).delete(delay=10.0)
         elif isinstance(error, commands.CommandOnCooldown):
             await(await ctx.send("This command can only be used once every {:.0f} seconds. You can retry in {:.1f} seconds.".format(error.cooldown.per, error.retry_after))).delete(delay=7)
@@ -90,11 +89,11 @@ class TableBOT(commands.Bot):
         # except:
         #     pass
 
-    def get_guild_prefixes(self, guild, local_inject = callable_prefix):
-        fill_msg = discord.Object(id=0)
-        fill_msg.guild = guild
+    def get_guild_prefixes(self, guild, local_callable = callable_prefix):
+        temp_msg = discord.Object(id=0)
+        temp_msg.guild = guild
 
-        return local_inject(self, fill_msg, mention=False)
+        return local_callable(self, temp_msg, mention=False)
     
     def add_prefix(self, guild, prefix):
         guild = str(guild)

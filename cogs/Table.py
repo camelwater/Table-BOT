@@ -4,8 +4,6 @@ Created on Wed May 19 08:33:13 2021
 
 @author: ryanz
 """
-
-from aiohttp.client import request
 import discord
 from discord.ext import commands, tasks
 from tabler import Table

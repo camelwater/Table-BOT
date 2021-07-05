@@ -8,6 +8,9 @@ Created on Sat Jun 5 15:30:03 2021
 #-------------- Table.py methods --------------#
 
 #default max teams based on format 
+from enum import IntFlag
+
+
 def max_teams(f):
     f = f[0]
     if f == 'f':
@@ -34,17 +37,9 @@ def get_num_players(f, teams):
 
 #============= tabler.py stuff ==============#
 
-def convert_format(f):
+def convert_format(f) -> int:
     """
     get players per team based on format
-
-    Parameters
-    ----------
-    f : format string
-
-    Returns
-    -------
-    int of format(players per team)
 
     """
     f = f[0]
@@ -82,7 +77,7 @@ def chunks(l, n):
 def LCS(X, Y) -> str:
     """
     find longest common substring between two strings.
-    used to find tags that are not prefixes are postfixes. 
+    used to find tags that are not prefixes nor suffixes. 
     currently only used for 2v2 tags.
     
     """
@@ -119,7 +114,6 @@ def is_CJK(char):
                  (131072, 196607)]
                 ])
 
-import re
 from unidecode import unidecode
 
 def sanitize_uni(string):
@@ -166,7 +160,8 @@ def check_repeat_times(race, prev_races):
                     repetitions[c_indx] += 1
                 elif player1[1] == 'DC' and player1[1] == player2[1]:
                     dc_repetitions[c_indx]+=1
-    repetitions= dict(repetitions)
+
+    repetitions = dict(repetitions)
     try:
         most_key = max(repetitions.items(), key=repetitions.get)
     except ValueError:
@@ -194,6 +189,7 @@ def check_repeat_times_slow(race, prev_races):
 
 
 
+### map constants
 
 pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
               11:{0:15, 1:12, 2:10, 3:8, 4:6, 5:5, 6:4, 7:3, 8:2, 9:1, 10:0},

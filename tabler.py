@@ -2996,7 +2996,4 @@ if __name__ == "__main__":
     http = urllib3.PoolManager()
     page = http.request('GET', "www.wiimmfi.de/stats/mkwx/list/r3120806")
     soup = BeautifulSoup(page.data, "html.parser")
-    x = set([('h', 1), ('h', 3)])
-    y = set([('h',1 ), ('h', 2)])
-    print(x.issubset(y))
     

@@ -118,7 +118,7 @@ def get_avail_settings(setting):
         return None
 
     ret = ""
-    for ind,dic in setting.items():
+    for ind, dic in setting.items():
         ret+='`{}.` {}\n'.format(ind," | ".join(map(lambda orig: "`{}`".format(orig), dic.values())))
     
     return ret

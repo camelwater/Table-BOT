@@ -3,6 +3,9 @@ import discord
 from discord.ext import commands
 from collections import Counter
 import json
+import os
+import fnmatch
+from pathlib import Path
 
 class Stats(commands.Cog):
     def __init__(self, bot):
@@ -65,13 +68,23 @@ class Stats(commands.Cog):
         # e.add_field(name='Written in:', value='python', inline=False)
         # e.add_field(name='Lines of code:', value="~4675 (cba to figure out exact number)", inline=False)
         # e.add_field(name="Libraries used:", value='discord.py, collections, urllib, aiohttp, and others', inline=False)
-        e.add_field(name='\u200b', value='WRITTEN IN: python\nLINES OF CODE: ~4675\nLIBRARIES: discord.py, \
+        e.add_field(name='\u200b', value=f'_WRITTEN IN:_ python\n_LINES OF CODE:_ {get_LOC()}\n_LIBRARIES:_ discord.py, \
         collections, urllib, aiohttp, and others', inline=False)
 
         link = "[GitHub Repository](https://github.com/camelwater/Table-BOT)"
         e.add_field(name='\u200b', value= link, inline=False)
 
         await ctx.send(embed=e)
+
+def get_LOC():
+    LOC_count = 0
+    for file in os.listdir('.') + os.listdir('./cogs'):
+        if fnmatch.fnmatch(file, '*.py'):
+            with open('./cogs/'+file if file in os.listdir('./cogs') else file, encoding='utf-8') as f:
+                for _ in f:
+                    LOC_count+=1
+
+    return LOC_count
 
 def load_stats_json():
     with open('resources/stats.json', 'r') as sjson:
