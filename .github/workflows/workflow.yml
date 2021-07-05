@@ -29,7 +29,7 @@ jobs:
         run: ls
       
       - name: Test bot run
-        run: timeout 5 'bot.py'
+        run: timeout 5 python bot.py
       
 
   continuous-deployment:
