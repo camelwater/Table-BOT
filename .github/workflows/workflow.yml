@@ -26,7 +26,7 @@ jobs:
           aws-region: us-east-2
       # Step 5
       - name: Test bot run
-        run: timeout --preserve-status 5; python bot.py 
+        run: timeout --preserve-status; 5; python bot.py 
       
 
   continuous-deployment:
