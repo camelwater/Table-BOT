@@ -25,11 +25,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
       # Step 5
-      - name: Test 
-        run: ls
-      
       - name: Test bot run
-        run: timeout -k 5 python bot.py
+        run: timeout 5 -k python bot.py
       
 
   continuous-deployment:
