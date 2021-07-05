@@ -25,10 +25,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
       # Step 5
-      - name: Test bot run
+      - name: Test 
         run: ls
+      
+      - name: Test bot run
         run: timeout 5 bot.py
-
+      
+        
   continuous-deployment:
     runs-on: ubuntu-latest
     needs: [continuous-integration]
