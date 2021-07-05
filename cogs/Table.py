@@ -5,6 +5,7 @@ Created on Wed May 19 08:33:13 2021
 @author: ryanz
 """
 
+from aiohttp.client import request
 import discord
 from discord.ext import commands, tasks
 from tabler import Table
@@ -57,11 +58,11 @@ class Table_cog(commands.Cog):
         self.set_instance(ctx)
         self.bot.table_instances[ctx.channel.id].last_command_sent = datetime.now()
         
-    #remove inactive bot instances (inactivity > 45 minutes)
+    #remove inactive bot instances (inactivity > 30 minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):
         for channel, instance in self.bot.table_instances.items():
-            if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes = 45):
+            if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes = 30):
                 self.bot.table_instances.pop(channel)
                 
     def get_active_tables(self):
@@ -608,7 +609,7 @@ class Table_cog(commands.Cog):
        
      
     #?reset
-    @commands.command(aliases=['stop'])
+    @commands.command(aliases=['stop', 'clear', 'quit'])
     async def reset(self,ctx):
         if not self.bot.table_instances[ctx.channel.id].table_running and not self.bot.table_instances[ctx.channel.id].confirm_room:
             await self.send_temp_messages(ctx, "You don't have an active table to reset.")
@@ -692,10 +693,15 @@ class Table_cog(commands.Cog):
         
         mes = self.bot.table_instances[ctx.channel.id].sub_in(subIn, subOut, subOut_races)
         await self.send_messages(ctx, mes)
-        
+
+    @commands.command(aliases=['subins', 'subouts'])
+    async def subs(self, ctx):
+        if await self.check_callable(ctx, "subs"): return
+
+        await ctx.send(self.bot.table_instances[ctx.channel.id].get_subs())
+
     @commands.command(aliases=['editsubraces', 'subraces'])
     async def editsub(self, ctx, *args):
-        
         if await self.check_callable(ctx, "editsub"): return
         
         usage = "\nUsage: `?editsub <player number> <correct races> <in/out> (sub out index)`"

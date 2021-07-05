@@ -49,6 +49,7 @@ class Table():
         self.player_ids = {} #used to map player ids to players (player id from bot)
         self.all_players = [] #list of every player who has been in the room
         self.sub_names = {}
+        self.subs = {}
         self.deleted_players = [] #players who have been removed from table through ?changename
        
         self.warnings = defaultdict(list) #race: list of warnings
@@ -654,13 +655,16 @@ class Table():
                 return warning_map.get(warning_type).format(warning.get("aff_players"), warning.get('gp'))
             
             elif "_repeat" in warning_type:
-                return warning_map.get(warning_type).format(warning.get("num_affected"), warning.get('gp'))
+                return warning_map.get(warning_type).format(warning.get("num_affected"), warning.get('race'), warning.get('gp'))
 
             else:
                 return warning_map.get(warning_type).format(warning.get('gp'))
 
         elif warning_type == "missing":
             return warning_map.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
+        
+        elif warning_type == "missing_w_sub":
+            return warning_map.get(warning_type).format(warning.get('gp'), warning.get('num_missing'), [self.display_names[i] for i in warning.get('missing_players')])
         
         elif warning_type == "overflow":
             return warning_map.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
@@ -672,7 +676,10 @@ class Table():
             return warning_map.get(warning_type).format([self.display_names[i] for i in warning.get('players')], warning.get('time'))
 
         elif warning_type == "sub":
-            return warning_map.get(warning_type).format(self.display_names[warning.get('player')])
+            if warning.get('is_edited', False):
+                return warning_map.get("sub_conf").format(self.display_names[warning.get('player')], self.display_names[warning.get('sub_out')])
+            else:
+                return warning_map.get(warning_type).format(self.display_names[warning.get('player')])
 
         elif warning_type == "large_time":
             return warning_map.get(warning_type).format(self.display_names[warning.get('player')], warning.get('time'))
@@ -1079,7 +1086,7 @@ class Table():
                 if p in self.sub_names: 
                     p2 = ''
                     for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                        p2 += '{}({})/'.format(x, r)
+                        p2 += '{}({})/'.format(self.display_names[x], r)
                     p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                 else:
                     p2 = self.display_names[p2]
@@ -1096,7 +1103,7 @@ class Table():
                          if p in self.sub_names: 
                             p2 = ''
                             for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                                p2 += '{}({})/'.format(x, r)
+                                p2 += '{}({})/'.format(self.display_names[x], r)
                             p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                          else:
                              p2 = self.display_names[p2]
@@ -1112,7 +1119,7 @@ class Table():
                         if p in self.sub_names: 
                             p2 = ''
                             for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                                p2 += '{}({})/'.format(x, r)
+                                p2 += '{}({})/'.format(self.display_names[x], r)
                             p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                         else:
                             p2 = self.display_names[p2]
@@ -1242,7 +1249,7 @@ class Table():
                 if p in self.sub_names: 
                     p2 = ''
                     for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                        p2 += '{}({})/'.format(x, r)
+                        p2 += '{}({})/'.format(self.display_names[x], r)
                     p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                 else:
                     p2 = self.display_names[p2]
@@ -1268,7 +1275,7 @@ class Table():
                         if p in self.sub_names: 
                             p2 = ''
                             for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                                p2 += '{}({})/'.format(x, r)
+                                p2 += '{}({})/'.format(self.display_names[x], r)
                             p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                         else:
                             p2 = self.display_names[p2]
@@ -1572,6 +1579,13 @@ class Table():
         #all tags were full, so create new tag
         self.tags[player[0]] = [fc]
         self.all_players[player[0]] = [fc]
+    def get_subs(self):
+        ret = 'Room subs:\n'
+        if len(self.sub_names)==0:
+            ret+=" **No subs.**"
+        for in_player, sub in self.subs.items():
+            ret+=f" - **{self.display_names[in_player]}** subbed in for **{self.display_names[sub.get('sub_out')]}** (after {sub.get('out_races')} races).\n"
+        return ret
 
     def sub_in(self, _in, out, out_races, reundo=False): 
         in_player, out_player = _in, out
@@ -1586,12 +1600,15 @@ class Table():
             except:
                 return "`{}` was not a valid player number. The player number must be from 1-{}.".format(out, len(self.player_ids))
         
+        self.subs[in_player] = {'sub_out': out_player, "out_races": out_races}
         if out_player in self.sub_names:
-            self.sub_names[in_player] = {'sub_out': self.sub_names[out_player]['sub_out']+[self.display_names[out_player]], 
+            self.sub_names[in_player] = {'sub_out': self.sub_names[out_player]['sub_out']+[out_player], 
                                          'in_races': self.gps*4-sum(self.sub_names[out_player]['out_races']+[out_races]), 
                                          "out_races": self.sub_names[out_player]['out_races']+[out_races]}
+            self.sub_names.pop(out_player)
+
         else:
-            self.sub_names[in_player] = {'sub_out': [self.display_names[out_player]], 'in_races': self.gps*4-out_races, "out_races": [out_races]}
+            self.sub_names[in_player] = {'sub_out': [out_player], 'in_races': self.gps*4-out_races, "out_races": [out_races]}
             
         self.players[in_player][1] = [a+b for a, b in zip(self.players[in_player][1], self.players[out_player][1])]
         self.players[in_player][2] = [a+b for a, b in zip(self.players[in_player][2], self.players[out_player][2])]
@@ -1639,20 +1656,38 @@ class Table():
                 self.all_players[tag].append(in_player)
        
             self.tags = {k:v for k,v in self.tags.items() if len(v)!=0}
-            
+        
+        edited_warning = None
+        done = False
+        for i, r in self.warnings.items():
+            for w in r:
+                if w.get('type') == 'sub' and w.get('player') == in_player:
+                    w['is_edited'] = True
+                    w['sub_out'] = out_player
+                    edited_warning = w
+                    done = True
+                    break
+            if done:
+                break
+
         if not reundo: 
-            restore = {'pts':pts, 'name': self.display_names.get(out_player), 'out_tag':tag, 'id':pid, 'in_tag': in_tag, 'out_edited_scores': out_edited_scores, 'in_edited_scores': in_edited_scores}
+            restore = {'pts':pts, 'name': self.display_names.get(out_player), 'out_tag':tag, 'id':pid, 'in_tag': in_tag, 'out_edited_scores': out_edited_scores, 'in_edited_scores': in_edited_scores, 'warning': edited_warning}
             if out_pens!=None:
                 restore['pens'] = out_pens
             self.modifications.append([('?sub {} {} {}'.format(out, out_races, _in), in_player, out_player, out_races, restore)])
             self.undos.clear()
-        return "Subbed in {} for {} (played {} races).".format(self.display_names[in_player], out_player_name, out_races)
+        return "Subbed in `{}` for `{}` (played `{}` races).".format(self.display_names[in_player], out_player_name, out_races)
     
     def undo_sub(self, in_player, out_player, restore):
         self.sub_names.pop(in_player)
+        self.subs.pop(in_player)
         self.players[out_player] = restore['pts']
         self.fcs[restore['name']] = out_player
         self.display_names[out_player] = restore['name']
+
+        if restore['warning']:
+            restore['warning']['is_edited'] = False
+            restore['warning'].pop('sub_out')
 
         if restore['in_edited_scores'] is not None and len(restore['in_edited_scores']) >0:
             self.edited_scores[in_player] = restore['in_edited_scores'] 
@@ -1812,10 +1847,10 @@ class Table():
                     else:     
                         for indx,i in enumerate(self.warnings[raceNum]):
                             if i.get('player') == player and "on" in i.get('type'):
-                                self.warnings[raceNum][indx] = {'type': "dc_before", 'race':1, 'gp':gp+1, 'is_edited':True}
+                                self.warnings[raceNum][indx] = {'type': "dc_before", 'player': player,'race':1, 'gp':gp+1, 'is_edited':True}
                         for indx, i in enumerate(self.dc_list[raceNum]):
                             if i.get('player') == player and "on" in i.get('type'):
-                                self.dc_list[raceNum][indx] = {'type':'dc_before', 'race':1, 'gp':gp+1, 'is_edited':True}
+                                self.dc_list[raceNum][indx] = {'type':'dc_before', 'player': player, 'race':1, 'gp':gp+1, 'is_edited':True}
 
             if not reundo:
                 self.modifications.append([('?dcs {} {}'.format(dc_num, status), dc_num, orig_status, status)]) 
@@ -2200,6 +2235,7 @@ class Table():
         if await self.check_updated():
             self.bot.command_stats['picture_generated']+=1
             self.picture_running = True
+            self.last_command_sent = datetime.datetime.now()
             detect_mes = await self.ctx.send("Detected race finish.")
             wait_mes = await self.ctx.send("Updating scores...")
             mes = await self.update_table(auto=True)
@@ -2266,6 +2302,7 @@ class Table():
                 
                 while next_elem not in elems and next_elem !=None:
                     fin_time = next_elem.findAll('td', align='center')[-1].text
+                    fin_time = 'DC' if fin_time == '—' else fin_time
                     miiName = next_elem.find('td', class_='mii-font').text
                     if miiName == "no name": miiName = "Player"
                     fc = next_elem.select('span[title*=PID]')[0].text
@@ -2319,11 +2356,15 @@ class Table():
             cur_race_players = [i[2] for i in race]
 
             #repeat times check
-            #t = timer.perf_counter()
+            #t = timer.perf_counter_ns()
             check_repeat_times = Utils.check_repeat_times(race, self.races+iter_races[:raceNum])
-            #print("repeat time check:", timer.perf_counter()-t)
+            #print("repeat time check:", timer.perf_counter_ns()-t)
+            #t = timer.perf_counter_ns()
+            #check_repeat_times = Utils.check_repeat_times_slow(race, self.races+iter_races[:raceNum])
+            #print("naive repeat time check:", timer.perf_counter_ns()-t)
             if check_repeat_times[0]:
-                self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'num_affected':check_repeat_times[1], 'gp': self.gp+1})
+                self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'race': check_repeat_times[1].get('race'),
+                                                    'num_affected':check_repeat_times[1].get('num_aff'), 'gp': self.gp+1})
 
             #tr check
             tr_count = Counter([i[3] for i in race])[True]
@@ -2373,7 +2414,10 @@ class Table():
                 sub_outs = False
                 if len(self.players)>self.num_players and len(total_missing_players)==len(self.players)-self.num_players:
                     sub_outs= True
-                    
+                if len(total_missing_players)>len(self.players)-self.num_players and (shift+raceNum+1)%4==1:
+                    sub_outs = True
+                    self.warnings[shift+raceNum+1].append({'type': 'missing_w_sub', 'missing_players': missing_players, 'num_missing': len(missing_players), 'gp': self.gp+1})
+
                 if not sub_outs:
                     if (shift+raceNum)%4 == 0:
                         for mp in missing_players:
@@ -2403,10 +2447,10 @@ class Table():
                                 self.gp_dcs[self.gp].append(mp)
             
             dc_count = 0
-            for i, r in enumerate(race):
-                if r[1] == '—':
-                    dc_count +=1
-                    race[i] = (r[0], 'DC', r[2])
+            # for i, r in enumerate(race):
+            #     if r[1] == '—':
+            #         dc_count +=1
+            #         race[i] = (r[0], 'DC', r[2])
             if dc_count == cur_room_size:
                 self.warnings[shift+raceNum+1].append({"type": "mkwx_bug_blank", 'gp':self.gp+1})
                 fin_times = {}
@@ -2543,7 +2587,7 @@ class Table():
                 if p in self.sub_names: 
                     p2 = ''
                     for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                        p2 += '{}({})/'.format(x, r)
+                        p2 += '{}({})/'.format(self.display_names[x], r)
                     p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                 else:
                     p2 = self.display_names[p2]
@@ -2584,7 +2628,7 @@ class Table():
                         if p in self.sub_names: 
                             p2 = ''
                             for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                                p2 += '{}({})/'.format(x, r)
+                                p2 += '{}({})/'.format(self.display_names[x], r)
                             p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                         else:
                             p2 = self.display_names[p2]
@@ -2624,7 +2668,7 @@ class Table():
                         if p in self.sub_names: 
                             p2 = ''
                             for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                                p2 += '{}({})/'.format(x, r)
+                                p2 += '{}({})/'.format(self.display_names[x], r)
                             p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                         else:
                             p2 = self.display_names[p2]
@@ -2823,9 +2867,9 @@ class Table():
     async def redo(self, j):
         if '?edit ' in j[0]:
             if "+" in j[0] or '-' in j[0]:
-                self.edit(j[1], j[2], str(j[3]), redo=True)
+                self.edit([[j[1], j[2], str(j[3])]], redo=True)
             else:
-                self.edit(j[1], j[2], str(j[4]), redo=True)
+                self.edit([[j[1], j[2], str(j[3])]], redo=True)
                 
         elif 'editrace' in j[0]:
             self.edit_race([[j[2], j[1], j[4]]], reundo=True)
@@ -2952,4 +2996,7 @@ if __name__ == "__main__":
     http = urllib3.PoolManager()
     page = http.request('GET', "www.wiimmfi.de/stats/mkwx/list/r3120806")
     soup = BeautifulSoup(page.data, "html.parser")
+    x = set([('h', 1), ('h', 3)])
+    y = set([('h',1 ), ('h', 2)])
+    print(x.issubset(y))
     

@@ -119,6 +119,7 @@ def is_CJK(char):
                  (131072, 196607)]
                 ])
 
+import re
 from unidecode import unidecode
 
 def sanitize_uni(string):
@@ -156,17 +157,42 @@ from collections import defaultdict
 
 def check_repeat_times(race, prev_races):
     repetitions = defaultdict(int)
+    dc_repetitions = defaultdict(int)
 
     for c_indx, compare in enumerate(prev_races[::-1]):
         for player1, player2 in zip(race, compare):
             if player1[2] == player2[2]:
-                if player1[1] == player2[1]:
-                    repetitions[c_indx+1] += 1
+                if player1[1] != 'DC' and player1[1] == player2[1]:
+                    repetitions[c_indx] += 1
+                elif player1[1] == 'DC' and player1[1] == player2[1]:
+                    dc_repetitions[c_indx]+=1
+    repetitions= dict(repetitions)
     try:
-        most_rep = max(repetitions.items(), key=lambda x : x[1])
+        most_key = max(repetitions.items(), key=repetitions.get)
     except ValueError:
-        most_rep =0
-    return True if most_rep>0 else False, most_rep
+        most_key = None
+    if most_key:
+        most_rep= repetitions[most_key] + dc_repetitions[most_key]
+    return (True, {'race': len(prev_races)-most_key, 'num_aff': most_rep}) if most_key else (False, {})
+
+def check_repeat_times_slow(race, prev_races):
+    repetitions = {}
+    race = [(i[2], i[1]) for i in race]
+    prev_races = [[(i[2], i[1]) for i in r] for r in prev_races]
+
+    for i, r in enumerate(prev_races[::-1]):
+        cou = len([c for c in race if c in r])
+        if cou>0:
+            repetitions[i] = cou
+    
+    try:
+        max_key = max(repetitions, key=repetitions.get)
+    except:
+        max_key = None
+
+    return (True, {'race': len(prev_races)-max_key, 'num_aff': repetitions[max_key]}) if max_key else (False, {})
+
+
 
 
 pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
@@ -196,9 +222,9 @@ char_map = {
 }
 
 warning_map = {
-            "dc_on": "{} DCed during the race (on results), unless MKWX BUG. Awarding 3 DC points per missing race in GP {} ({} pts).",
-            ("dc_on", 1): "{} DCed during the first race of GP {} (on results), unless MKWX BUG. 15 DC points for GP {}.",
-            ("dc_on", -1): "{} DCed during the race (on results), unless MKWX BUG. No DC points for GP {}.", 
+            "dc_on": "{} DCed during the race (on results), unless MKWX ERROR. Awarding 3 DC points per missing race in GP {} ({} pts).",
+            ("dc_on", 1): "{} DCed during the first race of GP {} (on results), unless MKWX ERROR. 15 DC points for GP {}.",
+            ("dc_on", -1): "{} DCed during the race (on results), unless MKWX ERROR. No DC points for GP {}.", 
 
             "dc_on_confirmed": "{} DCed during the race (on results). Awarding 3 DC points per missing race in GP {} ({} pts).",
             ("dc_on_confirmed", 1): "{} DCed during the first race of GP {} (on results). 15 DC points for GP {}.",
@@ -208,28 +234,30 @@ warning_map = {
             ("dc_before", 1): "{} is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war).", 
 
             "missing": "GP {} is missing player(s). GP started with {} players, but should've started with {} players.",
+            "missing_w_sub": "GP {} is missing {} player(s): {}. Missing players either DCed or were subbed out.",
             "overflow": "GP {} has too many players. GP started with {} players, but should've started with {} players.",
 
-            "blank_time": "{} had a blank race time and was on results. If this wasn't a DC, this is an MKWX BUG.",
+            "blank_time": "{} had a blank race time and was on results. If this wasn't a DC, this is an MKWX ERROR.",
 
             "tie": "{} had tied race times ({}). Check ?rr for errors.", 
 
-            "mkwx_bug_increase": "Room size increased mid-GP from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX BUG. Affected races: {}. Run ?changeroomsize to fix this.", 
-            "mkwx_bug_change": "Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX BUG. Table could be inaccurate for this GP ({}).", 
-            "mkwx_bug_blank": "All players in the race had blank finish times. This is an MKWX BUG if there was no room reset. Table is inaccurate for this GP ({}).", 
-            "mkwx_bug_repeat": "{} player(s) had the same finish as they had in a previous race. Check for errors as this is highly improbable and likely an MKWX BUG. Table could be inaccurate for this GP ({}).",
+            "mkwx_bug_increase": "Room size increased mid-GP from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX ERROR. Affected races: {}. Run ?changeroomsize to fix this.", 
+            "mkwx_bug_change": "Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX ERROR. Table could be inaccurate for this GP ({}).", 
+            "mkwx_bug_blank": "All players in the race had blank finish times. This is an MKWX ERROR if there was no room reset. Table is inaccurate for this GP ({}).", 
+            "mkwx_bug_repeat": "{} player(s) had the same finish as they had in a previous race (race {}). Check for errors as this is highly improbable and likely an MKWX ERROR. Table could be inaccurate for this GP ({}).",
             "mkwx_bug_tr":"Room had players with track errors ({} players). Check ?rr for errors. Table could be inaccurate for this GP ({}).", 
             "mkwx_bug_delta": "Room had time delay (lag) errors ({} players). Check ?rr for errors. Table could be inaccuate for this GP ({}).",
 
             "sub": "{}  -  Potential sub detected. If this player is a sub, use ?sub.", 
+            "sub_conf": "{} - subbed in for {}.",
 
             "large_time": "{} had a large finish time - {}. Check ?rr for errors."
         }
 
 dc_map = {
-            "dc_on": "{}** - DCed during the race (on results), unless MKWX BUG. Awarding 3 DC points per missing race in GP {} ({} pts).",
-            ("dc_on", 1): "{}** - DCed during the first race of GP {} (on results), unless MKWX BUG. 15 DC points for GP {}.",
-            ("dc_on", -1): "{}** - DCed during the race (on results), unless MKWX BUG. No DC points for GP {}.", 
+            "dc_on": "{}** - DCed during the race (on results), unless MKWX ERROR. Awarding 3 DC points per missing race in GP {} ({} pts).",
+            ("dc_on", 1): "{}** - DCed during the first race of GP {} (on results), unless MKWX ERROR. 15 DC points for GP {}.",
+            ("dc_on", -1): "{}** - DCed during the race (on results), unless MKWX ERROR. No DC points for GP {}.", 
 
             "dc_on_confirmed": "{}** - DCed during the race (on results). Awarding 3 DC points per missing race in GP {} ({} pts).",
             ("dc_on_confirmed", 1): "{}** - DCed during the first race of GP {} (on results). 15 DC points for GP {}.",
