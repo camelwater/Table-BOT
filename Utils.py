@@ -8,9 +8,6 @@ Created on Sat Jun 5 15:30:03 2021
 #-------------- Table.py methods --------------#
 
 #default max teams based on format 
-from enum import IntFlag
-
-
 def max_teams(f):
     f = f[0]
     if f == 'f':
