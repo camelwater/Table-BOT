@@ -26,7 +26,7 @@ jobs:
           aws-region: us-east-2
       # Step 5
       - name: Test bot run
-        run: timeout python bot.py --kill-after=5 --signal=HUP
+        run: timeout -k 5; python bot.py 
       
 
   continuous-deployment:
