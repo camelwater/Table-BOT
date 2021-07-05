@@ -26,7 +26,7 @@ jobs:
           aws-region: us-east-2
       # Step 5
       - name: Test bot run
-        run: timeout 5 bot.py 
+        run: timeout 5 ./bot.py 
 
   continuous-deployment:
     runs-on: ubuntu-latest
