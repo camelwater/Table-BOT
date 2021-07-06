@@ -1,0 +1,9 @@
+2021-07-05 21:16:45,755 ERROR -> in command: set
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Settings.py", line 113, in set
+    await ctx.sends(mes)
+AttributeError: 'Context' object has no attribute 'sends'
+
+

@@ -10,17 +10,28 @@ import os
 from dotenv import load_dotenv
 import json
 import atexit
-#import logging
+import logging
+from logging.handlers import RotatingFileHandler
+import traceback as tb
 
 #sys.path.append('C:\\Users\\ryanz\\Anaconda3\\Lib\\site-packages')
 
 load_dotenv()
 KEY = os.getenv('KEY')
+LOG_LOC = 'logs/logs.txt'
 #SERVER_ID = 775253594848886785
 
 INIT_EXT = ['cogs.Stats', 'cogs.Settings', 'cogs.Table']
 
-#log = logging.getLogger(__name__) #TODO: implement logging, also change prefixes to server settings in general
+handlers = [ RotatingFileHandler(filename=LOG_LOC, 
+            mode='w', 
+            maxBytes=512000, 
+            backupCount=4)
+           ]
+logging.basicConfig(handlers = handlers,
+                            format='%(asctime)s %(levelname)s -> %(message)s\n',
+                            level=logging.ERROR)
+log = logging.getLogger(__name__)
 
 def load_settings():
     with open('resources/settings.json') as d:
@@ -79,8 +90,10 @@ class TableBOT(commands.Bot):
             #raise error
         else:
             await ctx.send("An unidentified internal bot error occurred. Wait a bit and try again later.\nIf this issue persists, `?reset` the table.")
-            #log.log()
-            raise error
+            error_tb = ''.join(tb.format_exception(type(error), error, error.__traceback__))
+            error_tb = error_tb[:error_tb.find('\nThe above exception was the direct cause of the following exception:')]
+            log.error(msg=f"in command: {ctx.command}\n{error_tb}")
+            #raise error
 
     async def on_ready(self):
         print("Bot logged in as {0.user}".format(self)) 
