@@ -2356,12 +2356,7 @@ class Table():
             cur_race_players = [i[2] for i in race]
 
             #repeat times check
-            #t = timer.perf_counter_ns()
             check_repeat_times = Utils.check_repeat_times(race, self.races+iter_races[:raceNum])
-            #print("repeat time check:", timer.perf_counter_ns()-t)
-            #t = timer.perf_counter_ns()
-            #check_repeat_times = Utils.check_repeat_times_slow(race, self.races+iter_races[:raceNum])
-            #print("naive repeat time check:", timer.perf_counter_ns()-t)
             if check_repeat_times[0]:
                 self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'race': check_repeat_times[1].get('race'),
                                                     'num_affected':check_repeat_times[1].get('num_aff'), 'gp': self.gp+1})
@@ -2407,9 +2402,10 @@ class Table():
                 total_missing_players = []
                 missing_players = []
                 for i in self.players:
-                    total_missing_players.append(i)
-                    if i not in f_codes and ((i in self.room_players[self.gp] and (shift+raceNum+1)%4!=1) or (i in self.room_players[self.gp-1] and (shift+raceNum+1)%4==1)): 
-                        missing_players.append(i)
+                    if i not in f_codes:
+                        total_missing_players.append(i)
+                        if (i in self.room_players[self.gp] and (shift+raceNum+1)%4!=1) or (i in self.room_players[self.gp-1] and (shift+raceNum+1)%4==1): 
+                            missing_players.append(i)
                         
                 sub_outs = False
                 if len(self.players)>self.num_players and len(total_missing_players)==len(self.players)-self.num_players:
@@ -2446,18 +2442,19 @@ class Table():
                                 if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                                 self.gp_dcs[self.gp].append(mp)
             
+            ignore_indiv_dcs = False
             dc_count = 0
-            # for i, r in enumerate(race):
-            #     if r[1] == '—':
-            #         dc_count +=1
-            #         race[i] = (r[0], 'DC', r[2])
+            for i, r in enumerate(race):
+                if r[1] == 'DC':
+                    dc_count +=1
             if dc_count == cur_room_size:
                 self.warnings[shift+raceNum+1].append({"type": "mkwx_bug_blank", 'gp':self.gp+1})
                 fin_times = {}
                 for i in race:
                     fin_times[i[0]] = i[1]
                 self.finish_times[shift+raceNum] = fin_times
-                continue
+                ignore_indiv_dcs = True
+                #continue
             
             last_finish_times = {}
             
@@ -2508,7 +2505,7 @@ class Table():
                 last_finish_times[fc] = time
 
                 try:
-                    assert(time!='DC')
+                    assert(time!='DC' or ignore_indiv_dcs)
                 except AssertionError:
                     if self.gp not in self.gp_dcs or fc not in self.gp_dcs[self.gp]:
                         if (shift+raceNum)%4==0:
@@ -2518,7 +2515,7 @@ class Table():
                         else: 
                             if (4-((shift+raceNum+1)%4))%4 == 0:
                                 self.warnings[shift+raceNum+1].append({'type': "dc_on", 'race':-1, 'player':fc, 'gp':self.gp+1, "is_edited":is_edited})
-                                self.dc_list[shift+raceNum+1].append({'type': "dc_on_unsure", 'race':-1, 'player':fc, 'gp':self.gp+1, "is_edited":is_edited})
+                                self.dc_list[shift+raceNum+1].append({'type': "dc_on", 'race':-1, 'player':fc, 'gp':self.gp+1, "is_edited":is_edited})
                         
                             else:
                                 self.warnings[shift+raceNum+1].append({'type': "dc_on", 'race':shift+raceNum+1, 'rem_races': (4-((shift+raceNum+1)%4))%4, 'pts':0, 'player':fc, 'gp':self.gp+1, "is_edited":is_edited})

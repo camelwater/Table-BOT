@@ -1,8 +1,8 @@
 {
     "775253594848886785": {
         "style": {
-            "table": "dark",
-            "type": "Dark Theme"
+            "table": "default",
+            "type": "Default Style"
         },
         "graph": {
             "table": "none",
