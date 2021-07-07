@@ -5,30 +5,23 @@ Created on Wed May 19 08:33:13 2021
 @author: ryanz
 """
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 from tabler import Table
-from itertools import cycle
 import Utils
-from datetime import datetime, timedelta
+from datetime import datetime
 
 class Table_cog(commands.Cog):
     def __init__(self, bot):
         self.HOME_URL = "https://wiimmfi.de/stats/mkwx/list/"
         self.bot = bot
-        self.presences = cycle(['?help', '{} tables'])
         self.TESTING = False 
         
         if self.TESTING:
             table = Table(testing=True)
         
-    @commands.Cog.listener()
-    async def on_ready(self):
-        if not self.cycle_presences.is_running():
-            try:
-                self.cycle_presences.start()
-            except:
-                pass
-
+    # @commands.Cog.listener()
+    # async def on_ready(self):
+        
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         #print(message)
@@ -40,35 +33,12 @@ class Table_cog(commands.Cog):
             if hasattr(self.bot, "command_stats"):
                 self.bot.command_stats['help']+=1
     
-    @tasks.loop(seconds=15)
-    async def cycle_presences(self):
-        next_pres = next(self.presences)
-        if "tables" in next_pres:
-            active_tables= self.get_active_tables()
-            next_pres = next_pres.format(active_tables)
-            if active_tables==1: next_pres = next_pres.replace("tables", "table")
-        pres = discord.Activity(type=discord.ActivityType.watching, name=next_pres)
-        await self.bot.change_presence(status=discord.Status.online, activity=pres)
     
     @commands.Cog.listener()
     async def on_command(self, ctx):
         if ctx.command not in self.bot.get_cog('Table_cog').get_commands(): return
         self.set_instance(ctx)
         self.bot.table_instances[ctx.channel.id].last_command_sent = datetime.now()
-        
-    #remove inactive bot instances (inactivity > 30 minutes)
-    @tasks.loop(minutes = 15)
-    async def check_inactivity(self):
-        for channel, instance in self.bot.table_instances.items():
-            if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes = 30):
-                self.bot.table_instances.pop(channel)
-                
-    def get_active_tables(self):
-        count = 0
-        for t in list(self.bot.table_instances.values()):
-            if t.table_running:
-                count+=1
-        return count
     
     def set_instance(self, ctx):
         channel_id = ctx.channel.id

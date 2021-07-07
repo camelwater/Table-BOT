@@ -13,6 +13,8 @@ import atexit
 import logging
 from logging.handlers import RotatingFileHandler
 import traceback as tb
+from itertools import cycle
+from datetime import datetime, timedelta
 
 #sys.path.append('C:\\Users\\ryanz\\Anaconda3\\Lib\\site-packages')
 
@@ -65,9 +67,10 @@ class TableBOT(commands.Bot):
         super().__init__(command_prefix = callable_prefix, case_insensitive=True, intents = discord.Intents.all(), help_command = None)      
         self.prefixes = load_prefixes()
         self.settings = load_settings()
-        
         self.table_instances = {}
+        self.presences = cycle(['?help', '{} tables'])
         self.BOT_ID = 844640178630426646
+
         for l in INIT_EXT:
             self.load_extension(l)  
 
@@ -97,10 +100,42 @@ class TableBOT(commands.Bot):
 
     async def on_ready(self):
         print("Bot logged in as {0.user}".format(self)) 
+        try:
+            self.cycle_presences.start()
+        except RuntimeError:
+            pass
+        try:
+            self.check_inactivity.start()
+        except RuntimeError:
+            pass
         # try:
         #     self.routine_stats_dump.start()
-        # except:
+        # except RuntimeError:
         #     pass
+    
+    #remove inactive table instances (inactivity == 30+ minutes)
+    @tasks.loop(minutes = 15)
+    async def check_inactivity(self):
+        for channel, instance in self.table_instances.items():
+            if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes = 30):
+                self.table_instances.pop(channel)
+
+    @tasks.loop(seconds=15)
+    async def cycle_presences(self):
+        next_pres = next(self.presences)
+        if "tables" in next_pres:
+            active_tables= self.get_active_tables()
+            next_pres = next_pres.format(active_tables)
+            if active_tables==1: next_pres = next_pres.replace("tables", "table")
+        pres = discord.Activity(type=discord.ActivityType.watching, name=next_pres)
+        await self.change_presence(status=discord.Status.online, activity=pres)
+    
+    def get_active_tables(self):
+        count = 0
+        for t in list(self.table_instances.values()):
+            if t.table_running:
+                count+=1
+        return count
 
     def get_guild_prefixes(self, guild, local_callable = callable_prefix):
         temp_msg = discord.Object(id=0)

@@ -22,9 +22,9 @@ from Utils import isFFA, warning_map, dc_map, style_map, pts_map
 from Utils import graph_map as gm
 graph_map = copy.deepcopy(gm)
 
-
+#NOTE: consider changing players into Player objects, also maybe start using /room/ JSON (race_phase begin==13, end == 19) - main benefit start table before race 1
 class Table():
-    def __init__(self, ctx = None, bot = None, graph = None, style = None, testing = False):
+    def __init__(self, ctx = None, bot = None, testing = False):
         self.TESTING = testing
         self.IGNORE_FCS = False
         if self.TESTING:
@@ -76,8 +76,8 @@ class Table():
                    
         self.tags = {} #list of team tags and their respective players
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
-        self.graph = graph
-        self.style = style
+        self.graph = None
+        self.style = None
         self.table_img = None
         self.table_link = '' #image png link
         self.sui = False 
@@ -336,7 +336,7 @@ class Table():
                     return False, type_ask, "Room {} found.\n{}\n\n**Is this room correct?** (`?yes` / `?no`)".format(self.rxx, string)
     
     
-    def split_teams(self, f, num_teams):
+    def split_teams(self, f, num_teams): #TODO: rewrite into genetic/simulated annealing algo, if can't then at least fix prefix+suffix check
         """
         split players into teams based on tags
         """
@@ -2051,7 +2051,7 @@ class Table():
         
         return error, mes
 
-    def un_merge_room(self, merge_num): #TODO: update pts recalculation (maybe use update_table?)
+    def un_merge_room(self, merge_num): #TODO: update pts recalculation b/c dc pts changes (maybe use update_table? or just subtract pts using players[1][2] - race by race pts)
         self.restore_merged = (self.races, self.tracks, self.finish_times, copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), self.dc_list_ids, copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings))
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  
@@ -2494,7 +2494,7 @@ class Table():
                     
                     self.ties[shift+raceNum+1][time].append(fc)
                 
-                if ":" in time and int(time[0:time.find(':')])>=5:
+                if ":" in time and int(time[0:time.find(':')])>=4:
                     if self.sui:
                         if "Large finish times occurred, but are being ignored. Table could be inaccurate." not in self.warnings[-1]:
                             self.warnings[-1].append("Large finish times occurred, but are being ignored. Table could be inaccurate.")
