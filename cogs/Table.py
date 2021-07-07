@@ -14,10 +14,11 @@ class Table_cog(commands.Cog):
     def __init__(self, bot):
         self.HOME_URL = "https://wiimmfi.de/stats/mkwx/list/"
         self.bot = bot
-        self.TESTING = False 
+        self.TESTING = True 
         
         if self.TESTING:
             table = Table(testing=True)
+        
         
     # @commands.Cog.listener()
     # async def on_ready(self):

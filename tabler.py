@@ -112,6 +112,7 @@ class Table():
         ##### Stuff for bot instances #####
         
     def init_testing(self):
+        print("test:", unidecode(Utils.sanitize_uni("←Sgt")))
         # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
         #     'jaja LTA':0,'stupid@LTA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"mom's mv":0}
         self.players = {'x#1':0, 'xxx':0, 'Z':0, '¢unt':0, 'ZZZ': 0, 'cool kid': 0, "i am": 0, "IS U DUMB": 0, 'gas mob':0, "gassed up":0}

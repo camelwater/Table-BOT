@@ -122,8 +122,13 @@ def sanitize_uni(string):
     string with no CJK and non-unicode characters
 
     '''
-    string = [char_map.get(i, i) for i in string]
-    ret = [i for i in string if not is_CJK(i) and unidecode(i)!=""]
+    string = [CHAR_MAP.get(i, i) for i in string]
+    ret = [i for i in string if i in VALID_CHARS]
+    while len(ret)>0:
+        if ret[0] in PRE_REMOVE:
+            ret.pop(0)
+        else:
+            break
     return ''.join(ret)
 
 
@@ -131,13 +136,18 @@ def sanitize_uni_tag(string):
     '''
     get rid of non-unicode characters that cannot be converted, but keep convertable characters in original form
     '''
-    string = [i for i in string if not is_CJK(i) and (unidecode(i)!="" or i not in char_map)]
+    string = [i for i in string if (i in VALID_CHARS or i in CHAR_MAP)]
+    while len(string)>0:
+        if string[0] in PRE_REMOVE:
+            string.pop(0)
+        else:
+            break
     return ''.join(string)
 
 def replace_brackets(string):
     string = string.lstrip('[').lstrip(']').lstrip('(').lstrip(')').lstrip('{').lstrip('}')
     string = list(unidecode(sanitize_uni(string)))
-    ret = [i for i in string if i.isalnum()]
+    ret = [i for i in string if i in VALID_CHARS or i in CHAR_MAP]
     
     return ''.join(ret)
 
@@ -202,7 +212,7 @@ pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:
               1:{0:15}
             }
 
-char_map = {
+CHAR_MAP = {
     "Λ":"A",
     "λ": "A",
     "ß": "B",
@@ -210,9 +220,14 @@ char_map = {
     "Ξ": "E",
     "σ": "o", 
     "や": "P",
+    "$": "S",
     "ν": "v", 
     "γ": "y"
 }
+
+VALID_CHARS = "/\*^+-abcdefghijklmnopqrstuvwxyz\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz0123456789".upper()
+
+PRE_REMOVE = "/\*^+-"
 
 warning_map = {
             "dc_on": "{} DCed during the race (on results), unless MKWX ERROR. Awarding 3 DC points per missing race in GP {} ({} pts).",
