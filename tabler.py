@@ -2411,7 +2411,7 @@ class Table():
                 sub_outs = False
                 if len(self.players)>self.num_players and len(total_missing_players)==len(self.players)-self.num_players:
                     sub_outs= True
-                if len(total_missing_players)>len(self.players)-self.num_players and (shift+raceNum+1)%4==1:
+                if len(self.players)>self.num_players and len(total_missing_players)>len(self.players)-self.num_players and (shift+raceNum+1)%4==1:
                     sub_outs = True
                     self.warnings[shift+raceNum+1].append({'type': 'missing_w_sub', 'missing_players': missing_players, 'num_missing': len(missing_players), 'gp': self.gp+1})
 
