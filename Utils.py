@@ -34,6 +34,13 @@ def get_num_players(f, teams):
 
 #============= tabler.py stuff ==============#
 
+def isfloat(n):
+    try:
+        float(n)
+        return True
+    except:
+        return False
+
 def convert_format(f) -> int:
     """
     get players per team based on format
@@ -130,7 +137,7 @@ def sanitize_uni(string):
         n = unidecode(i)
         if len(n)>0: ret.append(n)
         else: ret.append(" ")
-        
+
     while len(ret)>0:
         if ret[0] in PRE_REMOVE or ret[0] not in VALID_CHARS:
             ret.pop(0)
@@ -260,8 +267,8 @@ warning_map = {
             "mkwx_bug_change": "Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX ERROR. Table could be inaccurate for this GP ({}).", 
             "mkwx_bug_blank": "All players in the race had blank finish times. This is an MKWX ERROR if there was no room reset. Table is inaccurate for this GP ({}).", 
             "mkwx_bug_repeat": "{} player(s) had the same finish as they had in a previous race (race {}). Check for errors as this is highly improbable and likely an MKWX ERROR. Table could be inaccurate for this GP ({}).",
-            "mkwx_bug_tr":"Room had players with track errors ({} players). Check ?rr for errors. Table could be inaccurate for this GP ({}).", 
-            "mkwx_bug_delta": "Room had time delay (lag) errors ({} players). Check ?rr for errors. Table could be inaccuate for this GP ({}).",
+            "mkwx_bug_tr":"Room had {} players with track errors. Check ?rr for errors. Table could be inaccurate for this GP ({}).", 
+            "mkwx_bug_delta": "Room had time delay (lag) errors ({} player(s)). Check ?rr for errors. Table could be inaccuate for this GP ({}).",
 
             "sub": "{}  -  Potential sub detected. If this player is a sub, use ?sub.", 
             "sub_conf": "{} - subbed in for {}.",

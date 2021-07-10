@@ -43,3 +43,36 @@ Traceback (most recent call last):
   File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\aiohttp\helpers.py", line 656, in __exit__
     raise asyncio.TimeoutError from None
 asyncio.exceptions.TimeoutError
+2021-07-10 17:53:44,213 ERROR -> in command: changetag
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 309, in changetag
+    mes= self.bot.table_instances[ctx.channel.id].change_tag(pID, tag)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1024, in change_tag
+    self.all_players[i[0]].remove(player)
+ValueError: list.remove(x): x not in list
+
+
+2021-07-10 17:54:46,731 ERROR -> in command: tags
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 383, in tags
+    mes = self.bot.table_instances[ctx.channel.id].group_tags(dic)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1098, in group_tags
+    print(all_players)
+NameError: name 'all_players' is not defined
+
+
+2021-07-10 18:02:26,763 ERROR -> in command: changetag
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 309, in changetag
+    mes= self.bot.table_instances[ctx.channel.id].change_tag(pID, tag)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1024, in change_tag
+    print(i[0])
+ValueError: list.remove(x): x not in list
+
+

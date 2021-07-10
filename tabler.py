@@ -1037,7 +1037,7 @@ class Table():
         for k in empty_keys:
             del self.tags[k]
 
-        ret = "{} tag changed from {} to {}".format(self.display_names[player], old_tag, tag)  
+        ret = "`{}` tag changed from `{}` to `{}`.".format(self.display_names[player], old_tag, tag)  
         if not reundo and self.table_running:
             self.modifications.append([("?changetag {} {}".format(p_indx, tag), player, tag, old_tag, old_indx)])
 
@@ -1068,13 +1068,13 @@ class Table():
         for i in dic.items():
             if i[0] not in self.tags:
                 self.tags[i[0]] = i[1]
-                self.all_players[i[0]] = i[1]
+                self.all_players[i[0]] = copy.copy(i[1])
             else:
                 for j in self.tags[i[0]]:
                     if j not in i[1] and j not in affected_players:
                         leftovers.append(j)
                 self.tags[i[0]] = i[1]
-                self.all_players[i[0]] = i[1]
+                self.all_players[i[0]] = copy.copy(i[1])
         
         per_team = Utils.convert_format(self.format)
         if len(leftovers)>0:
@@ -1091,10 +1091,11 @@ class Table():
             if len(x[1])==0: removal.append(x[0])
         for i in removal:
             self.tags.pop(i)
+            self.all_players.pop(i)
         
         if not redo and self.table_running:
             self.modifications.append([("?tags {}".format(dic_str), orig_tags, dic)])
-
+        
         return "Tags updated."
     
     def undo_group_tags(self, restore_tags):
@@ -2386,7 +2387,10 @@ class Table():
                     fc = next_elem.select('span[title*=PID]')[0].text
                     tr = next_elem.find_all('td',{"align" : "center"})[4].text
                     tr = False if tr=="✓" else True
-                    delta = next_elem.select('td[title*=delay]')[0].text
+                    try:
+                        delta = next_elem.select('td[title*=delay]')[0].text
+                    except IndexError:
+                        delta = next_elem.find_all('td',{"align" : "center"})[5].text
                     
                     race.append((miiName, fin_time, fc, tr, delta))
                     next_elem = next_elem.findNext('tr')
@@ -2432,41 +2436,56 @@ class Table():
                         
             cur_room_size = len(race)
             cur_race_players = [i[2] for i in race]
-
-            #repeat times check
-            check_repeat_times = Utils.check_repeat_times(race, self.races+iter_races[:raceNum])
-            if check_repeat_times[0]:
-                self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'race': check_repeat_times[1].get('race'),
-                                                    'num_affected':check_repeat_times[1].get('num_aff'), 'gp': self.gp+1})
-
-            #tr check
-            tr_count = Counter([i[3] for i in race])[True]
-            if tr_count>0:
-                self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_tr", 'aff_players': tr_count, 'gp': self.gp+1})
             
-            #delay check
-            delay_count = len([i[4] for i in race if i[4].replace('.','').isnumeric() and (float(i[4])>7.0 or float(i[4])<-7.0)])
-            if delay_count>0:
-                self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_delta", 'aff_players':delay_count, 'gp': self.gp+1})
+            all_blank = False
+            dc_count = 0
+            for i, r in enumerate(race):
+                if r[1] == 'DC':
+                    dc_count +=1
+            if dc_count == cur_room_size:
+                self.warnings[shift+raceNum+1].append({"type": "mkwx_bug_blank", 'gp':self.gp+1})
+                fin_times = {}
+                for i in race:
+                    fin_times[i[0]] = i[1]
+                self.finish_times[shift+raceNum] = fin_times
+                all_blank = True
+                #continue
 
-            #check for room size increases (mkwx bug)
-            if cur_room_size < self.room_sizes[self.gp]:
-                self.room_sizes[self.gp] = cur_room_size
-            if cur_room_size > self.room_sizes[self.gp]:
-                self.room_sizes_error_affected[self.gp].append(shift+raceNum+1)
+            if not all_blank: #don't check these errors if the race's times are all blank
+                #repeat times check
+                check_repeat_times = Utils.check_repeat_times(race, self.races+iter_races[:raceNum])
+                if check_repeat_times[0]:
+                    self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'race': check_repeat_times[1].get('race'),
+                                                        'num_affected':check_repeat_times[1].get('num_aff'), 'gp': self.gp+1})
+
+                #tr check
+                tr_count = Counter([i[3] for i in race])[True]
+                if tr_count>0:
+                    self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_tr", 'aff_players': tr_count, 'gp': self.gp+1})
+            
+                #delay check
+                delay_count = len([i[4] for i in race if i[4]=="—" or (Utils.isfloat(i[4]) and (float(i[4])>7.0 or float(i[4])<-7.0))])
+                if delay_count>0:
+                    self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_delta", 'aff_players':delay_count, 'gp': self.gp+1})
+
+                #check for room size increases (mkwx bug)
+                if cur_room_size < self.room_sizes[self.gp]:
+                    self.room_sizes[self.gp] = cur_room_size
+                if cur_room_size > self.room_sizes[self.gp]:
+                    self.room_sizes_error_affected[self.gp].append(shift+raceNum+1)
+                    
+                    if self.room_error_index[self.gp][1]==-1:
+                        self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_increase", 'new_players':cur_room_size, 'orig_players':self.room_sizes[self.gp], 'races':self.room_sizes_error_affected[self.gp]})
+                        self.room_error_index[self.gp][1] = len(self.warnings[shift+raceNum+1])-1
+                        self.room_error_index[self.gp][0] = shift+raceNum+1
+                    else:
+                        self.warnings[self.room_error_index[self.gp][0]][self.room_error_index[self.gp][1]]['races'] = self.room_sizes_error_affected[self.gp]
                 
-                if self.room_error_index[self.gp][1]==-1:
-                    self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_increase", 'new_players':cur_room_size, 'orig_players':self.room_sizes[self.gp], 'races':self.room_sizes_error_affected[self.gp]})
-                    self.room_error_index[self.gp][1] = len(self.warnings[shift+raceNum+1])-1
-                    self.room_error_index[self.gp][0] = shift+raceNum+1
-                else:
-                    self.warnings[self.room_error_index[self.gp][0]][self.room_error_index[self.gp][1]]['races'] = self.room_sizes_error_affected[self.gp]
-            
-            #check for changed players mid-GP (mkwx bug)
-            elif not all(elem in self.room_players[self.gp] for elem in cur_race_players) and not all(elem in last_race_players for elem in cur_race_players):
-                self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_change", 'race': shift+raceNum+1, 'gp':self.gp+1})
+                #check for changed players mid-GP (mkwx bug)
+                elif not all(elem in self.room_players[self.gp] for elem in cur_race_players) and not all(elem in last_race_players for elem in cur_race_players):
+                    self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_change", 'race': shift+raceNum+1, 'gp':self.gp+1})
 
-            last_race_players = cur_race_players   
+                last_race_players = cur_race_players   
             
             if cur_room_size<self.num_players and len(self.players)<self.num_players and (shift+raceNum)%4 == 0:
                 self.warnings[shift+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
@@ -2519,19 +2538,6 @@ class Table():
                                 if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                                 self.gp_dcs[self.gp].append(mp)
             
-            ignore_indiv_dcs = False
-            dc_count = 0
-            for i, r in enumerate(race):
-                if r[1] == 'DC':
-                    dc_count +=1
-            if dc_count == cur_room_size:
-                self.warnings[shift+raceNum+1].append({"type": "mkwx_bug_blank", 'gp':self.gp+1})
-                fin_times = {}
-                for i in race:
-                    fin_times[i[0]] = i[1]
-                self.finish_times[shift+raceNum] = fin_times
-                ignore_indiv_dcs = True
-                #continue
             
             last_finish_times = {}
             
@@ -2582,7 +2588,7 @@ class Table():
                 last_finish_times[fc] = time
 
                 try:
-                    assert(time!='DC' or ignore_indiv_dcs)
+                    assert(time!='DC' or all_blank)
                 except AssertionError:
                     if self.gp not in self.gp_dcs or fc not in self.gp_dcs[self.gp]:
                         if (shift+raceNum)%4==0:

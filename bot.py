@@ -52,7 +52,7 @@ def load_prefixes():
 
 def callable_prefix(bot, msg, mention=True):
     base = []
-    default = ['?', '^', '!']
+    default = ['?', '^']
     if msg.guild is None:
         base.extend(default)
     else:
