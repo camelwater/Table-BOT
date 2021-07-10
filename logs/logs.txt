@@ -7,3 +7,39 @@ Traceback (most recent call last):
 AttributeError: 'Context' object has no attribute 'sends'
 
 
+2021-07-10 13:12:54,609 ERROR -> in command: start
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 180, in start
+    await self.skip_search(ctx, data, is_rxx)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 73, in skip_search
+    error, ask, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(rid = arg)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 317, in find_room
+    self.split_teams(self.format, self.teams)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 360, in split_teams
+    teams = tag_algo(player_copy, per_team, num_teams)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\find_tags.py", line 394, in tag_algo
+    all_tag_matches = find_possible_tags(players)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\find_tags.py", line 363, in find_possible_tags
+    if m_tag[-1] == '-':
+IndexError: string index out of range
+
+
+2021-07-10 16:41:16,954 ERROR -> Attempting a reconnect in 1.97s
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\client.py", line 563, in connect
+    self.ws = await asyncio.wait_for(coro, timeout=60.0)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\asyncio\tasks.py", line 492, in wait_for
+    fut.result()
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\gateway.py", line 306, in from_client
+    socket = await client.http.ws_connect(gateway)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\http.py", line 132, in ws_connect
+    return await self.__session.ws_connect(url, **kwargs)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\aiohttp\client.py", line 754, in _ws_connect
+    resp = await self.request(
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\aiohttp\client.py", line 619, in _request
+    break
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\aiohttp\helpers.py", line 656, in __exit__
+    raise asyncio.TimeoutError from None
+asyncio.exceptions.TimeoutError

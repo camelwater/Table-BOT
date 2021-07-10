@@ -124,7 +124,13 @@ def sanitize_uni(string):
     '''
     
     string = [CHAR_MAP.get(i, i) for i in string]
-    ret = list(unidecode(''.join(string)))
+    # ret = list(unidecode(''.join(string)))
+    ret= []
+    for i in string:
+        n = unidecode(i)
+        if len(n)>0: ret.append(n)
+        else: ret.append(" ")
+        
     while len(ret)>0:
         if ret[0] in PRE_REMOVE or ret[0] not in VALID_CHARS:
             ret.pop(0)

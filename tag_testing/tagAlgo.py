@@ -112,7 +112,6 @@ class TagAlgo:
         chunks = list(Utils.chunks(self.players, self.num_per_team))
         for i in range(len(chunks)):
             chunks[i] = ["" , chunks[i]]
-        #print(chunks)
         return chunks
     
     def breed_elite(self, population, elite_muts = 3):
@@ -123,7 +122,6 @@ class TagAlgo:
             mut_fits = [self.fitness(m) for m in muts]
             fittest_mut, mut_fit = self.select_top_mut(muts, mut_fits)
             if mut_fit>self.fitness(c):
-                print("DOES IT EVER GO HERE")
                 population[i] = fittest_mut
         
         return population
@@ -132,7 +130,6 @@ class TagAlgo:
         #elite = copy.deepcopy(elite)
         elite = self.breed_elite(elite)
 
-        tick = time.time()
         for c in range(self.size - len(elite)):
             #p1 = rand.choice(elite)
             #p2 = rand.choice(elite)
@@ -141,12 +138,10 @@ class TagAlgo:
             
             elite.append(child)
 
-        #print("breeding time:", time.time()-tick)
         return elite
 
     
     def fitness(self,chromosome, final_check = False):
-        tick = time.time()
         fitness = 0
         seen_tags = []
         # all_players = []
@@ -197,7 +192,6 @@ class TagAlgo:
         if len(chromosome)>self.num_teams:
             fitness+=2500
         
-        #print("fitness check:", time.time()-tick)
         return fitness
     
     def findTag(self,group):

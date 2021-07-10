@@ -172,7 +172,7 @@ def try_split_chunks(players, tag, per_team, all_tags):
         while temp in all_tags:
             temp = (tag, a) #tuple for duplicate tags (a bit annoying)
             a+=1
-        all_tags[temp] = g
+        all_tags[temp] = set(g)
 
 
 def try_find_most_pre(players, tag, per_team, all_tags):
@@ -354,8 +354,7 @@ def find_possible_tags(players):
                                 or i_tag[:temp_indx] == j_tag[::-1][:temp_indx][::-1]):
                     
                     #print(temp_indx, players[i], players[j])
-                    #m_tag = Utils.sanitize_tag_uni(orig_i)[:temp_indx]
-                    m_tag = Utils.sanitize_uni(orig_i.strip()[:temp_indx])
+                    m_tag = Utils.sanitize_uni(orig_i)[:temp_indx]
                     if len(m_tag) == 1: 
                         m_tag = m_tag.upper()
                     if m_tag[-1] == '-':
@@ -369,14 +368,12 @@ def find_possible_tags(players):
                                 or i_tag[::-1][:temp_indx][::-1] == j_tag[:temp_indx]):
                     
                     #print(temp_indx, players[i], players[j])
-                    #m_tag = Utils.sanitize_tag_uni(orig_i)[::-1][:temp_indx][::-1]
-                    m_tag = Utils.sanitize_uni(orig_i.strip()[::-1][:temp_indx][::-1])
-
+                    m_tag = Utils.sanitize_uni(orig_i)[::-1][:temp_indx][::-1]
                     if len(m_tag) == 1: 
                         m_tag = m_tag.upper()
                     if m_tag[-1] == '-':
                         m_tag = m_tag[:-1]
-                  
+                
                     tag_matches[m_tag].add(players[i])
                     tag_matches[m_tag].add(players[j])
                     

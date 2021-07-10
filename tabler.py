@@ -17,13 +17,13 @@ from discord.ext import tasks
 import time as timer
 from unidecode import unidecode
 from collections import defaultdict, Counter
-from itertools import chain
+from os.path import commonprefix
+from find_tags import tag_algo
+import tag_testing.tagAlgo as tagAlgo
 import Utils
 from Utils import isFFA, warning_map, dc_map, style_map, pts_map
 from Utils import graph_map as gm
 graph_map = copy.deepcopy(gm)
-from find_tags import tag_algo
-import tag_testing.tagAlgo as tagAlgo
 
 #NOTE: consider changing players into Player objects, also maybe start using /room/ JSON (race_phase begin==13, end == 19) - main benefit start table before race 1
 class Table():
@@ -116,16 +116,16 @@ class Table():
         
     def init_testing(self):
 
-        # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
-            # 'jaja LTA':0,'stupid@LATINAMERICA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
+        self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
+            'jaja LTA':0,'stupid@LATINAMERICA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
         # self.players = {'x#1':0, 'awd':0, 'Ryan@X':0, '¢unt':0, 'stop man': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}
         # self.players = {'hello':0, 'stupid':0, 'VA':0, 'banned':0, '090':0, 'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'ABB':0}
         # self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'banned':0, 'barrel':0, 
         #         'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'where?':0}
-        self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'hapless':0, 'barrel':0, 
-                'A-1':0, 'uwau?':0, "WWW.PH.COM":0, "λxe":0, 'A-2':0, 'λp fraud':0, 'WOW!!':0}
+        # self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'hapless':0, 'barrel':0, 
+        #         'A-1':0, 'uwau?':0, "WWW.PH.COM":0, "λxe":0, 'A-2':0, 'λp fraud':0, 'WOW!!':0}
         self.IGNORE_FCS = True
-        self.split_teams('2', 4)
+        self.split_teams('5', 4)
 
     async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple:
         """
@@ -345,7 +345,7 @@ class Table():
                     return False, type_ask, "Room {} found.\n{}\n\n**Is this room correct?** (`?yes` / `?no`)".format(self.rxx, string)
     
     
-    def split_teams(self, f, num_teams): 
+    def split_teams(self, f, num_teams): #TEST: more testing for new tag algorithm
         """
         split players into teams based on tags
         """
@@ -1571,8 +1571,7 @@ class Table():
         self.fcs[player] = fc
         self.display_names[fc] = player
         print(self.num_players)
-        if len(self.players)-1<self.num_players:
-            print("asd")
+        if len(self.players)-1<self.num_players: #FIXME: need to fill in GP 2 if player wasn't in GP 2 either (only filling missing GP 1)
             for warn_item in enumerate(self.warnings[1]):
                 if warn_item[1].get('type') == "missing":
                     #print(ind,i)
@@ -2121,7 +2120,7 @@ class Table():
         
         return error, mes
 
-    def un_merge_room(self, merge_num): #TODO: update pts recalculation b/c dc pts changes (maybe use update_table? or just subtract pts using players[1][2] - race by race pts)
+    def un_merge_room(self, merge_num): #TEST: test if updated un_merge works 
         self.restore_merged = (self.races, self.tracks, self.finish_times, copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), self.dc_list_ids, copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings))
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  
@@ -2147,18 +2146,27 @@ class Table():
         for raceNum,race in enumerate(self.races):
             cur_room_size= len(race)
             gp = int(raceNum/4)
+            
+            for placement, player in enumerate(race):
+                player = player[2]
+
+                for dc in list(self.dc_pts.items()):    
+                    for indx,j in enumerate(dc[1]):
+                        if raceNum+1 in j[1] and dc[0] == player:
+                            self.dc_pts[dc[0]].pop(indx)
+                            continue
+
+                recorded_players.append(player)
+                self.players[player][1][gp] += pts_map[cur_room_size][placement]
+                self.players[player][2][raceNum] += pts_map[cur_room_size][placement]
+                self.players[player][0] += pts_map[cur_room_size][placement]
+
             for dc in list(self.dc_pts.items()):
                 for j in dc[1]:
                     if raceNum+1 in j[1]:
                         self.players[dc[0]][1][self.gp]+=3
                         self.players[dc[0]][2][raceNum]=3
                         break
-            for placement, player in enumerate(race):
-                player = player[2]
-                recorded_players.append(player)
-                self.players[player][1][gp] += pts_map[cur_room_size][placement]
-                self.players[player][2][raceNum] += pts_map[cur_room_size][placement]
-                self.players[player][0] += pts_map[cur_room_size][placement]
         
         x = copy.deepcopy(self.players)
         for i in x.keys():
@@ -2461,7 +2469,6 @@ class Table():
             last_race_players = cur_race_players   
             
             if cur_room_size<self.num_players and len(self.players)<self.num_players and (shift+raceNum)%4 == 0:
-                #TEST: test if player missing race one and comes back later gp
                 self.warnings[shift+raceNum+1].append({'type': 'missing', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
 
             elif cur_room_size > self.num_players and (shift+raceNum)%4 == 0:

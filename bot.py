@@ -52,7 +52,7 @@ def load_prefixes():
 
 def callable_prefix(bot, msg, mention=True):
     base = []
-    default = ['?', '^']
+    default = ['?', '^', '!']
     if msg.guild is None:
         base.extend(default)
     else:
@@ -96,7 +96,7 @@ class TableBOT(commands.Bot):
             error_tb = ''.join(tb.format_exception(type(error), error, error.__traceback__))
             error_tb = error_tb[:error_tb.find('\nThe above exception was the direct cause of the following exception:')]
             log.error(msg=f"in command: {ctx.command}\n{error_tb}")
-            #raise error
+            raise error
 
     async def on_ready(self):
         print("Bot logged in as {0.user}".format(self)) 
