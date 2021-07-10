@@ -1226,10 +1226,16 @@ class Table():
         return ret
         
     def dc_ids_append(self,player, race):
-        i = 1
-        while i in self.dc_list_ids:
-            i+=1
-        self.dc_list_ids[i] = [player,race]
+        self.temp_dc_list = []
+        # i = 1
+        # while i in self.dc_list_ids:
+        #     i+=1
+        # self.dc_list_ids[i] = [player,race]
+        self.temp_dc_list.append([player, race])
+        self.temp_dc_list = sorted(self.temp_dc_list, key=lambda l: (l[1], l[0]))
+        self.dc_list_ids = {}
+        for dcID, dc in enumerate(self.temp_dc_list):
+            self.dc_list_ids[dcID+1] = dc
         
     def edit(self,l, redo=False): 
         ret= ''

@@ -116,7 +116,7 @@ class TableBOT(commands.Bot):
     async def on_message(self, message: discord.Message):
         if message.author == self or message.author.bot: return
         #if not self.user.mentioned_in(message): return
-        if message.content.rstrip() in ['<@!{}>'.format(self.user.id), '<@{}>'.format(self.user.id)]:
+        if message.content.rstrip() in [f'<@!{self.user.id}>', f'<@{self.user.id}>']:
             await self.send_help(await self.get_context(message))
             if hasattr(self, "command_stats"):
                 self.command_stats['help']+=1
@@ -129,9 +129,14 @@ class TableBOT(commands.Bot):
     #remove inactive table instances (inactivity == 30+ minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):
-        for channel, instance in self.table_instances.items():
-            if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes = 30):
-                self.table_instances.pop(channel)
+        # inactive = []
+        # for channel, instance in self.table_instances.items():
+        #     if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes = 30):
+        #         inactive.append(channel)
+        # for i in inactive:
+        #     self.table_instances.pop(i)
+        self.table_instances = {channel: instance for (channel, instance) in self.table_instances.items() if 
+                                instance.last_command_sent is None or datetime.now() - instance.last_command_sent <= timedelta(minutes=30)}
 
     @tasks.loop(seconds=15)
     async def cycle_presences(self):
