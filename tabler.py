@@ -17,13 +17,13 @@ from discord.ext import tasks
 import time as timer
 from unidecode import unidecode
 from collections import defaultdict, Counter
+from itertools import chain
 import Utils
 from Utils import isFFA, warning_map, dc_map, style_map, pts_map
 from Utils import graph_map as gm
 graph_map = copy.deepcopy(gm)
 from find_tags import tag_algo
 import tag_testing.tagAlgo as tagAlgo
-from tag_testing.backup_tag_algo import split_teams as old_tag_algo
 
 #NOTE: consider changing players into Player objects, also maybe start using /room/ JSON (race_phase begin==13, end == 19) - main benefit start table before race 1
 class Table():
@@ -116,17 +116,16 @@ class Table():
         
     def init_testing(self):
 
-        # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA sucks':0,'LTAX':0,
-        #     'jaja LTA!!':0,'stupid@LATINAMERICA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
-        #self.players = {'x#1':0, 'xxx':0, 'Z':0, '¢unt':0, 'ZZZ': 0, 'cool kid': 0, "i am": 0, "IS U DUMB": 0, 'gas mob':0, "gassed up":0}
+        # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
+            # 'jaja LTA':0,'stupid@LATINAMERICA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
         # self.players = {'x#1':0, 'awd':0, 'Ryan@X':0, '¢unt':0, 'stop man': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}
         # self.players = {'hello':0, 'stupid':0, 'VA':0, 'banned':0, '090':0, 'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'ABB':0}
         # self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'banned':0, 'barrel':0, 
         #         'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'where?':0}
-        # self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'hapless':0, 'barrel':0, 
-        #         'A-1':0, 'uwau?':0, "WWW.PH.COM":0, "λxe":0, 'A-2':0, 'λp fraud':0, 'WOW!!':0}
+        self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'hapless':0, 'barrel':0, 
+                'A-1':0, 'uwau?':0, "WWW.PH.COM":0, "λxe":0, 'A-2':0, 'λp fraud':0, 'WOW!!':0}
         self.IGNORE_FCS = True
-        self.split_teams('5', 2)
+        self.split_teams('2', 4)
 
     async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple:
         """
@@ -350,6 +349,7 @@ class Table():
         """
         split players into teams based on tags
         """
+        
         tick=timer.time()
         f = f[0]
         if not f.isnumeric():
@@ -374,7 +374,7 @@ class Table():
         self.tags = teams
         self.all_players = copy.deepcopy(self.tags)
         self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].lower())))
-        self.tags = {k.strip().rstrip('-'): v for (k, v) in self.tags.items()}
+        self.tags = {k.strip(): v for (k, v) in self.tags.items()}
 
         print()
         print(self.tags)
@@ -1232,11 +1232,14 @@ class Table():
         #     i+=1
         # self.dc_list_ids[i] = [player,race]
         self.temp_dc_list.append([player, race])
-        self.temp_dc_list = sorted(self.temp_dc_list, key=lambda l: (l[1], l[0]))
+        self.temp_dc_list = sorted(self.temp_dc_list, key=lambda l: (l[1], Utils.sanitize_uni(l[0])))
         self.dc_list_ids = {}
         for dcID, dc in enumerate(self.temp_dc_list):
             self.dc_list_ids[dcID+1] = dc
-        
+        for race, dcs in self.dc_list.items(): #sort dc_list within races
+            self.dc_list[race] = sorted(dcs, key = lambda l: Utils.sanitize_uni(l))
+        self.dc_list = defaultdict(list, dict(sorted(self.dc_list.items(), key = lambda l: l[0])))
+
     def edit(self,l, redo=False): 
         ret= ''
 
@@ -1923,7 +1926,7 @@ class Table():
                 self.modifications.append([('?dcs {} {}'.format(dc_num, status), dc_num, orig_status, status)]) 
                 self.undos.clear()   
 
-            ret+= "Changed {} DC status for race {} to '{}'.\n".format(Utils.dis_clean(self.display_names[player]), raceNum, status)
+            ret+= "Changed `{}` DC status for race `{}` to `{}`.\n".format(Utils.dis_clean(self.display_names[player]), raceNum, status)
        
         return ret
                 
