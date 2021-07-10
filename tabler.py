@@ -21,6 +21,9 @@ import Utils
 from Utils import isFFA, warning_map, dc_map, style_map, pts_map
 from Utils import graph_map as gm
 graph_map = copy.deepcopy(gm)
+from find_tags import tag_algo
+import tag_testing.tagAlgo as tagAlgo
+from tag_testing.backup_tag_algo import split_teams as old_tag_algo
 
 #NOTE: consider changing players into Player objects, also maybe start using /room/ JSON (race_phase begin==13, end == 19) - main benefit start table before race 1
 class Table():
@@ -112,12 +115,18 @@ class Table():
         ##### Stuff for bot instances #####
         
     def init_testing(self):
-        print("test:", unidecode(Utils.sanitize_uni("←Sgt")))
-        # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
-        #     'jaja LTA':0,'stupid@LTA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"mom's mv":0}
-        self.players = {'x#1':0, 'xxx':0, 'Z':0, '¢unt':0, 'ZZZ': 0, 'cool kid': 0, "i am": 0, "IS U DUMB": 0, 'gas mob':0, "gassed up":0}
+
+        # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA sucks':0,'LTAX':0,
+        #     'jaja LTA!!':0,'stupid@LATINAMERICA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
+        #self.players = {'x#1':0, 'xxx':0, 'Z':0, '¢unt':0, 'ZZZ': 0, 'cool kid': 0, "i am": 0, "IS U DUMB": 0, 'gas mob':0, "gassed up":0}
+        # self.players = {'x#1':0, 'awd':0, 'Ryan@X':0, '¢unt':0, 'stop man': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}
+        # self.players = {'hello':0, 'stupid':0, 'VA':0, 'banned':0, '090':0, 'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'ABB':0}
+        # self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'banned':0, 'barrel':0, 
+        #         'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'where?':0}
+        # self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'hapless':0, 'barrel':0, 
+        #         'A-1':0, 'uwau?':0, "WWW.PH.COM":0, "λxe":0, 'A-2':0, 'λp fraud':0, 'WOW!!':0}
         self.IGNORE_FCS = True
-        self.split_teams('2', 1)
+        self.split_teams('5', 2)
 
     async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple:
         """
@@ -337,11 +346,47 @@ class Table():
                     return False, type_ask, "Room {} found.\n{}\n\n**Is this room correct?** (`?yes` / `?no`)".format(self.rxx, string)
     
     
-    def split_teams(self, f, num_teams): #TODO: rewrite into genetic/simulated annealing algo, if can't then at least fix prefix+suffix check
+    def split_teams(self, f, num_teams): 
         """
         split players into teams based on tags
         """
-        tick=timer.perf_counter_ns()
+        tick=timer.time()
+        f = f[0]
+        if not f.isnumeric():
+            return
+        per_team = int(f)
+        player_copy = list(self.display_names.values()) if not self.IGNORE_FCS else list(copy.deepcopy(self.players).keys())
+        
+        teams = tag_algo(player_copy, per_team, num_teams)
+        
+        if self.TESTING:
+                L = []
+                for i in teams.items():
+                    L.append([i[0].lower(), list(map(lambda l: Utils.sanitize_uni(l.lower()), i[1]))])
+                #print(L)
+                tagalgo = tagAlgo.TagAlgo(None, num_teams, per_team)
+                print(tagalgo.fitness(L))
+
+        if not self.IGNORE_FCS:
+            print(teams)
+            for i in teams.items():
+                teams[i[0]] = [self.fcs[j] for j in i[1]]  
+        self.tags = teams
+        self.all_players = copy.deepcopy(self.tags)
+        self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].lower())))
+        self.tags = {k.strip().rstrip('-'): v for (k, v) in self.tags.items()}
+
+        print()
+        print(self.tags)
+        print("tag algo time:",timer.time()-tick)
+        
+        #self.old_split_teams(f, num_teams)
+    
+    def old_split_teams(self, f, num_teams): 
+        """
+        split players into teams based on tags
+        """
+        tick=timer.time()
         f = f[0]
         if not f.isnumeric():
             return
@@ -361,12 +406,12 @@ class Table():
                 indx-=1
                 matches = 1
                 for j in range(len(player_copy)):                    
-                    if i!=j and indx>0 and unidecode(Utils.sanitize_uni(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx] == unidecode(Utils.sanitize_uni(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx]:
+                    if i!=j and indx>0 and Utils.sanitize_uni(player_copy[i].strip().replace("[","").replace(']','')).lower()[:indx] == Utils.sanitize_uni(player_copy[j].strip().replace("[","").replace(']','')).lower()[:indx]:
                         matches+=1
-                        #print(unidecode(Utils.sanitize_uni(player_copy[i].strip().lower().replace("[","").replace(']','')))[:indx], unidecode(Utils.sanitize_uni(player_copy[j].strip().lower().replace("[","").replace(']','')))[:indx])
+                        #print(Utils.sanitize_uni(player_copy[i].strip().lower().replace("[","").replace(']',''))[:indx], Utils.sanitize_uni(player_copy[j].strip().lower().replace("[","").replace(']',''))[:indx])
                         if matches == per_team: break 
                 
-            tag = Utils.sanitize_uni_tag(player_copy[i].replace("[","").replace(']',''))[:indx]
+            tag = Utils.sanitize_tag_uni(player_copy[i].replace("[","").replace(']',''))[:indx]
             if len(tag)>0 and tag[-1]=="-": 
                 tag = tag[:-1]
                 indx-=1
@@ -377,13 +422,14 @@ class Table():
                 post_players.append(player_copy.pop(i))
                 continue
             x = 1
+            #print(temp_tag, matches)
             while temp_tag in teams:
                 temp_tag = tag.rstrip() +"-"+str(x)
                 x+=1
             teams[temp_tag] = []
             ind = 0
             while ind<len(player_copy):
-                if unidecode(Utils.sanitize_uni(tag.lower().replace("[","").replace(']',''))) == unidecode(Utils.sanitize_uni(player_copy[ind].strip().lower().replace("[","").replace(']','')))[:indx]: 
+                if Utils.sanitize_uni(tag.replace("[","").replace(']','')).lower() == Utils.sanitize_uni(player_copy[ind].strip().replace("[","").replace(']','')).lower()[:indx]: 
                     if len(teams[temp_tag])<per_team:
                         teams[temp_tag].append(player_copy.pop(ind))
                         ind = 0
@@ -407,14 +453,20 @@ class Table():
                     break
             if postfix_fill:
                 cont=False
-                while indx>0:
-                    indx-=1
-                    for tag, _list in teams.items():
-                        if len(_list)<per_team and unidecode(Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']','')))[::-1][:indx][::-1] == unidecode(Utils.sanitize_uni(tag.lower().strip().replace("[","").replace(']',''))):
-                            teams[tag].append(post_players.pop(i))
-                            i = 0
-                            cont = True
-                            break
+                for tag, _list in teams.items():
+                    if len(_list)<per_team and len(commonprefix([Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']',''))[::-1], Utils.sanitize_uni(tag.lower().strip().replace("[","").replace(']',''))]))>0:
+                        teams[tag].append(post_players.pop(i))
+                        i = 0
+                        cont = True
+                        break
+                # while indx>0:
+                #     indx-=1
+                #     for tag, _list in teams.items():
+                #         if len(_list)<per_team and Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']',''))[::-1][:indx][::-1] == Utils.sanitize_uni(tag.lower().strip().replace("[","").replace(']','')):
+                #             teams[tag].append(post_players.pop(i))
+                #             i = 0
+                #             cont = True
+                #             break
                 if cont:
                     continue
 
@@ -428,14 +480,14 @@ class Table():
                 temp_indx-=1
                
                 for j in range(len(post_players)):
-                    i_tag = unidecode(Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']','')))
-                    j_tag = unidecode(Utils.sanitize_uni(post_players[j].strip().lower().replace("[","").replace(']','')))
+                    i_tag = Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']',''))
+                    j_tag = Utils.sanitize_uni(post_players[j].strip().lower().replace("[","").replace(']',''))
                     
                     if i!=j and temp_indx>0 and (i_tag[:temp_indx] == j_tag[::-1][:temp_indx][::-1]
                                                  or i_tag[:temp_indx] == j_tag[:temp_indx]):
                         
                         #print(temp_indx, post_players[i], post_players[j])
-                        m_tag = Utils.sanitize_uni_tag(post_players[i].strip().replace("[","").replace(']',''))[:temp_indx]
+                        m_tag = Utils.sanitize_tag_uni(post_players[i].strip().replace("[","").replace(']',''))[:temp_indx]
                         if len(m_tag) == 1: 
                             m_tag = Utils.sanitize_uni(m_tag).upper()
                         temp = m_tag
@@ -467,7 +519,7 @@ class Table():
                                    or i_tag[::-1][:temp_indx][::-1] == j_tag[:temp_indx]):
                         
                         #print(temp_indx, post_players[i], post_players[j])
-                        m_tag = Utils.sanitize_uni_tag(post_players[i].strip().replace("[","").replace(']',''))[::-1][:temp_indx][::-1]
+                        m_tag = Utils.sanitize_tag_uni(post_players[i].strip().replace("[","").replace(']',''))[::-1][:temp_indx][::-1]
                         if len(m_tag) == 1: 
                             m_tag = Utils.sanitize_uni(m_tag).upper()
                         temp = m_tag
@@ -550,7 +602,7 @@ class Table():
                 match = 0
                 
                 for j in range(len(un_players)):
-                    m = Utils.LCS(unidecode(Utils.sanitize_uni(un_players[i].strip().lower().replace("[","").replace(']','').replace(" ", ""))), unidecode(Utils.sanitize_uni(un_players[j].strip().lower().replace("[","").replace(']','').replace(" ",""))))
+                    m = Utils.LCS(Utils.sanitize_uni(un_players[i].strip().lower().replace("[","").replace(']','').replace(" ", "")), Utils.sanitize_uni(un_players[j].strip().lower().replace("[","").replace(']','').replace(" ","")))
                     if i!=j and len(m)>longest_match:
                         longest_match = len(m)
                         match= un_players[i], un_players[j]
@@ -603,6 +655,14 @@ class Table():
             else:
                 split()
         
+        if self.TESTING:
+                L = []
+                for i in teams.items():
+                    L.append([i[0].lower(), list(map(lambda l: Utils.sanitize_uni(l.lower()), i[1]))])
+                #print(L)
+                tagalgo = tagAlgo.TagAlgo(None, num_teams, per_team)
+                print(tagalgo.fitness(L))
+
         if not self.IGNORE_FCS:
             print(teams)
             for i in teams.items():
@@ -614,7 +674,7 @@ class Table():
 
         print()
         print(self.tags)
-        print("tag algo time:",timer.perf_counter_ns()-tick)
+        print("old tag algo time:",timer.time()-tick)
 
     def warn_to_str(self, warning):                
         warning_type = warning.get('type')
@@ -2368,7 +2428,7 @@ class Table():
                 self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_tr", 'aff_players': tr_count, 'gp': self.gp+1})
             
             #delay check
-            delay_count = len([i[4] for i in race if i[4].replace('.','').isnumeric() and (float(i[4])>6.0 or float(i[4])<-1.0)])
+            delay_count = len([i[4] for i in race if i[4].replace('.','').isnumeric() and (float(i[4])>7.0 or float(i[4])<-7.0)])
             if delay_count>0:
                 self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_delta", 'aff_players':delay_count, 'gp': self.gp+1})
 

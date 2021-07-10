@@ -71,6 +71,11 @@ class Stats(commands.Cog):
         e.add_field(name='\u200b', value= link, inline=False)
 
         await ctx.send(embed=e)
+    
+    @commands.command(name='help',aliases = ['h'])
+    async def _help(self, ctx):
+        info = '**List of commands:**```\n?start\n?search\n?reset\n?players\n?tracks\n?rxx\n?raceresults\n?editrace\n?changeroomsize\n?removerace\n?mergeroom\n?dcs\n?penalty, ?unpenalty\n?tags\n?edittag\n?changetag\n?changegps\n?edit\n?sub, ?editsub\n?tabletext\n?undo, ?redo\n?pic```'
+        await ctx.send(info)
 
 def get_LOC():
     LOC_count = 0

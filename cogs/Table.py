@@ -14,26 +14,10 @@ class Table_cog(commands.Cog):
     def __init__(self, bot):
         self.HOME_URL = "https://wiimmfi.de/stats/mkwx/list/"
         self.bot = bot
-        self.TESTING = True 
+        self.TESTING = False
         
         if self.TESTING:
             table = Table(testing=True)
-        
-        
-    # @commands.Cog.listener()
-    # async def on_ready(self):
-        
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
-        #print(message)
-        if message.author == self.bot or message.author.bot: return
-        if not self.bot.user.mentioned_in(message): return
-
-        if message.content.rstrip() in ['<@!{}>'.format(self.bot.user.id), '<@{}>'.format(self.bot.user.id)]:
-            await self._help(await self.bot.get_context(message))
-            if hasattr(self.bot, "command_stats"):
-                self.bot.command_stats['help']+=1
-    
     
     @commands.Cog.listener()
     async def on_command(self, ctx):
@@ -1041,11 +1025,6 @@ class Table_cog(commands.Cog):
         
         if await self.check_callable(ctx, "tabletext"): return
         await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_table_text())
-        
-    @commands.command(name='help',aliases = ['h'])
-    async def _help(self,ctx):
-        info = '**List of commands:**```\n?start\n?search\n?reset\n?players\n?tracks\n?rxx\n?raceresults\n?editrace\n?changeroomsize\n?removerace\n?mergeroom\n?dcs\n?penalty, ?unpenalty\n?tags\n?edittag\n?changetag\n?changegps\n?edit\n?sub, ?editsub\n?tabletext\n?undo, ?redo\n?pic```'
-        await self.send_messages(ctx, info)
     
 
 def setup(bot):

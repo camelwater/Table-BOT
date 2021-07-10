@@ -113,6 +113,19 @@ class TableBOT(commands.Bot):
         # except RuntimeError:
         #     pass
     
+    async def on_message(self, message: discord.Message):
+        if message.author == self or message.author.bot: return
+        #if not self.user.mentioned_in(message): return
+        if message.content.rstrip() in ['<@!{}>'.format(self.user.id), '<@{}>'.format(self.user.id)]:
+            await self.send_help(await self.get_context(message))
+            if hasattr(self, "command_stats"):
+                self.command_stats['help']+=1
+        await self.process_commands(message)
+    
+    async def send_help(self, ctx):
+        info = '**List of commands:**```\n?start\n?search\n?reset\n?players\n?tracks\n?rxx\n?raceresults\n?editrace\n?changeroomsize\n?removerace\n?mergeroom\n?dcs\n?penalty, ?unpenalty\n?tags\n?edittag\n?changetag\n?changegps\n?edit\n?sub, ?editsub\n?tabletext\n?undo, ?redo\n?pic```'
+        await ctx.send(info)
+    
     #remove inactive table instances (inactivity == 30+ minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):

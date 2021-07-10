@@ -115,28 +115,29 @@ from unidecode import unidecode
 
 def sanitize_uni(string):
     '''
-    convert known/common un-unidecodable strings to unicode, then strip all cjk and non-unicode characters from string
+    convert known/common un-unidecodable strings to unicode, then strip all non-
 
     Returns
     -------
     string with no CJK and non-unicode characters
 
     '''
+    
     string = [CHAR_MAP.get(i, i) for i in string]
-    ret = [i for i in string if i in VALID_CHARS]
+    ret = list(unidecode(''.join(string)))
     while len(ret)>0:
-        if ret[0] in PRE_REMOVE:
+        if ret[0] in PRE_REMOVE or ret[0] not in VALID_CHARS:
             ret.pop(0)
         else:
             break
     return ''.join(ret)
 
 
-def sanitize_uni_tag(string):
+def sanitize_tag_uni(string):
     '''
     get rid of non-unicode characters that cannot be converted, but keep convertable characters in original form
     '''
-    string = [i for i in string if (i in VALID_CHARS or i in CHAR_MAP)]
+    string = [i for i in string if CHAR_MAP.get(i, i) in VALID_CHARS or (unidecode(i)!="" and unidecode(i) in VALID_CHARS)]
     while len(string)>0:
         if string[0] in PRE_REMOVE:
             string.pop(0)
@@ -147,7 +148,7 @@ def sanitize_uni_tag(string):
 def replace_brackets(string):
     string = string.lstrip('[').lstrip(']').lstrip('(').lstrip(')').lstrip('{').lstrip('}')
     string = list(unidecode(sanitize_uni(string)))
-    ret = [i for i in string if i in VALID_CHARS or i in CHAR_MAP]
+    ret = [i for i in string if i in VALID_CHARS]
     
     return ''.join(ret)
 
@@ -213,8 +214,8 @@ pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:
             }
 
 CHAR_MAP = {
-    "Λ":"A",
-    "λ": "A",
+    "Λ": 'A',
+    "λ": 'A',
     "ß": "B",
     "¢": "c",
     "Ξ": "E",
@@ -299,4 +300,9 @@ settings = {
     "graph": graph_map, 
     "style": style_map
 }
+
+if __name__ == "__main__":
+    i = "!A★A"
+    print(sanitize_uni(i))
+    
     
