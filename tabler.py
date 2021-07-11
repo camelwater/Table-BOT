@@ -116,14 +116,13 @@ class Table():
         
     def init_testing(self):
 
-        self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
-            'jaja LTA':0,'stupid@LATINAMERICA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
+        # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
+        #     'jaja LTA':0,'stupid@LTA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
         # self.players = {'x#1':0, 'awd':0, 'Ryan@X':0, '¢unt':0, 'stop man': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}
         # self.players = {'hello':0, 'stupid':0, 'VA':0, 'banned':0, '090':0, 'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'ABB':0}
         # self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'banned':0, 'barrel':0, 
         #         'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'where?':0}
-        # self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'hapless':0, 'barrel':0, 
-        #         'A-1':0, 'uwau?':0, "WWW.PH.COM":0, "λxe":0, 'A-2':0, 'λp fraud':0, 'WOW!!':0}
+        
         self.IGNORE_FCS = True
         self.split_teams('5', 4)
 
@@ -261,7 +260,7 @@ class Table():
                         return True,type_ask, "I am currently experiencing some issues with Wiimmfi. Try again later."
 
                 if "No match found!" in list(soup.stripped_strings):
-                    return True, type_ask, "The room hasn't finished at a race yet.\nRetry `?search` when the room has finished one race."
+                    return True, type_ask, "The room hasn't finished a race yet.\nRetry when the room has finished one race."
                 else:
                     self.find_players(room_url, soup)
                     self.split_teams(self.format, self.teams)

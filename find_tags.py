@@ -102,7 +102,7 @@ def check_other_overlaps(players, tag, all_tags, per_team):
                     else:
                         all_tags[tag].discard(p)
                         if len(all_tags[tag])<=per_team:
-                            return
+                            return                            
 
                 elif Utils.sanitize_uni(p.strip()).lower().endswith(Utils.sanitize_uni(comp_tag.strip()).lower()) \
                     and not Utils.sanitize_uni(p.strip()).lower().endswith(Utils.sanitize_uni(tag.strip()).lower()) \
@@ -113,6 +113,12 @@ def check_other_overlaps(players, tag, all_tags, per_team):
                         all_tags[tag].discard(p)
                         if len(all_tags[tag])<=per_team:
                             return
+                
+                elif len(comp_tag)>len(tag) and (Utils.sanitize_uni(comp_tag.strip()).lower().startswith(Utils.sanitize_uni(tag.strip()).lower())
+                                            or Utils.sanitize_uni(comp_tag.strip()).lower().endswith(Utils.sanitize_uni(tag.strip()).lower())):
+                    all_tags[tag].discard(p)
+                    # if len(all_tags[tag])<=per_team:
+                    #     return
 
     # for comp_tag, tag_p in all_tags.items():
     #     if comp_tag == tag:
@@ -196,7 +202,6 @@ def try_find_most_pre(players, tag, per_team, all_tags):
             all_tags[tag].discard(non_pre_players.pop(0))
 
 def handle_undetermined(teams, un_players, per_team):
-
     #substring tag for 2v2s check
     # if len(un_players)>0 and per_team==2:
     #     find_substring_tags(un_players, teams)
@@ -253,11 +258,13 @@ def assert_correct(teams, un_players, per_team, num_teams, num_teams_supposed):
     if num_teams!=num_teams_supposed and len(corrupt_tags)==0:
         return
 
-    while len(teams)>num_teams:
+    while len(teams)>num_teams and len(corrupt_tags)==0:
+        #print(teams)
         for i in teams.items():
-            print(teams)
             if len(i[1])!=per_team:
                 popped = teams.pop(i[0])
+                try: corrupt_tags.remove(i[0])
+                except: pass
                 try:
                     un_players.extend(popped)
                 except:
@@ -282,16 +289,14 @@ def select_tops(all_tags, per_team, num_teams, num_teams_supposed, teams, player
             #try_find_most_pre(tag_players, tag, per_team, all_tags)
             try_split_chunks(tag_players, tag, per_team, all_tags)
         if len(tag_players)>per_team:   
-            while len(tag_players)>per_team: #just randomly get rid of someone - either the format is wrong or the players tags are bad (and impossible to get completely correct)
+            while len(tag_players)>per_team: #just randomly get rid of someone - either the format is wrong or the players' tags are bad (and impossible to get completely correct)
                 tag_players.discard(rand.choice(list(tag_players)))
     
     for _ in range(num_teams_supposed):
-        for x in copy.deepcopy(all_tags).items():
-            for player in x[1]:
-                if player not in players:
-                    all_tags[x[0]].remove(player)
-            if len(all_tags[x[0]]) == 0:
-                all_tags.pop(x[0])
+        for x in all_tags.items():
+            all_tags[x[0]] = set([i for i in x[1] if i in players])
+        for x in list(all_tags.items())[::-1]:
+            if len(x[1])==0: all_tags.pop(x[0])
         if len(all_tags)==0:
             break
         all_tags = dict(sorted(all_tags.items(), key=lambda item: (len(item[1]), sort_tags(item[0],item[1], per_team)), reverse=True))
@@ -325,11 +330,11 @@ def clean_tags(teams):
         else:
             if isinstance(tag, tuple):
                 if not check_tag(tag[0], add_self=True):
-                    
                     new_tags.append((tag[0], ind))
                 else:
                     n_tag = tag[0]+'-'+str(tag[1])
                     new_tags.append((n_tag, ind))
+
     teams_copy = copy.deepcopy(teams)
     for nt, ind in new_tags:
         teams[nt] = teams.pop(list(teams_copy.keys())[ind])
@@ -354,7 +359,7 @@ def find_possible_tags(players):
                                 or i_tag[:temp_indx] == j_tag[::-1][:temp_indx][::-1]):
                     
                     #print(temp_indx, players[i], players[j])
-                    m_tag = Utils.sanitize_uni(orig_i)[:temp_indx]
+                    m_tag = Utils.sanitize_uni(orig_i)[:temp_indx].strip()
                     if len(m_tag) == 1: 
                         m_tag = m_tag.upper()
                     if m_tag[-1] == '-':
@@ -368,7 +373,7 @@ def find_possible_tags(players):
                                 or i_tag[::-1][:temp_indx][::-1] == j_tag[:temp_indx]):
                     
                     #print(temp_indx, players[i], players[j])
-                    m_tag = Utils.sanitize_uni(orig_i)[::-1][:temp_indx][::-1]
+                    m_tag = Utils.sanitize_uni(orig_i)[::-1][:temp_indx][::-1].strip()
                     if len(m_tag) == 1: 
                         m_tag = m_tag.upper()
                     if m_tag[-1] == '-':
@@ -379,7 +384,7 @@ def find_possible_tags(players):
                     
             
         for tag, tagged_players in tag_matches.items():
-            if not any(tagged_players.issubset(e) for e in all_tag_matches[tag]):
+            if not any(tagged_players.issubset(e) for e in all_tag_matches[tag]): #does this improve performance? probably not too great of an effect
                 all_tag_matches[tag].append(tagged_players) #adding possible permutation for this tag (has to be new)
     return all_tag_matches
 
@@ -389,13 +394,15 @@ def tag_algo(players, per_team, num_teams):
     all_tag_matches = find_possible_tags(players)
 
     for tag, perms in all_tag_matches.items():
-        to_remove = []
-        for p1 in range(len(perms)):
+        p1 = 0
+        while p1< len(perms):
             for p2 in range(len(perms)):
-                if p1!=p2 and perms[p2].issubset(perms[p1]):
-                    to_remove.append(p2)
-        for tr in to_remove:
-            all_tag_matches[tag].pop(tr)
+                if p1!=p2 and perms[p1].issubset(perms[p2]):
+                    perms.pop(p1)
+                    p1-=1
+                    break
+            p1+=1
+
     for i in all_tag_matches.items():
         all_tag_matches[i[0]] = i[1][0]
 
@@ -414,11 +421,43 @@ def tag_algo(players, per_team, num_teams):
 
 if __name__ == "__main__":
     import time
-    #players = list({'x#1':0, 'xxx':0, 'Ryan@X':0, '¢unt':0, 'coolio': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}.keys())
+    # players5 = list({'x#*********************ATSDUAJSDGHASDUYkajsdhalkjdh1':0, 'awasasdsdadsddasdsadd':0, 'Ryadadadadddanasdasd@X':0, '¢unasdklajsdkajsdhalkjsddsasdasdt':0, 'stop asd;liajds;aosdij;alskdj;alsdkasdasdman': 0, 'coolasdasd kasdlkajsd;laksjdasdsadid cool': 0, "GG EaslkdjahsldkjadshlkajsdhlaksjdahsdasdZ": 0, 'gas moasdalkdsja;lsdb':0, "gasseasdasddsasasdd up":0, "kaya kljaxdlasdkasjdhalksdjhkjyanar":0, "yaya kasdaasdljsdhaosduy98712sdanar":0, "ya123123313233asdASDASDka ranar":0}.keys())
+    # players6 = list({'helasasdndkzxdkzjxdnzddasdlo':0, 'stupasdasdasid':0, 'asdl;lajsdhalksdjhlaskdjhaoisudyoaisduVA':0, 'banvannnnansdasdnansdnsdnasdndansdansdasndned':0, '09a8sd79as8d7a9s8d7a9sd87a9sd90':0, 'heaqoiu1p2oiu12981y49yoiusdasdll&*':0, 'whaasdasldajdsh;akjdhlaksjdhladsdsasdasddaat?':0, "a;lsdkja;sldkja;dlkaj;daaslkdja;lsdkjasd;l ad92y?":0, "λxasdasdasd12131311231asddade":0, 'Aaasd;lkasjd;alskdj;alskdjsdasdasAA':0, 'λp fraasdaskdkhalksdasdasdadud':0, 'AasdlkajdlakdsjhlaksdBB':0}.keys())
+    # players7 = list({'he1273182376198237619283716932llo':0, 'heasdaklsdhalisduyaosidu123':0, 'borrowasalsdjhalsdkjalsdkjdasded time':0, 'bannasdasdaded':0, 'barasdasdrasda;klsdjakldsjhasd9o8yael':0, 
+    #             'hellas1o2y92yoiuasdasddlkjasdlkajdsl&*':0, 'whaskdjhadsklbccmzbnx,mzat?':0, "wasdasdasdlkahsdjho?":0, "λasdasdkjalshdlakshdo9yous&*^&(*&^(*^&%9aksjdhaasdlkasd9qweyasdxe":0, 'AAasldkjadslkjadkajhdslkajdhlaksjdhalsdkjhasdA':0, 'λpasdasdas asd;alisdha;lksdhlakdsfraud':0, 'whasd;laskdhasdkjhaosiduyas9od8as9d8yapsd9ere?':0}.keys())
+    # players8 = list({'helasdas1231y392y31o2dlo':0, 'stupasdaasdasddssdasid':0, 'asdl;lajsdhalksdjhlaskdjhaoisudyoaisduVA':0, 'banvannnnansdasdnansdnsdnasdndansdansdasndned':0, '09a8sd79as8d7a9s8d7a9sd87a9sd90':0, 'heaqoiu1p2oiu12981y49yoiusdasdll&*':0, 'whaasdasldajdsh;akjdhlaksjdhladsdsasdasddaat?':0, "whasdasdasdasdasdo?":0, "λxasdasdasdasddade":0, 'Aaasd;lkasjd;alskdj;alskdjsdasdasAA':0, 'λp fraasdahdsdo9oysdasdasdadud':0, 'AasdlkajdlakdsjhlaksdBB':0}.keys())
+                
+    # players4 = list({'pringleMVMMVMVMVMVMVMVMVMVMVMMVMV@MV':0,'5heaskdjhadslkajhdslakhdaiuyo876o876o8768asdadMV':0,'hellasjdhahksdjhalskdjhalsdkjhaldo LTA':0,'Lasdkjahdklajsdhaosd98odTAX':0,
+    #         'jaja Lasdkjhdslaiusdyoasudyoasyasdya0sddTA':0,'stupasldasldkj;sdkaj;sdalkdsj;asldkid@LTA':0,'poop asdlakjdshlakjdshadssdMV':0,'MVMVMasdklahdsldssaadVMV':0,'LTA Vvalksjlpvalkjalksuqwealpo':0,"5 guys mom's spaghet":0}.keys())
+    # players = list({'x#*(*&(&(*&(*&(*&akjsdhasd87asd6a8sd11':0, 'xxxXXXXXXXXXXXXXXXXXXXXXXXXXXXXX':0, 'Ryan@XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX':0, '¢unt':0, 'coolio': 0, 'cool kid cool': 0, "GG EZZZZZZZZZZZZZZZZZZZZZZZZZ": 0, 'gas masdasadsadadsaob':0, "gassessssssssssssssssssd up":0, "kayajksdhasuoday9y098709a yanar":0, "yaya kasmasklaslkadsljladskjldsanar":0, "yaka kakaakakakdskdskasdadsjdsakranar":0}.keys())
+    # players2 = ['heaslkjdaskjdhlaksjdahdsllo', 'hasd.kjadshaliskdjho876e123', 'borrowed timasd;laasdllndlksdhaposdu98q2ee', 'WAasd.kjadshiaosda8dsX', 'basdkjahdlkajdsyao8ds7yarrel', 
+    #             'A-asdlkadslkajdhlakjsdh1', 'whasdoqiouewiuy12o13y4183476184716894124at?', "WWW.Pasdalj;lsdhaldksjhlkaH.COM", "λxeasdlkahdsalsda98", 'Aasdlkaskldjahsd9a8y-2', 'λp frasdjlhalkdsjsasdlaksjdhadsd90ayaud', 'WOwowowowowowowowowowoowowowowowowW!!']
+    # players3 = ['λρ ToOOOOOOOOOOOOOOoooooooooooom', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA*', 'v¢ bvbvbvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbvbvbvbvsauzule', 'sahasdjasdkjadshlkajsdhlakdsarave', 'MasdkjjdslakjdshlaksdjhKW 4Beans', 'cadasdasldhadjh9y01984y1944144avreMK', 'cocia;lskdhklajsdhasdo9y loko', 'Casdkjadhlajdasdasdhlkdsho9shap9sd8y', 'So[akjsdhakljdshaoisduyads8yLLLLLL]', 'Zjazasda,smdnadsasdasdca', 'Z- stavrosaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa']
+    # players+=players2+players4+players5+players6+players7+players8
+    # players+=players3
+    # seen = []
+    # lengths = []
+    # for ind,i in enumerate(players):
+    #     if i not in seen:
+    #         seen.append(i)
+    #         lengths.append(len(i))
+    #     else:
+    #         temp = i
+    #         a =1
+    #         while temp not in seen:
+    #             temp = f'{i}-{a}'
+    #         seen.append(temp)
+    #         players[ind] = temp
+    #         lengths.append(len(i))
+    #
+    ### ^^^^^ PERFORMANCE TESTING^^^^^ ###
+
+    # players = list({'x#1':0, 'xxx':0, 'Ryan@X':0, '¢ant':0, 'coolio': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}.keys())
     # players = ['hello', 'he123', 'borrowed time', 'WAX', 'barrel', 
     #             'A-1', 'what?', "WWW.PH.COM", "λxe", 'A-2', 'λp fraud', 'WOW!!']
-    players = ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros']
-   
+    # players = ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros']
+    players = ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', 'A*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA h', 'USA K', 'ABBA']
     tick = time.time()
     print(tag_algo(players, per_team=2, num_teams=6))
     print("done: ", time.time()-tick)
+    # print('avg length:', sum(lengths)/len(lengths))

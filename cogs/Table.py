@@ -78,7 +78,7 @@ class Table_cog(commands.Cog):
             if ask=='reset':
                 self.bot.table_instances.pop(ctx.message.channel.id)
             await wait_mes.delete()
-            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message, usage)
+            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message)
             return
         if ask=="confirm":
             self.bot.table_instances[ctx.channel.id].confirm_room = True
@@ -160,7 +160,7 @@ class Table_cog(commands.Cog):
             if isinstance(i, str) and "gps=" in i:
                 gps = args.pop(args.index(i))[4:]
                 if not gps.isnumeric() or int(gps)<1:
-                    await self.sent_temp_messages(ctx, "Invalid number of gps. <gps> must a positive non-zero number.")
+                    await self.sent_temp_messages(ctx, "Invalid number of gps. <gps> must a positive non-zero number.", usage)
                 break
 
         if sui!=None:
@@ -181,7 +181,7 @@ class Table_cog(commands.Cog):
             return
             
         self.bot.table_instances[ctx.channel.id].searching_room = True   
-        await self.send_messages(ctx, "Provide a room id (rxx) or mii name(s) in the room.", "Make sure the room has finished at least one race.", "\nUsage: `?search <rxx or mii> <rxx or mii names(s)>`")
+        await self.send_messages(ctx, "Provide a room id (rxx) or mii name(s) in the room. Make sure the room has finished at least one race.", "\nUsage: `?search <rxx or mii> <rxx or mii names(s)>`")
     
     #?search   
     @commands.command(aliases=['sr'])  
