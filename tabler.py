@@ -1000,11 +1000,11 @@ class Table():
         if not isFFA(self.format):
             ret+="\n"
             for tag, placements in tag_places.items():
-                ret+="{} -".format(tag)
+                ret+="**{}** -".format(tag)
                 for p in placements:
                     ret+=' {}{}'.format(p, '' if p==placements[-1] else ',')
-                ret+=" ({} pts)".format(sum([pts_map[count][i-1] for i in placements]))
-                ret+="{}".format("" if tag==list(tag_places.items())[-1][0] else "   |   ")
+                ret+=" (**{}** pts)".format(sum([pts_map[count][i-1] for i in placements]))
+                ret+="{}".format("" if tag==list(tag_places.items())[-1][0] else "   **|**   ")
         return False,ret
     
     def change_tag(self,player, tag, restore_indx = None,reundo=False):
@@ -1423,9 +1423,13 @@ class Table():
             except:
                 return "Invalid team number `{}`.".format(team)
         try:
-            assert(team in self.tags.keys())
+            lowered_tags = list(map(lambda l: l.strip().lower(), self.tags.keys()))
+            assert(team in lowered_tags)
+            team = list(self.tags.keys())[lowered_tags.index(team)]
         except:
-            return "Invalid team name `{}`. Team names are case-sensitive.".format(team)
+            valid_teams = ", ".join(list(map(lambda l: f'`{l}`', self.tags.keys())))
+            return "Invalid team name `{}`. Valid teams: {}.".format(team, valid_teams)
+        
         if pen[0] == '=':
             pen = int(pen.lstrip('=').lstrip('-'))
             self.team_pens[team] = pen
@@ -1460,9 +1464,13 @@ class Table():
             except:
                 return "Invalid team number `{}`.".format(team)
         try:
-            assert(team in self.tags.keys())
+            lowered_tags = list(map(lambda l: l.strip().lower(), self.tags.keys()))
+            assert(team in lowered_tags)
+            team = list(self.tags.keys())[lowered_tags.index(team)]
         except:
-            return "Invalid team name `{}`. Team names are case-sensitive.".format(team)
+            valid_teams = ", ".join(list(map(lambda l: f'`{l}`', self.tags.keys())))
+            return "Invalid team name `{}`. Valid teams: {}.".format(team, valid_teams)
+            
         if team not in self.team_pens:
             return "Team `{}` doesn't have any penalties.".format(team)
         else:

@@ -19,7 +19,7 @@ class Settings(commands.Cog):
     @commands.group(invoke_without_command=True, aliases=['px'])
     @commands.has_guild_permissions(manage_guild=True)
     async def prefix(self, ctx):
-        await ctx.send("```Usage:\n?prefix add <prefix>\n?prefix remove <prefix>\n?prefix set <prefix>```")
+        await ctx.send("```Usage:\n?prefix add <prefix>\n?prefix remove <prefix>\n?prefix set <prefix>\n?prefix reset```")
     
     @prefix.command(aliases=['+'])
     @commands.has_guild_permissions(manage_guild=True)
@@ -52,6 +52,12 @@ class Settings(commands.Cog):
         mes = self.bot.set_prefix(ctx.guild.id, prefix)
         await ctx.send(mes)
     
+    @prefix.command(name='reset')
+    @commands.has_guild_permissions(manage_guild=True)
+    async def _reset(self, ctx):
+        mes = self.bot.reset_prefix(ctx.guild.id)
+        await ctx.send(mes)
+    
     @commands.command(aliases=['sets'])
     @commands.guild_only()
     async def settings(self, ctx, mes=True):
@@ -62,7 +68,7 @@ class Settings(commands.Cog):
             try:
                 set = set['type']
             except:
-                pass
+                set = ''
             out+="\n.{}{}- {}".format(name, " "*(spaces-len(name)), set)
         
         if mes:
@@ -77,6 +83,10 @@ class Settings(commands.Cog):
         if settingType is None:
             await ctx.send("Usage: `?set <settingName> <setting>`\nSee `?settings` for a list of available settingNames.")
             return
+        
+        if settingType.lower() in ['reset', 'clear']:
+            mes = self.bot.reset_settings(ctx.guild.id)
+            return await ctx.send(mes)
         
         if not get_avail_settings(settingType):
             return await ctx.send("Invalid setting `{}`. Here is a list of customizable settings:\n{}".format(settingType, await self.settings(ctx, mes=False)))

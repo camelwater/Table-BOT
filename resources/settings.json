@@ -1,9 +1,6 @@
 {
     "775253594848886785": {
-        "style": {
-            "table": "default",
-            "type": "Default Style"
-        },
+        "style": null,
         "graph": {
             "table": "none",
             "type": "None"

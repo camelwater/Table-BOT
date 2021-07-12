@@ -16,8 +16,6 @@ import traceback as tb
 from itertools import cycle
 from datetime import datetime, timedelta
 
-#sys.path.append('C:\\Users\\ryanz\\Anaconda3\\Lib\\site-packages')
-
 load_dotenv()
 KEY = os.getenv('KEY')
 LOG_LOC = 'logs/logs.txt'
@@ -54,7 +52,7 @@ def callable_prefix(bot, msg, mention=True):
     base = []
     default = ['?', '^']
     if msg.guild is None:
-        base.extend(default)
+        base = default
     else:
         base.extend(bot.prefixes.get(str(msg.guild.id), default))
     if mention:
@@ -129,12 +127,6 @@ class TableBOT(commands.Bot):
     #remove inactive table instances (inactivity == 30+ minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):
-        # inactive = []
-        # for channel, instance in self.table_instances.items():
-        #     if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes = 30):
-        #         inactive.append(channel)
-        # for i in inactive:
-        #     self.table_instances.pop(i)
         self.table_instances = {channel: instance for (channel, instance) in self.table_instances.items() if 
                                 instance.last_command_sent is None or datetime.now() - instance.last_command_sent <= timedelta(minutes=30)}
 
@@ -175,7 +167,7 @@ class TableBOT(commands.Bot):
         prefixes = self.prefixes.get(guild, [])
         prefixes.append(prefix)
         self.prefixes[guild] = prefixes
-        self.write_prefix_json()
+        self.update_prefix_json()
         
         return f"`{prefix}` has been registered as a prefix."
     
@@ -187,7 +179,7 @@ class TableBOT(commands.Bot):
 
         try:
             self.prefixes[guild].remove(prefix)
-            self.write_prefix_json()
+            self.update_prefix_json()
 
             return f"Prefix `{prefix}` has been removed." + ' Use the bot mention as a prefix.' if len(self.prefixes[guild])==0 else ""
         except KeyError:
@@ -195,21 +187,27 @@ class TableBOT(commands.Bot):
         except:
             return f"`{prefix}` is not a registered prefix."
         
-    
     def set_prefix(self, guild, prefix):
         guild = str(guild)
         if not prefix:
             self.prefixes[guild] = []
-            self.write_prefix_json()
+            self.update_prefix_json()
             return "All custom prefixes have been removed. Use the bot mention as a prefix."
         
         if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
             return "The bot mention is a default prefix and cannot be set as a custom prefix."
         
         self.prefixes[guild] = [prefix]
-        self.write_prefix_json()
+        self.update_prefix_json()
 
         return f"`{prefix}` has been set as the prefix."
+    
+    def reset_prefix(self, guild):
+        guild = str(guild)
+        self.prefixes.pop(guild)
+        self.update_prefix_json()
+
+        return "Custom prefixes have been reset to default."
 
     def get_guild_settings(self, guild):
         guild = str(guild)
@@ -217,8 +215,16 @@ class TableBOT(commands.Bot):
       
         if self.settings.get(guild) is None:
             self.settings[guild] = default
-            self.write_settings_json()
+            self.update_settings_json()
+            return default
         return self.settings.get(guild, default)
+    
+    def reset_settings(self, guild):
+        guild = str(guild)
+        self.settings.pop(guild)
+        self.update_settings_json()
+
+        return "Server settings have been reset to defaults."
     
     def set_setting(self, guild, setting, default):
         guild = str(guild)
@@ -227,7 +233,7 @@ class TableBOT(commands.Bot):
                 self.settings.get(guild, {}).pop(setting)
             except:
                 pass
-            self.write_settings_json()
+            self.update_settings_json()
             return f"`{setting}` setting restored to default."
         
         try:
@@ -236,24 +242,25 @@ class TableBOT(commands.Bot):
             self.settings[guild] = {}
             self.settings[guild][setting] = default
         
-        self.write_settings_json()
+        self.update_settings_json()
         return "`{}` setting set as `{}`.".format(setting, default.get('type') if setting in ['graph', 'style'] else default)
     
     def get_setting(self, type, guild, raw = False):
         guild = str(guild)
+        default = {'style': None, 'graph': None}
         if type in ['graph', 'style']:
             if raw:
-                return self.settings.get(guild, {'style': None, 'graph': None}).get(type)
-            return self.settings.get(guild, {'style': None, 'graph': None}).get(type).get('type')
+                return self.settings.get(guild, default).get(type)
+            return self.settings.get(guild, default).get(type).get('type')
         else:
             pass
             #for other settings to be added in the future
 
-    def write_prefix_json(self):
+    def update_prefix_json(self):
         with open("resources/prefixes.json", 'w') as p:
             json.dump(self.prefixes, p, ensure_ascii=True, indent=4)
     
-    def write_settings_json(self):
+    def update_settings_json(self):
         with open("resources/settings.json", 'w') as s:
             json.dump(self.settings, s, ensure_ascii=True, indent=4)
     

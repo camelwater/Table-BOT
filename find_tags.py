@@ -456,8 +456,9 @@ if __name__ == "__main__":
     # players = ['hello', 'he123', 'borrowed time', 'WAX', 'barrel', 
     #             'A-1', 'what?', "WWW.PH.COM", "λxe", 'A-2', 'λp fraud', 'WOW!!']
     # players = ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros']
-    players = ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', 'A*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA h', 'USA K', 'ABBA']
+    #players = ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', 'A*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA h', 'USA K', 'ABBA']
+    players = ['S Quinn', 'N frozen', 'N Shawn', 'N Kasper', 'S Jake', 'S bobby', 'N Maq', 'S Sane', 'S Hawk', 'N Edison']
     tick = time.time()
-    print(tag_algo(players, per_team=2, num_teams=6))
+    print(tag_algo(players, per_team=5, num_teams=2))
     print("done: ", time.time()-tick)
     # print('avg length:', sum(lengths)/len(lengths))
