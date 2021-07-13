@@ -25,7 +25,9 @@ from Utils import isFFA, warning_map, dc_map, style_map, pts_map
 from Utils import graph_map as gm
 graph_map = copy.deepcopy(gm)
 
-#NOTE: consider changing players into Player objects, also maybe start using /room/ JSON (race_phase begin==13, end == 19) - main benefit start table before race 1
+# NOTE: consider changing players into Player objects, also maybe start using /room/ JSON 
+# - main benefit is ability to start table before race 1. must be in lobby though, and probably after lobby is full (otherwise teams would be wrong)
+# unless only calculate teams when the race_mode/race_phase changes (match has started so room players are correct)
 class Table():
     def __init__(self, ctx = None, bot = None, testing = False):
         self.TESTING = testing
@@ -36,7 +38,7 @@ class Table():
         self.URL = "https://wiimmfi.de/stats/mkwx"
         self.ROOM_URL = "https://wiimmfi.de/stats/mkwx/list/{}"
         self.current_url = ""
-        self.last_race_update = None
+        self.last_race_update = None #timestamp of last auto-update table
         
         self.modifications = [] #keep track of all user modifications to the table
         self.undos = [] #keep track of all user undos of modifications to the table
@@ -48,15 +50,15 @@ class Table():
         self.pens = {} # mapping players to penalties
         self.team_pens = {} #mapping penalties to teams
         self.fcs = {} #map fcs to mii name (so no conflicts with mii names - uniqueness)
-        self.display_names = {}
+        self.display_names = {} #provides corresponding mii name of given FC
         self.player_ids = {} #used to map player ids to players (player id from bot)
         self.all_players = [] #list of every player who has been in the room
-        self.sub_names = {}
-        self.subs = {}
+        self.sub_names = {} #players who are subbed in (used to convert their names on tables)
+        self.subs = {} #players who are subbed
         self.deleted_players = [] #players who have been removed from table through ?changename
        
         self.warnings = defaultdict(list) #race: list of warnings
-        self.manual_warnings = defaultdict(list)
+        self.manual_warnings = defaultdict(list) #warnings of manual changes to the table
 
         self.dc_list = defaultdict(list) # race: list of player dcs (?dcs)
         self.tracks = [] #track list
@@ -66,8 +68,8 @@ class Table():
         self.dc_pts = {} #player: number of races to award +3 DC points 
         self.dc_list_ids = {} #mapping dcs to an id (used for the command ?dcs)
         
-        self.removed_races = {}
-        self.removed_warn_dcs = {}
+        self.removed_races = {} #races removed with ?removerace (for restoring from ?undo)
+        self.removed_warn_dcs = {} #for restoring when ?removerace undone
         
         self.room_sizes = [] #list of room sizes for different gps (check if room size increases mid-gp, to send warning message - ?changeroomsize might be necessary)
         self.room_players = [] #list of list of players at beginning of GP (check if room changes mid-gp, send warning)
@@ -79,15 +81,15 @@ class Table():
                    
         self.tags = {} #list of team tags and their respective players
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
-        self.graph = None
-        self.style = None
+        self.graph = None #table picture graph
+        self.style = None #table picture theme/style
         self.table_img = None
-        self.table_link = '' #image png link
-        self.sui = False 
+        self.table_link = '' #gb.hlorenzi image URI link
+        self.sui = False #whether should ignore large finish times or not
         
         self.prev_rxxs = [] # for rooms that have been merged
-        self.prev_elems = []
-        self.current_elems = []
+        self.prev_elems = [] #prev elems of rooms before merge
+        self.current_elems = [] #elem list of current room
         
         self.format = "" #format (FFA, 2v2, etc.)
         self.teams = 0 #number of teams
@@ -126,30 +128,35 @@ class Table():
         self.IGNORE_FCS = True
         self.split_teams('5', 4)
 
-    async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple:
+    async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple[bool, str, str]:
         """
         find mkwx room using either rxx or mii name search
         """
         if merge:
             
-            if rid == None:
-                rxxs = {}
-                data= await self.fetch(self.URL)
+            if rid is None:
+                rxxs = defaultdict(int)
+                data = await self.fetch_mkwx_JSON(self.URL)
                 if isinstance(data, str) and 'error' in data:
                     if 'response' in data:
                         return True, "Wiimmfi appears to be down. Try again later."
                     else:
                         return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
-                    
-                miis = data.find_all('span', {'class': 'mii-font'})
-                for m in mii:
-                    for comp in miis:
-                        if comp.text.lower()==m.lower():
-                            rxx = comp.findPrevious('tr', {'id':True})['id']
-                            try:
-                                rxxs[rxx]+=1
-                            except:
-                                rxxs[rxx] = 1
+                
+                data = data[1:-1]
+                if len(data)<1:
+                    return "I am currently experiencing some issues with Wiimmfi's API. Try again later."
+                
+                for room in data:
+                    room_rxx = room.get("room_id")
+                    room_players = []
+                    for player in room.get("members", []):
+                        miiName = player.get('name')[0][0]
+                        if miiName == "no name": miiName = "Player"
+                        room_players.append(miiName)
+                    if set(map(lambda l: l.strip().lower(),mii)).issubset(room_players):
+                        rxxs[room_rxx]+=1
+        
                 if len(rxxs)==0:
                     return True, "`{}` {} not found in any rooms.\nMake sure all mii names are correct.".format(mii, "were" if len(mii)>1 else "was")
                 if len(rxxs)>1:
@@ -159,7 +166,7 @@ class Table():
                     if len(rxx)>1:
                         return True, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(lambda l: f"`{l}`",mii)), "were" if len(mii)>1 else "was", rxx)
                
-                rxx = max(rxxs, key=rxxs.get) 
+                rxx = 'r'+ str(max(rxxs, key=rxxs.get))
                 if rxx==self.rxx or rxx in self.prev_rxxs:
                     return True, "This room is already part of this table. Merge cancelled."
                 
@@ -220,24 +227,29 @@ class Table():
                 return False, "Rooms have successfully merged. Now watching room {}. {} races played.".format(self.rxx,len(self.races)+len(new_elems))
         else:
             type_ask = "none"
-            if rid == None: #mii names search
-                rxxs = {}
-                data = await self.fetch(self.URL)
+            if rid is None: #mii names search
+                rxxs = defaultdict(int)
+                data = await self.fetch_mkwx_JSON(self.URL)
                 if isinstance(data, str) and 'error' in data:
                     if 'response' in data:
                         return True, type_ask,"Wiimmfi appears to be down. Try again later."
                     else:
                         return True, type_ask,"I am currently experiencing some issues with Wiimmfi. Try again later."
-                
-                miis = data.find_all('span',{"class" : "mii-font"})
-                for m in mii:
-                    for comp in miis:
-                        if comp.text.lower()==m.lower():
-                            rxx = comp.findPrevious('tr', {"id":True})['id']
-                            try:
-                                rxxs[rxx]+=1
-                            except:
-                                rxxs[rxx] = 1
+           
+                data = data[1:-1]
+                if len(data)<1:
+                    return "I am currently experiencing some issues with Wiimmfi's API. Try again later."
+
+                for room in data:
+                    room_rxx = room.get("room_id")
+                    room_players = []
+                    for player in room.get("members", []):
+                        miiName = player.get('name')[0][0]
+                        if miiName == "no name": miiName = "Player"
+                        room_players.append(miiName.lower().strip())
+                   
+                    if set(map(lambda l: l.strip().lower(),mii)).issubset(room_players):
+                        rxxs[room_rxx]+=1
                
                 if len(rxxs)==0:
                     return True, type_ask, "{} {} not found in any rooms.\nMake sure all mii names are correct.".format(', '.join(map(str, mii)), "were" if len(mii)>1 else "was")
@@ -248,7 +260,7 @@ class Table():
                     if len(rxx)>1:
                         return True, type_ask, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(str, mii)), "were" if len(mii)>1 else "was", ', '.join(map(str,rxx)))
                
-                rxx = max(rxxs, key=rxxs.get) 
+                rxx = 'r' + str(max(rxxs, key=rxxs.get))
                 self.rxx = rxx
     
                 room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(self.rxx)
@@ -339,12 +351,11 @@ class Table():
                                     string+="\n\t{}. {}".format(counter,Utils.dis_clean(self.display_names[p]))
                                     self.player_ids[str(counter)] = p
                                     counter+=1
-                    #string = string.replace("no name", "Player")
                     self.player_list = string
                     return False, type_ask, "Room {} found.\n{}\n\n**Is this room correct?** (`?yes` / `?no`)".format(self.rxx, string)
     
     
-    def split_teams(self, f, num_teams): #TEST: more testing for new tag algorithm
+    def split_teams(self, f, num_teams): #TEST: need more testing for new tag algorithm
         """
         split players into teams based on tags
         """
@@ -421,7 +432,6 @@ class Table():
                 post_players.append(player_copy.pop(i))
                 continue
             x = 1
-            #print(temp_tag, matches)
             while temp_tag in teams:
                 temp_tag = tag.rstrip() +"-"+str(x)
                 x+=1
@@ -458,17 +468,8 @@ class Table():
                         i = 0
                         cont = True
                         break
-                # while indx>0:
-                #     indx-=1
-                #     for tag, _list in teams.items():
-                #         if len(_list)<per_team and Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']',''))[::-1][:indx][::-1] == Utils.sanitize_uni(tag.lower().strip().replace("[","").replace(']','')):
-                #             teams[tag].append(post_players.pop(i))
-                #             i = 0
-                #             cont = True
-                #             break
                 if cont:
                     continue
-
 
             #suffix and prefix (together) check
             temp_tag = ''
@@ -781,17 +782,26 @@ class Table():
             for warning in i[1]:
                 ret+="       \t- {}\n".format(self.warn_to_str(warning) if isinstance(warning, dict) else warning)
                 
-        if len(ret)>2048: #potentially look to implement system for overflowing warnings (either page or separate message/command)
+        if len(ret)>2048: #potentially look to implement system for overflowing warnings (either pages or separate message/file or command)
             return ret[:2048]
         
         return ret
     
+    def check_num_teams(self):
+        if len(self.tags)!=self.teams:
+            self.set_teams(len(self.tags))
+
     def set_teams(self, teams):
+        global graph_map
+
         self.teams = teams
         if self.teams!=2 and 3 in graph_map:
             graph_map.pop(3)
             if self.graph and self.graph.get('table') == 'diff':
+                self.default_graph = copy.deepcopy(self.graph)
                 self.graph = None
+        elif self.teams==2 and 3 not in graph_map:
+            graph_map[3] = copy.copy(gm[3])
 
     def style_options(self):
         ret = 'Table style options:'
@@ -1579,20 +1589,23 @@ class Table():
         self.fcs[player] = fc
         self.display_names[fc] = player
         print(self.num_players)
-        if len(self.players)-1<self.num_players: #FIXME: need to fill in GP 2 if player wasn't in GP 2 either (only filling missing GP 1)
-            for warn_item in enumerate(self.warnings[1]):
-                if warn_item[1].get('type') == "missing":
-                    #print(ind,i)
-                    self.dc_list[1].append({'type': 'dc_before', 'race':1, 'player': fc, 'gp': 1})
-                    self.warnings[1].append({'type': 'dc_before','race': 1, 'player': fc, 'gp': 1})
-                    self.dc_ids_append(fc, 1)
-                    if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
-                    self.gp_dcs[self.gp].append(fc)
-                    if len(self.players)==self.num_players:
-                        self.warnings[1].pop(warn_item[0])
-                    
-                    if not isFFA(self.format): self.find_tag(player, fc)
-                    return 'not sub'
+        if len(self.players)-1<self.num_players: #TEST: test if new missing players DC filling working (for multiple GPS: 1 + 2)
+            warn_replaced = False
+            for gp in range(0, self.gp):
+                for warn_item in enumerate(self.warnings[gp*4+1]):
+                    if warn_item[1].get('type') == "missing":
+                        #print(ind,i)
+                        self.dc_list[gp*4+1].append({'type': 'dc_before', 'race':1, 'player': fc, 'gp': gp+1})
+                        self.warnings[gp*4+1].append({'type': 'dc_before','race': 1, 'player': fc, 'gp': gp+1})
+                        self.dc_ids_append(fc, gp*4+1)
+                        if gp not in self.gp_dcs: self.gp_dcs[gp] = []
+                        self.gp_dcs[gp].append(fc)
+                        if len(self.players)==self.num_players:
+                            self.warnings[gp*4+1].pop(warn_item[0])
+                        warn_replaced = True
+            if warn_replaced:           
+                if not isFFA(self.format): self.find_tag(player, fc)
+                return 'not sub'
         
         if not isFFA(self.format):
             if "SUBS" not in self.tags:
@@ -1603,7 +1616,7 @@ class Table():
     def find_tag(self, player, fc):
         per_team = int(self.format[0])
 
-        #if only one spot left to be filled
+        #only one spot left to be filled
         if len(self.players)==self.num_players:
             for tag in self.tags.items():
                 if len(tag[1])<per_team:
@@ -1611,10 +1624,10 @@ class Table():
                     self.all_players[tag[0]].append(fc)
                     return
 
-        #prefix matching
+        #prefix tag matching
         match = ["", 0]
         for tag in self.tags.keys():
-            if player.find(tag)==0 and len(self.tags[tag]<per_team):
+            if Utils.sanitize_uni(player.strip()).lower().find(Utils.sanitize_uni(tag).lower())==0 and len(self.tags[tag]<per_team):
                 if len(tag)>match[1]:
                     match = [tag, len(tag)]
         if match[1]>0:
@@ -1622,10 +1635,10 @@ class Table():
             self.all_players[match[0]].append(fc)
             return
 
-        #suffix matching
+        #suffix tag matching
         match = ["", 0]
         for tag in self.tags.keys():
-            if player[::-1].find(tag[::-1])==0 and len(self.tags[tag]<per_team):
+            if Utils.sanitize_uni(player[::-1].strip()).lower().find(Utils.sanitize_uni(tag[::-1]).lower())==0 and len(self.tags[tag]<per_team):
                 if len(tag)>match[1]:
                     match = [tag, len(tag)]
         if match[1]>0:
@@ -1637,7 +1650,7 @@ class Table():
         if per_team==2:
             match = ["", 0]
             for tag in self.tags.keys():
-                lcs = Utils.LCS(player, tag)
+                lcs = Utils.LCS(Utils.sanitize_uni(player.strip()).lower(), Utils.sanitize_uni(tag).lower())
                 if len(lcs)>1 and lcs==tag and len(self.tags[tag]<per_team):
                     if len(lcs)>match[1]:
                         match = [lcs, len(lcs)]
@@ -1654,8 +1667,10 @@ class Table():
                 return
 
         #all tags were full, so create new tag
-        self.tags[player[0]] = [fc]
-        self.all_players[player[0]] = [fc]
+        new_tag = self.check_tags(Utils.replace_brackets(player)[0])
+        self.tags[new_tag] = [fc]
+        self.all_players[new_tag] = [fc]
+
     def get_subs(self):
         ret = 'Room subs:\n'
         if len(self.sub_names)==0:
@@ -2128,7 +2143,7 @@ class Table():
         
         return error, mes
 
-    def un_merge_room(self, merge_num): #TEST: test if updated un_merge works 
+    def un_merge_room(self, merge_num): #TEST: test if updated un_merge works properly
         self.restore_merged = (self.races, self.tracks, self.finish_times, copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), self.dc_list_ids, copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings))
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  
@@ -2283,7 +2298,6 @@ class Table():
         
         await self.update_table(recalc=True, reference_warnings = reference_warnings)
         
-    
     def change_gps(self,gps): 
         for player in list(self.players.keys()):
             self.players[player][1]+=[0]*(gps-self.gps)
@@ -2295,10 +2309,19 @@ class Table():
             except:
                 pass
           
-        
-    async def check_updated(self):
-        if self.last_race_update !=None and datetime.datetime.now() - self.last_race_update < datetime.timedelta(seconds=45): return False
+    async def room_is_updated(self):
+        if self.last_race_update is not None and datetime.datetime.now() - self.last_race_update < datetime.timedelta(seconds=45): return False
         soup = await self.fetch(self.current_url)
+        #TODO: JSON fetch for /room after first /list check (less load on wiimmfi apparently)
+        # cur_race = await self.fetch(self.current_url.replace('/list/', '/room/'))
+        # if isinstance(cur_race, str and "error") and 'error' in cur_race:
+        #     print("Wiimmfi error.")
+        #     return False
+        # check race_phase here == 19(end) or == 13(begin - in case missed when phase == 19) 
+        # *** (11 & 12 i think is in lobby (voting + waiting) - could use instead of 13, also maybe race_mode == 1 means waiting in room lobby? - between gps/globe)
+        # + need to keep track if race_phase check already passed so won't update table multiple times for one update
+        # so need to reset the rase_phase counter and continue the check
+
         if isinstance(soup, str) and 'error' in soup:
             print("Wiimmfi error.")
             return False
@@ -2314,36 +2337,37 @@ class Table():
     
     @tasks.loop(seconds=5)
     async def check_mkwx_update(self): 
-        cur_iter = self.check_mkwx_update.current_loop
-        if cur_iter!=0 and cur_iter%50==0:
-            print("Mkwx check {}.".format(cur_iter))
+        # cur_iter = self.check_mkwx_update.current_loop
+        # if cur_iter!=0 and cur_iter%50==0:
+        #     print("Mkwx check {}.".format(cur_iter))
             
-        if await self.check_updated():
-            self.bot.command_stats['picture_generated']+=1
-            self.picture_running = True
-            self.last_command_sent = datetime.datetime.now()
-            detect_mes = await self.ctx.send("Detected race finish.")
-            wait_mes = await self.ctx.send("Updating scores...")
-            mes = await self.update_table(auto=True)
-            await wait_mes.edit(content=mes)
-            pic_mes = await self.ctx.send("Fetching table picture...")
-            img = await self.get_table_img()
-            
-            f=discord.File(fp=img, filename='table.png')
-            em = discord.Embed(title=self.tag_str(), color=0x00ff6f)
-            
-            value_field = "[Edit this table on gb.hlorenzi.com]("+self.table_link+")"
-            em.add_field(name='\u200b', value= value_field, inline=False)
-            em.set_image(url='attachment://table.png')
-            em.set_footer(text = self.get_warnings())
-            
-            await pic_mes.delete()
-            await self.ctx.send(embed=em, file=f)
-            await detect_mes.delete()
+        if not await self.room_is_updated(): return
 
-            self.picture_running=False
-            
-        if len(self.races)>=self.gps*4 or (self.last_race_update!=None and datetime.datetime.now()-self.last_race_update>datetime.timedelta(minutes=30)):
+        self.bot.command_stats['picture_generated']+=1
+        self.picture_running = True
+        self.last_command_sent = datetime.datetime.now()
+        detect_mes = await self.ctx.send("Detected race finish.")
+        wait_mes = await self.ctx.send("Updating scores...")
+        mes = await self.update_table(auto=True)
+        await wait_mes.edit(content=mes)
+        pic_mes = await self.ctx.send("Fetching table picture...")
+        img = await self.get_table_img()
+        
+        f=discord.File(fp=img, filename='table.png')
+        em = discord.Embed(title=self.tag_str(), color=0x00ff6f)
+        
+        value_field = "[Edit this table on gb.hlorenzi.com]("+self.table_link+")"
+        em.add_field(name='\u200b', value= value_field, inline=False)
+        em.set_image(url='attachment://table.png')
+        em.set_footer(text = self.get_warnings())
+        
+        await pic_mes.delete()
+        await self.ctx.send(embed=em, file=f)
+        await detect_mes.delete()
+
+        self.picture_running=False
+        
+        if len(self.races)>=self.gps*4 or (self.last_race_update is not None and datetime.datetime.now()-self.last_race_update>datetime.timedelta(minutes=30)):
             self.check_mkwx_update.stop()
             
 
@@ -3074,13 +3098,44 @@ class Table():
                     return 'timeout error'
 
             else:
-                async with session.get(url, headers=headers) as response:
-                    return await response.text()
+                try:
+                    async with session.get(url, timeout=timeout, headers=headers) as response:
+                        if response.status!=200:
+                            return 'response error'
+                        resp = await response.text()
+                        soup = BeautifulSoup(resp, 'html.parser')
+                        return soup
+                except:
+                    return 'timeout error'
+
+    async def fetch_mkwx_JSON(self, url, headers=None):
+        url+="?m=json"
+        timeout = aiohttp.ClientTimeout(total=15)
+        async with aiohttp.ClientSession() as session:
+            if headers == None:
+                try:
+                    async with session.get(url, timeout=timeout) as response:
+                        if response.status!=200:
+                            return 'response error'
+                        resp = await response.json()
+                        return resp
+                except:
+                    return 'timeout error'
+
+            else:
+                try:
+                    async with session.get(url, timeout=timeout, headers=headers) as response:
+                        if response.status!=200:
+                            return 'response error'
+                        resp = await response.json()
+                        return resp
+                except:
+                    return 'timeout error'
         
     
 if __name__ == "__main__":
     import urllib3
     http = urllib3.PoolManager()
-    page = http.request('GET', "www.wiimmfi.de/stats/mkwx/list/r3120806")
+    page = http.request('GET', "www.wiimmfi.de/stats/mkwx/list/{}")
     soup = BeautifulSoup(page.data, "html.parser")
     

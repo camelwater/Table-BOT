@@ -122,11 +122,7 @@ from unidecode import unidecode
 
 def sanitize_uni(string):
     '''
-    convert known/common un-unidecodable strings to unicode, then strip all non-
-
-    Returns
-    -------
-    string with no CJK and non-unicode characters
+    convert known/common un-unidecodable strings to unicode and clean string for tag-matching
 
     '''
     
@@ -135,10 +131,11 @@ def sanitize_uni(string):
     ret= []
     for i in string:
         n = unidecode(i)
-        if n!="": 
+        if n!="" or i in VALID_CHARS: 
             ret.append(n)
         else: 
             ret.append(" ")
+
     ret = [i for i in ret if i in VALID_CHARS]
     while len(ret)>0:
         if ret[0] in PRE_REMOVE:
@@ -164,6 +161,12 @@ def sanitize_tag_uni(string):
             string.pop(0)
         else:
             break
+    while len(string)>0:
+        if string[-1] in POST_REMOVE:
+            string.pop(-1)
+        else:
+            break
+
     return ''.join(string)
 
 def replace_brackets(string):
@@ -195,6 +198,7 @@ def check_repeat_times(race, prev_races):
         most_key = max(repetitions.items(), key=repetitions.get)
     except ValueError:
         most_key = None
+
     if most_key:
         most_rep= repetitions[most_key] + dc_repetitions[most_key]
     return (True, {'race': len(prev_races)-most_key, 'num_aff': most_rep}) if most_key else (False, {})
@@ -220,6 +224,31 @@ def check_repeat_times_slow(race, prev_races):
 
 ### map constants
 
+VALID_CHARS = "/\*^+-_.!?@%&()\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz" + "abcdefghijklmnopqrstuvwxyz0123456789 ".upper()
+PRE_REMOVE = "/\*^+-_.!?#%() "
+POST_REMOVE = "/\*^+-.!?# "
+
+CHAR_MAP = {
+    "Λ": 'A',
+    "λ": 'A',
+    "@": 'A', # not sure about some of these conversions and char constants, but whatever (for now)
+    "ß": "B",
+    "¢": "c",
+    "€": "C",
+    "Ξ": "E",
+    "ξ": "E",
+    "Σ": "E",
+    "£": "E",
+    "σ": "o", 
+    "や": "P",
+    "ρ": "p",
+    "$": "S",
+    "μ": "u",
+    "ν": "v", 
+    "γ": "y"
+}
+
+
 pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
               11:{0:15, 1:12, 2:10, 3:8, 4:6, 5:5, 6:4, 7:3, 8:2, 9:1, 10:0},
               10:{0:15, 1:12, 2:10, 3:8, 4:6, 5:4, 6:3, 7:2, 8:1, 9:0},
@@ -233,26 +262,6 @@ pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:
               2:{0:15, 1:7},
               1:{0:15}
             }
-
-CHAR_MAP = {
-    "Λ": 'A',
-    "λ": 'A',
-    "ß": "B",
-    "¢": "c",
-    "Ξ": "E",
-    "σ": "o", 
-    "や": "P",
-    "ρ": "p",
-    "$": "S",
-    "μ": "u",
-    "ν": "v", 
-    "γ": "y"
-}
-
-VALID_CHARS = "/\*^+-_.!?@%&()abcdefghijklmnopqrstuvwxyz\u03A9\u038F " + "abcdefghijklmnopqrstuvwxyz0123456789".upper()
-
-PRE_REMOVE = "/\*^+-_.!?#%() "
-POST_REMOVE = "/\*^+-.!?# "
 
 warning_map = {
             "dc_on": "{} DCed during the race (on results), unless MKWX ERROR. Awarding 3 DC points per missing race in GP {} ({} pts).",
@@ -326,7 +335,7 @@ settings = {
 }
 
 if __name__ == "__main__":
-    i = "MΞ☆Mγτh"
+    i = "€ΣξMΞ☆Mγτh"
     print(sanitize_uni(i))
     
     

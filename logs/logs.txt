@@ -112,3 +112,18 @@ Traceback (most recent call last):
 NameError: name 'time' is not defined
 
 
+2021-07-12 23:45:34,343 ERROR -> in command: start
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 180, in start
+    await self.skip_search(ctx, data, is_rxx)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 75, in skip_search
+    error, ask, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(mii = arg)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 296, in find_room
+    self.find_players(room_url, soup)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1532, in find_players
+    miiName = next_elem.find('td', class_='mii-font').text
+AttributeError: 'NoneType' object has no attribute 'text'
+
+

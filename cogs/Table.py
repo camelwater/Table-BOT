@@ -89,6 +89,7 @@ class Table_cog(commands.Cog):
                 await self.send_messages(ctx, mes)
                 self.bot.table_instances[ctx.channel.id].searching_room = False
                 self.bot.table_instances[ctx.channel.id].confirm_room = False
+                self.bot.table_instances[ctx.channel.id].check_num_teams()
                 self.bot.table_instances[ctx.channel.id].check_mkwx_update.start()
                 return
             await wait_mes.delete()    
@@ -408,13 +409,15 @@ class Table_cog(commands.Cog):
         if self.bot.table_instances[ctx.channel.id].confirm_room:
             if self.bot.table_instances[ctx.channel.id].choose_room: self.bot.table_instances[ctx.channel.id].choose_room = False
             if len(self.bot.table_instances[ctx.channel.id].players)> self.bot.table_instances[ctx.channel.id].num_players:
-                mes = "**Warning:** *The number of players in the room doesn't match the given format and teams.*\nTable started, but will likely be inaccurate. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.bot.table_instances[ctx.channel.id].sui else '')
+                mes = "**Warning:** *The number of players in the room doesn't match the given format and teams.*\nTable started, *but will likely be inaccurate*. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.bot.table_instances[ctx.channel.id].sui else '')
             else:   
                 mes = "Table successfully started. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.bot.table_instances[ctx.channel.id].sui else '')
 
             self.bot.table_instances[ctx.channel.id].table_running = True
             self.bot.table_instances[ctx.channel.id].searching_room = False
             self.bot.table_instances[ctx.channel.id].confirm_room = False
+            self.bot.table_instances[ctx.channel.id].check_num_teams()
+
             self.bot.table_instances[ctx.channel.id].check_mkwx_update.start()
             await self.send_messages(ctx, mes)
             
@@ -615,7 +618,7 @@ class Table_cog(commands.Cog):
             return
     
     @commands.command(aliases=['substitute', 'subin', 'subout'])
-    async def sub(self, ctx, *args): #NOTE: needs more testing but seems to work fine 
+    async def sub(self, ctx, *args): 
         
         if await self.check_callable(ctx, "sub"): return
         

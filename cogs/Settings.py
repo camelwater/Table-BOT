@@ -68,7 +68,7 @@ class Settings(commands.Cog):
             try:
                 set = set['type']
             except:
-                set = ''
+                set = 'Not set'
             out+="\n.{}{}- {}".format(name, " "*(spaces-len(name)), set)
         
         if mes:
@@ -76,7 +76,6 @@ class Settings(commands.Cog):
         else:
             return "```{}```".format(out)
 
-    #TODO: add way to reset settings to default
     @commands.command(aliases=['setting'])
     @commands.has_guild_permissions(manage_guild=True)
     async def set(self, ctx, settingType: str = None, *,default: str=None):
