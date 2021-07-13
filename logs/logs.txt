@@ -95,3 +95,20 @@ Traceback (most recent call last):
 TypeError: sorted expected 1 argument, got 2
 
 
+2021-07-12 22:23:44,262 ERROR -> in command: start
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 180, in start
+    await self.skip_search(ctx, data, is_rxx)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 75, in skip_search
+    error, ask, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(mii = arg)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 266, in find_room
+    self.split_teams(self.format, self.teams)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 359, in split_teams
+    teams = tag_algo(player_copy, per_team, num_teams)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\find_tags.py", line 396, in tag_algo
+    c_time = time.time()
+NameError: name 'time' is not defined
+
+

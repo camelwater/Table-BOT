@@ -135,8 +135,10 @@ def sanitize_uni(string):
     ret= []
     for i in string:
         n = unidecode(i)
-        if len(n)>0: ret.append(n)
-        else: ret.append(" ")
+        if n!="": 
+            ret.append(n)
+        else: 
+            ret.append(" ")
     ret = [i for i in ret if i in VALID_CHARS]
     while len(ret)>0:
         if ret[0] in PRE_REMOVE:
@@ -247,10 +249,10 @@ CHAR_MAP = {
     "γ": "y"
 }
 
-VALID_CHARS = "/\*^+-_.!?@%&()abcdefghijklmnopqrstuvwxyz\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz0123456789".upper()
+VALID_CHARS = "/\*^+-_.!?@%&()abcdefghijklmnopqrstuvwxyz\u03A9\u038F " + "abcdefghijklmnopqrstuvwxyz0123456789".upper()
 
-PRE_REMOVE = "/\*^+-_.!?#%()"
-POST_REMOVE = "/\*^+-.!?#"
+PRE_REMOVE = "/\*^+-_.!?#%() "
+POST_REMOVE = "/\*^+-.!?# "
 
 warning_map = {
             "dc_on": "{} DCed during the race (on results), unless MKWX ERROR. Awarding 3 DC points per missing race in GP {} ({} pts).",
@@ -324,7 +326,7 @@ settings = {
 }
 
 if __name__ == "__main__":
-    i = "!A★Aμ"
+    i = "MΞ☆Mγτh"
     print(sanitize_uni(i))
     
     

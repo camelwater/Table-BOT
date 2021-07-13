@@ -151,13 +151,13 @@ class Table():
                             except:
                                 rxxs[rxx] = 1
                 if len(rxxs)==0:
-                    return True, "{} {} not found in any rooms.\nMake sure all mii names are correct.".format(mii, "were" if len(mii)>1 else "was")
+                    return True, "`{}` {} not found in any rooms.\nMake sure all mii names are correct.".format(mii, "were" if len(mii)>1 else "was")
                 if len(rxxs)>1:
                     if len(mii)==1:
-                        return True, "{} was found in multiple rooms: {}.\nTry again with a more refined search.".format(mii[0], list(rxxs.keys()))
+                        return True, "`{}` was found in multiple rooms: {}.\nTry again with a more refined search.".format(mii[0], list(rxxs.keys()))
                     rxx = [keys for keys,values in rxxs.items() if values == max(rxxs.values())]
                     if len(rxx)>1:
-                        return True, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(mii, "were" if len(mii)>1 else "was", rxx)
+                        return True, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(lambda l: f"`{l}`",mii)), "were" if len(mii)>1 else "was", rxx)
                
                 rxx = max(rxxs, key=rxxs.get) 
                 if rxx==self.rxx or rxx in self.prev_rxxs:
@@ -995,12 +995,12 @@ class Table():
                     if i[0] in t[1]:
                         tag_places[t[0]].append(count)
             
-        tag_places = dict(sorted(tag_places.items(), key=lambda item: sum([pts_map[count][i-1] for i in item[1]]), reverse=True))
-
         if not isFFA(self.format):
+            tag_places = dict(sorted(tag_places.items(), key=lambda item: sum([pts_map[count][i-1] for i in item[1]]), reverse=True))
+
             ret+="\n"
             for tag, placements in tag_places.items():
-                ret+="**{}** -".format(tag)
+                ret+="**`{}`** -".format(tag)
                 for p in placements:
                     ret+=' {}{}'.format(p, '' if p==placements[-1] else ',')
                 ret+=" (**{}** pts)".format(sum([pts_map[count][i-1] for i in placements]))
@@ -1470,7 +1470,7 @@ class Table():
         except:
             valid_teams = ", ".join(list(map(lambda l: f'`{l}`', self.tags.keys())))
             return "Invalid team name `{}`. Valid teams: {}.".format(team, valid_teams)
-            
+
         if team not in self.team_pens:
             return "Team `{}` doesn't have any penalties.".format(team)
         else:
