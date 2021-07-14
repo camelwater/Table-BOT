@@ -205,9 +205,11 @@ def check_repeat_times(race, prev_races):
                     dc_repetitions[c_indx]+=1
 
     repetitions = dict(repetitions)
+    print(len(prev_races))
+    print(repetitions)
     try:
-        most_key = max(repetitions.items(), key=repetitions.get)
-    except ValueError and TypeError:
+        most_key = max(repetitions, key=repetitions.get)
+    except ValueError:
         most_key = None
 
     if most_key:
@@ -301,7 +303,7 @@ warning_map = {
             "mkwx_bug_increase": "Room size increased mid-GP from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX ERROR. Affected races: {}. Run ?changeroomsize to fix this.", 
             "mkwx_bug_change": "Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX ERROR. Table could be inaccurate for this GP ({}).", 
             "mkwx_bug_blank": "All players in the race had blank finish times. This is an MKWX ERROR if there was no room reset. Table is inaccurate for this GP ({}).", 
-            "mkwx_bug_repeat": "{} player(s) had the same finish as they had in a previous race (race {}). Check for errors as this is highly improbable and likely an MKWX ERROR. Table could be inaccurate for this GP ({}).",
+            "mkwx_bug_repeat": "{} player(s) had the same finish time as they had in a previous race (race {}). Check for errors as this is highly improbable and likely an MKWX ERROR. Table could be inaccurate for this GP ({}).",
             "mkwx_bug_tr":"Room had {} players with track errors. Check ?rr for errors. Table could be inaccurate for this GP ({}).", 
             "mkwx_bug_delta": "Room had time delay (lag) errors ({} player(s)). Check ?rr for errors. Table could be inaccuate for this GP ({}).",
 
@@ -352,5 +354,7 @@ settings = {
 if __name__ == "__main__":
     i = "ÆMΞ☆Mγτh"
     print(sanitize_uni(i))
+    x = [1,2,3]
+
     
     

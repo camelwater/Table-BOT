@@ -2485,7 +2485,7 @@ class Table():
 
             if not all_blank: #don't check these errors if the race's times are all blank
                 #repeat times check
-                check_repeat_times = Utils.check_repeat_times(race, self.races+iter_races[:raceNum])
+                check_repeat_times = Utils.check_repeat_times(race, self.races[:raceNum] if recalc else self.races+iter_races[:raceNum])
                 if check_repeat_times[0]:
                     self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'race': check_repeat_times[1].get('race'),
                                                         'num_affected':check_repeat_times[1].get('num_aff'), 'gp': self.gp+1})
