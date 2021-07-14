@@ -130,7 +130,7 @@ class Table():
         self.IGNORE_FCS = True
         self.split_teams('5', 4)
 
-    async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple[bool, str, str]:
+    async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple:
         """
         find mkwx room using either rxx or mii name search
         """
