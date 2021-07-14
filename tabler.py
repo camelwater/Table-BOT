@@ -1949,7 +1949,7 @@ class Table():
                 self.modifications.append([('?dcs {} {}'.format(dc_num, status), dc_num, orig_status, status)]) 
                 self.undos.clear()   
 
-            ret+= "Changed `{}` DC status for race `{}` to `{}`.\n".format(Utils.dis_clean(self.display_names[player]), raceNum, status)
+            ret+= "Changed `{}` DC status for race `{}` to `{}`.\n".format(self.display_names[player], raceNum, status)
        
         return ret
                 
@@ -2105,7 +2105,7 @@ class Table():
                 self.players[a][1][gp] += (aff_new_pts[a] - aff_orig_pts[a])
                 self.players[a][2][raceNum-1] = aff_new_pts[a]
             
-            ret+='`{}` race {} placement changed to {}.{}'.format(Utils.dis_clean(self.display_names[player]), raceNum, correct_pos+1, '\n' if num==len(l)-1 else "")
+            ret+='`{}` race {} placement changed to {}.{}'.format(self.display_names[player], raceNum, correct_pos+1, '\n' if num==len(l)-1 else "")
             
             try:
                 self.manual_warnings[raceNum].remove("Placements for this race have been manually altered by the tabler.")

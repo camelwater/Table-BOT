@@ -142,7 +142,7 @@ def sanitize_uni(string, for_search = False):
             ret.append(" ")
 
     ret = [i for i in ret if i in VALID_CHARS]
-    
+
     if for_search:
         return ''.join(ret)
 
@@ -207,7 +207,7 @@ def check_repeat_times(race, prev_races):
     repetitions = dict(repetitions)
     try:
         most_key = max(repetitions.items(), key=repetitions.get)
-    except ValueError:
+    except ValueError and TypeError:
         most_key = None
 
     if most_key:
