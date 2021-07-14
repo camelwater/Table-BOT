@@ -120,14 +120,19 @@ def is_CJK(char):
 
 from unidecode import unidecode
 
-def sanitize_uni(string):
+def sanitize_uni(string, for_search = False):
     '''
     convert known/common un-unidecodable strings to unicode and clean string for tag-matching
 
     '''
     
     string = [CHAR_MAP.get(i, i) for i in string]
-    # ret = list(unidecode(''.join(string)))
+    # for ind, i in enumerate(string):
+    #     if i in MULT_CHAR_MAP:
+    #         replace = MULT_CHAR_MAP[i][::-1]
+    #         string.pop(ind)
+    #         for x in replace:
+    #             string.insert(ind, x)
     ret= []
     for i in string:
         n = unidecode(i)
@@ -137,16 +142,22 @@ def sanitize_uni(string):
             ret.append(" ")
 
     ret = [i for i in ret if i in VALID_CHARS]
+    
+    if for_search:
+        return ''.join(ret)
+
     while len(ret)>0:
         if ret[0] in PRE_REMOVE:
             ret.pop(0)
-        else:
-            break
-    while len(ret)>0:
-        if ret[-1] in POST_REMOVE:
+        elif ret[-1] in POST_REMOVE:
             ret.pop(-1)
         else:
             break
+    # while len(ret)>0:
+    #     if ret[-1] in POST_REMOVE:
+    #         ret.pop(-1)
+    #     else:
+    #         break
 
     return ''.join(ret)
 
@@ -248,6 +259,10 @@ CHAR_MAP = {
     "γ": "y"
 }
 
+MULT_CHAR_MAP = {
+    "Æ": 'AE',
+}
+
 
 pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
               11:{0:15, 1:12, 2:10, 3:8, 4:6, 5:5, 6:4, 7:3, 8:2, 9:1, 10:0},
@@ -335,7 +350,7 @@ settings = {
 }
 
 if __name__ == "__main__":
-    i = "€ΣξMΞ☆Mγτh"
+    i = "ÆMΞ☆Mγτh"
     print(sanitize_uni(i))
     
     

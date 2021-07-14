@@ -25,7 +25,8 @@ from Utils import isFFA, warning_map, dc_map, style_map, pts_map
 from Utils import graph_map as gm
 graph_map = copy.deepcopy(gm)
 
-# NOTE: consider changing players into Player objects, also maybe start using /room/ JSON 
+# NOTE: consider changing players into Player objects, and maybe automating first race dcs (18 and 15 pts) 
+# also should probably start using /room/ JSON 
 # - main benefit is ability to start table before race 1. must be in lobby though, and probably after lobby is full (otherwise teams would be wrong)
 # unless only calculate teams when the race_mode/race_phase changes (match has started so room players are correct)
 class Table():
@@ -153,8 +154,8 @@ class Table():
                     for player in room.get("members", []):
                         miiName = player.get('name')[0][0]
                         if miiName == "no name": miiName = "Player"
-                        room_players.append(miiName)
-                    if set(map(lambda l: l.strip().lower(),mii)).issubset(room_players):
+                        room_players.append(Utils.sanitize_uni(miiName.strip(), for_search=True).lower())
+                    if set(map(lambda l: Utils.sanitize_uni(l.strip(), for_search=True).lower(),mii)).issubset(room_players):
                         rxxs[room_rxx]+=1
         
                 if len(rxxs)==0:
@@ -246,9 +247,9 @@ class Table():
                     for player in room.get("members", []):
                         miiName = player.get('name')[0][0]
                         if miiName == "no name": miiName = "Player"
-                        room_players.append(miiName.lower().strip())
+                        room_players.append(Utils.sanitize_uni(miiName.strip(), for_search=True).lower())
                    
-                    if set(map(lambda l: l.strip().lower(),mii)).issubset(room_players):
+                    if set(map(lambda l: Utils.sanitize_uni(l.strip(), for_search=True).lower(),mii)).issubset(room_players):
                         rxxs[room_rxx]+=1
                
                 if len(rxxs)==0:
@@ -1010,11 +1011,11 @@ class Table():
 
             ret+="\n"
             for tag, placements in tag_places.items():
-                ret+="**`{}`** -".format(tag)
+                ret+="**{}** -".format(tag)
                 for p in placements:
                     ret+=' {}{}'.format(p, '' if p==placements[-1] else ',')
                 ret+=" (**{}** pts)".format(sum([pts_map[count][i-1] for i in placements]))
-                ret+="{}".format("" if tag==list(tag_places.items())[-1][0] else "   **|**   ")
+                ret+="{}".format("" if tag==list(tag_places.items())[-1][0] else "   |   ")
         return False,ret
     
     def change_tag(self,player, tag, restore_indx = None,reundo=False):
@@ -2313,7 +2314,7 @@ class Table():
         if self.last_race_update is not None and datetime.datetime.now() - self.last_race_update < datetime.timedelta(seconds=45): return False
         soup = await self.fetch(self.current_url)
         #TODO: JSON fetch for /room after first /list check (less load on wiimmfi apparently)
-        # cur_race = await self.fetch(self.current_url.replace('/list/', '/room/'))
+        # cur_race = await self.fetch_mkwx_JSON(self.current_url.replace('/list/', '/room/'))
         # if isinstance(cur_race, str and "error") and 'error' in cur_race:
         #     print("Wiimmfi error.")
         #     return False
