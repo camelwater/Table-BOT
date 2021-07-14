@@ -15,6 +15,15 @@ class Stats(commands.Cog):
         load = load_stats_json()
         if load:
             self.bot.command_stats = Counter(load)
+    
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author == self.bot or message.author.bot: return
+        if not self.bot.user.mentioned_in(message): return
+        if message.content.rstrip() in [f'<@!{self.bot.user.id}>', f'<@{self.bot.user.id}>']:
+            await self._help(await self.bot.get_context(message))
+            if hasattr(self.bot, "command_stats"):
+                self.bot.command_stats['help']+=1
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
@@ -74,8 +83,12 @@ class Stats(commands.Cog):
     
     @commands.command(name='help',aliases = ['h'])
     async def _help(self, ctx):
-        info = '**List of commands:**```\n?start\n?search\n?reset\n?players\n?tracks\n?rxx\n?raceresults\n?editrace\n?changeroomsize\n?removerace\n?mergeroom\n?dcs\n?penalty, ?unpenalty\n?tags\n?edittag\n?changetag\n?changegps\n?edit\n?sub, ?editsub\n?tabletext\n?undo, ?redo\n?pic```'
-        await ctx.send(info)
+        # info = '[Documentation](https://www.github.com/camelwater/Table-BOT)\n```List of commands:\n?start\n?search\n?reset\n?players\n?tracks\n?rxx\n?raceresults\n?editrace\n?changeroomsize\n?removerace\n?mergeroom\n?dcs\n?penalty, ?unpenalty\n?tags\n?edittag\n?changetag\n?changegps\n?edit\n?sub, ?editsub\n?tabletext\n?undo, ?redo\n?pic```'
+        e = discord.Embed(title="Table BOT help")
+        link = "[Documentation](https://github.com/camelwater/Table-BOT/blob/main/README.md)"
+        e.add_field(name='\u200b', value= link, inline=False)
+
+        await ctx.send(embed=e)
 
 def get_LOC():
     LOC_count = 0

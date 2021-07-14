@@ -18,7 +18,7 @@ ex. **r3066483** or **TN67**
 To watch a room and score it with Tablse BOT, these primary commands are used:
 
 ```
-?start [format] [numTeams] (room rxx) (gps=3) (sui=no)
+?start [format] [numTeams] (rxx|<miiName>,...) (gps=3) (sui=no)
 ``` 
 ex. `?start 5v5 2 sui=yes`
 

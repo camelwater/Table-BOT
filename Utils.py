@@ -122,11 +122,10 @@ from unidecode import unidecode
 
 def sanitize_uni(string, for_search = False):
     '''
-    convert known/common un-unidecodable strings to unicode and clean string for tag-matching
+    convert known/common un-unidecodable and unicode strings to ASCII and clean string for tag-matching
 
     '''
     
-    string = [CHAR_MAP.get(i, i) for i in string]
     # for ind, i in enumerate(string):
     #     if i in MULT_CHAR_MAP:
     #         replace = MULT_CHAR_MAP[i][::-1]
@@ -135,14 +134,18 @@ def sanitize_uni(string, for_search = False):
     #             string.insert(ind, x)
     ret= []
     for i in string:
+        i = CHAR_MAP.get(i, i)
+        if i in VALID_CHARS:
+            ret.append(i)
+            continue
+
         n = unidecode(i)
-        if n!="" or i in VALID_CHARS: 
+        if n=="":
+            n = " "
+        if n in VALID_CHARS:
             ret.append(n)
-        else: 
-            ret.append(" ")
 
-    ret = [i for i in ret if i in VALID_CHARS]
-
+            
     if for_search:
         return ''.join(ret)
 
@@ -153,11 +156,6 @@ def sanitize_uni(string, for_search = False):
             ret.pop(-1)
         else:
             break
-    # while len(ret)>0:
-    #     if ret[-1] in POST_REMOVE:
-    #         ret.pop(-1)
-    #     else:
-    #         break
 
     return ''.join(ret)
 
@@ -352,9 +350,12 @@ settings = {
 }
 
 if __name__ == "__main__":
+    import time
     i = "ÆMΞ☆Mγτh"
-    print(sanitize_uni(i))
-    x = [1,2,3]
-
-    
+    sans = []
+    t = time.time()
+    for _ in range(100):
+        sans.append(sanitize_uni(i))
+    print(time.time()-t)
+    print(sans[0])
     
