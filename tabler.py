@@ -68,6 +68,7 @@ class Table():
         self.gp_dcs = {} #gp: list of players who have dced in gp (to ensure dc warnings are simplified in embed)
         self.dc_pts = {} #player: number of races to award +3 DC points 
         self.dc_list_ids = {} #mapping dcs to an id (used for the command ?dcs)
+        self.temp_dc_list = []
         
         self.removed_races = {} #races removed with ?removerace (for restoring from ?undo)
         self.removed_warn_dcs = {} #for restoring when ?removerace undone
@@ -1237,7 +1238,6 @@ class Table():
         return ret
         
     def dc_ids_append(self,player, race):
-        self.temp_dc_list = []
         # i = 1
         # while i in self.dc_list_ids:
         #     i+=1
