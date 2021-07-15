@@ -120,10 +120,6 @@ class TableBOT(commands.Bot):
     #             self.command_stats['help']+=1
     #     await self.process_commands(message)
     
-    async def send_help(self, ctx):
-        info = '[Documentation](https://www.github.com/camelwater/Table-BOT)\n```List of commands:\n?start\n?search\n?reset\n?players\n?tracks\n?rxx\n?raceresults\n?editrace\n?changeroomsize\n?removerace\n?mergeroom\n?dcs\n?penalty, ?unpenalty\n?tags\n?edittag\n?changetag\n?changegps\n?edit\n?sub, ?editsub\n?tabletext\n?undo, ?redo\n?pic```'
-        await ctx.send(info)
-    
     #remove inactive table instances (inactivity == 30+ minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):

@@ -84,7 +84,7 @@ class Stats(commands.Cog):
     @commands.command(name='help',aliases = ['h'])
     async def _help(self, ctx):
         # info = '[Documentation](https://www.github.com/camelwater/Table-BOT)\n```List of commands:\n?start\n?search\n?reset\n?players\n?tracks\n?rxx\n?raceresults\n?editrace\n?changeroomsize\n?removerace\n?mergeroom\n?dcs\n?penalty, ?unpenalty\n?tags\n?edittag\n?changetag\n?changegps\n?edit\n?sub, ?editsub\n?tabletext\n?undo, ?redo\n?pic```'
-        e = discord.Embed(title="Table BOT help")
+        e = discord.Embed(title="Help")
         link = "[Documentation](https://github.com/camelwater/Table-BOT/blob/main/README.md)"
         e.add_field(name='\u200b', value= link, inline=False)
 

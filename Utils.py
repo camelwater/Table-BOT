@@ -132,6 +132,7 @@ def sanitize_uni(string, for_search = False):
     #         string.pop(ind)
     #         for x in replace:
     #             string.insert(ind, x)
+
     ret= []
     for i in string:
         i = CHAR_MAP.get(i, i)
@@ -141,8 +142,8 @@ def sanitize_uni(string, for_search = False):
 
         n = unidecode(i)
         if n=="":
-            n = " "
-        if n in VALID_CHARS:
+            ret.append(" ")
+        elif n in VALID_CHARS:
             ret.append(n)
 
             
@@ -243,6 +244,7 @@ CHAR_MAP = {
     "Λ": 'A',
     "λ": 'A',
     "@": 'A', # not sure about some of these conversions and char constants, but whatever (for now)
+    "Æ": 'A', # <-- temporary entry until I figure out good way to implement MULT_CHAR_MAP
     "ß": "B",
     "¢": "c",
     "€": "C",
