@@ -183,7 +183,7 @@ These commands are used to configure server settings for Table BOT.
 
 ### Miscallaneous Commands
 
-These commands are extra commands that are not used for tabling MKW rooms.
+Just some extra commands.
 
 ```
 ?stats (all)
