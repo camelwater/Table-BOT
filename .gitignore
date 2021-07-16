@@ -1,5 +1,7 @@
 __pycache__
 cogs/__pycache__
-tag_testing/
+tag_testing/__pycache__
+tag_testing/backup_tag_algo.py
+tag_testing/testTag.py
 .venv
 .vscode
