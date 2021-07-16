@@ -44,7 +44,7 @@ Additional helpful commands used alongside the primary commands to better table 
 
 ### Correction Commands
 
-These commands are used to correct the table. These commands are sometimes necessary, as the [website from which the room data comes from][mkwxWebsite] is quite unreliable and often reports information that contradicts in-game results.
+These commands are used to correct the table. These commands are sometimes necessary, as the [website from which room data is scraped from][mkwxWebsite] is regularly unreliable and reports information that contradicts actual in-game results.
 
 ```
 ?dc [dcNum] ["on"/"during"|"off"/"before"]
@@ -60,7 +60,7 @@ These commands are used to correct the table. These commands are sometimes neces
 
 ### Utility Commands
 
-These commands can be used to edit the table based on your custom ruleset outside of MKW's basic system. For example, penalizing players.
+These commands can be used to edit the table, whether it be to correct other table errors or to enforce a custom ruleset - for example, penalizing players.
 
 ```
 ?edit [playerNum] [gpNum] [score]
@@ -159,6 +159,42 @@ These commands provide extra information and useful insight to the room.
 
 ```
 ?rxx
+```
+
+### Settings Commands
+
+These commands are used to configure server settings for Table BOT.
+
+```
+?prefixes
+```
+
+```
+?prefix [set|add|remove] [prefix]
+```
+
+```
+?settings
+```
+
+```
+?set [settingName] [setting]
+```
+
+### Miscallaneous Commands
+
+These commands are extra commands that are not used for tabling MKW rooms.
+
+```
+?stats (all)
+```
+
+```
+?about
+```
+
+```
+?help
 ```
 
 

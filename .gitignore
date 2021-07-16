@@ -1,5 +1,5 @@
 __pycache__
 cogs/__pycache__
-tag_testing/__pycache__
+tag_testing/
 .venv
 .vscode
