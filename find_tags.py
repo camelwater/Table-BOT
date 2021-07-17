@@ -257,7 +257,8 @@ def assert_correct(teams, un_players, per_team, num_teams, num_teams_supposed):
         or (found_num_teams<num_teams_supposed and len(un_players)>=(per_team*num_teams_supposed))))\
         and len(corrupt_tags)==0:
         return
-    if num_teams!=num_teams_supposed and len(corrupt_tags)==0:
+    # if num_teams!=num_teams_supposed and len(corrupt_tags)==0:
+    if len(corrupt_tags)==0:
         return
 
     while len(teams)>num_teams and len(corrupt_tags)==0:

@@ -6,14 +6,14 @@ Table BOT is a discord bot made to automate the process of scoring and tabling M
 
 Here is some terminology that Table BOT uses:
 
-**rxx** - an eight character long room id beginning with an *r* and followed by seven numbers or a four character long room name that begins with two letters followed by two numbers (these can be found on [Wiimmfi][mkwxWebsite])\
+**```rxx```** - an eight character long room id beginning with an *r* and followed by seven numbers or a four character long room name that begins with two letters followed by two numbers (these can be found on [Wiimmfi][mkwxWebsite])\
 ex. **r3066483** or **TN67**
 
-**mii** - a player's in-game display name, can be non-ASCII
+**```mii```** - a player's in-game display name, can be non-ASCII
 
 ## Bot Usage
 
-> Commands are executed by providing the required arguments (in brackets) and additional, optional arguments (in parentheses). Optional arguments are by default excluded and arguments with an `=` sign have default values if nothing is provided.
+> Commands are executed by providing the required arguments [in brackets] and additional, optional arguments (in parentheses). Optional arguments are by default excluded and arguments with an `=` sign have default values if nothing is provided.
 
 To watch a room and score it with Table BOT, these primary commands are used:
 
@@ -22,21 +22,21 @@ To watch a room and score it with Table BOT, these primary commands are used:
 ``` 
 ex. `?start 5v5 2 sui=yes`
 
-Initializes a table instance with the given format (FFA 2v2, 3v3, etc.) and number of teams. Optionally, if you already know the room id (rxx) of the desired room, you can include it to skip the next step.
+Initializes a table instance with the given format (FFA 2v2, 3v3, etc.) and number of teams. Optionally, if you already know the room id (rxx) of the desired room or miiNames of players in the room, you can include either of them to skip the next step.
 
 ```
 ?search [mii|rxx] [<miiName>,...|rxx]
 ```
 ex. `?search mii camelwater123, beffjeff`
 
-Searches for a room on [Wiimmfi][mkwxWebsite] that best fits the arguments provided. If your search arguments are too broad and apply to multiple rooms (for example you provide a very common miiName such as 'Player'), you will need to narrow your search by providing better arguments. 
+Searches for a room on [Wiimmfi][mkwxWebsite] that best fits the arguments provided. If your search arguments are too broad and apply to multiple rooms (for example you provide a very common miiName such as "Player"), you will need to narrow your search by providing better arugments - either more miiNames or unique miiNames. 
 
 ```
 ?picture (byrace/race)
 ```
 ex. `?picture byrace`
 
-Fetches a [table picture][hlorenziWebsite] of the room's scores. `byrace` is an optional argument that can be included if you would like to see the table scores organized by each race (by default it is every gp, which is every 4 races).
+Fetches a [table picture][hlorenziWebsite] of the room's scores. `byrace/race` is an optional argument that can be included if you would like to see the table scores organized by each race (by default it is every gp, which is every 4 races).
 
 ## Additional Commands
 
@@ -44,7 +44,7 @@ Additional helpful commands used alongside the primary commands to better table 
 
 ### Correction Commands
 
-These commands are used to correct the table. These commands are sometimes necessary, as the [website from which room data is scraped from][mkwxWebsite] is regularly unreliable and reports information that contradicts actual in-game results.
+These commands are used to correct the table. These commands are sometimes necessary, as the [website from which room data is scraped from][mkwxWebsite] is regularly unreliable and may report information that contradicts actual in-game results.
 
 ```
 ?dc [dcNum] ["on"/"during"|"off"/"before"]

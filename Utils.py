@@ -169,10 +169,7 @@ def sanitize_tag_uni(string):
     while len(string)>0:
         if string[0] in PRE_REMOVE:
             string.pop(0)
-        else:
-            break
-    while len(string)>0:
-        if string[-1] in POST_REMOVE:
+        elif string[-1] in POST_REMOVE:
             string.pop(-1)
         else:
             break
@@ -181,10 +178,9 @@ def sanitize_tag_uni(string):
 
 def replace_brackets(string):
     string = string.lstrip('[').lstrip(']').lstrip('(').lstrip(')').lstrip('{').lstrip('}')
-    string = list(unidecode(sanitize_uni(string)))
-    ret = [i for i in string if i in VALID_CHARS]
+    string = sanitize_uni(string)
     
-    return ''.join(ret)
+    return string
 
 def dis_clean(string):
     return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~")
@@ -204,8 +200,7 @@ def check_repeat_times(race, prev_races):
                     dc_repetitions[c_indx]+=1
 
     repetitions = dict(repetitions)
-    print(len(prev_races))
-    print(repetitions)
+
     try:
         most_key = max(repetitions, key=repetitions.get)
     except ValueError:
