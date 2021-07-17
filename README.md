@@ -9,7 +9,7 @@ Here is some terminology that Table BOT uses:
 **```rxx```** - an eight character long room id beginning with an *r* and followed by seven numbers or a four character long room name that begins with two letters followed by two numbers (these can be found on [Wiimmfi][mkwxWebsite])\
 ex. **r3066483** or **TN67**
 
-**```mii```** - a player's in-game display name, can be non-ASCII
+**```mii```** - a player's in-game display name, can contain non-ASCII characters
 
 ## Bot Usage
 

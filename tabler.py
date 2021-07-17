@@ -188,10 +188,12 @@ class Table():
                 self.prev_rxxs.append(self.rxx)
                 self.prev_elems.append(self.current_elems)
                 self.current_elems=[]
+                print(rxx)
                 self.rxx = rxx
+                print(self.rxx)
                 self.last_race_update = None
                 if not redo:
-                    self.modifications.append([("?mergeroom {}".format(mii), len(self.prev_elems), rxx)])
+                    self.modifications.append([("?mergeroom {}".format(', '.join(mii)), len(self.prev_elems), rxx)])
                     self.undos.clear()
                 
                 new_elems = soup.select('tr[id*=r]')
@@ -2141,11 +2143,17 @@ class Table():
             self.players = self.restore_merged[6]
             self.manual_warnings = self.restore_merged[7]
             self.restore_merged = None
+
+            if len(self.races)<4*self.gps and not self.check_mkwx_update.is_running():
+                try:
+                    self.check_mkwx_update.start()
+                except:
+                    pass
         
         return error, mes
 
     def un_merge_room(self, merge_num): #TEST: test if updated un_merge works properly
-        self.restore_merged = (self.races, self.tracks, self.finish_times, copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), self.dc_list_ids, copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings))
+        self.restore_merged = (copy.copy(self.races), copy.copy(self.tracks), copy.deepcopy(self.finish_times), copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), copy.deepcopy(self.dc_list_ids), copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings))
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  
         self.races = self.races[:len(self.prev_elems[merge_indx])-len(self.removed_races)]
@@ -2201,6 +2209,12 @@ class Table():
                 for tag in self.tags.items():
                     if i in tag[1]:
                         tag[1].remove(i)
+
+        if len(self.races)<4*self.gps and not self.check_mkwx_update.is_running():
+            try:
+                self.check_mkwx_update.start()
+            except:
+                pass
                 
     
     async def remove_race(self, raceNum, redo=False): 
@@ -3014,7 +3028,7 @@ class Table():
             self.edit_sub_races(j[1], j[2], j[4], out_index=j[5], reundo=True)   
             
         elif '?mergeroom' in j[0]:
-            await self.merge_room(j[2], redo=True)
+            await self.merge_room([j[2]], redo=True)
         
         elif '?edittag' in j[0]:
             self.edit_tag_name([[j[2], j[1]]], reundo=True)

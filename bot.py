@@ -50,11 +50,12 @@ def load_prefixes():
 
 def callable_prefix(bot, msg, mention=True):
     base = []
-    default = ['?', '!', '$']
+    default = ['?', '!']
     if msg.guild is None:
         base = default
     else:
         base.extend(bot.prefixes.get(str(msg.guild.id), default))
+
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
     return base

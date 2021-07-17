@@ -127,3 +127,18 @@ Traceback (most recent call last):
 AttributeError: 'NoneType' object has no attribute 'text'
 
 
+2021-07-17 16:24:51,023 ERROR -> in command: undo
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 539, in undo
+    mes = await self.bot.table_instances[ctx.channel.id].undo_commands(args)
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 3055, in undo_commands
+    for i in self.modifications[-1]:
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2955, in undo
+    elif '?mergeroom' in j[0]:
+  File "C:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2150, in un_merge_room
+    merge_indx = merge_num-1
+IndexError: list index out of range
+
+

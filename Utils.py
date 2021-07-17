@@ -145,7 +145,6 @@ def sanitize_uni(string, for_search = False):
             ret.append(" ")
         elif n in VALID_CHARS:
             ret.append(n)
-
             
     if for_search:
         return ''.join(ret)
