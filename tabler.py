@@ -188,9 +188,7 @@ class Table():
                 self.prev_rxxs.append(self.rxx)
                 self.prev_elems.append(self.current_elems)
                 self.current_elems=[]
-                print(rxx)
                 self.rxx = rxx
-                print(self.rxx)
                 self.last_race_update = None
                 if not redo:
                     self.modifications.append([("?mergeroom {}".format(', '.join(mii)), len(self.prev_elems), rxx)])
@@ -377,7 +375,6 @@ class Table():
                 L = []
                 for i in teams.items():
                     L.append([i[0].lower(), list(map(lambda l: Utils.sanitize_uni(l.lower()), i[1]))])
-                #print(L)
                 tagalgo = tagAlgo.TagAlgo(None, num_teams, per_team)
                 print(tagalgo.fitness(L))
 
@@ -663,7 +660,6 @@ class Table():
                 L = []
                 for i in teams.items():
                     L.append([i[0].lower(), list(map(lambda l: Utils.sanitize_uni(l.lower()), i[1]))])
-                #print(L)
                 tagalgo = tagAlgo.TagAlgo(None, num_teams, per_team)
                 print(tagalgo.fitness(L))
 
@@ -1314,10 +1310,10 @@ class Table():
     def get_rxx(self):
         ret = ""
         if len(self.prev_rxxs)>0:
-            ret+="Past rooms:\n"
+            ret+="*Past rooms:*\n"
             for n, r in enumerate(self.prev_rxxs):
                 ret+="\t{}. {} | {}\n".format(n+1, r, self.ROOM_URL.format(r))
-        ret+= 'Current room: {} | {}'.format(self.rxx, self.ROOM_URL.format(self.rxx))
+        ret+= f'{"**Current room:**" if len(self.prev_rxxs>0) else "Current room:"} {self.rxx} | {self.ROOM_URL.format(self.rxx)}'
         return ret
         
     def get_pen_player_list(self, c_form=True):
@@ -1591,7 +1587,6 @@ class Table():
         self.players[fc] = [0,[0]*self.gps, [0]*self.gps*4]
         self.fcs[player] = fc
         self.display_names[fc] = player
-        print(self.num_players)
         if len(self.players)-1<self.num_players: #TEST: test if new missing players DC filling working (for multiple GPS: 1 + 2)
             warn_replaced = False
             for gp in range(0, self.gp):
