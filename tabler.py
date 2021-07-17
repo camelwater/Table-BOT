@@ -1381,7 +1381,7 @@ class Table():
                 self.modifications.append([('?pen {} {}'.format(p_indx, '='+str(pen)), player, '='+str(pen))])
                 self.undos.clear()
                 
-            return "{} penalty set to -{}".format(self.display_names[player], pen)
+            return "`{}` penalty set to `-{}`.".format(self.display_names[player], pen)
         
         else:
             pen = int(pen.lstrip('-'))
@@ -1394,7 +1394,7 @@ class Table():
             if not reundo:
                 self.modifications.append([('?pen {} {}'.format(p_indx, pen), player, pen)])
                 self.undos.clear()
-            return "-{} penalty given to {}".format(pen, self.display_names[player])
+            return "`-{}` penalty given to `{}`.".format(pen, self.display_names[player])
     
     def unpenalty(self, player, unpen, reundo=False):
         if unpen !=None:
@@ -1422,7 +1422,7 @@ class Table():
                 if not reundo: 
                     self.modifications.append([('?unpen {} {}'.format(p_indx, unpen), player, unpen)])
                     self.undos.clear()
-                return "Penalty for `{}` reduced by {}".format(self.display_names[player], unpen)
+                return "Penalty for `{}` reduced by `{}`.".format(self.display_names[player], unpen)
             
     def team_penalty(self, team, pen, reundo = False):
         if team.isnumeric():
@@ -1432,9 +1432,13 @@ class Table():
             except:
                 return "Invalid team number `{}`.".format(team)
         try:
-            lowered_tags = list(map(lambda l: l.strip().lower(), self.tags.keys()))
-            assert(team in lowered_tags)
-            team = list(self.tags.keys())[lowered_tags.index(team)]
+            try:
+                assert(team in self.tags.keys())
+            except:
+                lowered_tags = list(map(lambda l: Utils.sanitize_uni(l.strip()).lower(), self.tags.keys()))
+                sanitized_tag = Utils.sanitize_uni(team.strip()).lower()
+                assert(sanitized_tag in lowered_tags)
+                team = list(self.tags.keys())[lowered_tags.index(sanitized_tag)]
         except:
             valid_teams = ", ".join(list(map(lambda l: f'`{l}`', self.tags.keys())))
             return "Invalid team name `{}`. Valid teams: {}.".format(team, valid_teams)
@@ -1448,7 +1452,7 @@ class Table():
                 self.modifications.append([('?teampen {} {}'.format(team, '='+str(pen)), team, '='+str(pen))])
                 self.undos.clear()
                 
-            return "Team `{}` penalty set to -{}.".format(team, pen)
+            return "Team `{}` penalty set to `-{}`.".format(team, pen)
         
         else:
             pen = int(pen.lstrip('-'))
@@ -1461,7 +1465,7 @@ class Table():
             if not reundo:
                 self.modifications.append([('?teampen {} {}'.format(team, pen), team, pen)])
                 self.undos.clear()
-            return "-{} penalty given to team {}.".format(pen, team)
+            return "`-{}` penalty given to team `{}`.".format(pen, team)
     
     def team_unpenalty(self, team, unpen, reundo=False):
         if unpen !=None:
@@ -1473,9 +1477,13 @@ class Table():
             except:
                 return "Invalid team number `{}`.".format(team)
         try:
-            lowered_tags = list(map(lambda l: l.strip().lower(), self.tags.keys()))
-            assert(team in lowered_tags)
-            team = list(self.tags.keys())[lowered_tags.index(team)]
+            try:
+                assert(team in self.tags.keys())
+            except:
+                lowered_tags = list(map(lambda l: Utils.sanitize_uni(l.strip()).lower(), self.tags.keys()))
+                sanitized_tag = Utils.sanitize_uni(team.strip()).lower()
+                assert(sanitized_tag in lowered_tags)
+                team = list(self.tags.keys())[lowered_tags.index(sanitized_tag)]
         except:
             valid_teams = ", ".join(list(map(lambda l: f'`{l}`', self.tags.keys())))
             return "Invalid team name `{}`. Valid teams: {}.".format(team, valid_teams)
@@ -1497,7 +1505,7 @@ class Table():
                 if not reundo: 
                     self.modifications.append([('?teamunpen {} {}'.format(team, unpen), team, unpen)])
                     self.undos.clear()
-                return "Penalty for team {} reduced by {}.".format(team, unpen)
+                return "Penalty for team `{}` reduced by `{}`.".format(team, unpen)
 
     def find_players(self,url, soup): 
        
