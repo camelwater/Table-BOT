@@ -1313,7 +1313,7 @@ class Table():
             ret+="*Past rooms:*\n"
             for n, r in enumerate(self.prev_rxxs):
                 ret+="\t{}. {} | {}\n".format(n+1, r, self.ROOM_URL.format(r))
-        ret+= f'{"**Current room:**" if len(self.prev_rxxs>0) else "Current room:"} {self.rxx} | {self.ROOM_URL.format(self.rxx)}'
+        ret+= f'{"**Current room:**" if len(self.prev_rxxs)>0 else "Current room:"} {self.rxx} | {self.ROOM_URL.format(self.rxx)}'
         return ret
         
     def get_pen_player_list(self, c_form=True):
