@@ -7,7 +7,7 @@ Created on Sat Jun 5 15:30:03 2021
 
 #-------------- Table.py methods --------------#
 
-#default max teams based on format 
+#max teams based on format (ex. 6 teams for a 2v2, 2 teams for a 5v5)
 def max_teams(f):
     f = f[0]
     if f == 'f':
@@ -125,16 +125,13 @@ def sanitize_uni(string, for_search = False):
     convert known/common un-unidecodable and unicode strings to ASCII and clean string for tag-matching
 
     '''
-    
-    # for ind, i in enumerate(string):
-    #     if i in MULT_CHAR_MAP:
-    #         replace = MULT_CHAR_MAP[i][::-1]
-    #         string.pop(ind)
-    #         for x in replace:
-    #             string.insert(ind, x)
-
+  
     ret= []
     for i in string:
+        if i in MULT_CHAR_MAP:
+            for char in MULT_CHAR_MAP[i]:
+                ret.append(char)
+            continue
         i = CHAR_MAP.get(i, i)
         if i in VALID_CHARS:
             ret.append(i)
@@ -164,7 +161,7 @@ def sanitize_tag_uni(string):
     '''
     get rid of non-unicode characters that cannot be converted, but keep convertable characters in original form
     '''
-    string = [i for i in string if CHAR_MAP.get(i, i) in VALID_CHARS or (unidecode(i)!="" and unidecode(i) in VALID_CHARS)]
+    string = [i for i in string if CHAR_MAP.get(i, i) in VALID_CHARS or i in MULT_CHAR_MAP or (unidecode(i)!="" and unidecode(i) in VALID_CHARS)]
     while len(string)>0:
         if string[0] in PRE_REMOVE:
             string.pop(0)
@@ -175,7 +172,7 @@ def sanitize_tag_uni(string):
 
     return ''.join(string)
 
-def replace_brackets(string):
+def replace_brackets(string): #don't really need this anymore
     string = string.lstrip('[').lstrip(']').lstrip('(').lstrip(')').lstrip('{').lstrip('}')
     string = sanitize_uni(string)
     
@@ -228,7 +225,7 @@ def check_repeat_times_slow(race, prev_races):
 
 
 
-### map constants
+### constants + maps
 
 VALID_CHARS = "/\*^+-_.!?@%&()\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz" + "abcdefghijklmnopqrstuvwxyz0123456789 ".upper()
 PRE_REMOVE = "/\*^+-_.!?#%() "
@@ -237,8 +234,7 @@ POST_REMOVE = "/\*^+-.!?# "
 CHAR_MAP = {
     "Λ": 'A',
     "λ": 'A',
-    "@": 'A', # not sure about some of these conversions and char constants, but whatever (for now)
-    "Æ": 'A', # <-- temporary entry until I figure out good way to implement MULT_CHAR_MAP
+    "@": 'A', # <- keep this entry?
     "ß": "B",
     "¢": "c",
     "€": "C",
@@ -260,89 +256,90 @@ MULT_CHAR_MAP = {
 }
 
 
-pts_map =   { 12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
-              11:{0:15, 1:12, 2:10, 3:8, 4:6, 5:5, 6:4, 7:3, 8:2, 9:1, 10:0},
-              10:{0:15, 1:12, 2:10, 3:8, 4:6, 5:4, 6:3, 7:2, 8:1, 9:0},
-              9:{0:15, 1:11, 2:8, 3:6, 4:4, 5:3, 6:2, 7:1, 8:0},
-              8:{0:15, 1:11, 2:8, 3:6, 4:4, 5:2, 6:1, 7:0},
-              7:{0:15, 1:10, 2:7, 3:5, 4:3, 5:1, 6:0},
-              6:{0:15, 1:10, 2:6, 3:3, 4:1, 5:0},
-              5:{0:15, 1:9, 2:5, 3:2, 4:1},
-              4:{0:15, 1:9, 2:4, 3:1},
-              3:{0:15, 1:8, 2:2},
-              2:{0:15, 1:7},
-              1:{0:15}
-            }
+PTS_MAP =  { 
+    12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
+    11:{0:15, 1:12, 2:10, 3:8, 4:6, 5:5, 6:4, 7:3, 8:2, 9:1, 10:0},
+    10:{0:15, 1:12, 2:10, 3:8, 4:6, 5:4, 6:3, 7:2, 8:1, 9:0},
+    9:{0:15, 1:11, 2:8, 3:6, 4:4, 5:3, 6:2, 7:1, 8:0},
+    8:{0:15, 1:11, 2:8, 3:6, 4:4, 5:2, 6:1, 7:0},
+    7:{0:15, 1:10, 2:7, 3:5, 4:3, 5:1, 6:0},
+    6:{0:15, 1:10, 2:6, 3:3, 4:1, 5:0},
+    5:{0:15, 1:9, 2:5, 3:2, 4:1},
+    4:{0:15, 1:9, 2:4, 3:1},
+    3:{0:15, 1:8, 2:2},
+    2:{0:15, 1:7},
+    1:{0:15}
+    }
 
-warning_map = {
-            "dc_on": "{} DCed during the race (on results), unless MKWX ERROR. Awarding 3 DC points per missing race in GP {} ({} pts).",
-            ("dc_on", 1): "{} DCed during the first race of GP {} (on results), unless MKWX ERROR. 15 DC points for GP {}.",
-            ("dc_on", -1): "{} DCed during the race (on results), unless MKWX ERROR. No DC points for GP {}.", 
+WARNING_MAP = {
+        "dc_on": "{} DCed during the race (on results), unless MKWX ERROR. Awarding 3 DC points per missing race in GP {} ({} pts).",
+        ("dc_on", 1): "{} DCed during the first race of GP {} (on results), unless MKWX ERROR. 15 DC points for GP {}.",
+        ("dc_on", -1): "{} DCed during the race (on results), unless MKWX ERROR. No DC points for GP {}.", 
 
-            "dc_on_confirmed": "{} DCed during the race (on results). Awarding 3 DC points per missing race in GP {} ({} pts).",
-            ("dc_on_confirmed", 1): "{} DCed during the first race of GP {} (on results). 15 DC points for GP {}.",
-            ("dc_on_confirmed", -1): "{} DCed during the race (on results). No DC points for GP {}.",
+        "dc_on_confirmed": "{} DCed during the race (on results). Awarding 3 DC points per missing race in GP {} ({} pts).",
+        ("dc_on_confirmed", 1): "{} DCed during the first race of GP {} (on results). 15 DC points for GP {}.",
+        ("dc_on_confirmed", -1): "{} DCed during the race (on results). No DC points for GP {}.",
 
-            "dc_before": "{} DCed before race. Giving 3 DC points per missing race in GP {} ({} pts).", 
-            ("dc_before", 1): "{} is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war).", 
+        "dc_before": "{} DCed before race. Giving 3 DC points per missing race in GP {} ({} pts).", 
+        ("dc_before", 1): "{} is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war).", 
 
-            "missing": "GP {} is missing player(s). GP started with {} players, but should've started with {} players.",
-            "missing_w_sub": "GP {} is missing {} player(s): {}. Missing players either DCed or were subbed out.",
-            "overflow": "GP {} has too many players. GP started with {} players, but should've started with {} players.",
+        "missing": "GP {} is missing player(s). GP started with {} players, but should've started with {} players.",
+        "missing_w_sub": "GP {} is missing {} player(s): {}. Missing players either DCed or were subbed out.",
+        "overflow": "GP {} has too many players. GP started with {} players, but should've started with {} players.",
 
-            "blank_time": "{} had a blank race time and was on results. If this wasn't a DC, this is an MKWX ERROR.",
+        "blank_time": "{} had a blank race time and was on results. If this wasn't a DC, this is an MKWX ERROR.",
 
-            "tie": "{} had tied race times ({}). Check ?rr for errors.", 
+        "tie": "{} had tied race times ({}). Check ?rr for errors.", 
 
-            "mkwx_bug_increase": "Room size increased mid-GP from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX ERROR. Affected races: {}. Run ?changeroomsize to fix this.", 
-            "mkwx_bug_change": "Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX ERROR. Table could be inaccurate for this GP ({}).", 
-            "mkwx_bug_blank": "All players in the race had blank finish times. This is an MKWX ERROR if there was no room reset. Table is inaccurate for this GP ({}).", 
-            "mkwx_bug_repeat": "{} player(s) had the same finish time as they had in a previous race (race {}). Check for errors as this is highly improbable and likely an MKWX ERROR. Table could be inaccurate for this GP ({}).",
-            "mkwx_bug_tr":"Room had {} players with track errors. Check ?rr for errors. Table could be inaccurate for this GP ({}).", 
-            "mkwx_bug_delta": "Room had time delay (lag) errors ({} player(s)). Check ?rr for errors. Table could be inaccuate for this GP ({}).",
+        "mkwx_bug_increase": "Room size increased mid-GP from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX ERROR. Affected races: {}. Run ?changeroomsize to fix this.", 
+        "mkwx_bug_change": "Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX ERROR. Table could be inaccurate for this GP ({}).", 
+        "mkwx_bug_blank": "All players in the race had blank finish times. This is an MKWX ERROR if there was no room reset. Table is inaccurate for this GP ({}).", 
+        "mkwx_bug_repeat": "{} player(s) had the same finish time as they had in a previous race (race {}). Check for errors as this is highly improbable and likely an MKWX ERROR. Table could be inaccurate for this GP ({}).",
+        "mkwx_bug_tr":"Room had {} players with track errors. Check ?rr for errors. Table could be inaccurate for this GP ({}).", 
+        "mkwx_bug_delta": "Room had time delay (lag) errors ({} player(s)). Check ?rr for errors. Table could be inaccuate for this GP ({}).",
 
-            "sub": "{}  -  Potential sub detected. If this player is a sub, use ?sub.", 
-            "sub_conf": "{} - subbed in for {}.",
+        "sub": "{}  -  Potential sub detected. If this player is a sub, use ?sub.", 
+        "sub_conf": "{} - subbed in for {}.",
 
-            "large_time": "{} had a large finish time - {}. Check ?rr for errors."
+        "large_time": "{} had a large finish time - {}. Check ?rr for errors."
         }
 
-dc_map = {
-            "dc_on": "{}** - DCed during the race (on results), unless MKWX ERROR. Awarding 3 DC points per missing race in GP {} ({} pts).",
-            ("dc_on", 1): "{}** - DCed during the first race of GP {} (on results), unless MKWX ERROR. 15 DC points for GP {}.",
-            ("dc_on", -1): "{}** - DCed during the race (on results), unless MKWX ERROR. No DC points for GP {}.", 
+DC_MAP = {
+    "dc_on": "{}** - DCed during the race (on results), unless MKWX ERROR. Awarding 3 DC points per missing race in GP {} ({} pts).",
+    ("dc_on", 1): "{}** - DCed during the first race of GP {} (on results), unless MKWX ERROR. 15 DC points for GP {}.",
+    ("dc_on", -1): "{}** - DCed during the race (on results), unless MKWX ERROR. No DC points for GP {}.", 
 
-            "dc_on_confirmed": "{}** - DCed during the race (on results). Awarding 3 DC points per missing race in GP {} ({} pts).",
-            ("dc_on_confirmed", 1): "{}** - DCed during the first race of GP {} (on results). 15 DC points for GP {}.",
-            ("dc_on_confirmed", -1): "{}** - DCed during the race (on results). No DC points for GP {}.", 
+    "dc_on_confirmed": "{}** - DCed during the race (on results). Awarding 3 DC points per missing race in GP {} ({} pts).",
+    ("dc_on_confirmed", 1): "{}** - DCed during the first race of GP {} (on results). 15 DC points for GP {}.",
+    ("dc_on_confirmed", -1): "{}** - DCed during the race (on results). No DC points for GP {}.", 
 
-            "dc_before": "{}** - DCed before race. 3 DC points per missing race in GP {} ({} pts).", 
-            ("dc_before", 1): "{}** - missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war)."
-        }  
+    "dc_before": "{}** - DCed before race. 3 DC points per missing race in GP {} ({} pts).", 
+    ("dc_before", 1): "{}** - missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war)."
+    }  
 
-graph_map = {
-        1: {"table": "none", "type": "None"},
-        2: {"table": "abs", "type": "Absolute"},
-        3: {"table": "diff", "type": "Difference"}   
+GRAPH_MAP = {
+    1: {"table": "none", "type": "None"},
+    2: {"table": "abs", "type": "Absolute"},
+    3: {"table": "diff", "type": "Difference"}   
 }
 
-style_map = {
-        1: {"table": "default", "type": "Default Style"},
-        2: {"table": "dark", "type": "Dark Theme"},
-        3: {"table": "rank", "type": "Color by Ranking"},
-        4: {"table": "mku", "type": "Mario Kart Universal"},
-        5: {"table": "200L", "type": "200 League"},
-        6: {"table": "americas", "type": "Americas Cup"},
-        7: {"table": "euro", "type": "EuroLeague"},
-        8: {"table": "japan", "type": "マリオカートチームリーグ戦"},
-        9: {"table": "cwl", "type": "Clan War League"},
-        10: {"table": "runners", "type": "Runners Assemble"},
-        11: {"table": "mkworlds", "type": "Mario Kart Worlds"},
+STYLE_MAP = {
+    1: {"table": "default", "type": "Default Style"},
+    2: {"table": "dark", "type": "Dark Theme"},
+    3: {"table": "rank", "type": "Color by Ranking"},
+    4: {"table": "mku", "type": "Mario Kart Universal"},
+    5: {"table": "200L", "type": "200 League"},
+    6: {"table": "americas", "type": "Americas Cup"},
+    7: {"table": "euro", "type": "EuroLeague"},
+    8: {"table": "japan", "type": "マリオカートチームリーグ戦"},
+    9: {"table": "cwl", "type": "Clan War League"},
+    10: {"table": "runners", "type": "Runners Assemble"},
+    11: {"table": "mkworlds", "type": "Mario Kart Worlds"},
 }
 
-settings = {
-    "graph": graph_map, 
-    "style": style_map
+SETTINGS = {
+    "graph": GRAPH_MAP, 
+    "style": STYLE_MAP
 }
 
 if __name__ == "__main__":

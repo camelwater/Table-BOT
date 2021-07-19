@@ -45,6 +45,7 @@ def get_test_case(large = False):
         #             'A-1', 'what?', "WWW.PH.COM", "λxe", 'A-2', 'λp fraud', 'WOW!!']
         # players = ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros']
         # players = ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', '@*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA h', 'USA K', 'ABBA']
+        # players = ['Æ big', 'PP hi', "PP powerplant", 'PP POWERGRID', 'Æ vamp', 'PP ger', 'Æ hello', 'Æ oo', 'big PP', 'shuyx@Æ']
         # players = ['Ac☆Mirymeg', 'Z☆', 'WC top 2', 'Player', 'MonkeyTime', 'z おk', 'Ac Stubbz', 'Hosseini','MΞ☆Mγτh','Hτ chξΣ◇€£', 'Player', 'WC △△◎◎♪☆○']
         players = ['Ac☆Mirymeg', 'ZabbatheHUT☆', 'WC top 2', 'Player-', 'Mi gusta s', 'z おk', 'Ac Stubbz', 'BARGAINING FOR MONEY','MΞ☆Mγτh','Bτ chξΣ◇€£SE', 'Player', 'World CUP WINNER △△◎◎♪☆○']
 
@@ -208,7 +209,7 @@ def try_split_by_actual(players, tag, per_team, all_tags):
     for p in players:
         if not (p.strip().lower().startswith(tag.lower()) or p.strip().lower().endswith(tag.lower())):
             diff_actual_players.append(p)
-    if len(diff_actual_players)>=per_team:
+    if len(diff_actual_players)>=per_team and len(players)-len(diff_actual_players)>=per_team:
         diff_actual_players = diff_actual_players[:per_team]
         for i in diff_actual_players:
             all_tags[tag].discard(i)
@@ -294,7 +295,7 @@ def handle_undetermined(teams, un_players, per_team):
         for r_team in split:
             for ind,player in enumerate(r_team):
                 try:
-                    temp = check = Utils.replace_brackets(player)[0] #use first valid character from name as new tag
+                    temp = check = Utils.sanitize_uni(player)[0] #use first valid character from name as new tag
                     d = 1
                     while check.lower() in map(lambda o: o.lower(), teams.keys()):
                         check = f"{temp}-{d}"
@@ -302,7 +303,7 @@ def handle_undetermined(teams, un_players, per_team):
                     teams[check] = r_team
                     break
                 
-                except: #player has no valid characters in their name (can't use replace_brackets/sanitize_uni)
+                except: #player has no valid characters in their name (can't use sanitize_uni)
                     if ind+1==len(r_team):
                         temp = check = player[0]
                         d = 1
@@ -540,10 +541,10 @@ if __name__ == "__main__":
     
     players, lengths = get_test_case(large=False)
     tick = time.time()
-    t = tag_algo(players, per_team=2, num_teams=6)
-    print(dict(sorted(t.items(), key = lambda l: l[0])))
-    tock = time.time()-tick
-    print("\nPERFORMANCE:", tock)
+    teams = tag_algo(players, per_team=2, num_teams=6)
+    # print(dict(sorted(t.items(), key = lambda l: l[0])))
+    print(teams)
+    print("\nPERFORMANCE:", time.time()-tick)
     
     if lengths:
         print('avg length:', sum(lengths)/len(lengths))

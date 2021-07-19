@@ -17,13 +17,12 @@ from discord.ext import tasks
 import time as timer
 from unidecode import unidecode
 from collections import defaultdict, Counter
-from os.path import commonprefix
 from find_tags import tag_algo
 import tag_testing.tagAlgo as tagAlgo
 import Utils
-from Utils import isFFA, warning_map, dc_map, style_map, pts_map
-from Utils import graph_map as gm
-graph_map = copy.deepcopy(gm)
+from Utils import isFFA, WARNING_MAP, DC_MAP, STYLE_MAP, PTS_MAP
+from Utils import GRAPH_MAP as GM
+graph_map = copy.deepcopy(GM)
 
 # NOTE: consider changing players into Player objects, and maybe automating first race dcs (18 and 15 pts) 
 # also should probably start using /room/ JSON 
@@ -391,290 +390,6 @@ class Table():
         print(self.tags)
         print("tag algo time:",timer.time()-tick)
         
-        #self.old_split_teams(f, num_teams)
-    
-    def old_split_teams(self, f, num_teams): 
-        """
-        split players into teams based on tags
-        """
-        tick=timer.time()
-        f = f[0]
-        if not f.isnumeric():
-            return
-        per_team = int(f)
-        teams = {} #tag: list of players
-        player_copy = list(self.display_names.values()) if not self.IGNORE_FCS else list(copy.deepcopy(self.players).keys())
-        #print(player_copy)
-        post_players = []
-        
-        i = 0
-        while i< len(player_copy):
-            tag = ''
-            matches = 1
-            indx = len(player_copy[i])+1
-
-            while matches < per_team and indx>0:
-                indx-=1
-                matches = 1
-                for j in range(len(player_copy)):                    
-                    if i!=j and indx>0 and Utils.sanitize_uni(player_copy[i].strip().replace("[","").replace(']','')).lower()[:indx] == Utils.sanitize_uni(player_copy[j].strip().replace("[","").replace(']','')).lower()[:indx]:
-                        matches+=1
-                        #print(Utils.sanitize_uni(player_copy[i].strip().lower().replace("[","").replace(']',''))[:indx], Utils.sanitize_uni(player_copy[j].strip().lower().replace("[","").replace(']',''))[:indx])
-                        if matches == per_team: break 
-                
-            tag = Utils.sanitize_tag_uni(player_copy[i].replace("[","").replace(']',''))[:indx]
-            if len(tag)>0 and tag[-1]=="-": 
-                tag = tag[:-1]
-                indx-=1
-            if len(tag)==1: tag = Utils.sanitize_uni(tag).upper()
-            
-            temp_tag = tag
-            if tag == "": 
-                post_players.append(player_copy.pop(i))
-                continue
-            x = 1
-            while temp_tag in teams:
-                temp_tag = tag.rstrip() +"-"+str(x)
-                x+=1
-            teams[temp_tag] = []
-            ind = 0
-            while ind<len(player_copy):
-                if Utils.sanitize_uni(tag.replace("[","").replace(']','')).lower() == Utils.sanitize_uni(player_copy[ind].strip().replace("[","").replace(']','')).lower()[:indx]: 
-                    if len(teams[temp_tag])<per_team:
-                        teams[temp_tag].append(player_copy.pop(ind))
-                        ind = 0
-                        continue
-                ind+=1
-                
-            i = 0 
-
-        #find suffix tags
-        i = 0
-        all_tag_matches= {}
-        while i < len(post_players):
-            tag = ''
-            matches = 1
-            indx = len(post_players[i])+1
-            
-            postfix_fill = False
-            for team in teams.items():
-                if len(team[1])<per_team:
-                    postfix_fill = True
-                    break
-            if postfix_fill:
-                cont=False
-                for tag, _list in teams.items():
-                    if len(_list)<per_team and len(commonprefix([Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']',''))[::-1], Utils.sanitize_uni(tag.lower().strip().replace("[","").replace(']',''))]))>0:
-                        teams[tag].append(post_players.pop(i))
-                        i = 0
-                        cont = True
-                        break
-                if cont:
-                    continue
-
-            #suffix and prefix (together) check
-            temp_tag = ''
-            tag_matches = defaultdict(list)
-            temp_indx = len(post_players[i])+1
-            while temp_indx>0:
-                cont=False
-                temp_indx-=1
-               
-                for j in range(len(post_players)):
-                    i_tag = Utils.sanitize_uni(post_players[i].strip().lower().replace("[","").replace(']',''))
-                    j_tag = Utils.sanitize_uni(post_players[j].strip().lower().replace("[","").replace(']',''))
-                    
-                    if i!=j and temp_indx>0 and (i_tag[:temp_indx] == j_tag[::-1][:temp_indx][::-1]
-                                                 or i_tag[:temp_indx] == j_tag[:temp_indx]):
-                        
-                        #print(temp_indx, post_players[i], post_players[j])
-                        m_tag = Utils.sanitize_tag_uni(post_players[i].strip().replace("[","").replace(']',''))[:temp_indx]
-                        if len(m_tag) == 1: 
-                            m_tag = Utils.sanitize_uni(m_tag).upper()
-                        temp = m_tag
-                        d = 1
-                        while m_tag.lower().strip() in map(lambda o: o.lower().strip(), list(teams)):
-                            m_tag = f"{temp}-{d}"
-                            d+=1
-
-                        if len(tag_matches[m_tag])==0:
-                            tag_matches[m_tag].append(post_players[i])
-                        tag_matches[m_tag].append(post_players[j])
-                        if len(tag_matches[m_tag])==per_team:
-                            teams[m_tag] = tag_matches.pop(m_tag)
-                            for p in teams[m_tag]:
-                                try:
-                                    post_players.remove(p)
-                                except:
-                                    pass
-                                for x in all_tag_matches.items():
-                                    try:
-                                        all_tag_matches[1].remove(p)
-                                    except:
-                                        pass
-                                i = -1
-                            cont=True
-                            break
-                        
-                    elif i!=j and temp_indx>0 and (i_tag[::-1][:temp_indx][::-1] == j_tag[::-1][:temp_indx][::-1]
-                                   or i_tag[::-1][:temp_indx][::-1] == j_tag[:temp_indx]):
-                        
-                        #print(temp_indx, post_players[i], post_players[j])
-                        m_tag = Utils.sanitize_tag_uni(post_players[i].strip().replace("[","").replace(']',''))[::-1][:temp_indx][::-1]
-                        if len(m_tag) == 1: 
-                            m_tag = Utils.sanitize_uni(m_tag).upper()
-                        temp = m_tag
-                        d = 1
-                        while m_tag.lower().strip() in map(lambda o: o.lower().strip(), list(teams)):
-                            m_tag = f"{temp}-{d}"
-                            d+=1
-
-                        if len(tag_matches[m_tag])==0:
-                            tag_matches[m_tag].append(post_players[i])
-                        tag_matches[m_tag].append(post_players[j])
-                        if len(tag_matches[m_tag])==per_team:
-                            teams[m_tag] = tag_matches.pop(m_tag)
-                            for p in teams[m_tag]:
-                                try:
-                                    post_players.remove(p)
-                                except:
-                                    pass
-                                for x in all_tag_matches.items():
-                                    try:
-                                        all_tag_matches[1].remove(p)
-                                    except:
-                                        pass
-                                i = -1
-                            cont=True  
-                            break
-                                
-                if cont:
-                    break
-               
-            i+=1
-            for item in tag_matches.items():
-                if item[0] in all_tag_matches:
-                    if len(item[1]) > len(all_tag_matches[item[0]]):
-                        all_tag_matches[item[0]] = item[1]
-                    # if len(item[1]) > len(all_tag_matches[item[0]]) and len(all_tag_matches[item[0]])!=per_team:
-                    #     all_tag_matches[item[0]] = item[1]
-                    # else:
-                    #     temp = check = item[0]
-                    #     d = 1
-                    #     while check in all_tag_matches:
-                    #         check = f"{temp}-{d}"
-                    #         d+=1
-                    #     all_tag_matches[check] = item[1]
-                else:
-                    all_tag_matches[item[0]] = item[1]
-
-        #print(post_players)
-        teams_needed = num_teams-len(teams.keys())
-        #print("teams needed:",teams_needed)
-        if(len(all_tag_matches)>=teams_needed):
-            for t in range(teams_needed):
-                for x in copy.deepcopy(all_tag_matches).items():
-                    for player in x[1]:
-                        if player not in post_players:
-                            all_tag_matches[x[0]].remove(player)
-                    if len(all_tag_matches[x[0]]) == 0:
-                        all_tag_matches.pop(x[0])
-                if len(all_tag_matches) == 0:
-                    continue
-                all_tag_matches = dict(sorted(all_tag_matches.items(), key=lambda item: len(item[1]), reverse=True))
-                teams[list(all_tag_matches.keys())[0]] = all_tag_matches[list(all_tag_matches.keys())[0]]
-                for p in all_tag_matches[list(all_tag_matches.keys())[0]]:
-                    try:
-                        post_players.remove(p)
-                    except:
-                        pass
-                all_tag_matches.pop(list(all_tag_matches.keys())[0])
-                
-                        
-        un_players = copy.deepcopy(post_players)
-        post_players.clear()
-      
-        #substring (unconventional) tag for 2v2s
-        if per_team==2:
-            i = 0
-            while i<len(un_players):
-                tag = ''
-                longest_match = 1
-                match = 0
-                
-                for j in range(len(un_players)):
-                    m = Utils.LCS(Utils.sanitize_uni(un_players[i].strip().lower().replace("[","").replace(']','').replace(" ", "")), Utils.sanitize_uni(un_players[j].strip().lower().replace("[","").replace(']','').replace(" ","")))
-                    if i!=j and len(m)>longest_match:
-                        longest_match = len(m)
-                        match= un_players[i], un_players[j]
-                        tag = m
-
-                if match == 0 or tag == '':
-                    i+=1
-                else:
-                    temp_tag = tag
-                    x = 1
-                    while temp_tag in teams:
-                        temp_tag = tag+"-"+str(x)
-                        x+=1
-                    teams[temp_tag] = list(match)
-                    for p in match:
-                        un_players.remove(p)
-
-        #randomly tag the rest (tag could not be determined)
-        if len(un_players)>0:
-            is_all_filled = True
-            for item in teams.items():
-                    if len(item[1])<per_team:
-                        is_all_filled = False
-                        break
-            def split():
-                split = list(Utils.chunks(un_players, per_team))
-                for i in split:
-                    for ind,j in enumerate(i):
-                        try:
-                            temp = check = Utils.replace_brackets(j)[0]
-                            d = 1
-                            while check.lower() in map(lambda o: o.lower(), list(teams)):
-                                check = f"{temp}-{d}"
-                                d+=1
-                            teams[check] = i
-                            break
-                        
-                        except:
-                            if ind+1==len(i):
-                                teams[j[0][0]] = i
-                            else:
-                                continue
-                    
-            if len(teams)==num_teams and not is_all_filled:
-                for item in teams.items():
-                    while len(item[1])<per_team and len(un_players)>0:
-                        item[1].append(un_players.pop(0))
-                if len(un_players)>0:
-                    split()
-            else:
-                split()
-        
-        if self.TESTING:
-                L = []
-                for i in teams.items():
-                    L.append([i[0].lower(), list(map(lambda l: Utils.sanitize_uni(l.lower()), i[1]))])
-                tagalgo = tagAlgo.TagAlgo(None, num_teams, per_team)
-                print(tagalgo.fitness(L))
-
-        if not self.IGNORE_FCS:
-            print(teams)
-            for i in teams.items():
-                teams[i[0]] = [self.fcs[j] for j in i[1]]  
-        self.tags = teams
-        self.all_players = copy.deepcopy(self.tags)
-        self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].lower())))
-        self.tags = {k.strip(): v for (k, v) in self.tags.items()}
-
-        print()
-        print(self.tags)
-        print("old tag algo time:",timer.time()-tick)
 
     def warn_to_str(self, warning):                
         warning_type = warning.get('type')
@@ -687,63 +402,63 @@ class Table():
                 warning_type = warning_type+"_confirmed" if is_edited else warning_type
                 race = warning.get('race')
                 if race == 1:
-                    ret = warning_map.get((warning_type, race)).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('gp')) 
+                    ret = WARNING_MAP.get((warning_type, race)).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('gp')) 
                 elif race == -1:
-                    ret = warning_map.get((warning_type, race)).format(self.display_names[warning.get('player')], warning.get('gp'))
+                    ret = WARNING_MAP.get((warning_type, race)).format(self.display_names[warning.get('player')], warning.get('gp'))
                 else:
-                    ret = warning_map.get(warning_type).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('pts'))
+                    ret = WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('pts'))
             
             else:
                 race = warning.get('race')
                 if race == 1:
-                    ret = warning_map.get((warning_type,race)).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('gp'), warning.get('gp'))
+                    ret = WARNING_MAP.get((warning_type,race)).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('gp'), warning.get('gp'))
                 else:
-                    ret = warning_map.get(warning_type).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('pts'))
+                    ret = WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('pts'))
         
             return ret + '{}'.format(" - determined by tabler" if is_edited else "")
 
         elif "mkwx_bug" in warning_type:
             if "_increase" in warning_type:
-                return warning_map.get(warning_type).format(warning.get('orig_players'), warning.get('new_players'), ', '.join(map(str, warning.get('races'))))
+                return WARNING_MAP.get(warning_type).format(warning.get('orig_players'), warning.get('new_players'), ', '.join(map(str, warning.get('races'))))
 
             elif "_change" in warning_type:
-                return warning_map.get(warning_type).format(warning.get('race'), warning.get('gp'))
+                return WARNING_MAP.get(warning_type).format(warning.get('race'), warning.get('gp'))
             
             elif "_tr" in warning_type:
-                return warning_map.get(warning_type).format(warning.get("aff_players"), warning.get("gp"))
+                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get("gp"))
 
             elif "_delta" in warning_type:
-                return warning_map.get(warning_type).format(warning.get("aff_players"), warning.get('gp'))
+                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get('gp'))
             
             elif "_repeat" in warning_type:
-                return warning_map.get(warning_type).format(warning.get("num_affected"), warning.get('race'), warning.get('gp'))
+                return WARNING_MAP.get(warning_type).format(warning.get("num_affected"), warning.get('race'), warning.get('gp'))
 
             else:
-                return warning_map.get(warning_type).format(warning.get('gp'))
+                return WARNING_MAP.get(warning_type).format(warning.get('gp'))
 
         elif warning_type == "missing":
-            return warning_map.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
+            return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
         
         elif warning_type == "missing_w_sub":
-            return warning_map.get(warning_type).format(warning.get('gp'), warning.get('num_missing'), [self.display_names[i] for i in warning.get('missing_players')])
+            return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('num_missing'), [self.display_names[i] for i in warning.get('missing_players')])
         
         elif warning_type == "overflow":
-            return warning_map.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
+            return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
         
         elif warning_type == "blank_time":
-            return warning_map.get(warning_type).format(self.display_names[warning.get('player')])
+            return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
 
         elif warning_type == "tie":
-            return warning_map.get(warning_type).format([self.display_names[i] for i in warning.get('players')], warning.get('time'))
+            return WARNING_MAP.get(warning_type).format([self.display_names[i] for i in warning.get('players')], warning.get('time'))
 
         elif warning_type == "sub":
             if warning.get('is_edited', False):
-                return warning_map.get("sub_conf").format(self.display_names[warning.get('player')], self.display_names[warning.get('sub_out')])
+                return WARNING_MAP.get("sub_conf").format(self.display_names[warning.get('player')], self.display_names[warning.get('sub_out')])
             else:
-                return warning_map.get(warning_type).format(self.display_names[warning.get('player')])
+                return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
 
         elif warning_type == "large_time":
-            return warning_map.get(warning_type).format(self.display_names[warning.get('player')], warning.get('time'))
+            return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')], warning.get('time'))
 
         else:
             print("WARNING TYPE NOT FOUND:", warning_type)
@@ -801,11 +516,11 @@ class Table():
                 self.default_graph = copy.deepcopy(self.graph)
                 self.graph = None
         elif self.teams==2 and 3 not in graph_map:
-            graph_map[3] = copy.copy(gm[3])
+            graph_map[3] = copy.copy(GM[3])
 
     def style_options(self):
         ret = 'Table style options:'
-        for num,style in style_map.items():
+        for num,style in STYLE_MAP.items():
             ret+="\n   {} {}".format("**{}.**".format(num) if self.style and self.style.get('type') == style.get('type') else "`{}.`".format(num), style.get('type'))
         return ret
     
@@ -822,9 +537,9 @@ class Table():
 
         if choice.lstrip('+').lstrip('-').isnumeric():
             c_indx = int(choice)
-            choice = style_map.get(c_indx, None)
+            choice = STYLE_MAP.get(c_indx, None)
             if not choice:
-                return "`{}` is not a valid style number. The style number must be from 1-{}. Look at `?style` for reference.".format(c_indx, len(style_map))
+                return "`{}` is not a valid style number. The style number must be from 1-{}. Look at `?style` for reference.".format(c_indx, len(STYLE_MAP))
             
             if not reundo:
                 self.modifications.append([("?style {}".format(c_indx), self.style.get('type') if self.style is not None else None, choice.get('type'))])
@@ -836,18 +551,18 @@ class Table():
         else:
             o_choice = choice
             not_in = True
-            for i in list(style_map.values()):
+            for i in list(STYLE_MAP.values()):
                 if choice.lower() in map(lambda l: l.lower(), i.values()):
                     not_in=False
                     break
             if not_in:
                 options = ''
-                for i in list(style_map.values()):
+                for i in list(STYLE_MAP.values()):
                     options+='   - {}\n'.format(" | ".join(map(lambda orig: "`{}`".format(orig), i.values())))
                     
                 return "`{}` is not a valid style. The following are the only available style options:\n".format(o_choice)+options
             
-            for i in list(style_map.values()):
+            for i in list(STYLE_MAP.values()):
                 if choice.lower() in map(lambda l: l.lower(), i.values()):
                     choice = i
                     break
@@ -1006,14 +721,14 @@ class Table():
                         tag_places[t[0]].append(count)
             
         if not isFFA(self.format):
-            tag_places = dict(sorted(tag_places.items(), key=lambda item: sum([pts_map[count][i-1] for i in item[1]]), reverse=True))
+            tag_places = dict(sorted(tag_places.items(), key=lambda item: sum([PTS_MAP[count][i-1] for i in item[1]]), reverse=True))
 
             ret+="\n"
             for tag, placements in tag_places.items():
                 ret+="**{}** -".format(tag)
                 for p in placements:
                     ret+=' {}{}'.format(p, '' if p==placements[-1] else ',')
-                ret+=" (**{}** pts)".format(sum([pts_map[count][i-1] for i in placements]))
+                ret+=" (**{}** pts)".format(sum([PTS_MAP[count][i-1] for i in placements]))
                 ret+="{}".format("" if tag==list(tag_places.items())[-1][0] else "   |   ")
         return False,ret
     
@@ -1210,16 +925,16 @@ class Table():
         if '_on' in dc_type:
             dc_type = dc_type+'_confirmed' if is_edited else dc_type
             if race == 1:
-                ret = dc_map.get((dc_type, 1)).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('gp'))
+                ret = DC_MAP.get((dc_type, 1)).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('gp'))
             elif race == -1:
-                ret = dc_map.get((dc_type, -1)).format(self.display_names[dc.get('player')], dc.get('gp'))
+                ret = DC_MAP.get((dc_type, -1)).format(self.display_names[dc.get('player')], dc.get('gp'))
             else:
-                ret = dc_map.get(dc_type).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('pts'))
+                ret = DC_MAP.get(dc_type).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('pts'))
         else:
             if race == 1:
-                ret = dc_map.get((dc_type, 1)).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('gp'), dc.get('gp'))
+                ret = DC_MAP.get((dc_type, 1)).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('gp'), dc.get('gp'))
             else:
-                ret = dc_map.get(dc_type).format(self.display_names[dc.get('player')],  dc.get('gp'), dc.get('pts'))
+                ret = DC_MAP.get(dc_type).format(self.display_names[dc.get('player')],  dc.get('gp'), dc.get('pts'))
         return ret + '{}'.format(' - edited by tabler' if is_edited else "")
 
     def dc_list_str(self): 
@@ -1993,7 +1708,7 @@ class Table():
             for place, p in enumerate(self.races[raceNum]):
                 player = p[2]
                 try:
-                    pts = pts_map[orig_room_size][place]
+                    pts = PTS_MAP[orig_room_size][place]
                 except KeyError:
                     pts = 0
                 orig_pts[player] = pts
@@ -2003,7 +1718,7 @@ class Table():
             for place, p in enumerate(self.races[raceNum]):
                 player = p[2]
                 try:
-                    pts = pts_map[cor_room_size][place]
+                    pts = PTS_MAP[cor_room_size][place]
                 except KeyError:
                     pts = 0
                 fixed_pts[player] = pts
@@ -2071,9 +1786,9 @@ class Table():
             corresponding_rr = [i[2] for i in corresponding_rr]
             
             orig_pos = corresponding_rr.index(player)
-            orig_pts = pts_map[len(corresponding_rr)][orig_pos]
+            orig_pts = PTS_MAP[len(corresponding_rr)][orig_pos]
             try:   
-                cor_pts = pts_map[len(corresponding_rr)][int(correct_pos)]
+                cor_pts = PTS_MAP[len(corresponding_rr)][int(correct_pos)]
             except:
                 return "Corrected position `{}` was invalid. It must be a number from 1-{}.".format(correct_pos+1, len(corresponding_rr))
             
@@ -2084,7 +1799,7 @@ class Table():
                 
             aff_orig_pts = {}
             for a in aff:
-                aff_orig_pts[a] = pts_map[len(corresponding_rr)][corresponding_rr.index(a)]
+                aff_orig_pts[a] = PTS_MAP[len(corresponding_rr)][corresponding_rr.index(a)]
             
             correct_ft_order = list(self.finish_times[raceNum-1].keys())
             correct_ft_order.insert(correct_pos, correct_ft_order.pop(orig_pos))
@@ -2097,7 +1812,7 @@ class Table():
             corresponding_rr = [i[2] for i in corresponding_rr]
             
             for a in aff:
-                aff_new_pts[a] = pts_map[len(corresponding_rr)][corresponding_rr.index(a)]
+                aff_new_pts[a] = PTS_MAP[len(corresponding_rr)][corresponding_rr.index(a)]
             
             gp = int((raceNum-1)/4)
 
@@ -2192,9 +1907,9 @@ class Table():
                             continue
 
                 recorded_players.append(player)
-                self.players[player][1][gp] += pts_map[cur_room_size][placement]
-                self.players[player][2][raceNum] += pts_map[cur_room_size][placement]
-                self.players[player][0] += pts_map[cur_room_size][placement]
+                self.players[player][1][gp] += PTS_MAP[cur_room_size][placement]
+                self.players[player][2][raceNum] += PTS_MAP[cur_room_size][placement]
+                self.players[player][0] += PTS_MAP[cur_room_size][placement]
 
             for dc in list(self.dc_pts.items()):
                 for j in dc[1]:
@@ -2609,9 +2324,9 @@ class Table():
 
                 miiName = self.display_names[fc]
                 
-                self.players[fc][1][self.gp] += pts_map[cur_room_size][place]
-                self.players[fc][2][shift+raceNum] = pts_map[cur_room_size][place]
-                self.players[fc][0] += pts_map[cur_room_size][place]
+                self.players[fc][1][self.gp] += PTS_MAP[cur_room_size][place]
+                self.players[fc][2][shift+raceNum] = PTS_MAP[cur_room_size][place]
+                self.players[fc][0] += PTS_MAP[cur_room_size][place]
                 
                 #check for ties
                 if time != 'DC' and time in list(last_finish_times.values()):

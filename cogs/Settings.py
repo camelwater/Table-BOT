@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from discord.ext import commands
-from Utils import settings
+from Utils import SETTINGS
 
 class Settings(commands.Cog):
     def __init__(self, bot):
@@ -104,12 +104,12 @@ class Settings(commands.Cog):
             valid = False
             if default.isnumeric():
                 try:
-                    default = settings.get(settingType)[int(default)]
+                    default = SETTINGS.get(settingType)[int(default)]
                     valid=True
                 except:
                     pass
             else:
-                for i in list(settings.get(settingType).values()):
+                for i in list(SETTINGS.get(settingType).values()):
                     if default.lower() in map(lambda l: l.lower(), i.values()):
                         default = i
                         valid = True
@@ -122,7 +122,7 @@ class Settings(commands.Cog):
         await ctx.send(mes)
     
 def get_avail_settings(setting):
-    setting = settings.get(setting)
+    setting = SETTINGS.get(setting)
     if setting is None:
         return None
 
