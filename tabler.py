@@ -368,7 +368,7 @@ class Table():
         per_team = int(f)
         player_copy = list(self.display_names.values()) if not self.IGNORE_FCS else list(copy.deepcopy(self.players).keys())
         
-        teams = tag_algo(player_copy, per_team, num_teams)
+        teams = tag_algo(player_copy, per_team = per_team, num_teams = num_teams)
         
         if self.TESTING:
                 L = []
