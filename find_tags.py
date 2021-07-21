@@ -313,7 +313,7 @@ def handle_undetermined(teams, un_players, per_team):
                 
                 except: #player has no valid characters in their name (can't use sanitize_uni)
                     if ind+1==len(r_team):
-                        temp = check = player[0][0]
+                        temp = check = player[1][0]
                         d = 1
                         while check.lower() in map(lambda o: o.lower(), teams.keys()):
                             check = f"{temp}-{d}"
