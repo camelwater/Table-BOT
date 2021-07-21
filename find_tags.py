@@ -8,7 +8,7 @@ import random as rand
 
 def get_test_case(large = False):
     """
-    return a test case for the tag algorithm (I had to make them).
+    return a test case for the tag algorithm (manual).
     `large` is for large performance testing - more than what is usually required of the algorithm.
     """
     if large:
@@ -43,13 +43,13 @@ def get_test_case(large = False):
                 lengths.append(len(i))
     else:
         # players = list({'x#1':0, 'xxx':0, 'Ryan@X':0, '¢ant':0, 'coolio': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}.keys())
-        players = ['hello', 'he123', 'borrowed time', 'WAX', 'barrel', 
-                    'A-1', 'what?', "WWW.PH.COM", "λxe", 'A-2', 'λp fraud', 'WOW!!']
+        # players = ['hello', 'he123', 'borrowed time', 'WAX', 'barrel', 
+        #             'A-1', 'what?', "WWW.PH.COM", "λxe", 'A-2', 'λp fraud', 'WOW!!']
         # players = ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros', 'vc Dane']
         # players = ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', '@*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA h', 'USA K', 'ABBA']
         # players = ['Æ big', 'PP hi', "PP powerplant", 'PP POWERGRID', 'Æ vamp', 'PP ger', 'Æ hello', 'Æ oo', 'big PP', 'shuyx@Æ']
         # players = ['Ac☆Mirymeg', 'Z☆', 'WC top 2', 'Player', 'MonkeyTime', 'z おk', 'Ac Stubbz', 'Hosseini','MΞ☆Mγτh','Hτ chξΣ◇€£', 'Player', 'WC △△◎◎♪☆○']
-        # players = ['Ac☆Mirymeg', 'ZabbatheHUT☆', 'WC top 2', 'Player-', 'Mi gusta s', 'z おk', 'Ac Stubbz', 'BARGAINING FOR MONEY','MΞ☆Mγτh','Bτ chξΣ◇€£SE', 'Player', 'World CUP WINNER △△◎◎♪☆○']
+        players = ['Ac☆Mirymeg', 'JabbatheHUT☆', 'WC top 2', 'Player-', 'Mi gusta s', 'z おk', 'Ac Stubbz', 'BARGAINING FOR MONEY','MΞ☆Mγτh','Bτ chξΣ◇€£SE', 'Player', 'World CUP WINNER △△◎◎♪☆○']
 
     return players, (lengths if large else None)
 
@@ -389,9 +389,8 @@ def select_top(all_tags, per_team, num_teams, num_teams_supposed, teams, players
             tag_players.discard(rand.choice(list(tag_players)))
     
     for _ in range(num_teams_supposed):
-        for x in all_tags.items():
-            all_tags[x[0]] = set([i for i in x[1] if i in players])
         for x in list(all_tags.items())[::-1]:
+            all_tags[x[0]] = set([i for i in x[1] if i in players])
             if len(x[1])==0: all_tags.pop(x[0])
         if len(all_tags)==0:
             break
@@ -418,7 +417,7 @@ def fix_tags(teams):
             if isinstance(i, tuple): 
                 i = i[0]+'-'+str(i[1])
             if i.strip().lower() == t.strip().lower(): count+=1
-        if add_self:count+=1 
+        if add_self: count+=1 
         return count>1
 
     new_tags = []
@@ -470,7 +469,6 @@ def find_possible_tags(players):
                     tag_matches[m_tag].add(players[j])
 
                 if (i_tag[-temp_indx:] == j_tag[-temp_indx:] or i_tag[-temp_indx:] == j_tag[:temp_indx]):
-                    #[::-1][:temp_indx][::-1]
                     m_tag = Utils.sanitize_uni(orig_i)[-temp_indx:].strip()
                     if len(m_tag) == 1: 
                         m_tag = m_tag.upper()
@@ -486,37 +484,37 @@ def find_possible_tags(players):
                 all_tag_matches[tag].append(tagged_players) #adding possible combination for this tag
     return all_tag_matches
 
-def find_possible_tags_1(players):
-    all_tag_matches= defaultdict(list)
+# def find_possible_tags_1(players):
+#     all_tag_matches= defaultdict(list)
 
-    for i in range(len(players)):
-        tag_matches = defaultdict(set)
-        orig_i = players[i].strip()
-        i_tag = Utils.sanitize_uni(orig_i).lower()
-        for j in range(len(players)):
-            if i==j: continue
-            j_tag = Utils.sanitize_uni(players[j].strip()).lower()
+#     for i in range(len(players)):
+#         tag_matches = defaultdict(set)
+#         orig_i = players[i].strip()
+#         i_tag = Utils.sanitize_uni(orig_i).lower()
+#         for j in range(len(players)):
+#             if i==j: continue
+#             j_tag = Utils.sanitize_uni(players[j].strip()).lower()
 
-            # pre_check = commonprefix([i_tag, j_tag])
-            # pre_suf_check = common_fixes(i_tag, j_tag)
-            # suf_check = commonprefix([i_tag[::-1], j_tag[::-1]])[::-1]
+#             pre_check = commonprefix([i_tag, j_tag])
+#             pre_suf_check = common_fixes(i_tag, j_tag)
+#             suf_check = commonprefix([i_tag[::-1], j_tag[::-1]])[::-1]
             
-            # for check in pre_check:
-            #     for indx in range(1, len(check)+1):
-            #         m_tag = Utils.sanitize_uni(orig_i)[:indx].strip()
-            #         if len(m_tag) == 1: 
-            #             m_tag = m_tag.upper()
-            #         if m_tag[-1] == '-':
-            #             m_tag = m_tag[:-1]
+#             for check in pre_check:
+#                 for indx in range(1, len(check)+1):
+#                     m_tag = Utils.sanitize_uni(orig_i)[:indx].strip()
+#                     if len(m_tag) == 1: 
+#                         m_tag = m_tag.upper()
+#                     if m_tag[-1] == '-':
+#                         m_tag = m_tag[:-1]
                     
-            #         tag_matches[m_tag].add(players[i])
-            #         tag_matches[m_tag].add(players[j])
+#                     tag_matches[m_tag].add(players[i])
+#                     tag_matches[m_tag].add(players[j])
 
 
-        for tag, tagged_players in tag_matches.items():
-            if not any(tagged_players.issubset(e) for e in all_tag_matches[tag]): #does this improve performance? probably not too great of an effect
-                all_tag_matches[tag].append(tagged_players) #adding possible combination for this tag (new)
-    return all_tag_matches
+#         for tag, tagged_players in tag_matches.items():
+#             if not any(tagged_players.issubset(e) for e in all_tag_matches[tag]): #does this improve performance? probably not too great of an effect
+#                 all_tag_matches[tag].append(tagged_players) #adding possible combination for this tag (new)
+#     return all_tag_matches
 
 
 def tag_algo(players, per_team, num_teams):
