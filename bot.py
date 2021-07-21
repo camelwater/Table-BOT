@@ -19,7 +19,6 @@ from datetime import datetime, timedelta
 load_dotenv()
 KEY = os.getenv('KEY')
 LOG_LOC = 'logs/logs.txt'
-#SERVER_ID = 775253594848886785
 
 INIT_EXT = ['cogs.Stats', 'cogs.Settings', 'cogs.Table']
 
