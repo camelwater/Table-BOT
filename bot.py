@@ -69,11 +69,11 @@ class TableBOT(commands.Bot):
         self.presences = cycle(['?help', '{} tables'])
         self.BOT_ID = 844640178630426646
 
-        for l in INIT_EXT:
-            self.load_extension(l)  
+        for ext in INIT_EXT:
+            self.load_extension(ext)  
 
     #TODO: catch invalid form errors (too long fields)        
-    async def on_command_error(self, ctx: commands.context.Context, error):
+    async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
             if not ctx.guild:
                 await(await ctx.send("I don't recognize that command. Use `?help` for a list of available commands.")).delete(delay=25)
