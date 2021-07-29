@@ -59,14 +59,14 @@ class Stats(commands.Cog):
         common = counter.most_common(num)
         spaces = max([len(k[0]) for k in common])+1
 
-        out = "Total commands processed -> {}\nPictures generated -> {}\n\n".format(total, pic_total)
+        out = "Total_Commands_Processed = {}\nPictures_Generated = {}\n\n".format(total, pic_total)
         out+='[ {} ]\n'.format('{} Most Used Commands'.format(num) if num<len(counter) else "Command Stats")
         if len(common)==0:
             out+="Commands haven't been used yet."
         else:
-            out += '\n'.join("{}{}: {}".format(k, " "*(spaces-len(k)), c) for k,c in common)
+            out += '\n'.join("{}{}= {}".format(k.replace(" ","_"), " "*(spaces-len(k)), c) for k,c in common)
          
-        await ctx.send("```css\n{}\n```".format(out))
+        await ctx.send("```ini\n{}\n```".format(out))
     
     
     @commands.command(aliases=['info'])
