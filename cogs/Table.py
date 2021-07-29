@@ -112,6 +112,7 @@ class Table_cog(commands.Cog):
             self.bot.table_instances[ctx.channel.id].choose_message= "A tabler watching room {} is currently active.\nAre you sure you want to start a new table? (`?yes` / `?no`)".format(self.bot.table_instances[ctx.channel.id].rxx)
             await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message)
             return
+
         usage = "Usage: `?start <format> <number of teams> <gps = 3>`"
         
         if len(args)<1:
@@ -333,7 +334,6 @@ class Table_cog(commands.Cog):
             if len(i)<2:
                 await self.send_temp_messages(ctx, "Error processing command: missing <corrected tag> for tag '{}'".format(i[0]), self.bot.table_instances[ctx.channel.id].get_player_list(), usage)
                 return
-        
         
         mes = self.bot.table_instances[ctx.channel.id].edit_tag_name(arg)
         if self.bot.table_instances[ctx.channel.id].confirm_room:

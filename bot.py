@@ -28,8 +28,8 @@ handlers = [ RotatingFileHandler(filename=LOG_LOC,
             backupCount=4)
            ]
 logging.basicConfig(handlers = handlers,
-                            format='%(asctime)s %(levelname)s -> %(message)s\n',
-                            level=logging.ERROR)
+                    format='%(asctime)s %(levelname)s -> %(message)s\n',
+                    level=logging.ERROR)
 log = logging.getLogger(__name__)
 
 def load_settings():
@@ -123,8 +123,8 @@ class TableBOT(commands.Bot):
     #remove inactive table instances (inactivity == 30+ minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):
-        self.table_instances = {channel: instance for (channel, instance) in self.table_instances.items() if 
-                                instance.last_command_sent is None or datetime.now() - instance.last_command_sent <= timedelta(minutes=30)}
+        self.table_instances = {channel: instance for (channel, instance) in self.table_instances.items() 
+                                if instance.last_command_sent is None or datetime.now() - instance.last_command_sent <= timedelta(minutes=30)}
 
     @tasks.loop(seconds=15)
     async def cycle_presences(self):
