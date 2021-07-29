@@ -18,7 +18,7 @@ import time as timer
 from unidecode import unidecode
 from collections import defaultdict, Counter
 from find_tags import tag_algo
-import tag_testing.tagAlgo as tagAlgo
+import tag_testing.simulatedAnnealingTag as simAnl
 import Utils
 from Utils import isFFA, WARNING_MAP, DC_MAP, STYLE_MAP, PTS_MAP
 from Utils import GRAPH_MAP as GM
@@ -123,11 +123,11 @@ class Table():
         #     'jaja LTA':0,'stupid@LTA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
         # self.players = {'x#1':0, 'awd':0, 'Ryan@X':0, '¢unt':0, 'stop man': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}
         # self.players = {'hello':0, 'stupid':0, 'VA':0, 'banned':0, '090':0, 'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'ABB':0}
-        # self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'banned':0, 'barrel':0, 
-        #         'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'where?':0}
+        self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'banned':0, 'barrel':0, 
+                'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'where?':0}
         
         self.IGNORE_FCS = True
-        self.split_teams('5', 4)
+        self.split_teams('3', 4)
 
     async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple:
         """
@@ -371,11 +371,11 @@ class Table():
         teams = tag_algo(player_copy, per_team = per_team, num_teams = num_teams)
         
         if self.TESTING:
-                L = []
-                for i in teams.items():
-                    L.append([i[0].lower(), list(map(lambda l: Utils.sanitize_uni(l.lower()), i[1]))])
-                tagalgo = tagAlgo.TagAlgo(None, num_teams, per_team)
-                print(tagalgo.fitness(L))
+            L = []
+            for i in teams.items():
+                L.append([Utils.sanitize_uni(i[0]).lower(), list(map(lambda l: (Utils.sanitize_uni(l.strip()).lower(), l), i[1]))])
+            cost_check = simAnl.SimulatedAnnealing(L, per_team)
+            print("cost:",cost_check.E(L))
 
         if not self.IGNORE_FCS:
             print(teams)

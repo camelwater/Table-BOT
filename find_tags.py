@@ -45,11 +45,11 @@ def get_test_case(large = False):
         # players = list({'x#1':0, 'xxx':0, 'Ryan@X':0, '¢ant':0, 'coolio': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}.keys())
         # players = ['hello', 'he123', 'borrowed time', 'WAX', 'barrel', 
         #             'A-1', 'what?', "WWW.PH.COM", "λxe", 'A-2', 'λp fraud', 'WOW!!']
-        # players = ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros', 'vc Dane']
+        # players = ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros']
         # players = ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', '@*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA h', 'USA K', 'ABBA']
         # players = ['Æ big', 'PP hi', "PP powerplant", 'PP POWERGRID', 'Æ vamp', 'PP ger', 'Æ hello', 'Æ oo', 'big PP', 'shuyx@Æ']
-        # players = ['Ac☆Mirymeg', 'Z☆', 'WC top 2', 'Player', 'MonkeyTime', 'z おk', 'Ac Stubbz', 'Hosseini','MΞ☆Mγτh','Hτ chξΣ◇€£', 'Player', 'WC △△◎◎♪☆○']
-        players = ['Ac☆Mirymeg', 'JabbatheHUT☆', 'WC top 2', 'Player-', 'Mi gusta s', 'z おk', 'Ac Stubbz', 'BARGAINING FOR MONEY','MΞ☆Mγτh','Bτ chξΣ◇€£SE', 'Player', 'World CUP WINNER △△◎◎♪☆○']
+        players = ['Ac☆Mirymeg', 'Z☆', 'WC top 2', 'Player', 'MonkeyTime', 'z おk', 'Ac Stubbz', 'Hosseini','MΞ☆Mγτh','Hτ chξΣ◇€£', 'Player', 'WC △△◎◎♪☆○']
+        # players = ['Ac☆Mirymeg', 'JabbatheHUT☆', 'WC top 2', 'Player-', 'Mi gusta s', 'z おk', 'Ac Stubbz', 'BARGAINING FOR MONEY','MΞ☆Mγτh','Bτ chξΣ◇€£SE', 'Player', 'World CUP WINNER △△◎◎♪☆○']
 
     return players, (lengths if large else None)
 

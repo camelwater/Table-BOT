@@ -88,12 +88,12 @@ class Settings(commands.Cog):
             return await ctx.send(mes)
         
         if not get_avail_settings(settingType):
-            return await ctx.send("Invalid setting `{}`. Here is a list of customizable settings:\n{}".format(settingType, await self.settings(ctx, mes=False)))
+            return await ctx.send("Invalid setting `{}`. Here are the customizable settings:\n{}".format(settingType, await self.settings(ctx, mes=False)))
 
         if default is None:
             avail_settings = get_avail_settings(settingType)
             if not avail_settings:
-                await ctx.send("Invalid setting `{}`. Here is a list of customizable settings:\n{}".format(settingType, await self.settings(ctx, mes=False)))
+                await ctx.send("Invalid setting `{}`. Here are the customizable settings:\n{}".format(settingType, await self.settings(ctx, mes=False)))
             else:
                 await(await ctx.send("Specify a setting value for `{}`. The value can be any of the following:\n{}".format(settingType, avail_settings))).delete(delay=45)
             return

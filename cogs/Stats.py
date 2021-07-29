@@ -50,7 +50,7 @@ class Stats(commands.Cog):
                 num = len(counter) if num.lower()=='all' else 5
 
         pic_total = counter['picture_generated']
-        counter = Counter({k:v for k,v in dict(counter).items() if "generated" not in k})
+        counter = Counter({k:v for k,v in dict(counter).items() if k!="picture_generated" and k!="yes" and k!="no"})
         
         total = sum(counter.values())
 
@@ -66,7 +66,7 @@ class Stats(commands.Cog):
         else:
             out += '\n'.join("{}{}: {}".format(k, " "*(spaces-len(k)), c) for k,c in common)
          
-        await ctx.send("```\n{}\n```".format(out))
+        await ctx.send("```css\n{}\n```".format(out))
     
     
     @commands.command(aliases=['info'])

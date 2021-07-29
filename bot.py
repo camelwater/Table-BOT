@@ -73,7 +73,7 @@ class TableBOT(commands.Bot):
             self.load_extension(l)  
 
     #TODO: catch invalid form errors (too long fields)        
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: commands.context.Context, error):
         if isinstance(error, commands.CommandNotFound):
             if not ctx.guild:
                 await(await ctx.send("I don't recognize that command. Use `?help` for a list of available commands.")).delete(delay=25)
