@@ -59,8 +59,8 @@ class Stats(commands.Cog):
         common = counter.most_common(num)
         spaces = max([len(k[0]) for k in common])+1
 
-        out = "Total commands processed: {}\nPictures generated: {}\n\n".format(total, pic_total)
-        out+='{}:\n'.format('{} most used commands'.format(num) if num<len(counter) else "Command stats")
+        out = "Total commands processed: -> {}\nPictures generated -> {}\n\n".format(total, pic_total)
+        out+='[ {} ]\n'.format('{} Most Used Commands'.format(num) if num<len(counter) else "Command Stats")
         if len(common)==0:
             out+="Commands haven't been used yet."
         else:
