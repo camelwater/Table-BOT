@@ -177,7 +177,7 @@ class TableBOT(commands.Bot):
             self.prefixes[guild].remove(prefix)
             self.update_prefix_json()
 
-            return f"Prefix `{prefix}` has been removed." + ' Use the bot mention as a prefix.' if len(self.prefixes[guild])==0 else ""
+            return f"Prefix `{prefix}` has been removed." + (' Use the bot mention as a prefix.' if len(self.prefixes[guild])==0 else "")
         except KeyError:
             return "You don't have any custom prefixes registered."
         except:

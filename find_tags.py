@@ -219,7 +219,7 @@ def split_chunks(players, tag, per_team, all_tags):
     prefix players and suffix players will try to be kept in their respective groupings
     '''
     # if tag has too many people at this point, then it is very likely that
-    # their are duplicate tags, meaning more than one team have the same tag (obviously shouldn't happen and isn't allowed)
+    # there are duplicate tags, meaning more than one team has the same tag (obviously shouldn't happen and isn't allowed)
 
     def post_id(p):
         p = p[0]
