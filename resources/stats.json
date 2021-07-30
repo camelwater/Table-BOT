@@ -38,7 +38,7 @@
     "style": 36,
     "settings": 26,
     "set": 51,
-    "prefixes": 27,
+    "prefixes": 29,
     "prefix set": 5,
     "prefix": 6,
     "prefix remove": 4,
@@ -46,5 +46,5 @@
     "subs": 14,
     "tags": 7,
     "changetag": 4,
-    "prefix reset": 1
+    "prefix reset": 2
 }

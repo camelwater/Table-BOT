@@ -8,12 +8,14 @@ class Settings(commands.Cog):
 
     @commands.command(aliases=['getprefixes', 'pxs'])
     async def prefixes(self, ctx):
-        prefixes = self.bot.get_guild_prefixes(ctx.guild)
+        prefixes, is_default = self.bot.get_guild_prefixes(ctx.guild)
         mes = "{} prefixes:\n".format(f'[{ctx.guild.name}]' if ctx.guild else '[DM]')
         if len(prefixes) == 0:
-            mes+="No custom prefixes."
+            mes+="No prefixes."
         for i, p in enumerate(prefixes):
             mes+=f"{i+1}. {p}\n"
+        if is_default:
+            mes+="(Default)"
         await ctx.send(f"```css\n{mes}```")
 
     @commands.group(invoke_without_command=True, aliases=['px'])

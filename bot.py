@@ -57,7 +57,7 @@ def callable_prefix(bot, msg, mention=True):
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
-    return base
+    return (base, True) if msg.guild is None or bot.prefixes.get(str(msg.guild.id)) is None else base
 
 
 class TableBOT(commands.Bot):
@@ -177,9 +177,9 @@ class TableBOT(commands.Bot):
             self.prefixes[guild].remove(prefix)
             self.update_prefix_json()
 
-            return f"Prefix `{prefix}` has been removed." + (' Use the bot mention as a prefix.' if len(self.prefixes[guild])==0 else "")
+            return f"Prefix `{prefix}` has been removed." + (' You must use the bot mention as the prefix now.' if len(self.prefixes[guild])==0 else "")
         except KeyError:
-            return "You don't have any custom prefixes registered."
+            return "You don't have any custom prefixes registered. You can add or set custom prefixes with `?prefix`."
         except:
             return f"`{prefix}` is not a registered prefix."
         
@@ -188,7 +188,7 @@ class TableBOT(commands.Bot):
         if not prefix:
             self.prefixes[guild] = []
             self.update_prefix_json()
-            return "All custom prefixes have been removed. Use the bot mention as a prefix."
+            return "All prefixes have been removed. Use the bot mention as a prefix."
         
         if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
             return "The bot mention is a default prefix and cannot be set as a custom prefix."
