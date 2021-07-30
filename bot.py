@@ -200,7 +200,8 @@ class TableBOT(commands.Bot):
     
     def reset_prefix(self, guild):
         guild = str(guild)
-        self.prefixes.pop(guild)
+        if guild in self.prefixes:
+            self.prefixes.pop(guild)
         self.update_prefix_json()
 
         return "Server prefixes have been reset to default."
