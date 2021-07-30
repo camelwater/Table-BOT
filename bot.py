@@ -155,7 +155,7 @@ class TableBOT(commands.Bot):
             return "You cannot have more than 3 custom prefixes."
 
         if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
-            return "The bot mention is a default prefix and cannot be added as a custom prefix."
+            return "My mention is a default prefix and cannot be added as a custom prefix."
 
         if prefix in self.prefixes.get(guild, []):
             return f"`{prefix}` is already registered as a prefix."
@@ -171,13 +171,13 @@ class TableBOT(commands.Bot):
         guild = str(guild)
 
         if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
-            return "The bot mention is a default prefix and cannot be removed."
+            return "My mention is a default prefix and cannot be removed."
 
         try:
             self.prefixes[guild].remove(prefix)
             self.update_prefix_json()
 
-            return f"Prefix `{prefix}` has been removed." + (' You must use the bot mention as the prefix now.' if len(self.prefixes[guild])==0 else "")
+            return f"Prefix `{prefix}` has been removed." + (f' You must use my mention, {self.user.mention}, as the prefix now.' if len(self.prefixes[guild])==0 else "")
         except KeyError:
             return "You don't have any custom prefixes registered. You can add or set custom prefixes with `?prefix`."
         except:
@@ -188,7 +188,7 @@ class TableBOT(commands.Bot):
         if not prefix:
             self.prefixes[guild] = []
             self.update_prefix_json()
-            return "All prefixes have been removed. Use the bot mention as a prefix."
+            return f"All prefixes have been removed. Use my mention, {self.user.mention}, as a prefix."
         
         if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
             return "The bot mention is a default prefix and cannot be set as a custom prefix."
@@ -203,7 +203,7 @@ class TableBOT(commands.Bot):
         self.prefixes.pop(guild)
         self.update_prefix_json()
 
-        return "Custom prefixes have been reset to default."
+        return "Server prefixes have been reset to default."
 
     def get_guild_settings(self, guild):
         guild = str(guild)

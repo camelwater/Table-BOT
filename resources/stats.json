@@ -38,13 +38,13 @@
     "style": 36,
     "settings": 26,
     "set": 51,
-    "prefixes": 29,
-    "prefix set": 5,
+    "prefixes": 38,
+    "prefix set": 7,
     "prefix": 6,
-    "prefix remove": 4,
-    "prefix add": 2,
+    "prefix remove": 5,
+    "prefix add": 3,
     "subs": 14,
     "tags": 7,
     "changetag": 4,
-    "prefix reset": 2
+    "prefix reset": 4
 }
