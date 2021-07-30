@@ -1,22 +1,29 @@
-2021-07-29 23:53:45,323 ERROR -> in command: prefix set
+2021-07-30 16:28:58,449 ERROR -> in command: set
 Traceback (most recent call last):
   File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
     ret = await coro(*args, **kwargs)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Settings.py", line 54, in _set
-    mes = self.bot.set_prefix(ctx.guild.id, prefix)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\bot.py", line 192, in set_prefix
-    return f"All prefixes have been removed. Use my mention, {self.bot.mention}, as a prefix."
-AttributeError: 'TableBOT' object has no attribute 'bot'
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Settings.py", line 89, in set
+    mes = self.bot.reset_settings(ctx.guild.id)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\bot.py", line 264, in reset_settings
+    cur.execute('''UPDATE servers SET style=? graph=? WHERE id=?''',
+sqlite3.OperationalError: near "graph": syntax error
 
 
-2021-07-29 23:55:26,386 ERROR -> in command: prefix set
+2021-07-30 17:32:33,988 ERROR -> Attempting a reconnect in 1.29s
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\client.py", line 566, in connect
+    await self.ws.poll_event()
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\gateway.py", line 582, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+2021-07-30 18:09:38,416 ERROR -> in command: set
 Traceback (most recent call last):
   File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
     ret = await coro(*args, **kwargs)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Settings.py", line 54, in _set
-    mes = self.bot.set_prefix(ctx.guild.id, prefix)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\bot.py", line 192, in set_prefix
-    return f"All prefixes have been removed. Use my mention, {self.mention}, as a prefix."
-AttributeError: 'TableBOT' object has no attribute 'mention'
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Settings.py", line 139, in set
+    mes = self.bot.set_setting(ctx.guild.id, settingType, default)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\bot.py", line 291, in set_setting
+    cur.execute('''SELECT FROM servers
+sqlite3.OperationalError: near "FROM": syntax error
 
 
