@@ -34,6 +34,7 @@ logging.basicConfig(handlers = handlers,
                     level=logging.ERROR)
 log = logging.getLogger(__name__)
 
+SPLIT_CHAR = '¶'
 conn = sqlite3.connect('resources/database.db')
 cur = conn.cursor()
 cur.execute('''CREATE TABLE IF NOT EXISTS servers (
@@ -65,7 +66,7 @@ def fetch_prefixes_and_settings():
     server_pxs = {k[0]: k[1] for k in server_rows}
     server_sets = {int(k[0]): {"graph": SETTINGS["graph"].get(k[2]),"style": SETTINGS["style"].get(k[3])} for k in server_rows}
    
-    return {int(k): (p.split(',') if p else []) for k, p in server_pxs.items()}, server_sets
+    return {int(k): (p.split(SPLIT_CHAR) if p else []) for k, p in server_pxs.items()}, server_sets
 
 def callable_prefix(bot, msg, mention=True):
     base = []
@@ -184,7 +185,7 @@ class TableBOT(commands.Bot):
         cur.execute('''UPDATE servers 
                         SET prefixes=? 
                         WHERE id=?''',
-                    (','.join(prefixes), guild))
+                    (SPLIT_CHAR.join(prefixes), guild))
         conn.commit()
         
         return f"`{prefix}` has been registered as a prefix."
@@ -198,7 +199,7 @@ class TableBOT(commands.Bot):
             cur.execute('''UPDATE servers 
                             SET prefixes=? 
                             WHERE id=?''',
-                        (','.join(self.prefixes[guild]) if len(self.prefixes[guild])>0 else None, guild))
+                        (SPLIT_CHAR.join(self.prefixes[guild]) if len(self.prefixes[guild])>0 else None, guild))
             conn.commit()
 
             return f"Prefix `{prefix}` has been removed." + (f' You must use my mention, {self.user.mention}, as the prefix now.' if len(self.prefixes[guild])==0 else "")
@@ -236,7 +237,7 @@ class TableBOT(commands.Bot):
         cur.execute('''UPDATE servers 
                         SET prefixes=? 
                         WHERE id=?''',
-                    (','.join(DEFAULT_PREFIXES), guild))
+                    (SPLIT_CHAR.join(DEFAULT_PREFIXES), guild))
         conn.commit()
 
         return "Server prefixes have been reset to default."
