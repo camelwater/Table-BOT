@@ -16,11 +16,12 @@ import traceback as tb
 from itertools import cycle
 from datetime import datetime, timedelta
 import sqlite3
+import copy
 from Utils import SETTINGS
 
 load_dotenv()
 KEY = os.getenv('KEY')
-LOG_LOC = 'logs/logs.txt'
+LOG_LOC = 'logs/logs.log'
 
 INIT_EXT = ['cogs.Stats', 'cogs.Settings', 'cogs.Table']
 
@@ -231,7 +232,7 @@ class TableBOT(commands.Bot):
     def reset_prefix(self, guild):
         # if guild in self.prefixes:
         #     self.prefixes.pop(guild)
-        self.prefixes[guild] = DEFAULT_PREFIXES
+        self.prefixes[guild] = copy.copy(DEFAULT_PREFIXES)
         cur.execute('''UPDATE servers 
                         SET prefixes=? 
                         WHERE id=?''',
