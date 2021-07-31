@@ -140,6 +140,12 @@ class TableBOT(commands.Bot):
         # except RuntimeError:
         #     pass
     
+    async def on_guild_join(self, guild):
+        cur.execute('''INSERT OR IGNORE INTO servers
+                        VALUES (?, ?, ?, ?)''',
+                        (guild.id), None, None, None)
+        conn.commit()
+    
     #remove inactive table instances (inactivity == 30+ minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):
