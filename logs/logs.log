@@ -16,6 +16,8 @@ Traceback (most recent call last):
   File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\gateway.py", line 582, in poll_event
     raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
 discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+
+
 2021-07-30 18:09:38,416 ERROR -> in command: set
 Traceback (most recent call last):
   File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped

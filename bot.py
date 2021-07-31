@@ -34,7 +34,6 @@ logging.basicConfig(handlers = handlers,
                     level=logging.ERROR)
 log = logging.getLogger(__name__)
 
-SPLIT_CHAR = '¶'
 conn = sqlite3.connect('resources/database.db')
 cur = conn.cursor()
 cur.execute('''CREATE TABLE IF NOT EXISTS servers (
@@ -43,21 +42,15 @@ cur.execute('''CREATE TABLE IF NOT EXISTS servers (
                 graph integer, 
                 style integer)''')
 
-# def load_settings():
-#     with open('resources/settings.json') as d:
-#         load = json.load(d)
-#         if load:
-#             return load
-#         else:
-#             return {}
+def load_json(file):
+    with open(file+'.json', 'wr', encoding='utf-8') as f:
+        return json.load(f)
 
-# def load_prefixes():
-#     with open('resources/prefixes.json') as p:
-#         load = json.load(p)
-#         if load: 
-#             return load
-#         return {}
+def update_json(file, contents):
+    with open(file+'.json', 'w', encoding='utf-8') as f:
+        json.dump(contents, f, ensure_ascii=True, indent = 4)
 
+SPLIT_CHAR = '¶'
 DEFAULT_PREFIXES = ['?', '!']
 
 def fetch_prefixes_and_settings():
@@ -75,7 +68,6 @@ def callable_prefix(bot, msg, mention=True):
         base = default
     else:
         base.extend(bot.prefixes.get(msg.guild.id, default))
-        # base.append('$')
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
@@ -143,7 +135,7 @@ class TableBOT(commands.Bot):
     async def on_guild_join(self, guild):
         cur.execute('''INSERT OR IGNORE INTO servers
                         VALUES (?, ?, ?, ?)''',
-                        (guild.id), None, None, None)
+                        (guild.id, None, None, None))
         conn.commit()
     
     #remove inactive table instances (inactivity == 30+ minutes)
@@ -310,14 +302,6 @@ class TableBOT(commands.Bot):
         else:
             pass
             #for other settings to be added in the future
-
-    # def update_prefix_json(self):
-    #     with open("resources/prefixes.json", 'w') as p:
-    #         json.dump(self.prefixes, p, ensure_ascii=True, indent=4)
-    
-    # def update_settings_json(self):
-    #     with open("resources/settings.json", 'w') as s:
-    #         json.dump(self.settings, s, ensure_ascii=True, indent=4)
     
     @tasks.loop(hours=1)
     async def routine_stats_dump(self):
