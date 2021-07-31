@@ -153,6 +153,7 @@ class Table():
                     room_players = []
                     for player in room.get("members", []):
                         miiName = player.get('name')[0][0]
+                        if not miiName: continue
                         if miiName == "no name": miiName = "Player"
                         room_players.append(Utils.sanitize_uni(miiName.strip(), for_search=True).lower())
                     if set(map(lambda l: Utils.sanitize_uni(l.strip(), for_search=True).lower(),mii)).issubset(room_players):
@@ -246,6 +247,7 @@ class Table():
                     room_players = []
                     for player in room.get("members", []):
                         miiName = player.get('name')[0][0]
+                        if not miiName: continue
                         if miiName == "no name": miiName = "Player"
                         room_players.append(Utils.sanitize_uni(miiName.strip(), for_search=True).lower())
                    
