@@ -144,17 +144,17 @@ class Table():
                     else:
                         return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
                 
-                data = data[1:-1]
-                if len(data)<1:
+                # data = data[1:-1]
+                if len(data[1:-1])<1:
                     return "I am currently experiencing some issues with Wiimmfi's API. Try again later."
                 
                 for room in data:
+                    if room.get("type")!="room": continue
                     room_rxx = room.get("room_id")
                     room_players = []
                     for player in room.get("members", []):
                         miiName = player.get('name')[0][0]
-                        if not miiName: continue
-                        if miiName == "no name": miiName = "Player"
+                        if not miiName or miiName == "no name": miiName = "Player"
                         room_players.append(Utils.sanitize_uni(miiName.strip(), for_search=True).lower())
                     if set(map(lambda l: Utils.sanitize_uni(l.strip(), for_search=True).lower(),mii)).issubset(room_players):
                         rxxs[room_rxx]+=1
@@ -238,17 +238,17 @@ class Table():
                     else:
                         return True, type_ask,"I am currently experiencing some issues with Wiimmfi. Try again later."
            
-                data = data[1:-1]
-                if len(data)<1:
+                # data = data[1:-1]
+                if len(data[1:-1])<1:
                     return "I am currently experiencing some issues with Wiimmfi's API. Try again later."
 
                 for room in data:
+                    if room.get("type")!="room": continue
                     room_rxx = room.get("room_id")
                     room_players = []
                     for player in room.get("members", []):
                         miiName = player.get('name')[0][0]
-                        if not miiName: continue
-                        if miiName == "no name": miiName = "Player"
+                        if not miiName or miiName == "no name": miiName = "Player"
                         room_players.append(Utils.sanitize_uni(miiName.strip(), for_search=True).lower())
                    
                     if set(map(lambda l: Utils.sanitize_uni(l.strip(), for_search=True).lower(),mii)).issubset(room_players):
@@ -702,19 +702,19 @@ class Table():
     
     def race_results(self,race):
         ret = ''
-        x = {}
+        results = {}
         tag_places = defaultdict(list)
         if race==-1:
-            x = self.finish_times[len(self.races)-1]
+            results = self.finish_times[len(self.races)-1]
             race = len(self.races)
         else: 
             if race-1 not in self.finish_times:
                 return True, "Race `{}` doesn't exist. The race number should be from 1-{}.".format(race, len(self.races))
-            x = self.finish_times[race-1]
+            results = self.finish_times[race-1]
        
         count = 0
         ret+="Race #{} - {}:\n".format(race, self.tracks[race-1])
-        for i in list(x.items()):
+        for i in list(results.items()):
             count+=1
             ret+="   {}. {} - {}\n".format(count, Utils.dis_clean(self.display_names[i[0]]), i[1])
             if not isFFA(self.format):
@@ -730,8 +730,9 @@ class Table():
                 ret+="**{}** -".format(tag)
                 for p in placements:
                     ret+=' {}{}'.format(p, '' if p==placements[-1] else ',')
-                ret+=" (**{}** pts)".format(sum([PTS_MAP[count][i-1] for i in placements]))
-                ret+="{}".format("" if tag==list(tag_places.items())[-1][0] else "   |   ")
+                pts_sum = sum([PTS_MAP[count][i-1] for i in placements])
+                ret+=f" (**{pts_sum}** {'pt' if pts_sum == 1 else 'pts'})"
+                ret+= "" if tag==list(tag_places.items())[-1][0] else "   |   "
         return False,ret
     
     def change_tag(self,player, tag, restore_indx = None,reundo=False):
@@ -740,7 +741,7 @@ class Table():
             try:
                 player = self.player_ids[player]
             except:
-                return "Player number `{}` is not valid. It must be from {}-{}".format(player, 0,len(self.players))
+                return "Player number `{}` is not valid. It must be from {}-{}.".format(player, 0,len(self.players))
         old_tag = ""
         for i in self.tags.items():
             if player in i[1]:
@@ -1004,7 +1005,7 @@ class Table():
                     pass
                 self.manual_warnings[-1].append("GP {} scores have been manually modified by the tabler.".format(gp))
                     
-                return "`{}` GP {} score changed to {}.".format(self.display_names[player], gp, self.edited_scores[player][int(gp)])
+                return "`{}` GP `{}` score changed to `{}`.".format(self.display_names[player], gp, self.edited_scores[player][int(gp)])
             else:
                 self.edited_scores[player][int(gp)] = int(score)
                 
@@ -1018,7 +1019,7 @@ class Table():
                     pass
                 self.manual_warnings[-1].append("GP {} scores have been manually modified by the tabler.".format(gp))
                         
-                ret+="`{}` GP {} score changed to {}.\n".format(self.display_names[player], gp, score)
+                ret+="`{}` GP `{}` score changed to `{}`.\n".format(self.display_names[player], gp, score)
         return ret
     
     def undo_edit(self, player, gp):

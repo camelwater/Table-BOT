@@ -323,7 +323,7 @@ WARNING_MAP = {
         "mkwx_bug_blank": "All players in the race had blank finish times. This is an MKWX ERROR if there was no room reset. Table is inaccurate for this GP ({}).", 
         "mkwx_bug_repeat": "{} player(s) had the same finish time as they had in a previous race (race {}). Check for errors as this is highly improbable and likely an MKWX ERROR. Table could be inaccurate for this GP ({}).",
         "mkwx_bug_tr":"Room had {} players with track errors. Check ?rr for errors. Table could be inaccurate for this GP ({}).", 
-        "mkwx_bug_delta": "Room had time delay (lag) errors ({} player(s)). Check ?rr for errors. Table could be inaccuate for this GP ({}).",
+        "mkwx_bug_delta": "Room had time delay (lag) errors - {} affected player(s). Check ?rr for errors. Table could be inaccuate for this GP ({}).",
 
         "sub": "{}  -  Potential sub detected. If this player is a sub, use ?sub.", 
         "sub_conf": "{} - subbed in for {}.",
