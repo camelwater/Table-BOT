@@ -78,8 +78,8 @@ class Settings(commands.Cog):
             try:
                 set = set['type']
             except:
-                set = 'Not set'
-            out+="\n.{}{}- {}".format(name, " "*(spaces-len(name)), set)
+                set = ''
+            out+="\n{}{}:: {}".format(name, " "*(spaces-len(name)), set)
         
         if mes:
             await ctx.send("```{}```".format(out))
