@@ -374,7 +374,7 @@ if __name__ == "__main__":
     i = "Player"
     sans = []
     t = time.time()
-    for _ in range(100):
+    for _ in range(1000):
         sans.append(sanitize_uni(i))
     print(time.time()-t)
     print(sans[0])
