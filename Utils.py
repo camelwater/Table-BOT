@@ -133,7 +133,7 @@ def sanitize_uni(string, for_search = False):
                 ret.append(char)
             continue
         i = CHAR_MAP.get(i, i)
-        if i in VALID_CHARS:
+        if i in VALID_CHARS or is_CJK(i):
             ret.append(i)
             continue
         
@@ -162,7 +162,7 @@ def sanitize_tag_uni(string):
     '''
     get rid of non-unicode characters that cannot be converted, but keep convertable characters in original form
     '''
-    string = [i for i in string if CHAR_MAP.get(i, i) in VALID_CHARS or i in MULT_CHAR_MAP or (unidecode(i)!="" and unidecode(i) in VALID_CHARS)]
+    string = [i for i in string if CHAR_MAP.get(i, i) in VALID_CHARS or is_CJK(i) or i in MULT_CHAR_MAP or (unidecode(i)!="" and unidecode(i) in VALID_CHARS)]
     while len(string)>0:
         if string[0] in PRE_REMOVE:
             string.pop(0)

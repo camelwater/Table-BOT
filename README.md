@@ -20,16 +20,16 @@ To watch a room and score it with Table BOT, these primary commands are used:
 ```
 ?start [format] [numTeams] (rxx|<miiName>,...) (gps=3) (sui=no)
 ``` 
-ex. `?start 5v5 2 sui=yes`
+ex. `?start 5v5 2 camelwater123 beffjeff sui=yes gps=5`
 
-Initializes a table instance with the given format (FFA 2v2, 3v3, etc.) and number of teams. Optionally, if you already know the room id (rxx) of the desired room or miiNames of players in the room, you can include either of them to skip the next step.
+Initializes a table instance with the given format (FFA 2v2, 3v3, etc.) and number of teams. Optionally, if you already know the room id (rxx) of the desired room or the miiNames of players in the room, you can include either of them to skip the next step.
 
 ```
 ?search [mii|rxx] [<miiName>,...|rxx]
 ```
 ex. `?search mii camelwater123, beffjeff`
 
-Searches for a room on [Wiimmfi][mkwxWebsite] that best fits the arguments provided. If your search arguments are too broad and apply to multiple rooms (for example you provide a very common miiName such as "Player"), you will need to narrow your search by providing better arugments - either more miiNames or unique miiNames. 
+Searches for a room on [Wiimmfi][mkwxWebsite] that best fits the provided miiName or rxx arguments. If your search arguments are too broad and apply to multiple rooms (for example you provide a very common miiName, such as "Player"), you will need to narrow your search by providing better arugments: either include additional miiNames or provide unique miiNames. 
 
 ```
 ?picture (byrace/race)
@@ -178,12 +178,12 @@ These commands are used to configure server settings for Table BOT.
 ```
 
 ```
-?set [settingName] [setting]
+?set [settingName] [value]
 ```
 
 ### Miscallaneous Commands
 
-Just some extra commands.
+Some extra commands.
 
 ```
 ?stats (all)
