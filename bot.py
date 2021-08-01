@@ -256,7 +256,7 @@ class TableBOT(commands.Bot):
                     (None, None, guild))
         conn.commit()
 
-        return "Server settings have been reset to defaults."
+        return "Server settings have been reset to default values."
     
     def set_setting(self, guild, setting, default):
         if not default:

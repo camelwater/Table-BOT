@@ -73,7 +73,7 @@ class Settings(commands.Cog):
     async def settings(self, ctx, mes=True):
         settings = self.bot.get_guild_settings(ctx.guild.id)
         spaces = max([len(k[0]) for k in settings.items()])+1
-        out = f'css\n[ {ctx.guild.name} server settings ]'
+        out = f'asciidoc\n== [ {ctx.guild.name} ] server settings =='
         for name, set in settings.items():
             try:
                 set = set['type']
@@ -90,7 +90,7 @@ class Settings(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     async def set(self, ctx, settingType: str = None, *,default: str=None):
         if settingType is None:
-            await ctx.send("Usage: `?set <settingName> <setting>`\nSee `?settings` for a list of available settingNames.")
+            await ctx.send("```Usage:\n?set <settingName> <value>`\n?set reset <settingName>\nSee `?settings` for a list of customizable settings.```")
             return
         
         if settingType.lower() in ['reset', 'clear']:
