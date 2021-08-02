@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-from re import U
 import Utils
 from os.path import commonprefix
 from collections import defaultdict
@@ -8,7 +6,7 @@ import copy
 import random as rand
 from itertools import chain
 from functools import reduce, partial
-from collections import Counter
+import tag_testing.simulatedAnnealingTag as simAnl
 
 def get_test_case(large = False):
     """
@@ -29,7 +27,7 @@ def get_test_case(large = False):
         players2 = ['asldkjadheaslkjdaskjdhlaksjdahdsllo', 'hasd123123213.kjadshaliskdjho876e123', 'borrowed timasd;laasdllndlksdhaposdu98q2ee', 'WAasd.kj.asdas.da.dsasd.asd.asd.a adshiaosda8dsX', 'basdkjasda  sda qe e j12oei1eahdlkajdsyao8ds7yarrel', 
                     'A-asdlkadslkajdhlla192837192akjsdh1', 'whasdoqiouewiuy12o13y4183476184716894124at?', "WWW.Pasdalj;lsdhaldksjhlkaH.COM", "λxeasdlkahdsasdsd ds adaalsda98", 'Aasdlkaskldjahsd9a8y-2', 'λp frasdjlhalkdsjsasdlaksjdhadsd90ayaud', 'WOwowowowowowowowowowoowowowowowowW!!']
         players3 = ['λρ ToOOOOOOOOOOOOOOoooooooooooom', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA*', 'v¢ bvbvbvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbvbvbvbvsauzule', 'sahasdjasdkjadshlkajsdhlakdsarave', 'MasdkjjdslakjdshlaksdjhKW 4Beans', 'cadasdasldhadjh9y01984y1944144avreMK', 'cocia;lskdhklajsdhasdo9y loko', 'Casdkjadhlajdasdasdhlkdsho9shap9sd8y', 'So[akjsdhakljdshaoisduyads8yLLLLLL]', 'Zjazasda,smdda   asddnadsasdasdca', 'Z- stavrosaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa']
-        players+=players2+players7+players8+players4+players5+players6+players3+players9*25
+        players+=players2+players7+players8+players4+players5+players6+players3+players9*44
 
         seen = []
         lengths = []
@@ -48,16 +46,15 @@ def get_test_case(large = False):
                 lengths.append(len(temp))
         
     else:
-        players = list({'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
-            'jaja LTA':0,'stupid@LTA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}.keys())
         # players = list({'x#1':0, 'xxx':0, 'Ryan@X':0, '¢ant':0, 'coolio': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}.keys())
-        # players = ['hello', 'he123', 'borrowed time', 'WAX', 'barrel', 
-        #             'A-1', 'what?', "WWW.PH.COM", "BWλHλHλ", 'Ã', 'λp fraud', 'WOW!!']
+        players = ['hello', 'he123', 'borrowed time', 'WAX', 'barrel', 
+                    'A-1', 'what?', "WWW.PH.COM", "BWλHλHλ", 'Ã', 'λp fraud', 'WOW!!']
         # players = ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros']
         # players = ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', '@*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA h', 'USA K', 'ABBA']
         # players = ['Æ big', 'PP hi', "PP powerplant", 'PP POWERGRID', 'Æ vamp', 'PP ger', 'Æ hello', 'Æ oo', 'big PP', 'shuyx@Æ']
         # players = ['Ac☆Mirymeg', 'Z☆', 'WC top 2', 'Player', 'MonkeyTime', 'z おk', 'Ac Stubbz', 'Hosseini','MΞ☆Mγτh','Hτ chξΣ◇€£', 'Player', 'WC △△◎◎♪☆○']
-        # players = ['Ac☆Mirymeg', 'JabbatheHUT☆', 'WC top 2', 'Player-', 'Mi gusta s', 'z おk', 'Ac Stubbz', 'BARGAINING FOR MONEY','MΞ☆Mγτh','Bτ chξΣ◇€£SE', 'Player', 'World CUP WINNER △△◎◎♪☆○']
+        # players= ['A◇山周回のれみ','CRYLIXDAWN', 'さぼA', 'DG★mila*', 'C☆Latent', 'Player-1','Dovi', 'らいよんのRemi', 'にしのだいせんせい',
+        #             'Player-2', 'ライオンのRemi', 'だいせんせい'] 
 
     return players, (lengths if large else None)
 
@@ -104,14 +101,6 @@ def clean_subsets(all_tags):
                 break
         i+=1
 
-# def squeeze_tag_matches(all_tag_matches):
-#     '''
-#     condense tags into one set per tag
-#     '''
-   
-#     for tag, sets in all_tag_matches.items():
-#         all_tag_matches[tag] = set().union(*sets)
-
 def overlaps(p, tag, all_tags, per_team):
     num_overlaps = 0
     for x, x_players in all_tags.items():
@@ -140,7 +129,7 @@ def check_overlaps(players, tag, all_tags, per_team):
                 all_tags[tag].discard(i)
         return
 
-    iter = sorted(list(players), key=lambda l: (0 if overlaps(l, tag, all_tags, per_team)==1 else 1, 1 if l[0].startswith(tag.lower()) else 0))
+    iter = sorted(list(players), key=lambda l: (1 if overlaps(l, tag, all_tags, per_team)==1 else 0, 0 if l[0].startswith(tag.lower()) else 1))
 
     for comp_tag, tag_p in all_tags.items():
         if comp_tag == tag:
@@ -149,19 +138,25 @@ def check_overlaps(players, tag, all_tags, per_team):
             comp_tag = comp_tag[0]
 
         comp_tag_uni = Utils.sanitize_uni(comp_tag).lower()
-        for p in iter:
-            if p in tag_p and len(tag_p) == per_team:
+        for p in iter[::-1]:
+            if p in tag_p and len(tag_p)>=per_team: 
                 if len(comp_tag)>len(tag) and (comp_tag_uni.startswith(tag.lower())
                                             or comp_tag_uni.endswith(tag.lower())):
                     all_tags[tag].discard(p)
                     iter.remove(p)
+
+                # elif not len(non_overlapped)<per_team and all([True if overlaps(i, tag, all_tags, per_team)==1 else False for i in tag_p]):
+                #     all_tags[tag].discard(p)
+                #     iter.remove(p)
+                    # if len(all_tags[tag])<=per_team:
+                    #         return
 
                 elif p[0].startswith(comp_tag_uni) and not p[0].startswith(tag.lower()) \
                         and more_prefix(all_tags[comp_tag], comp_tag) and not more_suffix(all_tags[tag], tag):
                     if overlaps(p, tag, all_tags, per_team)==1:
                         all_tags[tag].discard(p)
                         iter.remove(p)
-                    else:
+                    elif len(tag_p)==per_team and len(all_tags[tag])>per_team:
                         all_tags[tag].discard(p)
                         iter.remove(p)
                         if len(all_tags[tag])<=per_team:
@@ -172,13 +167,13 @@ def check_overlaps(players, tag, all_tags, per_team):
                     if overlaps(p, tag, all_tags, per_team)==1:
                         all_tags[tag].discard(p)
                         iter.remove(p)
-                    else:
+                    elif len(tag_p)==per_team and len(all_tags[tag])>per_team:
                         all_tags[tag].discard(p)
                         iter.remove(p)
                         if len(all_tags[tag])<=per_team:
                             return
                 
-
+                
 def ngram(seq: str, n: int):
     return (seq[i: i+n] for i in range(0, len(seq)-n+1))
 
@@ -240,7 +235,7 @@ def split_chunks(players, tag, per_team, all_tags):
     # if tag has too many people at this point, then it is very likely that
     # there are duplicate tags, meaning more than one team has the same tag (obviously shouldn't happen and isn't allowed)
 
-    def post_id(p):
+    def post_id(p) :
         p = p[0]
         if p.startswith(tag.lower()):
             return 1
@@ -254,7 +249,7 @@ def split_chunks(players, tag, per_team, all_tags):
     mash = []
     # indx = (int(len(players)/per_team)-1)*per_team
     indx = per_team
-    players = sorted(list(players), key=lambda l: post_id(l), reverse=True)
+    players = sorted(list(players), key=lambda l: (overlaps(l, tag, all_tags, per_team),post_id(l)), reverse=True)
     if indx == 0: indx = 1
     if len(players[indx:])<per_team:
         mash = players[indx:]
@@ -475,16 +470,18 @@ def find_possible_tags(players):
                 
                 if (i_tag[:temp_indx] == j_tag[:temp_indx] or i_tag[:temp_indx] == j_tag[-temp_indx:]):
                     m_tag = Utils.sanitize_uni(orig_i)[:temp_indx].strip()
-                    if len(m_tag) == 1: 
-                        m_tag = m_tag.upper()
-                    if m_tag[-1] == '-':
-                        m_tag = m_tag[:-1]
-                    
-                    tag_matches[m_tag].add(players[i])
-                    tag_matches[m_tag].add(players[j])
+                    if len(m_tag)>0:
+                        if len(m_tag) == 1: 
+                            m_tag = m_tag.upper()
+                        if m_tag[-1] == '-':
+                            m_tag = m_tag[:-1]
+                        
+                        tag_matches[m_tag].add(players[i])
+                        tag_matches[m_tag].add(players[j])
 
                 if (i_tag[-temp_indx:] == j_tag[-temp_indx:] or i_tag[-temp_indx:] == j_tag[:temp_indx]):
                     m_tag = Utils.sanitize_uni(orig_i)[-temp_indx:].strip()
+                    if len(m_tag)==0: continue
                     if len(m_tag) == 1: 
                         m_tag = m_tag.upper()
                     if m_tag[-1] == '-':
@@ -528,11 +525,15 @@ def tag_algo(players, per_team, num_teams):
 
 if __name__ == "__main__":
     import time
-
+    
     large = False
     players, lengths = get_test_case(large=large)
+    rand.shuffle(players)
+    #find_possible_tags faster than commonaffix (maybe should change for split_acutal_tag)
+
     tick = time.perf_counter()
-    teams = tag_algo(players, per_team=5, num_teams=6)
+    per_team = 2
+    teams = tag_algo(players, per_team=per_team, num_teams=6)
     # print(dict(sorted(t.items(), key = lambda l: l[0])))
     if not large: print(teams)
     print("\nPERFORMANCE: {:.15f}".format(time.perf_counter()-tick))
@@ -540,3 +541,11 @@ if __name__ == "__main__":
     if lengths:
         print('avg length:', sum(lengths)/len(lengths))
         print(len(lengths))
+    
+    L = []
+    for tag, p in teams.items():
+        if tag.find('-')>=len(tag)/2 and tag[tag.find('-'):].isnumeric():
+            tag = tag[tag.find('-')]
+        L.append([Utils.sanitize_uni(tag).lower(), list(map(lambda l: (Utils.sanitize_uni(l.strip()).lower(), l), p))])
+    cost_check = simAnl.SimulatedAnnealing(L, per_team)
+    print("cost:",cost_check.E(L))
