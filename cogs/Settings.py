@@ -90,7 +90,7 @@ class Settings(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     async def set(self, ctx, settingType: str = None, *,default: str=None):
         if settingType is None:
-            await ctx.send("```Usage:\n?set <settingName> <value>`\n?set reset <settingName>\nSee `?settings` for a list of customizable settings.```")
+            await ctx.send("```asciidoc\n[Usage]\n?set <settingName> <value>\n?set reset <settingName>\nSee `?settings' for a list of customizable settings.\n```")
             return
         
         if settingType.lower() in ['reset', 'clear']:
