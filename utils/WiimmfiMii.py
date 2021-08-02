@@ -7,7 +7,6 @@ import aiohttp
 
 WIIMMFI_SAKE = 'http://mariokartwii.sake.gs.wiimmfi.de/SakeStorageServer/StorageServer.asmx'
 
-#pid or fc
 async def get_wiimmfi_mii_async(playerid: str):
     playerid = miiUtils.fc_to_pid(int(playerid.replace("-","")), b'RMCJ')
     async with aiohttp.ClientSession() as session:
@@ -22,6 +21,7 @@ def get_wiimmfi_mii(playerid: str):
     if mii_data == b'': return None
     return WiimmfiMii(mii_data.content)
 
+# https://github.com/willsigg/mkwtools
 class WiimmfiMii(Mii.Mii): 
     def __init__(self, responseContent):
         fullWiimmfiResponse = bytearray(base64.b64decode(str(responseContent)[399:527]))

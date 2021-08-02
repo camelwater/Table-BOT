@@ -370,10 +370,10 @@ class Table():
                 fc = future_fcs[future]
                 try:
                     mii_result = future.result()
+                    if mii_result: self.table_flags[fc] = mii_result.countryCode
+
                 except Exception as exc:
                     raise exc
-                else:
-                    if mii_result: self.table_flags[fc] = mii_result.countryCode
 
     
     def split_teams(self, f, num_teams): #TEST: need more testing for new tag algorithm

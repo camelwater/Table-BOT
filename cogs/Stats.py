@@ -4,7 +4,7 @@ from discord.ext import commands
 from collections import Counter
 import json
 import os
-import fnmatch
+from fnmatch import fnmatch
 
 class Stats(commands.Cog):
     def __init__(self, bot):
@@ -93,9 +93,9 @@ class Stats(commands.Cog):
 
 def get_LOC():
     LOC_count = 0
-    for file in os.listdir('.') + os.listdir('./cogs'):
-        if fnmatch.fnmatch(file, '*.py'):
-            with open('./cogs/'+file if file in os.listdir('./cogs') else file, encoding='utf-8') as f:
+    for dir in ['.', './cogs', './utils']:
+        for file in os.listdir(dir):    
+            with open(f"{dir}/{file}", encoding='utf-8') as f:
                 for _ in f:
                     LOC_count+=1
 

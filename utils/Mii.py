@@ -1,3 +1,4 @@
+# FROM: https://github.com/willsigg/mkwtools
 from binascii import hexlify, unhexlify
 from bitstring import BitArray
 from struct import pack
