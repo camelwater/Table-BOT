@@ -4,4 +4,5 @@ unidecode
 datetime
 aiohttp
 bs4
+requests
 bitstring
