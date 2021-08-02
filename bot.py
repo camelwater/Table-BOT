@@ -51,7 +51,7 @@ def update_json(file, contents):
     with open(file+'.json', 'w', encoding='utf-8') as f:
         json.dump(contents, f, ensure_ascii=True, indent = 4)
 
-SPLIT_CHAR = '¶'
+SPLIT_DELIM = '{d/D17¤85xu§ey¶}'
 DEFAULT_PREFIXES = ['?', '!']
 
 def fetch_prefixes_and_settings():
@@ -60,7 +60,7 @@ def fetch_prefixes_and_settings():
     server_pxs = {k[0]: k[1] for k in server_rows}
     server_sets = {int(k[0]): {"graph": SETTINGS["graph"].get(k[2]),"style": SETTINGS["style"].get(k[3])} for k in server_rows}
    
-    return {int(k): (p.split(SPLIT_CHAR) if p else []) for k, p in server_pxs.items()}, server_sets
+    return {int(k): (p.split(SPLIT_DELIM) if p else []) for k, p in server_pxs.items()}, server_sets
 
 def callable_prefix(bot, msg, mention=True):
     base = []
@@ -184,7 +184,7 @@ class TableBOT(commands.Bot):
         cur.execute('''UPDATE servers 
                         SET prefixes=? 
                         WHERE id=?''',
-                    (SPLIT_CHAR.join(prefixes), guild))
+                    (SPLIT_DELIM.join(prefixes), guild))
         conn.commit()
         
         return f"`{prefix}` has been registered as a prefix."
@@ -198,7 +198,7 @@ class TableBOT(commands.Bot):
             cur.execute('''UPDATE servers 
                             SET prefixes=? 
                             WHERE id=?''',
-                        (SPLIT_CHAR.join(self.prefixes[guild]) if len(self.prefixes[guild])>0 else None, guild))
+                        (SPLIT_DELIM.join(self.prefixes[guild]) if len(self.prefixes[guild])>0 else None, guild))
             conn.commit()
 
             return f"Prefix `{prefix}` has been removed." + (f' You must use my mention, {self.user.mention}, as the prefix now.' if len(self.prefixes[guild])==0 else "")
@@ -236,18 +236,18 @@ class TableBOT(commands.Bot):
         cur.execute('''UPDATE servers 
                         SET prefixes=? 
                         WHERE id=?''',
-                    (SPLIT_CHAR.join(DEFAULT_PREFIXES), guild))
+                    (SPLIT_DELIM.join(DEFAULT_PREFIXES), guild))
         conn.commit()
 
         return "Server prefixes have been reset to default."
 
     def get_guild_settings(self, guild):
-        default = {'style': None, 'graph': None}
+        default = {'graph': None, 'style': None}
 
         return self.settings.get(guild, default)
     
     def reset_settings(self, guild):
-        default = {'style': None, 'graph': None}
+        default = {'graph': None, 'style': None}
         self.settings[guild] = default
 
         cur.execute('''UPDATE servers 
@@ -295,7 +295,7 @@ class TableBOT(commands.Bot):
         return "`{}` setting set to `{}`.".format(setting, default.get('type') if setting in ['graph', 'style'] else default)
     
     def get_setting(self, type, guild, raw = False):
-        default = {'style': None, 'graph': None}
+        default = {'graph': None, 'style': None}
         if type in ['graph', 'style']:
             if raw:
                 return self.settings.get(guild, default).get(type)
@@ -327,3 +327,4 @@ if __name__ == "__main__":
     @atexit.register
     def on_exit():
         bot.dump_stats_json()
+    

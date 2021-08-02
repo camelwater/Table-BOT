@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from discord.ext import commands
 from Utils import SETTINGS
-RESERVED_CHAR = '¶'
+RESERVED_DELIM = '{d/D17¤85xu§ey¶}'
 
 class Settings(commands.Cog):
     def __init__(self, bot):
@@ -31,7 +31,7 @@ class Settings(commands.Cog):
         if prefix is None:
             await ctx.send("You need to specify a prefix to be added.")
             return
-        if RESERVED_CHAR in prefix:
+        if RESERVED_DELIM in prefix:
             return await ctx.send("You cannot add this prefix because it contains forbidden characters.")
         mes = self.bot.add_prefix(ctx.guild.id, prefix)
         
@@ -56,7 +56,7 @@ class Settings(commands.Cog):
     @prefix.command(name='set')
     @commands.has_guild_permissions(manage_guild=True)
     async def _set(self, ctx, *, prefix: str = None):
-        if RESERVED_CHAR in prefix:
+        if RESERVED_DELIM in prefix:
             return await ctx.send("You cannot set this prefix because it contains forbidden characters.")
 
         mes = self.bot.set_prefix(ctx.guild.id, prefix)
