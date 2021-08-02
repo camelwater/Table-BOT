@@ -60,7 +60,7 @@ These commands are used to correct the table. These commands are sometimes neces
 
 ### Utility Commands
 
-These commands can be used to edit the table, whether it be to correct other table errors or to enforce a custom ruleset - for example, penalizing players.
+These commands can be used to edit the table, whether it be to correct other table errors or to enforce a custom ruleset - such as penalizing players.
 
 ```
 ?edit [playerNum] [gpNum] [score]
@@ -139,6 +139,14 @@ These commands provide extra information and useful insight to the room.
 
 ```
 ?pens
+```
+
+```
+?subs
+```
+
+```
+?dcs
 ```
 
 ```

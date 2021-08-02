@@ -73,7 +73,7 @@ class Settings(commands.Cog):
     async def settings(self, ctx, mes=True):
         settings = self.bot.get_guild_settings(ctx.guild.id)
         spaces = max([len(k[0]) for k in settings.items()])+1
-        out = f'asciidoc\n== [ {ctx.guild.name} ] server settings =='
+        out = f'asciidoc\n== [{ctx.guild.name}] server settings =='
         for name, set in settings.items():
             try:
                 set = set['type']
@@ -118,12 +118,7 @@ class Settings(commands.Cog):
         if settingType in ['style', 'graph']:
             valid = False
             if default.isnumeric():
-                # try:
-                #     default = SETTINGS.get(settingType)[int(default)]
-                #     valid=True
-                # except:
-                #     pass
-                if default in SETTINGS: valid = True
+                if int(default) in SETTINGS: valid = True
             else:
                 # for i in list(SETTINGS.get(settingType).values()):
                 #     if default.lower() in map(lambda l: l.lower(), i.values()):
