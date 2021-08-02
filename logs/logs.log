@@ -40,3 +40,41 @@ Traceback (most recent call last):
 KeyError: '1'
 
 
+2021-08-02 16:45:23,835 ERROR -> in command: start
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 182, in start
+    await self.skip_search(ctx, data, is_rxx)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 73, in skip_search
+    error, ask, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(rid = arg)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 332, in find_room
+    self.find_players(room_url, soup)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1251, in find_players
+    if wiimmfiMii: self.table_flags[fc] = wiimmfiMii.countryCode
+AttributeError: 'coroutine' object has no attribute 'countryCode'
+
+
+2021-08-02 17:11:36,345 ERROR -> in command: yes
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 423, in yes
+    self.bot.table_instances[ctx.channel.id].populate_table_flags()
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 374, in populate_table_flags
+    raise exc
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 372, in populate_table_flags
+    mii_result = future.result()
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\concurrent\futures\_base.py", line 438, in result
+    return self.__get_result()
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\concurrent\futures\_base.py", line 390, in __get_result
+    raise self._exception
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\concurrent\futures\thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\utils\WiimmfiMii.py", line 23, in get_wiimmfi_mii
+    return WiimmfiMii(mii_data)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\utils\WiimmfiMii.py", line 33, in __init__
+    self.unknown1 = bytes(fullWiimmfiResponse[76]) #set to null
+IndexError: bytearray index out of range
+
+

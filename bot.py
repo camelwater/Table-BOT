@@ -17,7 +17,7 @@ from itertools import cycle
 from datetime import datetime, timedelta
 import sqlite3
 import copy
-from Utils import SETTINGS
+from utils.Utils import SETTINGS
 
 load_dotenv()
 KEY = os.getenv('KEY')
@@ -69,6 +69,7 @@ def callable_prefix(bot, msg, mention=True):
         base = default
     else:
         base.extend(bot.prefixes.get(msg.guild.id, default))
+        # base.append('$')
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)

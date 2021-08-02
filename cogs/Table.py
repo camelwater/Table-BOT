@@ -7,7 +7,7 @@ Created on Wed May 19 08:33:13 2021
 import discord
 from discord.ext import commands
 from tabler import Table
-import Utils
+import utils.Utils as Utils
 from datetime import datetime
 
 class Table_cog(commands.Cog):
@@ -90,6 +90,7 @@ class Table_cog(commands.Cog):
                 self.bot.table_instances[ctx.channel.id].searching_room = False
                 self.bot.table_instances[ctx.channel.id].confirm_room = False
                 self.bot.table_instances[ctx.channel.id].check_num_teams()
+                self.bot.table_instances[ctx.channel.id].populate_table_flags()
                 self.bot.table_instances[ctx.channel.id].check_mkwx_update.start()
                 return
             await wait_mes.delete()    
@@ -417,9 +418,10 @@ class Table_cog(commands.Cog):
             self.bot.table_instances[ctx.channel.id].searching_room = False
             self.bot.table_instances[ctx.channel.id].confirm_room = False
             self.bot.table_instances[ctx.channel.id].check_num_teams()
-
-            self.bot.table_instances[ctx.channel.id].check_mkwx_update.start()
+            
             await self.send_messages(ctx, mes)
+            self.bot.table_instances[ctx.channel.id].populate_table_flags()
+            self.bot.table_instances[ctx.channel.id].check_mkwx_update.start()
             
         elif self.bot.table_instances[ctx.channel.id].confirm_reset:
             self.bot.table_instances[ctx.channel.id].check_mkwx_update.stop()
@@ -522,8 +524,8 @@ class Table_cog(commands.Cog):
         em.add_field(name='\u200b', value= value_field, inline=False)
         em.set_image(url='attachment://table.png')
         em.set_footer(text = self.bot.table_instances[ctx.channel.id].get_warnings())
-        await pic_mes.delete()
         await ctx.send(embed=em, file=f)
+        await pic_mes.delete()
     
     @commands.command()
     async def undo(self,ctx, *args):

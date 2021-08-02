@@ -3,7 +3,7 @@
 import random as rand
 from math import exp
 import copy
-import Utils
+import utils.Utils as Utils
 from itertools import chain
 from functools import partial, reduce
 from typing import Iterator, Tuple, List

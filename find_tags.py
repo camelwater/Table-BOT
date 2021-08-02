@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import Utils
+import utils.Utils as Utils
 from os.path import commonprefix
 from collections import defaultdict
 import copy
@@ -49,6 +49,7 @@ def get_test_case(large = False):
         # players = list({'x#1':0, 'xxx':0, 'Ryan@X':0, '¢ant':0, 'coolio': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}.keys())
         players = ['hello', 'he123', 'borrowed time', 'WAX', 'barrel', 
                     'A-1', 'what?', "WWW.PH.COM", "BWλHλHλ", 'Ã', 'λp fraud', 'WOW!!']
+        players = ['Mo taz', 'Mo Matt', 'Mo Jαggγ', 'Mo Sal', 'Mo Jos', 'Prιngle@MV', 'MV Noah', 'MV stripe', 'MV L-boaT', 'MV yax']
         # players = ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros']
         # players = ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', '@*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA h', 'USA K', 'ABBA']
         # players = ['Æ big', 'PP hi', "PP powerplant", 'PP POWERGRID', 'Æ vamp', 'PP ger', 'Æ hello', 'Æ oo', 'big PP', 'shuyx@Æ']
@@ -532,7 +533,7 @@ if __name__ == "__main__":
     #find_possible_tags faster than commonaffix (maybe should change for split_acutal_tag)
 
     tick = time.perf_counter()
-    per_team = 2
+    per_team = 5
     teams = tag_algo(players, per_team=per_team, num_teams=6)
     # print(dict(sorted(t.items(), key = lambda l: l[0])))
     if not large: print(teams)

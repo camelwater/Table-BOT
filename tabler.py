@@ -10,6 +10,7 @@ import copy
 from io import BytesIO
 from urllib.parse import quote
 import aiohttp
+import concurrent.futures
 from urllib.request import urlopen
 import datetime
 import discord
@@ -19,9 +20,10 @@ from unidecode import unidecode
 from collections import defaultdict, Counter
 from find_tags import tag_algo
 import tag_testing.simulatedAnnealingTag as simAnl
-import Utils
-from Utils import isFFA, WARNING_MAP, DC_MAP, STYLE_MAP, PTS_MAP
-from Utils import GRAPH_MAP as GM
+from utils.WiimmfiMii import get_wiimmfi_mii, get_wiimmfi_mii_async
+import utils.Utils as Utils
+from utils.Utils import isFFA, WARNING_MAP, DC_MAP, STYLE_MAP, PTS_MAP
+from utils.Utils import GRAPH_MAP as GM
 graph_map = copy.deepcopy(GM)
 
 # NOTE: consider changing players into Player objects, and maybe automating first race dcs (18 and 15 pts) 
@@ -81,6 +83,7 @@ class Table():
         self.edited_scores = defaultdict(lambda: defaultdict(int)) #players with edited gp scores
                    
         self.tags = {} #list of team tags and their respective players
+        self.table_flags = {}
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
         self.graph = None #table picture graph
         self.style = None #table picture theme/style
@@ -357,6 +360,21 @@ class Table():
                     self.player_list = string
                     return False, type_ask, "Room {} found.\n{}\n\n**Is this room correct?** (`?yes` / `?no`)".format(self.rxx, string)
     
+    def populate_table_flags(self):
+        '''
+        get Miis of all players and get their region codes
+        '''
+        with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
+            future_fcs = {executor.submit(get_wiimmfi_mii, fc): fc for fc in self.players.keys()}
+            for future in concurrent.futures.as_completed(future_fcs):
+                fc = future_fcs[future]
+                try:
+                    mii_result = future.result()
+                except Exception as exc:
+                    raise exc
+                else:
+                    if mii_result: self.table_flags[fc] = mii_result.countryCode
+
     
     def split_teams(self, f, num_teams): #TEST: need more testing for new tag algorithm
         """
@@ -964,7 +982,7 @@ class Table():
         for dcID, dc in enumerate(self.temp_dc_list):
             self.dc_list_ids[dcID+1] = dc
         for race, dcs in self.dc_list.items(): #sort dc_list within races
-            self.dc_list[race] = sorted(dcs, key = lambda l: Utils.sanitize_uni(l))
+            self.dc_list[race] = sorted(dcs, key = lambda l: Utils.sanitize_uni(l.get('player','')))
         self.dc_list = defaultdict(list, dict(sorted(self.dc_list.items(), key = lambda l: l[0])))
 
     def edit(self,l, redo=False): 
@@ -1307,10 +1325,12 @@ class Table():
         
         return ret
             
-    def add_sub_player(self,player, fc):
+    async def add_sub_player(self,player, fc):
         if fc in self.all_players: return 'failed'
         if isFFA(self.format): self.all_players.append(fc)
         self.players[fc] = [0,[0]*self.gps, [0]*self.gps*4]
+        wiimm_mii = await get_wiimmfi_mii_async(fc)
+        if wiimm_mii: self.table_flags[fc] = wiimm_mii.countryCode
         self.fcs[player] = fc
         self.display_names[fc] = player
         if len(self.players)-1<self.num_players: #TEST: test if new missing players DC filling working (for multiple GPS: 1 + 2)
@@ -2097,8 +2117,8 @@ class Table():
         em.set_image(url='attachment://table.png')
         em.set_footer(text = self.get_warnings())
         
-        await pic_mes.delete()
         await self.ctx.send(embed=em, file=f)
+        await pic_mes.delete()
         await detect_mes.delete()
 
         self.picture_running=False
@@ -2321,7 +2341,7 @@ class Table():
                 
                 #sub player
                 if fc not in self.players and fc not in self.deleted_players:
-                    status = self.add_sub_player(self.check_name(player[0]), fc)
+                    status = await self.add_sub_player(self.check_name(player[0]), fc)
                     if not isFFA(self.format) and status == 'success':
                         self.warnings[shift+raceNum+1].append({'type':'sub', 'player': fc})
 
@@ -2439,6 +2459,9 @@ class Table():
                 else:
                     p2 = self.display_names[p2]
                 ret+="\n{} ".format(p2)
+                #flag insertion by region
+                flag_code = self.table_flags.get(p, '')
+                ret+=f"[{flag_code if flag_code else ''}] "
                 if by_race: 
                     scores = self.players[p][2]
                 else:
@@ -2480,6 +2503,9 @@ class Table():
                         else:
                             p2 = self.display_names[p2]
                         ret+="\n\nNO TEAM\n{} ".format(p2)
+                        #flag insertion by region
+                        flag_code = self.table_flags.get(p, '')
+                        ret+=f"[{flag_code if flag_code else ''}] "
                         if by_race: 
                             scores = self.players[p][2]
                         else:
@@ -2520,6 +2546,9 @@ class Table():
                         else:
                             p2 = self.display_names[p2]
                         ret+="\n{} ".format(p2)
+                        #flag insertion by region
+                        flag_code = self.table_flags.get(p, '')
+                        ret+=f"[{flag_code if flag_code else ''}] " 
                         if by_race: 
                             scores = self.players[p][2]
                         else:
@@ -2564,10 +2593,16 @@ class Table():
             png_link = "https://gb.hlorenzi.com/table.png?data={}".format(quote(self.table_str))
             
         self.table_link = png_link.replace('.png', "")
-        with urlopen(png_link) as url:
-            output = BytesIO(url.read())
-        
-        return output
+       
+        timeout = 10
+        async with aiohttp.ClientSession() as session:
+            async with session.get(png_link, timeout=timeout) as resp:
+                if resp.status!=200:
+                    return await self.ctx.send("Error while fetching table picture: table picture rendering site is down.")
+                return BytesIO(await resp.read())
+        # with urlopen(png_link) as url:
+        #     output = BytesIO(url.read())
+        # return output
     
     def get_modifications(self):
         ret = ''
@@ -2820,7 +2855,7 @@ class Table():
         
         
     async def fetch(self, url, headers=None): 
-        timeout = aiohttp.ClientTimeout(total=15)
+        timeout = aiohttp.ClientTimeout(total=10)
         async with aiohttp.ClientSession() as session:
             if headers == None:
                 try:
@@ -2846,7 +2881,7 @@ class Table():
 
     async def fetch_mkwx_JSON(self, url, headers=None):
         url+="?m=json"
-        timeout = aiohttp.ClientTimeout(total=15)
+        timeout = aiohttp.ClientTimeout(total=10)
         async with aiohttp.ClientSession() as session:
             if headers == None:
                 try:

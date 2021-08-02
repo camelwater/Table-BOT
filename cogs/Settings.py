@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from discord.ext import commands
-from Utils import SETTINGS
+from utils.Utils import SETTINGS
 RESERVED_DELIM = '{d/D17¤85xu§ey¶}'
 
 class Settings(commands.Cog):
