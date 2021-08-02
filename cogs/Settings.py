@@ -106,7 +106,6 @@ class Settings(commands.Cog):
             return await ctx.send("Invalid setting `{}`. Here are the customizable settings:\n{}".format(settingType, await self.settings(ctx, mes=False)))
 
         if default is None:
-            # avail_settings = get_avail_settings(settingType)
             if not avail_settings:
                 await ctx.send("Invalid setting `{}`. Here are the customizable settings:\n{}".format(settingType, await self.settings(ctx, mes=False)))
             else:
@@ -118,7 +117,8 @@ class Settings(commands.Cog):
         if settingType in ['style', 'graph']:
             valid = False
             if default.isnumeric():
-                if int(default) in SETTINGS: valid = True
+                default = int(default)
+                if default in SETTINGS[settingType]: valid = True
             else:
                 # for i in list(SETTINGS.get(settingType).values()):
                 #     if default.lower() in map(lambda l: l.lower(), i.values()):

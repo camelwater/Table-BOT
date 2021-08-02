@@ -292,7 +292,7 @@ class TableBOT(commands.Bot):
         #                 FROM servers''')
         # print(cur.fetchall())
 
-        return "`{}` setting set as `{}`.".format(setting, default.get('type') if setting in ['graph', 'style'] else default)
+        return "`{}` setting set to `{}`.".format(setting, default.get('type') if setting in ['graph', 'style'] else default)
     
     def get_setting(self, type, guild, raw = False):
         default = {'style': None, 'graph': None}

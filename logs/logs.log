@@ -29,3 +29,14 @@ Traceback (most recent call last):
 sqlite3.OperationalError: near "FROM": syntax error
 
 
+2021-08-02 04:05:15,299 ERROR -> in command: set
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Settings.py", line 137, in set
+    mes = self.bot.set_setting(ctx.guild.id, settingType, default)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\bot.py", line 278, in set_setting
+    default = SETTINGS[setting][default]
+KeyError: '1'
+
+
