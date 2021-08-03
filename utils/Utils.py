@@ -316,19 +316,19 @@ WARNING_MAP = {
 
         "blank_time": "{} had a blank race time and was on results. If this wasn't a DC, this is an MKWX ERROR.",
 
-        "tie": "{} had tied race times ({}). Check { PREFIX }rr for errors.", 
+        "tie": "{} had tied race times ({}). Check [PREFIX]rr for errors.", 
 
-        "mkwx_bug_increase": "Room size increased mid-GP from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX ERROR. Affected races: {}. Run { PREFIX }changeroomsize to fix this.", 
+        "mkwx_bug_increase": "Room size increased mid-GP from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX ERROR. Affected races: {}. Run [PREFIX]changeroomsize to fix this.", 
         "mkwx_bug_change": "Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX ERROR. Table could be inaccurate for this GP ({}).", 
         "mkwx_bug_blank": "All players in the race had blank finish times. This is an MKWX ERROR if there was no room reset. Table is inaccurate for this GP ({}).", 
         "mkwx_bug_repeat": "{} player(s) had the same finish time as they had in a previous race (race {}). Check for errors as this is highly improbable and likely an MKWX ERROR. Table could be inaccurate for this GP ({}).",
-        "mkwx_bug_tr":"Room had {} players with track errors. Check { PREFIX }rr for errors. Table could be inaccurate for this GP ({}).", 
-        "mkwx_bug_delta": "Room had time delay (lag) errors - {} affected player(s). Check { PREFIX }rr for errors. Table could be inaccuate for this GP ({}).",
+        "mkwx_bug_tr":"Room had {} players with track errors. Check [PREFIX]rr for errors. Table could be inaccurate for this GP ({}).", 
+        "mkwx_bug_delta": "Room had time delay (lag) errors - {} affected player(s). Check [PREFIX]rr for errors. Table could be inaccuate for this GP ({}).",
 
         "sub": "{}  -  Potential sub detected. If this player is a sub, use {}sub.", 
         "sub_conf": "{} - subbed in for {}.",
 
-        "large_time": "{} had a large finish time - {}. Check { PREFIX }rr for errors."
+        "large_time": "{} had a large finish time - {}. Check [PREFIX]rr for errors."
         }
 
 DC_MAP = {
