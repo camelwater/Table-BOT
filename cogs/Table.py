@@ -9,6 +9,8 @@ from discord.ext import commands
 from tabler import Table
 import utils.Utils as Utils
 from datetime import datetime
+import io
+import re
 
 class Table_cog(commands.Cog):
     def __init__(self, bot):
@@ -528,9 +530,24 @@ class Table_cog(commands.Cog):
         value_field = "[Edit this table on gb.hlorenzi.com]("+self.bot.table_instances[ctx.channel.id].table_link+")"
         em.add_field(name='\u200b', value= value_field, inline=False)
         em.set_image(url='attachment://table.png')
-        em.set_footer(text = self.bot.table_instances[ctx.channel.id].get_warnings())
+        is_overflow, error_footer, fixed_footer = self.bot.table_instances[ctx.channel.id].get_warnings()
+        if is_overflow:
+            em.set_footer(text = fixed_footer)
+        else:
+            em.set_footer(text = error_footer)
+        
         await ctx.send(embed=em, file=f)
         await pic_mes.delete()
+
+        if is_overflow: #send file of errors
+            path = "./error_footers/"
+            file_name = f'warnings_and_errors-{re.sub("[^0-9]", "", str(datetime.now()))}.txt'
+            with open(path+file_name, 'w', encoding='utf-8') as e_file:
+                e_file.write(error_footer)
+            e_file = io.BytesIO(open(path+file_name, 'rb').read())
+            Utils.delete_file(path+file_name)
+                
+            await ctx.send(file = discord.File(fp=e_file, filename=file_name))
     
     @commands.command()
     async def undo(self,ctx, *args):

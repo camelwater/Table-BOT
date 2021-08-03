@@ -51,7 +51,7 @@ class Settings(commands.Cog):
             await ctx.send(f"You need to specify a prefix to be removed:\n{guild_prefixes}")
             return
         
-        mes = self.bot.remove_prefix(ctx.guild.id, prefix)
+        mes = self.bot.remove_prefix(ctx.prefix, ctx.guild.id, prefix)
         await ctx.send(mes)
     
     @prefix.command(name='set')

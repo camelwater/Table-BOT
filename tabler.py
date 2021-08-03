@@ -6,6 +6,7 @@ Created on Tue May 18 15:05:35 2021
 """
 from bs4 import BeautifulSoup
 import copy
+import re
 #from PIL import Image
 from io import BytesIO
 from urllib.parse import quote
@@ -377,7 +378,7 @@ class Table():
                     raise exc
 
     
-    def split_teams(self, f, num_teams): #TEST: need more testing for new tag algorithm
+    def split_teams(self, f, num_teams):
         """
         split players into teams based on tags
         """
@@ -517,11 +518,14 @@ class Table():
             ret+="     Race #{}: {}\n".format(i[0], self.tracks[i[0]-1])
             for warning in i[1]:
                 ret+="       \t- {}\n".format(self.warn_to_str(warning) if isinstance(warning, dict) else warning)
-                
-        if len(ret)>2048: #potentially look to implement system for overflowing warnings (either pages or separate message/file or command)
-            return ret[:2048]
+
+        ret+="hello"*500 
+        if len(ret)>2020:
+            fixed_ret = ret[:2020]
+            fixed_ret+="... (full errors in file)"
+            return True, ret, fixed_ret 
         
-        return ret
+        return False, ret, ret
     
     def check_num_teams(self):
         if len(self.tags)!=self.teams:
@@ -2095,9 +2099,6 @@ class Table():
     @tasks.loop(seconds=5)
     async def check_mkwx_update(self): 
         # cur_iter = self.check_mkwx_update.current_loop
-        # if cur_iter!=0 and cur_iter%50==0:
-        #     print("Mkwx check {}.".format(cur_iter))
-            
         if not await self.room_is_updated(): return
 
         self.bot.command_stats['picture_generated']+=1
@@ -2116,11 +2117,26 @@ class Table():
         value_field = "[Edit this table on gb.hlorenzi.com]("+self.table_link+")"
         em.add_field(name='\u200b', value= value_field, inline=False)
         em.set_image(url='attachment://table.png')
-        em.set_footer(text = self.get_warnings())
+        is_overflow, error_footer, fixed_footer = self.get_warnings()
+        if is_overflow:
+            em.set_footer(text = fixed_footer)
+        else:
+            em.set_footer(text = error_footer)
         
         await self.ctx.send(embed=em, file=f)
         await pic_mes.delete()
         await detect_mes.delete()
+
+        
+        if is_overflow: #send file of errors
+            path = "./error_footers/"
+            file_name = f'warnings_and_errors-{re.sub("[^0-9]", "", str(datetime.datetime.now()))}.txt'
+            with open(path+file_name, 'w', encoding='utf-8') as e_file:
+                e_file.write(error_footer)
+            e_file = BytesIO(open(path+file_name, 'rb').read())
+            Utils.delete_file(path+file_name)
+                
+            await self.ctx.send(file = discord.File(fp=e_file, filename=file_name))
 
         self.picture_running=False
         

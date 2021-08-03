@@ -88,7 +88,6 @@ class TableBOT(commands.Bot):
         for ext in INIT_EXT:
             self.load_extension(ext)  
 
-    #TODO: catch invalid form errors (too long fields)        
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
             if not ctx.guild:
@@ -190,7 +189,7 @@ class TableBOT(commands.Bot):
         
         return f"`{prefix}` has been registered as a prefix."
     
-    def remove_prefix(self, guild, prefix):
+    def remove_prefix(ctx_prefix, self, guild, prefix):
         if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
             return "My mention is a default prefix and cannot be removed."
 
@@ -204,7 +203,7 @@ class TableBOT(commands.Bot):
 
             return f"Prefix `{prefix}` has been removed." + (f' You must use my mention, {self.user.mention}, as the prefix now.' if len(self.prefixes[guild])==0 else "")
         except KeyError:
-            return f"You don't have any custom prefixes registered. You can add or set custom prefixes with `{ctx.prefix}prefix`."
+            return f"You don't have any custom prefixes registered. You can add or set custom prefixes with `{ctx_prefix}prefix`."
         except:
             return f"`{prefix}` is not a registered prefix."
         

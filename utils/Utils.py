@@ -4,6 +4,13 @@ Created on Sat Jun 5 15:30:03 2021
 
 @author: ryanz
 """
+import os
+
+def delete_file(filename):
+    try:
+        os.remove(filename)
+    except:
+        pass
 
 #-------------- Table.py methods --------------#
 
