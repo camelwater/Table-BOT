@@ -519,7 +519,6 @@ class Table():
             for warning in i[1]:
                 ret+="       \t- {}\n".format(self.warn_to_str(warning) if isinstance(warning, dict) else warning)
 
-        ret+="hello"*500 
         if len(ret)>2020:
             fixed_ret = ret[:2020]
             fixed_ret+="... (full errors in file)"
