@@ -27,8 +27,10 @@ class Table_cog(commands.Cog):
     
     def set_instance(self, ctx: commands.Context):
         channel_id = ctx.channel.id
-        self.bot.table_instances[channel_id].prefix = ctx.prefix
-        if channel_id in self.bot.table_instances: return
+        
+        if channel_id in self.bot.table_instances: 
+            self.bot.table_instances[channel_id].prefix = ctx.prefix
+            return
 
         self.bot.table_instances[channel_id] = Table(ctx=ctx, bot=self.bot)
         if ctx.guild:
