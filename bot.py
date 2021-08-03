@@ -73,7 +73,6 @@ def callable_prefix(bot, msg, mention=True):
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
-    # return base, (True if msg.guild is None or bot.prefixes.get(msg.guild.id) is None else False)
     return base
 
 

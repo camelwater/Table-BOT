@@ -303,7 +303,7 @@ class Table_cog(commands.Cog):
             await ctx.send("This command cannot be used in FFAs.")
         
         px = ctx.prefix
-        usage = "Usage: f`{px}changetag <player id> <corrected tag>`"
+        usage = f"Usage: `{px}changetag <player id> <corrected tag>`"
         if len(args)==0:
             await self.send_temp_messages(ctx, self.bot.table_instances[ctx.channel.id].get_player_list(),'\n',usage)
             return
@@ -320,7 +320,7 @@ class Table_cog(commands.Cog):
         mes= self.bot.table_instances[ctx.channel.id].change_tag(pID, tag)
         if self.bot.table_instances[ctx.channel.id].confirm_room:
             self.bot.table_instances[ctx.channel.id].choose_message = self.bot.table_instances[ctx.channel.id].get_player_list() +f"\n**Is this correct?** (`{px}yes` / `{px}no`)"
-            await self.send_messages(ctx, mes, self.bot.table_instances[ctx.channel.id].get_player_list(), f"\n**Is this correct?** (`{px}yes` / `{px}no`)")
+            await self.send_messages(ctx, mes, self.bot.table_instances[ctx.channel.id].get_player_list(p_form=False), f"\n**Is this correct?** (`{px}yes` / `{px}no`)")
         else:
             await self.send_messages(ctx, mes)
         
@@ -347,7 +347,7 @@ class Table_cog(commands.Cog):
         mes = self.bot.table_instances[ctx.channel.id].edit_tag_name(arg)
         if self.bot.table_instances[ctx.channel.id].confirm_room:
             self.bot.table_instances[ctx.channel.id].choose_message = self.bot.table_instances[ctx.channel.id].get_player_list() + f"\n**Is this correct?** (`{px}yes` / `{px}no`)"
-            await self.send_messages(ctx, mes, self.bot.table_instances[ctx.channel.id].get_player_list(), f"\n**Is this correct?** (`{px}yes` / `{px}no`)")
+            await self.send_messages(ctx, mes, self.bot.table_instances[ctx.channel.id].get_player_list(p_form=False), f"\n**Is this correct?** (`{px}yes` / `{px}no`)")
         else:
             await self.send_messages(ctx, mes)
             
@@ -395,7 +395,7 @@ class Table_cog(commands.Cog):
             self.bot.table_instances[ctx.channel.id].choose_message = self.bot.table_instances[ctx.channel.id].get_player_list(p_form=False) +f"\n**Is this correct?** (`{px}yes` / `{px}no`)"
             await self.send_messages(ctx, mes, self.bot.table_instances[ctx.channel.id].get_player_list(p_form=False), f"\n**Is this correct?** (`{px}yes` / `{px}no`)")
         else:
-            await self.send_messages(ctx, mes, self.bot.table_instances[ctx.channel.id].get_player_list(p_form=False))
+            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_player_list(p_form=True), mes)
         
     @tags.error
     async def tags_error(self,ctx, error):
@@ -730,7 +730,7 @@ class Table_cog(commands.Cog):
     async def playerlist(self,ctx):
         
         if await self.check_callable(ctx, "players"): return
-        await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_player_list(p_form=False))
+        await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_player_list(p_form=False, include_tag=False))
     
     @commands.command(aliases=['e'])
     async def edit(self,ctx: commands.Context, * , arg):

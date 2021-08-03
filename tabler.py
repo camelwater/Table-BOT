@@ -298,17 +298,11 @@ class Table():
                     else:
                         self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].upper())))
                         for tag in self.tags.keys():
-                            if tag == "":
-                                 for p in self.tags[tag]:
-                                     string+="\n**NO TEAM**\n\t{}. {} ".format(counter,Utils.dis_clean(self.display_names[p]))
-                                     self.player_ids[str(counter)] = p
-                                     counter+=1
-                            else:   
-                                string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
-                                for p in self.tags[tag]:
-                                    string+="\n\t{}. {}".format(counter,Utils.dis_clean(self.display_names[p]))
-                                    self.player_ids[str(counter)] = p
-                                    counter+=1
+                            string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
+                            for p in self.tags[tag]:
+                                string+="\n\t{}. {}".format(counter,Utils.dis_clean(self.display_names[p]))
+                                self.player_ids[str(counter)] = p
+                                counter+=1
                                     
                     self.player_list = string
                     return False, type_ask, f"Room {self.rxx} found.\n{string}\n\n**Is this correct?** (`{self.prefix}yes` / `{self.prefix}no`)"    
@@ -347,18 +341,12 @@ class Table():
                             counter+=1          
                     else:
                         self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].upper())))
-                        for tag in self.tags.keys():
-                            if tag == "":
-                                 for p in self.tags[tag]:
-                                     string+="\n**NO TEAM**\n\t{}. {} ".format(counter,Utils.dis_clean(self.display_names[p]))
-                                     self.player_ids[str(counter)] = p
-                                     counter+=1
-                            else:   
-                                string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
-                                for p in self.tags[tag]:
-                                    string+="\n\t{}. {}".format(counter,Utils.dis_clean(self.display_names[p]))
-                                    self.player_ids[str(counter)] = p
-                                    counter+=1
+                        for tag in self.tags.keys():  
+                            string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
+                            for p in self.tags[tag]:
+                                string+="\n\t{}. {}".format(counter,Utils.dis_clean(self.display_names[p]))
+                                self.player_ids[str(counter)] = p
+                                counter+=1
                     self.player_list = string
                     return False, type_ask, f"Room {self.rxx} found.\n{string}\n\n**Is this room correct?** (`{self.prefix}yes` / `{self.prefix}no`)"
     
@@ -406,7 +394,7 @@ class Table():
         self.tags = teams
         self.all_players = copy.deepcopy(self.tags)
         self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].lower())))
-        self.tags = {k.strip(): v for (k, v) in self.tags.items()}
+        self.tags = {("NO TEAM" if k.strip()=="" else k.strip()): v for (k, v) in self.tags.items()}
 
         print()
         print(self.tags)
@@ -771,24 +759,33 @@ class Table():
                 old_indx = i[1].index(player)
                 i[1].remove(player)
                 self.all_players[i[0]].remove(player)
-        if tag not in self.tags:
+        existing_tag = None
+        if tag in self.tags:
+            existing_tag = tag
+        else:
+            for indx, i in enumerate(list(map(lambda l: Utils.sanitize_uni(l.strip()).lower(),self.tags.keys()))):
+                if tag.lower() == i:
+                    existing_tag = list(self.tags.keys())[indx]
+                    break
+            
+        if existing_tag:
+            if reundo and restore_indx is not None:
+                self.tags[existing_tag].insert(restore_indx, player)
+                self.all_players[existing_tag].insert(restore_indx, player)
+            else:
+                self.tags[existing_tag].append(player)
+                self.all_players[existing_tag].append(player)
+        else:
             self.tags[tag] = [player]
             self.all_players[tag] = [player]
-        else:
-            if reundo and restore_indx is not None:
-                self.tags[tag].insert(restore_indx, player)
-                self.all_players[tag].insert(restore_indx, player)
-            else:
-                self.tags[tag].append(player)
-                self.all_players[tag].append(player)
 
         empty_keys = [k[0] for k in list(self.tags.items()) if len(k[1])==0]
         for k in empty_keys:
             del self.tags[k]
 
-        ret = "`{}` tag changed from `{}` to `{}`.".format(self.display_names[player], old_tag, tag)  
+        ret = "`{}` tag changed from `{}` to `{}`.".format(self.display_names[player], old_tag, existing_tag if existing_tag else tag)  
         if not reundo and self.table_running:
-            self.modifications.append([(f"{self.prefix}changetag {p_indx} {tag}", player, tag, old_tag, old_indx)])
+            self.modifications.append([(f"changetag {p_indx} {tag}", player, tag, old_tag, old_indx)])
 
         return ret
        
@@ -843,7 +840,7 @@ class Table():
             self.all_players.pop(i)
         
         if not redo and self.table_running:
-            self.modifications.append([("{}tags {}".format(self.prefix, dic_str), orig_tags, dic)])
+            self.modifications.append([(f"tags {dic_str}", orig_tags, dic)])
         
         return "Tags updated."
     
@@ -886,7 +883,10 @@ class Table():
             self.display_names[player] = restore_name
         return
 
-    def get_player_list(self, p_form = True):
+    def get_player_list(self, p_form = True, include_tag = None):
+        if include_tag is None:
+            include_tag = not p_form
+        
         counter = 1
         string =''
         self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].upper())))
@@ -906,37 +906,21 @@ class Table():
                 counter+=1
         else:
             for tag in self.tags.keys():
-                if tag == "":
-                     for p in self.tags[tag]:
-                         self.player_ids[str(counter)] = p
-                         p2 = p
-                         if p in self.deleted_players: continue
-                         if p in self.sub_names: 
-                            p2 = ''
-                            for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                                p2 += '{}({})/'.format(self.display_names[x], r)
-                            p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
-                         else:
-                             p2 = self.display_names[p2]
-                         string+="\n**NO TEAM**\n\t{}{}".format('`{}.` '.format(counter) if p_form else '{}. '.format(counter),Utils.dis_clean(p2))
-                         
-                         counter+=1
-                else:   
-                    string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
-                    for p in self.tags[tag]:
-                        self.player_ids[str(counter)] = p
-                        p2 = p
-                        if p in self.deleted_players: continue
-                        if p in self.sub_names: 
-                            p2 = ''
-                            for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                                p2 += '{}({})/'.format(self.display_names[x], r)
-                            p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
-                        else:
-                            p2 = self.display_names[p2]
-                        string+="\n\t{}{}".format('`{}.` '.format(counter) if p_form else '{}. '.format(counter),Utils.dis_clean(p2))
-                        
-                        counter+=1
+                string+=f'\n**{"Tag: " if include_tag else ""}{Utils.dis_clean(tag)}**'
+                for p in self.tags[tag]:
+                    self.player_ids[str(counter)] = p
+                    p2 = p
+                    if p in self.deleted_players: continue
+                    if p in self.sub_names: 
+                        p2 = ''
+                        for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
+                            p2 += '{}({})/'.format(self.display_names[x], r)
+                        p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
+                    else:
+                        p2 = self.display_names[p2]
+                    string+="\n\t{}{}".format('`{}.` '.format(counter) if p_form else '{}. '.format(counter),Utils.dis_clean(p2))
+                    
+                    counter+=1
 
         self.player_list = string
         return self.player_list
@@ -1077,30 +1061,23 @@ class Table():
                 counter+=1
         else:
             for tag in self.tags.keys():
-                if tag == "":
-                     for p in self.tags[tag]:
-                         self.player_ids[str(counter)] = p
-                         string+="\n**NO TEAM**\n\t{}. {} {}".format('`{}`'.format(counter) if c_form else counter,Utils.dis_clean(self.display_names[p]), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
-                         
-                         counter+=1
-                else:   
-                    string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
-                    if tag in self.team_pens.keys(): 
-                        string+=" **(-{})**".format(self.team_pens.get(tag))
-                    for p in self.tags[tag]:
-                        self.player_ids[str(counter)] = p
-                        p2 = p
-                        if p in self.deleted_players: continue
-                        if p in self.sub_names: 
-                            p2 = ''
-                            for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                                p2 += '{}({})/'.format(self.display_names[x], r)
-                            p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
-                        else:
-                            p2 = self.display_names[p2]
-                        string+="\n\t{}. {} {}".format('`{}`'.format(counter) if c_form else counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
-                        
-                        counter+=1
+                string+='\n**{}**'.format(Utils.dis_clean(tag))
+                if tag in self.team_pens.keys(): 
+                    string+=" **(-{})**".format(self.team_pens.get(tag))
+                for p in self.tags[tag]:
+                    self.player_ids[str(counter)] = p
+                    p2 = p
+                    if p in self.deleted_players: continue
+                    if p in self.sub_names: 
+                        p2 = ''
+                        for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
+                            p2 += '{}({})/'.format(self.display_names[x], r)
+                        p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
+                    else:
+                        p2 = self.display_names[p2]
+                    string+="\n\t{}. {} {}".format('`{}`'.format(counter) if c_form else counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                    
+                    counter+=1
                     
         self.player_list = string
         return self.player_list
@@ -1203,7 +1180,7 @@ class Table():
             if self.team_pens[team] == 0: self.team_pens.pop(team)
             
             if not reundo:
-                self.modifications.append([('{}teampen {} {}'.format(self.prefix, team, pen), team, pen)])
+                self.modifications.append([(f'teampen {team} {pen}', team, pen)])
                 self.undos.clear()
             return "`-{}` penalty given to team `{}`.".format(pen, team)
     
@@ -2507,90 +2484,47 @@ class Table():
                 
         else:
             for tag in self.tags.keys():
-                if tag == "":
-                    for p in self.tags[tag]:
-                        p2 = p
-                        if p in self.deleted_players: continue
-                        if p in self.sub_names: 
-                            p2 = ''
-                            for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                                p2 += '{}({})/'.format(self.display_names[x], r)
-                            p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
+                ret+='\n\n{}'.format(tag)
+                for p in self.tags[tag]:
+                    p2 = p
+                    if p in self.deleted_players: continue
+                    if p in self.sub_names: 
+                        p2 = ''
+                        for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
+                            p2 += '{}({})/'.format(self.display_names[x], r)
+                        p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
+                    else:
+                        p2 = self.display_names[p2]
+                    ret+="\n{} ".format(p2)
+                    #flag insertion by region
+                    flag_code = self.table_flags.get(p, '')
+                    ret+=f"[{flag_code if flag_code else ''}] " 
+                    if by_race: 
+                        scores = self.players[p][2]
+                    else:
+                        scores = self.players[p][1]
+                    for num,gp in enumerate(scores):
+                        if by_race:
+                            if int(num/4)+1 in self.edited_scores[p]:
+                                if num/4 +1 in self.edited_scores[p]:
+                                    ret+="{}".format(self.edited_scores[p][int(num/4)+1])
+                                else:
+                                    ret+='0'
+                                if num+1!=len(scores):
+                                    ret+='|'
+                                continue      
                         else:
-                            p2 = self.display_names[p2]
-                        ret+="\n\nNO TEAM\n{} ".format(p2)
-                        #flag insertion by region
-                        flag_code = self.table_flags.get(p, '')
-                        ret+=f"[{flag_code if flag_code else ''}] "
-                        if by_race: 
-                            scores = self.players[p][2]
-                        else:
-                            scores = self.players[p][1]
-                        for num,gp in enumerate(scores):
-                            if by_race:
-                                if int(num/4)+1 in self.edited_scores[p]:
-                                    if num/4 +1 in self.edited_scores[p]:
-                                        ret+="{}".format(self.edited_scores[p][int(num/4)+1])
-                                    else:
-                                        ret+='0'
-                                    if num+1!=len(scores):
-                                        ret+='|'
-                                    continue        
-                            else:
-                                if num+1 in self.edited_scores[p]:
-                                    ret+='{}'.format(self.edited_scores[p][num+1])
-                                    if num+1!=len(scores):
-                                        ret+='|'
-                                    continue
+                            if num+1 in self.edited_scores[p]:
+                                ret+='{}'.format(self.edited_scores[p][num+1])
+                                if num+1!=len(scores):
+                                    ret+='|'
+                                continue
                             
-                            ret+="{}".format(gp)
-                            if num+1!=len(scores):
-                                ret+='|'
-                        if p in self.pens:
-                            ret+='-{}'.format(self.pens[p])
-                    
-                else:   
-                    ret+='\n\n{}'.format(tag)
-                    for p in self.tags[tag]:
-                        p2 = p
-                        if p in self.deleted_players: continue
-                        if p in self.sub_names: 
-                            p2 = ''
-                            for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                                p2 += '{}({})/'.format(self.display_names[x], r)
-                            p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
-                        else:
-                            p2 = self.display_names[p2]
-                        ret+="\n{} ".format(p2)
-                        #flag insertion by region
-                        flag_code = self.table_flags.get(p, '')
-                        ret+=f"[{flag_code if flag_code else ''}] " 
-                        if by_race: 
-                            scores = self.players[p][2]
-                        else:
-                            scores = self.players[p][1]
-                        for num,gp in enumerate(scores):
-                            if by_race:
-                                if int(num/4)+1 in self.edited_scores[p]:
-                                    if num/4 +1 in self.edited_scores[p]:
-                                        ret+="{}".format(self.edited_scores[p][int(num/4)+1])
-                                    else:
-                                        ret+='0'
-                                    if num+1!=len(scores):
-                                        ret+='|'
-                                    continue      
-                            else:
-                                if num+1 in self.edited_scores[p]:
-                                    ret+='{}'.format(self.edited_scores[p][num+1])
-                                    if num+1!=len(scores):
-                                        ret+='|'
-                                    continue
-                                
-                            ret+="{}".format(gp)
-                            if num+1!=len(scores):
-                                ret+='|'
-                        if p in self.pens:
-                            ret+='-{}'.format(self.pens[p])
+                        ret+="{}".format(gp)
+                        if num+1!=len(scores):
+                            ret+='|'
+                    if p in self.pens:
+                        ret+='-{}'.format(self.pens[p])
                 if tag in self.team_pens.keys():
                     ret+='\nPenalty -{}'.format(self.team_pens[tag])
                             
