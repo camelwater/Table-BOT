@@ -22,8 +22,9 @@ class Settings(commands.Cog):
 
     @commands.group(invoke_without_command=True, aliases=['px'],  case_insensitive=True)
     @commands.has_guild_permissions(manage_guild=True)
-    async def prefix(self, ctx):
-        await ctx.send("```Usage:\n?prefix add <prefix>\n?prefix remove <prefix>\n?prefix set <prefix>\n?prefix reset```")
+    async def prefix(self, ctx: commands.Context):
+        px = ctx.prefix
+        await ctx.send(f"```Usage:\n{px}prefix add <prefix>\n{px}prefix remove <prefix>\n{px}prefix set <prefix>\n{px}prefix reset```")
     
     @prefix.command(aliases=['+'])
     @commands.has_guild_permissions(manage_guild=True)
@@ -44,7 +45,7 @@ class Settings(commands.Cog):
             guild_prefixes = ''
             pfxs = self.bot.get_guild_prefixes(ctx.guild)
             if len(pfxs) == 0:
-                return await ctx.send("You don't have any prefixes registered. You can add or set custom prefixes with `?prefix`.")
+                return await ctx.send(f"You don't have any prefixes registered. You can add or set custom prefixes with `{ctx.prefix}prefix`.")
             for p in pfxs:
                 guild_prefixes+=f"- `{p}`\n"
             await ctx.send(f"You need to specify a prefix to be removed:\n{guild_prefixes}")
@@ -90,7 +91,8 @@ class Settings(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     async def set(self, ctx, settingType: str = None, *,default: str=None):
         if settingType is None:
-            await ctx.send("```asciidoc\n[Usage]\n?set <settingName> <value>\n?set reset <settingName>\nSee `?settings' for a list of customizable settings.\n```")
+            px = ctx.prefix
+            await ctx.send(f"```asciidoc\n[Usage]\n{px}set <settingName> <value>\n{px}set reset <settingName>\nSee `{px}settings' for a list of customizable settings.\n```")
             return
         
         if settingType.lower() in ['reset', 'clear']:
