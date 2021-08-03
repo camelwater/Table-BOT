@@ -1,0 +1,1 @@
+Place to store temporary error/warnings messages as files. This is used when the error messages are too long (over 2048 characters) to be sent on discord as a message.
