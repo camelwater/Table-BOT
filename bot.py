@@ -188,7 +188,7 @@ class TableBOT(commands.Bot):
         
         return f"`{prefix}` has been registered as a prefix."
     
-    def remove_prefix(ctx_prefix, self, guild, prefix):
+    def remove_prefix(self, ctx_prefix, guild, prefix):
         if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
             return "My mention is a default prefix and cannot be removed."
 
