@@ -38,7 +38,7 @@ class Stats(commands.Cog):
         command +='_generated'
         self.bot.command_stats[command]+=1
 
-    @commands.command(aliases=['commandstats'])
+    @commands.command(aliases=['commandstats', 'cstats'])
     async def stats(self, ctx, num = None):
         counter = self.bot.command_stats
         if num is None:

@@ -116,6 +116,7 @@ class Table():
         self.table_running = False
         self.picture_running = False
         self.ctx = ctx
+        self.prefix = ctx.prefix
         self.bot = bot
         self.last_command_sent = None
         ##### Stuff for bot instances #####
@@ -185,7 +186,7 @@ class Table():
                         return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
                     
                 if "No match found!" in list(soup.stripped_strings):
-                    return True, "The room ({}) hasn't finished a race yet.\nRetry `?mergeroom` when the room has finished one race.".format(rxx)
+                    return True, f"The room ({rxx}) hasn't finished a race yet.\nRetry `{self.prefix}mergeroom` when the room has finished one race."
                 
                 self.current_url = room_url
                 self.prev_rxxs.append(self.rxx)
@@ -194,7 +195,7 @@ class Table():
                 self.rxx = rxx
                 self.last_race_update = None
                 if not redo:
-                    self.modifications.append([("?mergeroom {}".format(', '.join(mii)), len(self.prev_elems), rxx)])
+                    self.modifications.append([("mergeroom {}".format(', '.join(mii)), len(self.prev_elems), rxx)])
                     self.undos.clear()
                 
                 new_elems = soup.select('tr[id*=r]')
@@ -215,7 +216,7 @@ class Table():
                 
                 stripped = list(soup.stripped_strings)
                 if "No match found!" in stripped:
-                    return True, "The room ({}) hasn't finished at least one race yet.\nRetry `?mergeroom` when the room has finished at least one race.".format(rid)
+                    return True, f"The room ({rid}) hasn't finished at least one race yet.\nRetry `{self.prefix}mergeroom` when the room has finished at least one race."
                 
                 self.current_url = room_url
                 self.prev_rxxs.append(self.rxx)
@@ -225,7 +226,7 @@ class Table():
                 if len(rid)==4: self.rxx = self.rxx.upper()
                 self.last_race_update = None
                 if not redo:
-                    self.modifications.append([("?mergeroom {}".format(rid), len(self.prev_elems), rid)])
+                    self.modifications.append([(f"mergeroom {rid}", len(self.prev_elems), rid)])
                     self.undos.clear()
                 
                 new_elems = soup.select('tr[id*=r]')
@@ -309,7 +310,7 @@ class Table():
                                     counter+=1
                                     
                     self.player_list = string
-                    return False, type_ask, "Room {} found.\n{}\n\n**Is this correct?** (`?yes` / `?no`)".format(self.rxx, string)     
+                    return False, type_ask, f"Room {self.rxx} found.\n{string}\n\n**Is this correct?** (`{self.prefix}yes` / `{self.prefix}no`)"    
                 
             else: #room id search
                 rid = rid[0]
@@ -328,7 +329,7 @@ class Table():
                 
                 stripped = list(soup.stripped_strings)
                 if "No match found!" in stripped:
-                    return True, type_ask, "The room either doesn't exist or hasn't finished a race yet.\nRetry `?search` when the room has finished one race and make sure the room id is in rxx or XX00 format."
+                    return True, type_ask, f"The room either doesn't exist or hasn't finished a race yet.\nRetry `{self.prefix}search` when the room has finished one race and make sure the room id is in *rxx* or *XX00* format."
                 else:
                     self.find_players(room_url, soup)
                     self.split_teams(self.format, self.teams)
@@ -358,7 +359,7 @@ class Table():
                                     self.player_ids[str(counter)] = p
                                     counter+=1
                     self.player_list = string
-                    return False, type_ask, "Room {} found.\n{}\n\n**Is this room correct?** (`?yes` / `?no`)".format(self.rxx, string)
+                    return False, type_ask, f"Room {self.rxx} found.\n{string}\n\n**Is this room correct?** (`{self.prefix}yes` / `{self.prefix}no`)"
     
     def populate_table_flags(self):
         '''
@@ -500,7 +501,7 @@ class Table():
         if actual_warn_len==0:
             return "No warnings or room errors. Table should be accurate."
         warnings = defaultdict(list,dict(sorted(warnings.items(), key=lambda item: item[0])))
-        ret = 'Room warnings/errors that could affect the table{}:\n'.format(" (?dcs to fix dcs)" if len(self.dc_list)>0 else "")
+        ret = 'Room warnings/errors that could affect the table{}:\n'.format(f" ({self.prefix}dcs to fix dcs)" if len(self.dc_list)>0 else "")
         
         for indx,i in enumerate(warnings[-1]):
             if "scores have been manually modified" in i:
@@ -559,10 +560,10 @@ class Table():
             c_indx = int(choice)
             choice = STYLE_MAP.get(c_indx, None)
             if not choice:
-                return "`{}` is not a valid style number. The style number must be from 1-{}. Look at `?style` for reference.".format(c_indx, len(STYLE_MAP))
+                return f"`{c_indx}` is not a valid style number. The style number must be from 1-{len(STYLE_MAP)}. Look at `{self.prefix}style` for reference."
             
             if not reundo:
-                self.modifications.append([("?style {}".format(c_indx), self.style.get('type') if self.style is not None else None, choice.get('type'))])
+                self.modifications.append([(f"style {c_indx}", self.style.get('type') if self.style is not None else None, choice.get('type'))])
                 self.undos.clear()
             
             self.style = choice
@@ -588,7 +589,7 @@ class Table():
                     break
             
             if not reundo:
-                self.modifications.append([("?style {}".format(o_choice), self.style.get('type') if self.style is not None else None, choice.get('type'))])
+                self.modifications.append([(f"style {o_choice}", self.style.get('type') if self.style is not None else None, choice.get('type'))])
                 self.undos.clear()
             
             self.style = choice
@@ -603,13 +604,13 @@ class Table():
             c_indx = int(choice)
             choice = graph_map.get(c_indx, None)
             if not choice:
-                return "`{}` is not a valid graph number. The graph number must be from 1-{}. Look at `?graph` for reference.".format(c_indx, len(graph_map))
+                return "`{}` is not a valid graph number. The graph number must be from 1-{}. Look at `{}graph` for reference.".format(c_indx, len(graph_map), self.prefix)
             
             if self.teams != 2 and choice.get('table') == 'diff':
                 return "The graph type `{}` can only be used when there are two teams.".format('Difference')
 
             if not reundo:
-                self.modifications.append([("?graph {}".format(c_indx), self.graph.get('type') if self.graph is not None else None, choice.get('type'))])
+                self.modifications.append([(f"graph {c_indx}", self.graph.get('type') if self.graph is not None else None, choice.get('type'))])
                 self.undos.clear()
             
             self.graph = choice
@@ -638,7 +639,7 @@ class Table():
                 return "The graph type `{}` can only be used when there are two teams.".format('Difference')
             
             if not reundo:
-                self.modifications.append([("?graph {}".format(o_choice), self.graph.get('type') if self.graph is not None else None, choice.get('type'))])
+                self.modifications.append([(f"graph {o_choice}", self.graph.get('type') if self.graph is not None else None, choice.get('type'))])
                 self.undos.clear()
             
             self.graph= choice
@@ -707,7 +708,7 @@ class Table():
                 ret+= "Edited tag `{}` to `{}`.{}".format(orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
                 
             if not reundo and self.table_running:
-                self.modifications.append([('?edittag {} {}'.format(t_orig, new), new, orig)])
+                self.modifications.append([(f'edittag {t_orig} {new}', new, orig)])
                 self.undos.clear()
 
         return ret
@@ -784,7 +785,7 @@ class Table():
 
         ret = "`{}` tag changed from `{}` to `{}`.".format(self.display_names[player], old_tag, tag)  
         if not reundo and self.table_running:
-            self.modifications.append([("?changetag {} {}".format(p_indx, tag), player, tag, old_tag, old_indx)])
+            self.modifications.append([(f"{self.prefix}changetag {p_indx} {tag}", player, tag, old_tag, old_indx)])
 
         return ret
        
@@ -839,7 +840,7 @@ class Table():
             self.all_players.pop(i)
         
         if not redo and self.table_running:
-            self.modifications.append([("?tags {}".format(dic_str), orig_tags, dic)])
+            self.modifications.append([("{}tags {}".format(self.prefix, dic_str), orig_tags, dic)])
         
         return "Tags updated."
     
@@ -869,7 +870,7 @@ class Table():
                 self.display_names[player] = new_name
             
             if not redo:
-                self.modifications.append([('?changename {} {}'.format(p_indx, new_name), player, new_name, old_name, should_del)])
+                self.modifications.append([(f'changename {p_indx} {new_name}', player, new_name, old_name, should_del)])
                 self.undos.clear()
             ret+="`{}` name changed to `{}`{}.\n".format(old_name, new_name, " (removed from table)" if should_del else "")
         
@@ -1014,7 +1015,7 @@ class Table():
                     
                 
                 if not redo:
-                    self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
+                    self.modifications.append([(f'edit {p_indx} {gp} {score}', player, gp, score)])
                     self.undos.clear()
                 
                 try:
@@ -1028,7 +1029,7 @@ class Table():
                 self.edited_scores[player][int(gp)] = int(score)
                 
                 if not redo:
-                    self.modifications.append([('?edit {} {} {}'.format(p_indx, gp, score), player, gp, score)])
+                    self.modifications.append([(f'edit {p_indx} {gp} {score}', player, gp, score)])
                     self.undos.clear()
                 
                 try:
@@ -1114,7 +1115,7 @@ class Table():
             if self.pens[player] == 0: self.pens.pop(player)
             
             if not reundo:
-                self.modifications.append([('?pen {} {}'.format(p_indx, '='+str(pen)), player, '='+str(pen))])
+                self.modifications.append([('pen {} {}'.format(p_indx, '='+str(pen)), player, '='+str(pen))])
                 self.undos.clear()
                 
             return "`{}` penalty set to `-{}`.".format(self.display_names[player], pen)
@@ -1128,7 +1129,7 @@ class Table():
             if self.pens[player] == 0: self.pens.pop(player)
             
             if not reundo:
-                self.modifications.append([('?pen {} {}'.format(p_indx, pen), player, pen)])
+                self.modifications.append([(f'pen {p_indx} {pen}', player, pen)])
                 self.undos.clear()
             return "`-{}` penalty given to `{}`.".format(pen, self.display_names[player])
     
@@ -1148,7 +1149,7 @@ class Table():
                 orig_pen = self.pens[player]
                 self.pens.pop(player)
                 if not reundo:
-                    self.modifications.append([('?unpen {}'.format(p_indx), player, orig_pen)])
+                    self.modifications.append([(f'unpen {p_indx}', player, orig_pen)])
                     self.undos.clear()
                 return "Penalties for `{}` have been removed.".format(self.display_names[player])
             else:
@@ -1156,7 +1157,7 @@ class Table():
                 if self.pens[player] == 0: self.pens.pop(player)
                 
                 if not reundo: 
-                    self.modifications.append([('?unpen {} {}'.format(p_indx, unpen), player, unpen)])
+                    self.modifications.append([(f'unpen {p_indx} {unpen}', player, unpen)])
                     self.undos.clear()
                 return "Penalty for `{}` reduced by `{}`.".format(self.display_names[player], unpen)
             
@@ -1185,7 +1186,7 @@ class Table():
             if self.team_pens[team] == 0: self.team_pens.pop(team)
             
             if not reundo:
-                self.modifications.append([('?teampen {} {}'.format(team, '='+str(pen)), team, '='+str(pen))])
+                self.modifications.append([('teampen {} {}'.format(team, '='+str(pen)), team, '='+str(pen))])
                 self.undos.clear()
                 
             return "Team `{}` penalty set to `-{}`.".format(team, pen)
@@ -1199,7 +1200,7 @@ class Table():
             if self.team_pens[team] == 0: self.team_pens.pop(team)
             
             if not reundo:
-                self.modifications.append([('?teampen {} {}'.format(team, pen), team, pen)])
+                self.modifications.append([('{}teampen {} {}'.format(self.prefix, team, pen), team, pen)])
                 self.undos.clear()
             return "`-{}` penalty given to team `{}`.".format(pen, team)
     
@@ -1231,7 +1232,7 @@ class Table():
                 orig_pen = self.team_pens[team]
                 self.team_pens.pop(team)
                 if not reundo:
-                    self.modifications.append([('?teamunpen {}'.format(team), team, orig_pen)])
+                    self.modifications.append([(f'teamunpen {team}', team, orig_pen)])
                     self.undos.clear()
                 return "Penalties for team `{}` have been removed.".format(team)
             else:
@@ -1239,7 +1240,7 @@ class Table():
                 if self.team_pens[team] == 0: self.team_pens.pop(team)
                 
                 if not reundo: 
-                    self.modifications.append([('?teamunpen {} {}'.format(team, unpen), team, unpen)])
+                    self.modifications.append([(f'teamunpen {team} {unpen}', team, unpen)])
                     self.undos.clear()
                 return "Penalty for team `{}` reduced by `{}`.".format(team, unpen)
 
@@ -1510,7 +1511,7 @@ class Table():
             restore = {'pts':pts, 'name': self.display_names.get(out_player), 'out_tag':tag, 'id':pid, 'in_tag': in_tag, 'out_edited_scores': out_edited_scores, 'in_edited_scores': in_edited_scores, 'warning': edited_warning}
             if out_pens!=None:
                 restore['pens'] = out_pens
-            self.modifications.append([('?sub {} {} {}'.format(out, out_races, _in), in_player, out_player, out_races, restore)])
+            self.modifications.append([(f'sub {out} {out_races} {_in}', in_player, out_player, out_races, restore)])
             self.undos.clear()
         return "Subbed in `{}` for `{}` (played `{}` races).".format(self.display_names[in_player], out_player_name, out_races)
     
@@ -1596,7 +1597,7 @@ class Table():
                 return "Sub out index `{}` was invalid. It must be from 1-{}.".format(out_index, len(self.sub_names[player]['out_races']))
             
         if not reundo: 
-            self.modifications.append([("?editsub {} {} {} {}".format(indx, races, 'in' if is_in else 'out', out_index if not is_in else ""), player, races, orig_races, is_in, out_index)])
+            self.modifications.append([("editsub {} {} {} {}".format(indx, races, 'in' if is_in else 'out', out_index if not is_in else ""), player, races, orig_races, is_in, out_index)])
             self.undos.clear()
 
         return "Changed `{}` sub {}{} races to {}.".format(self.display_names[player], 'in' if is_in else 'out', '' if is_in else ' (`{}`)'.format(self.sub_names[player]['sub_out'][out_index-1]), races)
@@ -1689,7 +1690,7 @@ class Table():
                                 self.dc_list[raceNum][indx] = {'type':'dc_before', 'player': player, 'race':1, 'gp':gp+1, 'is_edited':True}
 
             if not reundo:
-                self.modifications.append([('?dcs {} {}'.format(dc_num, status), dc_num, orig_status, status)]) 
+                self.modifications.append([(f'dcs {dc_num} {status}', dc_num, orig_status, status)]) 
                 self.undos.clear()   
 
             ret+= "Changed `{}` DC status for race `{}` to `{}`.\n".format(self.display_names[player], raceNum, status)
@@ -1718,7 +1719,7 @@ class Table():
             except:
                 
                 if cor_room_size> orig_room_size and cor_room_size<=len(self.players):
-                    ret+="**Note:** *If a race is missing player(s) due to DCs, it is advised to use `?dcs` instead.\nOnly use this command if no DCs were shown for the race in question.*\n\n"
+                    ret+=f"**Note:** *If a race is missing player(s) due to DCs, it is advised to use `{self.prefix}dcs` instead.\nOnly use this command if no DCs were shown for the race in question.*\n\n"
                 else:
                     ret+= "Invalid <corrected room size> for race `{}`. The corrected room size must be a number from 1-{}.\n".format(raceNum+1, len(self.players))
                     continue
@@ -1772,7 +1773,7 @@ class Table():
             if not self_call and not undo:
                 self.changed_room_sizes[raceNum+1].append(cor_room_size)
             if not reundo and not self_call:
-                self.modifications.append([("?changeroomsize {} {}".format(raceNum+1, cor_room_size), raceNum+1, orig_room_size, cor_room_size, restore)])
+                self.modifications.append([(f"changeroomsize {raceNum+1} {cor_room_size}", raceNum+1, orig_room_size, cor_room_size, restore)])
                 self.undos.clear()
 
         return ret
@@ -1856,7 +1857,7 @@ class Table():
                 pass
             self.manual_warnings[raceNum].append("Placements for this race have been manually altered by the tabler.")
             
-            mods.append(('?editrace {} {} {}'.format(raceNum, p_indx, correct_pos+1), player, raceNum, orig_pos+1, correct_pos+1))
+            mods.append((f'editrace {raceNum} {p_indx} {correct_pos+1}', player, raceNum, orig_pos+1, correct_pos+1))
      
         if not reundo and len(mods)>0:
             self.modifications.append(mods)
@@ -1984,7 +1985,7 @@ class Table():
         await self.recalc_table(start=raceNum)
         
         if not redo: 
-            self.modifications.append([('?removerace {}'.format(raceNum), raceNum, track)])
+            self.modifications.append([(f'removerace {raceNum}', raceNum, track)])
             self.undos.clear()
 
         self.manual_warnings[-1].append("Race #{} (originally) - {} has been removed by the tabler.".format(raceNum, track))
@@ -2609,7 +2610,7 @@ class Table():
         if len(self.modifications)==0:
             ret+="No table modifications to undo."
         for i,m in enumerate(self.modifications):
-            ret+='{}. {}\n'.format(i+1, m[0][0])
+            ret+='{}. {}{}\n'.format(i+1, self.prefix, m[0][0])
         return ret
     
     def get_undos(self):
@@ -2618,36 +2619,36 @@ class Table():
             ret+="No table modification undos to redo."
         
         for i,u in enumerate(self.undos):
-            ret+="{}. {}\n".format(i+1, u[0][0])
+            ret+="{}. {}{}\n".format(i+1, self.prefix, u[0][0])
         return ret
     
     def undo_warning(self,mod):
         mod_type = mod[0]
         
-        if '?edit ' in mod_type:
+        if mod_type.find('edit ') == 0:
             gp = int(mod[2])
             count = 0
             for x in self.modifications:
                 for j in x:
-                    if '?edit ' in j[0] and int(j[2])==gp:
+                    if 'edit ' in j[0] and int(j[2])==gp:
                         count+=1
             if count==1: self.manual_warnings[-1].remove("GP {} scores have been manually modified by the tabler.".format(gp))
             
-        elif '?editrace' in mod_type:
+        elif 'editrace' in mod_type:
             raceNum = int(mod[2])
             count = 0
             for x in self.modifications:
                 for j in x:
-                    if '?editrace' in j[0] and int(j[2])==raceNum:
+                    if 'editrace' in j[0] and int(j[2])==raceNum:
                         count+=1
             if count==1: 
                 self.manual_warnings[raceNum].pop(self.manual_warnings[raceNum].index("Placements for this race have been manually altered by the tabler."))
                 
-        elif '?dcs' in mod_type:
+        elif 'dcs' in mod_type:
             count = 0
             for x in self.modifications:
                 for j in x:
-                    if '?dcs' in j[0] and int(j[1])==int(mod[1]):
+                    if 'dcs' in j[0] and int(j[1])==int(mod[1]):
                         count+=1
             if count==1:
                 raceNum = self.dc_list_ids[int(mod[1])][1]
@@ -2658,7 +2659,7 @@ class Table():
                 for indx,i in enumerate(self.warnings[raceNum]):
                     if i.get('player') == player:
                         self.warnings[raceNum][indx]['is_edited'] = False
-        elif "?removerace" in mod_type:
+        elif "removerace" in mod_type:
             raceNum= int(mod[1])
             track = mod[2]
             for indx,i in enumerate(self.manual_warnings[-1]):
@@ -2671,7 +2672,7 @@ class Table():
             count=0
             for x in self.modifications:
                 for j in x:
-                    if '?changeroomsize' in j[0] and int(j[1])==raceNum:
+                    if 'changeroomsize' in j[0] and int(j[1])==raceNum:
                         count+=1
             if count==1:
                 for indx, i in enumerate(self.manual_warnings[raceNum]):
@@ -2683,63 +2684,63 @@ class Table():
         self.manual_warnings = defaultdict(list,{k:v for k,v in self.manual_warnings.items() if len(v)>0})  
     
     async def undo(self, j):
-        if '?edit ' in j[0]:
+        if j[0].find('edit ') == 0:
             self.undo_edit(j[1], j[2])
             self.undo_warning(j)
                 
-        elif '?editrace' in j[0]: 
+        elif 'editrace' in j[0]: 
             self.edit_race([[j[2], j[1], j[3]]], reundo=True)
             self.undo_warning(j)
         
-        elif '?pen' in j[0]:
+        elif j[0].find('pen') == 0:
             self.unpenalty(j[1], str(j[2]), reundo=True)
         
-        elif '?unpen' in j[0]:
+        elif j[0].find('unpen') == 0:
             self.penalty(j[1], str(j[2]), reundo=True)
         
-        elif '?teampen' in j[0]:
+        elif 'teampen' in j[0]:
             self.team_unpenalty(j[1], str(j[2]), reundo=True)
         
-        elif '?teamunpen' in j[0]:
+        elif 'teamunpen' in j[0]:
             self.team_penalty(j[1], str(j[2]), reundo=True)
         
-        elif '?dcs'in j[0]: 
+        elif 'dcs'in j[0]: 
             self.edit_dc_status([[j[1], j[2]]], reundo=True)
             self.undo_warning(j)
             
-        elif '?changeroomsize' in j[0]:
+        elif 'changeroomsize' in j[0]:
             self.undo_crs(j[1], j[2], j[4])
             self.undo_warning(j)
         
-        elif '?removerace' in j[0]:
+        elif 'removerace' in j[0]:
             await self.restore_removed_race(j[1])
             self.undo_warning(j)
             
-        elif '?sub' in j[0]:
+        elif j[0].find('sub') == 0:
             self.undo_sub(j[1], j[2], j[4])
             
-        elif '?editsub' in j[0]:
+        elif 'editsub' in j[0]:
             self.edit_sub_races(j[1], j[3], j[4], out_index=j[5], reundo=True)
         
-        elif '?mergeroom' in j[0]:
+        elif 'mergeroom' in j[0]:
             self.un_merge_room(j[1])
         
-        elif '?edittag' in j[0]:
+        elif 'edittag' in j[0]:
             self.edit_tag_name([[j[1], j[2]]], reundo=True)
         
-        elif '?changetag' in j[0]:
+        elif 'changetag' in j[0]:
             self.change_tag(j[1], j[3], restore_indx=j[4], reundo=True)
 
-        elif '?tags ' in j[0]:
+        elif 'tags ' in j[0]:
             self.undo_group_tags(j[1])
         
-        elif '?changename ' in j[0]:
+        elif 'changename ' in j[0]:
             self.undo_change_name(j[1], j[3],j[4])
         
-        elif '?graph ' in j[0]:
+        elif 'graph ' in j[0]:
             self.change_graph(j[1], reundo=True)
         
-        elif '?style ' in j[0]:
+        elif 'style ' in j[0]:
             self.change_style(j[1], reundo=True)
         
         else:
@@ -2747,7 +2748,7 @@ class Table():
             raise AssertionError
     
     async def redo(self, j):
-        if '?edit ' in j[0]:
+        if j[0].find('edit ') == 0:
             if "+" in j[0] or '-' in j[0]:
                 self.edit([[j[1], j[2], str(j[3])]], redo=True)
             else:
@@ -2756,52 +2757,52 @@ class Table():
         elif 'editrace' in j[0]:
             self.edit_race([[j[2], j[1], j[4]]], reundo=True)
         
-        elif '?pen' in j[0]:
+        elif j[0].find('pen') == 0:
             self.penalty(j[1], str(j[2]), reundo=True)
         
-        elif '?unpen' in j[0]:
+        elif j[0].find('unpen') == 0:
             self.unpenalty(j[1], str(j[2]), reundo=True)
             
-        elif '?teampen' in j[0]:
+        elif 'teampen' in j[0]:
             self.team_penalty(j[1], str(j[2]), reundo=True)
         
-        elif '?teamunpen' in j[0]:
+        elif 'teamunpen' in j[0]:
             self.team_unpenalty(j[1], str(j[2]), reundo=True)
         
-        elif '?dcs'in j[0]:
+        elif 'dcs'in j[0]:
             self.edit_dc_status([[j[1], j[3]]], reundo=True)
         
-        elif '?changeroomsize' in j[0]:
+        elif 'changeroomsize' in j[0]:
             self.change_room_size([[j[1], j[3]]], reundo=True)
         
-        elif '?removerace'==j[0]:
+        elif 'removerace'==j[0]:
             await self.remove_race(j[1], redo=True)
             
-        elif '?sub' in j[0]:
+        elif j[0].find('sub') == 0:
             self.sub_in(j[1], j[2], j[3], reundo=True)
     
-        elif '?editsub' in j[0]:
+        elif 'editsub' in j[0]:
             self.edit_sub_races(j[1], j[2], j[4], out_index=j[5], reundo=True)   
             
-        elif '?mergeroom' in j[0]:
+        elif 'mergeroom' in j[0]:
             await self.merge_room([j[2]], redo=True)
         
-        elif '?edittag' in j[0]:
+        elif 'edittag' in j[0]:
             self.edit_tag_name([[j[2], j[1]]], reundo=True)
         
-        elif '?changetag' in j[0]:
+        elif 'changetag' in j[0]:
             self.change_tag(j[1], j[2], reundo=True)
 
-        elif '?tags ' in j[0]:
+        elif 'tags ' in j[0]:
             self.group_tags(j[2], redo=True)
 
-        elif '?changename ' in j[0]:
+        elif 'changename ' in j[0]:
             self.change_name([[j[1], j[2]]], redo=True)
         
-        elif '?graph ' in j[0]:
+        elif 'graph ' in j[0]:
             self.change_graph(j[2], reundo=True)
         
-        elif '?style ' in j[0]:
+        elif 'style ' in j[0]:
             self.change_style(j[2], reundo=True)
         
         else:
@@ -2827,7 +2828,7 @@ class Table():
                 mod = self.modifications[-1]
                 self.undos.append(mod)
                 del self.modifications[-1]
-                return "Last table modification ({}) has been undone.".format(mod[0][0])
+                return f"Last table modification ({self.prefix}{mod[0][0]}) has been undone."
             return "No manual modifications to the table to undo."
         
     async def redo_commands(self, num):
@@ -2850,7 +2851,7 @@ class Table():
                 mod = self.undos[-1]
                 self.modifications.append(mod)
                 del self.undos[-1]
-                return "Last table modification undo ({}) has been redone.".format(mod[0][0])
+                return f"Last table modification undo ({self.prefix}{mod[0][0]}) has been redone."
             return "No table modification undos to redo."
         
         
