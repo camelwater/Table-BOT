@@ -440,16 +440,16 @@ class Table():
 
         elif "mkwx_bug" in warning_type:
             if "_increase" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get('orig_players'), warning.get('new_players'), ', '.join(map(str, warning.get('races'))))
+                return WARNING_MAP.get(warning_type).format(warning.get('orig_players'), warning.get('new_players'), ', '.join(map(str, warning.get('races')))).replace("{PREFIX}", self.prefix)
 
             elif "_change" in warning_type:
                 return WARNING_MAP.get(warning_type).format(warning.get('race'), warning.get('gp'))
             
             elif "_tr" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get("gp"))
+                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get("gp")).replace("{PREFIX}", self.prefix)
 
             elif "_delta" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get('gp'))
+                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get('gp')).replace("{PREFIX}", self.prefix)
             
             elif "_repeat" in warning_type:
                 return WARNING_MAP.get(warning_type).format(warning.get("num_affected"), warning.get('race'), warning.get('gp'))
@@ -470,7 +470,7 @@ class Table():
             return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
 
         elif warning_type == "tie":
-            return WARNING_MAP.get(warning_type).format([self.display_names[i] for i in warning.get('players')], warning.get('time'))
+            return WARNING_MAP.get(warning_type).format([self.display_names[i] for i in warning.get('players')], warning.get('time')).replace("{PREFIX}", self.prefix)
 
         elif warning_type == "sub":
             if warning.get('is_edited', False):
@@ -479,7 +479,7 @@ class Table():
                 return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
 
         elif warning_type == "large_time":
-            return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')], warning.get('time'))
+            return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')], warning.get('time')).replace("{PREFIX}", self.prefix)
 
         else:
             print("WARNING TYPE NOT FOUND:", warning_type)
