@@ -92,7 +92,7 @@ class TableBOT(commands.Bot):
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
             if not ctx.guild:
-                await(await ctx.send("I don't recognize that command. Use `?help` for a list of available commands.")).delete(delay=25)
+                await(await ctx.send(f"I don't recognize that command. Use `{ctx.prefix}help` for a list of available commands.")).delete(delay=25)
             pass
         elif isinstance(error, commands.NoPrivateMessage):
             await(await ctx.send("This command cannot be used in DMs.")).delete(delay=7)
@@ -106,7 +106,7 @@ class TableBOT(commands.Bot):
             pass
             #raise error
         else:
-            await ctx.send("An unidentified internal bot error occurred. Wait a bit and try again later.\nIf this issue persists, `?reset` the table.")
+            await ctx.send(f"An unidentified internal bot error occurred. Wait a bit and try again later.\nIf this issue persists, `{ctx.prefix}reset` the table.")
             error_tb = ''.join(tb.format_exception(type(error), error, error.__traceback__))
             error_tb = error_tb[:error_tb.find('\nThe above exception was the direct cause of the following exception:')]
             log.error(msg=f"in command: {ctx.command}\n{error_tb}")
@@ -204,7 +204,7 @@ class TableBOT(commands.Bot):
 
             return f"Prefix `{prefix}` has been removed." + (f' You must use my mention, {self.user.mention}, as the prefix now.' if len(self.prefixes[guild])==0 else "")
         except KeyError:
-            return "You don't have any custom prefixes registered. You can add or set custom prefixes with `?prefix`."
+            return f"You don't have any custom prefixes registered. You can add or set custom prefixes with `{ctx.prefix}prefix`."
         except:
             return f"`{prefix}` is not a registered prefix."
         
