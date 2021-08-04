@@ -93,6 +93,7 @@ class Table():
         self.prev_rxxs = [] # for rooms that have been merged
         self.prev_elems = [] #prev elems of rooms before merge
         self.current_elems = [] #elem list of current room
+        self.restore_merged = []
         
         self.format = "" #format (FFA, 2v2, etc.)
         self.teams = 0 #number of teams
@@ -1843,10 +1844,7 @@ class Table():
         return ret
     
     async def merge_room(self, arg, redo=False):
-        is_rxx = False
-        check = arg[0]
-        if len(arg)==1 and (len(check)==8 and check[1:].isnumeric() and check[0]=='r') or (len(check)==4 and check[2:].isnumeric()):
-            is_rxx = True
+        is_rxx = len(arg)==1 and Utils.is_rxx(arg[0])
             
         if is_rxx:
             error, mes = await self.find_room(rid = arg, merge=True, redo=redo)
@@ -1854,15 +1852,15 @@ class Table():
             error, mes= await self.find_room(mii=arg, merge=True, redo=redo)
         
         if redo:
-            self.races = self.restore_merged[0]
-            self.tracks = self.restore_merged[1]
-            self.finish_times = self.restore_merged[2]
-            self.warnings = self.restore_merged[3]
-            self.dc_list = self.restore_merged[4]
-            self.dc_list_ids = self.restore_merged[5]
-            self.players = self.restore_merged[6]
-            self.manual_warnings = self.restore_merged[7]
-            self.restore_merged = None
+            self.races = self.restore_merged[-1][0]
+            self.tracks = self.restore_merged[-1][1]
+            self.finish_times = self.restore_merged[-1][2]
+            self.warnings = self.restore_merged[-1][3]
+            self.dc_list = self.restore_merged[-1][4]
+            self.dc_list_ids = self.restore_merged[-1][5]
+            self.players = self.restore_merged[-1][6]
+            self.manual_warnings = self.restore_merged[-1][7]
+            self.restore_merged.pop(-1)
 
             if len(self.races)<4*self.gps and not self.check_mkwx_update.is_running():
                 try:
@@ -1873,7 +1871,9 @@ class Table():
         return error, mes
 
     def un_merge_room(self, merge_num): #TEST: test if updated un_merge works properly
-        self.restore_merged = (copy.copy(self.races), copy.copy(self.tracks), copy.deepcopy(self.finish_times), copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), copy.deepcopy(self.dc_list_ids), copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings))
+        self.restore_merged.append((copy.copy(self.races), copy.copy(self.tracks), 
+            copy.deepcopy(self.finish_times), copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), 
+            copy.deepcopy(self.dc_list_ids), copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings)))
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  
         self.races = self.races[:len(self.prev_elems[merge_indx])-len(self.removed_races)]

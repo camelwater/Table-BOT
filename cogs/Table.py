@@ -179,7 +179,7 @@ class Table_cog(commands.Cog):
 
         if len(args)>2:
             arg3 = args[2]
-            if ((arg3[0]=='r' and len(arg3)==8) or (arg3[2:].isnumeric() and len(arg3)==4)) and len(args[2:])==1:
+            if Utils.is_rxx(arg3) and len(args[2:])==1:
                 data = [arg3]
                 is_rxx = True
             else:

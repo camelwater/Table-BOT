@@ -12,6 +12,17 @@ def delete_file(filename):
     except:
         pass
 
+import re
+
+def is_rxx(arg):
+    '''
+    check if string is a roomID (if it is in rxx or xx00 format)
+    '''
+    return re.match('^r[0-9]{7}$|^[a-z]{2}[0-9]{2}$', arg.lower()) is not None
+    # return (arg3[0]=='r' and len(arg3)==8) or (arg3[2:].isnumeric() and len(arg3)==4)
+
+
+
 #-------------- Table.py methods --------------#
 
 #max teams based on format (ex. 6 teams for a 2v2, 2 teams for a 5v5)
@@ -378,7 +389,7 @@ SETTINGS = {
 
 if __name__ == "__main__":
     import time
-    i = "Player"
+    i = "A◇山周回のれみ"
     sans = []
     t = time.time()
     for _ in range(1000):
