@@ -7,7 +7,7 @@ Created on Wed Jun  2 11:51:05 2021
 import discord
 from discord.ext import tasks, commands
 import os
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 import json
 import atexit
 import logging
@@ -19,8 +19,9 @@ import sqlite3
 import copy
 from utils.Utils import SETTINGS
 
-load_dotenv()
-KEY = os.getenv('KEY')
+# load_dotenv(dotenv_path="./.env.local")
+creds = dotenv_values(".env.local") or dotenv_values(".env") #.env.local for local testing, .env on server
+KEY = creds['KEY']
 LOG_LOC = 'logs/logs.log'
 
 INIT_EXT = ['cogs.Stats', 'cogs.Settings', 'cogs.Table']
