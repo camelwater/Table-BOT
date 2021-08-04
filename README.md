@@ -4,6 +4,8 @@ Table BOT is a discord bot made to automate the process of scoring and tabling M
 
 ## Important Information
 
+This bot was inspired and influenced conceptually by another similar bot, which can be found [here](https://github.com/BadWolf1023/MKW-Table-Bot). It has greater functionality than this bot and is used in MKW Lounge, a ranked ladder for Mario Kart Wii.
+
 Here is some terminology that Table BOT uses:
 
 **```rxx```** - an eight character long room id beginning with an *r* and followed by seven numbers or a four character long room name that begins with two letters followed by two numbers (these can be found on [Wiimmfi][mkwxWebsite])\
