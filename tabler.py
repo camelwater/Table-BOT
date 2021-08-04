@@ -27,10 +27,8 @@ from utils.Utils import isFFA, WARNING_MAP, DC_MAP, STYLE_MAP, PTS_MAP
 from utils.Utils import GRAPH_MAP as GM
 graph_map = copy.deepcopy(GM)
 
-# NOTE: consider changing players into Player objects, and maybe automating first race dcs (18 and 15 pts) 
-# also should probably start using /room/ JSON 
-# - main benefit is ability to start table before race 1. must be in lobby though, and probably after lobby is full (otherwise teams would be wrong)
-# unless only calculate teams when the race_mode/race_phase changes (match has started so room players are correct)
+# NOTE: maybe automate first race dcs (18 and 15 pts) 
+
 class Table():
     def __init__(self, ctx = None, bot = None, testing = False):
         self.TESTING = testing

@@ -20,7 +20,6 @@ import copy
 from utils.Utils import SETTINGS
 import argparse
 
-# load_dotenv(dotenv_path="./.env.local")
 creds = dotenv_values(".env.local") or dotenv_values(".env") #.env.local for local testing, .env on server
 KEY = creds['KEY']
 LOG_LOC = 'logs/logs.log'
@@ -323,7 +322,7 @@ class TableBOT(commands.Bot):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('key', metavar='K', type=str, nargs='?')
+    parser.add_argument('key', metavar='KEY', type=str, nargs='?')
     bot_key = parser.parse_args().key
     if bot_key: KEY = bot_key
 
