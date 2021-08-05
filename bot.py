@@ -42,7 +42,13 @@ cur.execute('''CREATE TABLE IF NOT EXISTS servers (
                 id integer PRIMARY KEY,
                 prefixes text, 
                 graph integer, 
-                style integer)''')
+                style integer, 
+                IgnoreLargeTimes text)''')
+# cur.execute('''IF COL_LENGTH ('servers.IgnoreLargeTimes') IS NULL
+#                 BEGIN
+#                 ALTER TABLE servers
+#                     ADD IgnoreLargeTimes text NULL
+#                 END''')
 
 def load_json(file):
     with open(file+'.json', 'wr', encoding='utf-8') as f:
@@ -59,7 +65,7 @@ def fetch_prefixes_and_settings():
     cur.execute('SELECT * FROM servers')
     server_rows = cur.fetchall()
     server_pxs = {k[0]: k[1] for k in server_rows}
-    server_sets = {int(k[0]): {"graph": SETTINGS["graph"].get(k[2]),"style": SETTINGS["style"].get(k[3])} for k in server_rows}
+    server_sets = {int(k[0]): {"IgnoreLargeTimes": k[4] or "0","graph": SETTINGS["graph"].get(k[2]),"style": SETTINGS["style"].get(k[3])} for k in server_rows}
    
     return {int(k): (p.split(SPLIT_DELIM) if p else []) for k, p in server_pxs.items()}, server_sets
 
@@ -70,7 +76,7 @@ def callable_prefix(bot, msg, mention=True):
         base = default
     else:
         base.extend(bot.prefixes.get(msg.guild.id, default))
-        # base.append('$')
+        base.append('$')
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
@@ -115,8 +121,8 @@ class TableBOT(commands.Bot):
         print("Bot logged in as {0.user}".format(self)) 
         for server in self.guilds:
             cur.execute('''INSERT OR IGNORE INTO servers
-                            VALUES (?, ?, ?, ?)''', 
-                            (server.id, None, None, None))
+                            VALUES (?, ?, ?, ?, ?)''', 
+                            (server.id, SPLIT_DELIM.join(DEFAULT_PREFIXES), None, None, None))
             conn.commit()
 
         self.prefixes, self.settings = fetch_prefixes_and_settings()
@@ -135,8 +141,8 @@ class TableBOT(commands.Bot):
     
     async def on_guild_join(self, guild):
         cur.execute('''INSERT OR IGNORE INTO servers
-                        VALUES (?, ?, ?, ?)''',
-                        (guild.id, None, None, None))
+                        VALUES (?, ?, ?, ?, ?)''',
+                        (guild.id, SPLIT_DELIM.join(DEFAULT_PREFIXES), None, None, None))
         conn.commit()
     
     #remove inactive table instances (inactivity == 30+ minutes)
@@ -242,33 +248,35 @@ class TableBOT(commands.Bot):
         return "Server prefixes have been reset to default."
 
     def get_guild_settings(self, guild):
-        default = {'graph': None, 'style': None}
+        default = {'IgnoreLargeTimes': "0", 'graph': None, 'style': None}
 
         return self.settings.get(guild, default)
     
     def reset_settings(self, guild):
-        default = {'graph': None, 'style': None}
+        default = {'IgnoreLargeTimes': "0", 'graph': None, 'style': None}
         self.settings[guild] = default
 
         cur.execute('''UPDATE servers 
-                        SET style=?, graph=? 
+                        SET IgnoreLargeTimes=?, style=?, graph=? 
                         WHERE id=?''',
-                    (None, None, guild))
+                    (None, None, None, guild))
         conn.commit()
 
         return "Server settings have been reset to default values."
     
     def set_setting(self, guild, setting, default):
+        default_sets = {'IgnoreLargeTimes': "0", 'graph': None, 'style': None}
         if not default:
             try:
-                self.settings[guild][setting] = None
+                default = default_sets.get(setting)
+                self.settings[guild][setting] = default
             except:
                 pass
 
             cur.execute(f'''UPDATE servers 
                             SET {setting}=? 
                             WHERE id=?''',
-                        (None, guild))
+                        (default, guild))
             conn.commit()
 
             return f"`{setting}` setting restored to default."
@@ -288,21 +296,21 @@ class TableBOT(commands.Bot):
                         WHERE id=?''',
                     (key, guild))
         conn.commit()
-        # cur.execute('''SELECT graph, style 
+        # cur.execute('''SELECT * 
         #                 FROM servers''')
         # print(cur.fetchall())
 
-        return "`{}` setting set to `{}`.".format(setting, default.get('type') if setting in ['graph', 'style'] else default)
+        return "`{}` setting set to `{}`.".format(setting, default.get('type') if setting in ['graph', 'style'] else SETTINGS[setting].get(default, default))
     
     def get_setting(self, type, guild, raw = False):
-        default = {'graph': None, 'style': None}
+        default = {'IgnoreLargeTimes': "0", 'graph': None, 'style': None}
         if type in ['graph', 'style']:
             if raw:
                 return self.settings.get(guild, default).get(type)
             return self.settings.get(guild, default).get(type).get('type')
         else:
-            pass
-            #for other settings to be added in the future
+            print(self.settings.get(guild, default).get(type))
+            return self.settings.get(guild, default).get(type)
     
     @tasks.loop(hours=1)
     async def routine_stats_dump(self):

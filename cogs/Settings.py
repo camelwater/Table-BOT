@@ -75,12 +75,15 @@ class Settings(commands.Cog):
         settings = self.bot.get_guild_settings(ctx.guild.id)
         spaces = max([len(k[0]) for k in settings.items()])+1
         out = f'asciidoc\n== [{ctx.guild.name}] server settings =='
-        for name, set in settings.items():
-            try:
-                set = set['type']
-            except:
-                set = ''
-            out+="\n{}{}:: {}".format(name, " "*(spaces-len(name)), set)
+        for name, val in settings.items():
+            if name in ['graph', 'style']:
+                try:
+                    val = val['type']
+                except:
+                    val = ''
+            else:
+                val = SETTINGS[name].get(val, val)
+            out+="\n{}{}:: {}".format(name, " "*(spaces-len(name)), val)
         
         if mes:
             await ctx.send("```{}```".format(out))
@@ -97,11 +100,12 @@ class Settings(commands.Cog):
         
         if settingType.lower() in ['reset', 'clear']:
             if default: #resetting specific setting (default becomes settingType)
-                mes = self.bot.set_setting(ctx.guild.id, default, None)
+                mes = self.bot.set_setting(ctx.guild.id, correct_settingName(default), None)
             else: #resetting all settings
                 mes = self.bot.reset_settings(ctx.guild.id)
             return await ctx.send(mes)
         
+        settingType = correct_settingName(settingType)
         avail_settings = get_avail_settings(settingType)
         
         if not avail_settings:
@@ -114,28 +118,30 @@ class Settings(commands.Cog):
                 await(await ctx.send("Specify a setting value for `{}`. The value can be any of the following:\n{}".format(settingType, avail_settings))).delete(delay=60)
             return
 
-        settingType = settingType.lower()
-        default = default.lower()
+        valid = False
         if settingType in ['style', 'graph']:
-            valid = False
             if default.isnumeric():
                 default = int(default)
                 if default in SETTINGS[settingType]: valid = True
             else:
-                # for i in list(SETTINGS.get(settingType).values()):
-                #     if default.lower() in map(lambda l: l.lower(), i.values()):
-                #         default = i
-                #         valid = True
-                #         break
                 for k, v in SETTINGS[settingType].items():
                     if default.lower() in map(lambda l: l.lower(), v.values()):
                         default = k
                         valid = True
                         break
+        else:
+            #largeFinishTimes
+            if default.lower() in SETTINGS[settingType]: valid = True
+            else:
+                for k, v in SETTINGS[settingType].items():
+                    if default.lower() == v.lower():
+                        default = k
+                        valid = True
+                        break
 
-            if not valid:
-                await ctx.send(f"Invalid value `{default}` for setting `{settingType}`. The value must be one of the following:\n{get_avail_settings(settingType)}")
-                return
+        if not valid:
+            await ctx.send(f"Invalid value `{default}` for setting `{settingType}`. The value must be one of the following:\n{get_avail_settings(settingType)}")
+            return
 
         mes = self.bot.set_setting(ctx.guild.id, settingType, default)
         await ctx.send(mes)
@@ -147,9 +153,22 @@ def get_avail_settings(setting):
 
     ret = ""
     for ind, dic in setting.items():
-        ret+='`{}.` {}\n'.format(ind," | ".join(map(lambda orig: "`{}`".format(orig), dic.values())))
+        ret+='`{}.` {}\n'.format(ind, " | ".join(map(lambda orig: "`{}`".format(orig), dic.values())) if setting in ['graph', 'style']
+                                        else f'`{dic}`')
     
     return ret
+
+def correct_settingName(setting):
+    try:
+        assert(setting in SETTINGS)
+        return setting
+    except:
+        try:
+            lowered_keys = list(map(lambda l: l.lower(), SETTINGS.keys()))
+            assert(setting.lower() in lowered_keys)
+            return list(SETTINGS.keys())[lowered_keys.index(setting.lower())]
+        except:
+            return setting
     
 def setup(bot):
     bot.add_cog(Settings(bot))  

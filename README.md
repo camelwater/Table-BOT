@@ -35,7 +35,7 @@ ex. `?search mii camelwater123, beffjeff`
 Searches for a room on [Wiimmfi][mkwxWebsite] that best fits the provided miiName or rxx arguments. If your search arguments are too broad and apply to multiple rooms (for example you provide a very common miiName, such as "Player"), you will need to narrow your search by providing better arugments: either include additional miiNames or provide unique miiNames. 
 
 ```
-?picture (byrace/race)
+?picture (byrace/race) (showlargetimes=no)
 ```
 ex. `?picture byrace`
 
@@ -119,6 +119,10 @@ These commands can be used to edit the table, whether it be to correct other tab
 ```
 ```
 ?graph
+```
+
+```
+?showlargetimes [yes/no]
 ```
 
 ```

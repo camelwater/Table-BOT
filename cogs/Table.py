@@ -88,7 +88,7 @@ class Table_cog(commands.Cog):
         if ask=="confirm":
             self.bot.table_instances[ctx.channel.id].confirm_room = True
             if self.bot.table_instances[ctx.channel.id].format[0] == 'f':
-                mes = "Table successfully started. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.bot.table_instances[ctx.channel.id].sui else '')
+                mes = "Table successfully started. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (suppressing large finish time warnings)" if self.bot.table_instances[ctx.channel.id].sui else '')
                 self.bot.table_instances[ctx.channel.id].table_running = True
                 await wait_mes.delete()
                 await self.send_messages(ctx, mes)
@@ -162,18 +162,21 @@ class Table_cog(commands.Cog):
         gps = 3
         sui=None
         for i in args:
-            if isinstance(i, str) and 'sui=' in i:
+            if isinstance(i, str) and i.find('sui=')==0:
                 sui = args.pop(args.index(i))
                 break
         for i in args:
-            if isinstance(i, str) and "gps=" in i:
+            if isinstance(i, str) and i.find("gps=")==0:
                 gps = args.pop(args.index(i))[4:]
                 if not gps.isnumeric() or int(gps)<1:
                     await self.sent_temp_messages(ctx, "Invalid number of gps. <gps> must a positive non-zero number.", usage)
                 break
 
         if sui!=None:
-            self.bot.table_instances[ctx.channel.id].sui = True if sui[4:]=='yes' or sui[4:]=='y' else False 
+            self.bot.table_instances[ctx.channel.id].sui = True if sui[4:][0]=='y' else False 
+        else:
+            self.bot.table_instances[ctx.channel.id].set_sui(self.bot.get_setting('IgnoreLargeTimes', ctx.guild.id))
+
         self.bot.table_instances[ctx.channel.id].gps = int(gps)
         
 
@@ -418,9 +421,9 @@ class Table_cog(commands.Cog):
         if self.bot.table_instances[ctx.channel.id].confirm_room:
             if self.bot.table_instances[ctx.channel.id].choose_room: self.bot.table_instances[ctx.channel.id].choose_room = False
             if len(self.bot.table_instances[ctx.channel.id].players)> self.bot.table_instances[ctx.channel.id].num_players:
-                mes = "**Warning:** *The number of players in the room doesn't match the given format and teams.*\nTable started, *but will likely be inaccurate*. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.bot.table_instances[ctx.channel.id].sui else '')
+                mes = "**Warning:** *The number of players in the room doesn't match the given format and teams.*\nTable started, *but will likely be inaccurate*. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (suppressing large finish time warnings)" if self.bot.table_instances[ctx.channel.id].sui else '')
             else:   
-                mes = "Table successfully started. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (ignoring large finish times)" if self.bot.table_instances[ctx.channel.id].sui else '')
+                mes = "Table successfully started. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (suppressing large finish time warnings)" if self.bot.table_instances[ctx.channel.id].sui else '')
 
             self.bot.table_instances[ctx.channel.id].table_running = True
             self.bot.table_instances[ctx.channel.id].searching_room = False
@@ -494,6 +497,7 @@ class Table_cog(commands.Cog):
 
         mes = self.bot.table_instances[ctx.channel.id].change_graph(choice)
         await ctx.send(mes)
+    
 
     @graph.error
     async def graph_error(self, ctx, error):
@@ -503,26 +507,47 @@ class Table_cog(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].graph_options(), f"\nUsage: `{ctx.prefix}graph <graphNumber|graphName>`")        
     
+    @commands.command(aliases=['showlarge', 'showlargefinishtimes', 'large', 'largefinish', 'showlargefinish', 'largefinishtimes', 'largetimes'])
+    async def showlargetimes(self,ctx, choice: str):
+        if await self.check_callable(ctx, "showlargetimes"): return
+        if choice.lower() not in {'yes', 'y', 'no', 'n'}: return await ctx.send(f"Invalid value `{choice}`. You must put either yes or no.")
+        show_large = True if choice.lower() in {'yes', 'y'} else False
+        self.bot.table_instances[ctx.channel.id].sui = not show_large
+        await ctx.send("Table now showing large finish times." if show_large else "Table now suppressing large finish times.")
+
+    @showlargetimes.error
+    async def largefinishtimes_error(self, ctx, error):
+        self.set_instance(ctx)
+        if await self.check_callable(ctx, "largefinishtimes"): return
+
+        if isinstance(error, commands.MissingRequiredArgument):
+            await self.send_messages(ctx, f"\nUsage: `{ctx.prefix}showlargetimes <yes/no>`")        
+    
+
     #?picture
     @commands.command(aliases=['p', 'pic', 'wp', 'warpicture'])
     @commands.max_concurrency(number=1, wait=True, per = commands.BucketType.channel)
     @commands.cooldown(1, 10, type=commands.BucketType.channel)
     async def picture(self,ctx, *arg):
         if self.bot.table_instances[ctx.channel.id].picture_running:
-            await self.send_temp_messages(ctx, "This command is currently in use. Please wait.")
-            return
+            return await self.send_temp_messages(ctx, "This command is currently in use. Please wait.")
         
         if await self.check_callable(ctx, "picture"): return
         byrace = False
-        if len(arg)>0 and arg[0] in ['byrace', 'race']:
-            byrace = True
-        
+        large_times = None
+        arg = list(map(lambda l: l.lower(), arg))
+        if len(arg)>0:
+            if 'byrace' in arg or 'race' in arg: byrace = True
+            bool_list = ['largetimes=' in i for i in arg]
+            if any(bool_list): check_arg = arg[bool_list[::-1].index(True)]
+            if check_arg[check_arg.find('=')+1:][0]=='y': large_times = True
+            elif check_arg[check_arg.find('=')+1:][0]=='n': large_times = False
+
         wait_mes = await ctx.send("Updating scores...")
         mes = await self.bot.table_instances[ctx.channel.id].update_table()
         await wait_mes.edit(content=mes)
         pic_mes = await ctx.send("Fetching table picture...")
         img = await self.bot.table_instances[ctx.channel.id].get_table_img(by_race=byrace)
-        
         
         f=discord.File(fp=img, filename='table.png')
         em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].tag_str(), color=0x00ff6f)
@@ -530,7 +555,7 @@ class Table_cog(commands.Cog):
         value_field = "[Edit this table on gb.hlorenzi.com]("+self.bot.table_instances[ctx.channel.id].table_link+")"
         em.add_field(name='\u200b', value= value_field, inline=False)
         em.set_image(url='attachment://table.png')
-        is_overflow, error_footer, fixed_footer = self.bot.table_instances[ctx.channel.id].get_warnings()
+        is_overflow, error_footer, fixed_footer = self.bot.table_instances[ctx.channel.id].get_warnings(show_large_times = large_times)
         if is_overflow:
             em.set_footer(text = fixed_footer)
         else:

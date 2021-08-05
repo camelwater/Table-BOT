@@ -52,3 +52,99 @@ Traceback (most recent call last):
 IndexError: bytearray index out of range
 
 
+2021-08-04 17:11:26,350 ERROR -> in command: settings
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Settings.py", line 85, in settings
+    val = SETTINGS[name].get(val, val)
+KeyError: 'IgnoreLargeTimes'
+
+
+2021-08-04 17:26:02,981 ERROR -> in command: set
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Settings.py", line 148, in set
+    mes = self.bot.set_setting(ctx.guild.id, l_settingType, default)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\bot.py", line 286, in set_setting
+    cur.execute(f'''UPDATE servers
+sqlite3.OperationalError: no such column: ignorelargetimes
+
+
+2021-08-04 17:51:30,764 ERROR -> in command: settings
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Settings.py", line 86, in settings
+    val = SETTINGS[name].get(val, val)
+KeyError: 'ignorelargetimes'
+
+
+2021-08-04 17:59:15,535 ERROR -> in command: settings
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Settings.py", line 85, in settings
+    val = SETTINGS[name].get(val, val)
+KeyError: 'ignorelargetimes'
+
+
+2021-08-04 18:12:02,356 ERROR -> in command: start
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 178, in start
+    self.bot.table_instances[ctx.channel_id].set_sui(self.bot.get_setting('ignorelargetimes', ctx.guild.id))
+AttributeError: 'Context' object has no attribute 'channel_id'
+
+
+2021-08-04 18:15:14,943 ERROR -> in command: start
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 178, in start
+    self.bot.table_instances[ctx.channel.id].set_sui(self.bot.get_setting('IgnoreLargeTimes', ctx.guild.id))
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 521, in set_sui
+    if per_team >= int(sui_setting.rstrip('+')):
+ValueError: invalid literal for int() with base 10: '5v5'
+
+
+2021-08-04 18:16:31,758 ERROR -> in command: start
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 178, in start
+    self.bot.table_instances[ctx.channel.id].set_sui(self.bot.get_setting('IgnoreLargeTimes', ctx.guild.id))
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 521, in set_sui
+    if per_team >= int(sui_setting.rstrip('+')):
+ValueError: invalid literal for int() with base 10: '5v5'
+
+
+2021-08-04 18:22:29,145 ERROR -> in command: start
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 178, in start
+    self.bot.table_instances[ctx.channel.id].set_sui(self.bot.get_setting('IgnoreLargeTimes', ctx.guild.id))
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 521, in set_sui
+    if per_team >= int(sui_setting.rstrip('+')):
+ValueError: invalid literal for int() with base 10: '5v5'
+
+
+2021-08-04 19:12:10,676 ERROR -> Attempting a reconnect in 1.30s
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\client.py", line 566, in connect
+    await self.ws.poll_event()
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\gateway.py", line 582, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+2021-08-04 19:34:01,845 ERROR -> in command: stats
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Stats.py", line 60, in stats
+    spaces = max([len(k[0]) for k in common])+1
+ValueError: max() arg is an empty sequence
+
+

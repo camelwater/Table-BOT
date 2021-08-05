@@ -473,8 +473,14 @@ class Table():
             print("WARNING TYPE NOT FOUND:", warning_type)
             raise AssertionError
 
-    def get_warnings(self):
+    def get_warnings(self, show_large_times = None):
         warnings = defaultdict(list)
+
+        if show_large_times is False:
+            warnings[-1].insert(0, 'Large finish times occurred, but are being ignored. Table could be inaccurate.')
+        elif show_large_times is None and self.sui:
+            warnings[-1].insert(0, 'Large finish times occurred, but are being ignored. Table could be inaccurate.')
+
         #merging self.warnings with self.manual_warnings
         for race, warn_list in self.manual_warnings.items():
             warnings[race] += warn_list
@@ -483,11 +489,18 @@ class Table():
             if race ==-1:
                 warnings[race] = warn_list + warnings[race]
             else:
-                warnings[race]+=warn_list
+                warn_list_copy = copy.copy(warn_list)
+                for indx,w in list(enumerate(warn_list_copy))[::-1]:
+                    if isinstance(w, dict) and w.get('type')=='large_time':
+                        if show_large_times is False:
+                            warn_list_copy.pop(indx)
+                        elif show_large_times is None and self.sui:
+                            warn_list_copy.pop(indx)
+                warnings[race]+=warn_list_copy
 
         actual_warn_len = sum([len(i[1]) for i in warnings.items()])
         if actual_warn_len==0:
-            return "No warnings or room errors. Table should be accurate."
+            return False, "No warnings or room errors. Table should be accurate.", None
         warnings = defaultdict(list,dict(sorted(warnings.items(), key=lambda item: item[0])))
         ret = 'Room warnings/errors that could affect the table{}:\n'.format(f" ({self.prefix}dcs to fix dcs)" if len(self.dc_list)>0 else "")
         
@@ -511,8 +524,19 @@ class Table():
             fixed_ret+="... (full errors in file)"
             return True, ret, fixed_ret 
         
-        return False, ret, ret
+        return False, ret, None
     
+    def set_sui(self, sui_setting):
+        per_team = Utils.convert_format(self.format)
+        if not sui_setting or sui_setting == "0": #Never
+            return
+        if '+' in sui_setting:
+            if per_team >= int(sui_setting.rstrip('+')):
+                self.sui = True
+        else:
+            if per_team == int(sui_setting):
+                self.sui=True
+
     def check_num_teams(self):
         if len(self.tags)!=self.teams:
             self.set_teams(len(self.tags))
@@ -2356,12 +2380,12 @@ class Table():
                     self.ties[shift+raceNum+1][time].append(fc)
                 
                 if ":" in time and int(time[0:time.find(':')])>=4:
-                    if self.sui:
-                        if "Large finish times occurred, but are being ignored. Table could be inaccurate." not in self.warnings[-1]:
-                            self.warnings[-1].append("Large finish times occurred, but are being ignored. Table could be inaccurate.")
-
-                    else:
-                        self.warnings[shift+raceNum+1].append({'type': 'large_time', 'player':fc, 'time':time})
+                    self.warnings[shift+raceNum+1].append({'type': 'large_time', 'player':fc, 'time':time})
+                    # if self.sui:
+                    #     if "Large finish times occurred, but are being ignored. Table could be inaccurate." not in self.warnings[-1]:
+                    #         self.warnings[-1].append("Large finish times occurred, but are being ignored. Table could be inaccurate.")
+                    # else:
+                    #     self.warnings[shift+raceNum+1].append({'type': 'large_time', 'player':fc, 'time':time})
 
                 last_finish_times[fc] = time
 

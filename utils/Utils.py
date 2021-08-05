@@ -382,7 +382,23 @@ STYLE_MAP = {
     11: {"table": "mkworlds", "type": "Mario Kart Worlds"},
 }
 
+IGNORE_LARGE_TIMES_MAP = {
+    '0': "Never",
+    '1+': "Always",
+    '1': "FFA",
+    '2': "2v2",
+    '2+': "2v2+",
+    '3': "3v3",
+    '3+': "3v3+",
+    '4': "4v4",
+    '4+': "4v4+",
+    '5': "5v5",
+    '5+': "5v5+",
+    '6': "6v6"
+}
+
 SETTINGS = {
+    "IgnoreLargeTimes": IGNORE_LARGE_TIMES_MAP,
     "graph": GRAPH_MAP, 
     "style": STYLE_MAP
 }
