@@ -906,7 +906,7 @@ class Table():
             self.display_names[player] = restore_name
         return
 
-    def get_player_list(self, p_form = True, include_tag = None):
+    def get_player_list(self, p_form = True, include_tag = None, team_command = False):
         if include_tag is None:
             include_tag = not p_form
         
@@ -928,8 +928,8 @@ class Table():
                 self.player_ids[str(counter)] = p
                 counter+=1
         else:
-            for tag in self.tags.keys():
-                string+=f'\n**{"Tag: " if include_tag else ""}{Utils.dis_clean(tag)}**'
+            for t_indx, tag in enumerate(list(self.tags.keys())):
+                string+=f'\n{f"`{t_indx+1}.` " if team_command else ""}**{"Tag: " if include_tag else ""}{Utils.dis_clean(tag)}**'
                 for p in self.tags[tag]:
                     self.player_ids[str(counter)] = p
                     p2 = p
@@ -941,7 +941,7 @@ class Table():
                         p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                     else:
                         p2 = self.display_names[p2]
-                    string+="\n\t{}{}".format('`{}.` '.format(counter) if p_form else '{}. '.format(counter),Utils.dis_clean(p2))
+                    string+="\n\t{}{}".format('`{}.` '.format(counter) if p_form and not team_command else '{}. '.format(counter),Utils.dis_clean(p2))
                     
                     counter+=1
 
@@ -1063,7 +1063,7 @@ class Table():
         ret+= f'{"**Current room:**" if len(self.prev_rxxs)>0 else "Current room:"} {self.rxx} | {self.ROOM_URL.format(self.rxx)}'
         return ret
         
-    def get_pen_player_list(self, c_form=True):
+    def get_pen_player_list(self, c_form=True, team_command = False):
         counter = 1
         string =''
         self.tags = dict(sorted(self.tags.items(), key=lambda item: item[0].upper()))
@@ -1083,8 +1083,8 @@ class Table():
                 
                 counter+=1
         else:
-            for tag in self.tags.keys():
-                string+='\n**{}**'.format(Utils.dis_clean(tag))
+            for t_indx, tag in enumerate(list(self.tags.keys())):
+                string+=f'\n{f"`{t_indx+1}`. " if team_command else ""}**{Utils.dis_clean(tag)}**'
                 if tag in self.team_pens.keys(): 
                     string+=" **(-{})**".format(self.team_pens.get(tag))
                 for p in self.tags[tag]:
@@ -1098,7 +1098,7 @@ class Table():
                         p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                     else:
                         p2 = self.display_names[p2]
-                    string+="\n\t{}. {} {}".format('`{}`'.format(counter) if c_form else counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                    string+="\n\t{}. {} {}".format('`{}`'.format(counter) if c_form and not team_command else counter, Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                     
                     counter+=1
                     

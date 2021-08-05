@@ -6,6 +6,6 @@ tag_testing/backup_tag_algo.py
 tag_testing/testTag.py
 resources/prefixes.json
 resources/settings.json
-.env.local
+.env.testing
 .venv
 .vscode

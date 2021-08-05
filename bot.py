@@ -6,7 +6,6 @@ Created on Wed Jun  2 11:51:05 2021
 """
 import discord
 from discord.ext import tasks, commands
-import os
 from dotenv import dotenv_values
 import json
 import atexit
@@ -20,13 +19,13 @@ import copy
 from utils.Utils import SETTINGS
 import argparse
 
-creds = dotenv_values(".env.local") or dotenv_values(".env") #.env.local for local testing, .env on server
+creds = dotenv_values(".env.testing") or dotenv_values(".env") #.env.testing for local testing, .env for deployment
 KEY = creds['KEY']
 LOG_LOC = 'logs/logs.log'
 
 INIT_EXT = ['cogs.Stats', 'cogs.Settings', 'cogs.Table']
 
-handlers = [ RotatingFileHandler(filename=LOG_LOC, 
+handlers = [RotatingFileHandler(filename=LOG_LOC, 
             mode='w', 
             maxBytes=512000, 
             backupCount=4)
@@ -51,7 +50,7 @@ cur.execute('''CREATE TABLE IF NOT EXISTS servers (
 #                 END''')
 
 def load_json(file):
-    with open(file+'.json', 'wr', encoding='utf-8') as f:
+    with open(file+'.json', 'r', encoding='utf-8') as f:
         return json.load(f)
 
 def update_json(file, contents):
@@ -76,7 +75,7 @@ def callable_prefix(bot, msg, mention=True):
         base = default
     else:
         base.extend(bot.prefixes.get(msg.guild.id, default))
-        base.append('$')
+        # base.append('$')
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
@@ -86,7 +85,7 @@ def callable_prefix(bot, msg, mention=True):
 class TableBOT(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix = callable_prefix, case_insensitive=True, intents = discord.Intents.all(), help_command = None)      
-        self.prefixes, self.settings = {}, {}
+        self.prefixes, self.settings = fetch_prefixes_and_settings()
         self.table_instances = {}
         self.presences = cycle(['?help', '{} tables'])
         self.BOT_ID = 844640178630426646
@@ -122,7 +121,7 @@ class TableBOT(commands.Bot):
         for server in self.guilds:
             cur.execute('''INSERT OR IGNORE INTO servers
                             VALUES (?, ?, ?, ?, ?)''', 
-                            (server.id, SPLIT_DELIM.join(DEFAULT_PREFIXES), None, None, None))
+                            (server.id, SPLIT_DELIM.join(DEFAULT_PREFIXES), None, None, "0")) # id, prefixes, graph, style, IgnoreLargeTimes
             conn.commit()
 
         self.prefixes, self.settings = fetch_prefixes_and_settings()
@@ -134,15 +133,11 @@ class TableBOT(commands.Bot):
             self.check_inactivity.start()
         except RuntimeError:
             pass
-        # try:
-        #     self.routine_stats_dump.start()
-        # except RuntimeError:
-        #     pass
     
     async def on_guild_join(self, guild):
         cur.execute('''INSERT OR IGNORE INTO servers
                         VALUES (?, ?, ?, ?, ?)''',
-                        (guild.id, SPLIT_DELIM.join(DEFAULT_PREFIXES), None, None, None))
+                        (guild.id, SPLIT_DELIM.join(DEFAULT_PREFIXES), None, None, "0")) #id, prefixes, graph, style, IgnoreLargeTimes
         conn.commit()
     
     #remove inactive table instances (inactivity == 30+ minutes)
@@ -160,6 +155,10 @@ class TableBOT(commands.Bot):
             if active_tables==1: next_pres = next_pres.replace("tables", "table")
         pres = discord.Activity(type=discord.ActivityType.watching, name=next_pres)
         await self.change_presence(status=discord.Status.online, activity=pres)
+    
+    # @tasks.loop(hours=1)
+    # async def routine_stats_dump(self):
+    #     self.dump_stats_json()
     
     def get_active_tables(self):
         count = 0
@@ -236,8 +235,6 @@ class TableBOT(commands.Bot):
         return f"`{prefix}` has been set as the prefix."
     
     def reset_prefix(self, guild):
-        # if guild in self.prefixes:
-        #     self.prefixes.pop(guild)
         self.prefixes[guild] = copy.copy(DEFAULT_PREFIXES)
         cur.execute('''UPDATE servers 
                         SET prefixes=? 
@@ -311,10 +308,6 @@ class TableBOT(commands.Bot):
         else:
             print(self.settings.get(guild, default).get(type))
             return self.settings.get(guild, default).get(type)
-    
-    @tasks.loop(hours=1)
-    async def routine_stats_dump(self):
-        self.dump_stats_json()
 
     def dump_stats_json(self):
         if not hasattr(self, "command_stats") or len(self.command_stats) == 0: return

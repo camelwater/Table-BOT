@@ -175,7 +175,8 @@ class Table_cog(commands.Cog):
         if sui!=None:
             self.bot.table_instances[ctx.channel.id].sui = True if sui[4:][0]=='y' else False 
         else:
-            self.bot.table_instances[ctx.channel.id].set_sui(self.bot.get_setting('IgnoreLargeTimes', ctx.guild.id))
+            if ctx.guild:
+                self.bot.table_instances[ctx.channel.id].set_sui(self.bot.get_setting('IgnoreLargeTimes', ctx.guild.id))
 
         self.bot.table_instances[ctx.channel.id].gps = int(gps)
         
@@ -362,7 +363,7 @@ class Table_cog(commands.Cog):
         if Utils.isFFA(self.bot.table_instances[ctx.channel.id].format): 
             await ctx.send("This command cannot be used in FFAs.")
         if isinstance(error, commands.MissingRequiredArgument):
-            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_player_list(),f'\nUsage: `{ctx.prefix}edittag <tag> <corrected tag>`')    
+            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_player_list(team_command=True),f'\nUsage: `{ctx.prefix}edittag <tag> <corrected tag>`')    
     
     #to manually create tags
     @commands.command(aliases=['tag'])
@@ -409,7 +410,7 @@ class Table_cog(commands.Cog):
             await ctx.send("This command cannot be used in FFAs.")
         
         if isinstance(error, commands.MissingRequiredArgument):
-            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_player_list(), f"\nUsage: `{ctx.prefix}tags <tag> <pID(s)> / <tag> <pID(s)>`\n**ex.** `{ctx.prefix}tags Player 1 3 / Z 2 4 / B 5 6`")
+            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_player_list(p_form=True), f"\nUsage: `{ctx.prefix}tags <tag> <pID(s)> / <tag> <pID(s)>`\n**ex.** `{ctx.prefix}tags Player 1 3 / Z 2 4 / B 5 6`")
     
     @commands.command(aliases=['y'])
     async def yes(self,ctx):
@@ -523,9 +524,8 @@ class Table_cog(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await self.send_messages(ctx, f"\nUsage: `{ctx.prefix}showlargetimes <yes/no>`")        
     
-
     #?picture
-    @commands.command(aliases=['p', 'pic', 'wp', 'warpicture'])
+    @commands.command(aliases=['p', 'pic', 'wp', 'warpicture', 'tablepic', 'tablepicture', 'table', 'tp'])
     @commands.max_concurrency(number=1, wait=True, per = commands.BucketType.channel)
     @commands.cooldown(1, 10, type=commands.BucketType.channel)
     async def picture(self,ctx, *arg):
@@ -877,7 +877,7 @@ class Table_cog(commands.Cog):
         mes = self.bot.table_instances[ctx.channel.id].unpenalty(pID, unpen)
         await self.send_messages(ctx, mes)
                                 
-    @commands.command(aliases=['tp', 'tpen', 'teampen'])
+    @commands.command(aliases=['tpen', 'teampen'])
     async def teampenalty(self, ctx, *args):
         
         if await self.check_callable(ctx, "teampenalty"): return
@@ -887,7 +887,7 @@ class Table_cog(commands.Cog):
         usage = f"Usage: `{ctx.prefix}teampen <team> <penalty>`"
         
         if len(args)==0:
-            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_pen_player_list(), '\n'+usage)
+            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_pen_player_list(team_command=True), '\n'+usage)
             return
         team = args[0]
         
@@ -913,7 +913,7 @@ class Table_cog(commands.Cog):
         usage = f"Usage: `{ctx.prefix}teamunpen <team> <unpen amount = current pen>`"
         
         if len(args)==0:
-            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_pen_player_list(), '\n'+usage)
+            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_pen_player_list(team_command=True), '\n'+usage)
             return
         
         team = args[0]

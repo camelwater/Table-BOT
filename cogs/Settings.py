@@ -9,15 +9,12 @@ class Settings(commands.Cog):
 
     @commands.command(aliases=['getprefixes', 'pxs'])
     async def prefixes(self, ctx):
-        # prefixes, is_default = self.bot.get_guild_prefixes(ctx.guild)
         prefixes = self.bot.get_guild_prefixes(ctx.guild)
         mes = "{} prefixes:\n".format(f'[{ctx.guild.name}]' if ctx.guild else '[DM]')
         if len(prefixes) == 0:
             mes+="No prefixes."
         for i, p in enumerate(prefixes):
             mes+=f"{i+1}. {p}\n"
-        # if is_default:
-        #     mes+="(Default)"
         await ctx.send(f"```css\n{mes}```")
 
     @commands.group(invoke_without_command=True, aliases=['px'],  case_insensitive=True)
@@ -130,7 +127,7 @@ class Settings(commands.Cog):
                         valid = True
                         break
         else:
-            #largeFinishTimes
+            #other settings (currently only IgnoreLargeTimes)
             if default.lower() in SETTINGS[settingType]: valid = True
             else:
                 for k, v in SETTINGS[settingType].items():
