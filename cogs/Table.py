@@ -529,7 +529,7 @@ class Table_cog(commands.Cog):
         path = './error_footers/'
         filename = f"warnings_and_errors-{ctx.channel.id}.txt"
         warn_content = self.bot.table_instances[ctx.channel.id].get_warnings(override=True)
-        if "No warnings or room errors." not in warn_content: 
+        if "No warnings or room errors." in warn_content: 
             return await ctx.send("*No warnings or room errors.*")
 
         err_file = Utils.create_temp_file(filename, warn_content, dir=path)
