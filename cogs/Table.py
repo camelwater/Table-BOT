@@ -9,8 +9,7 @@ from discord.ext import commands
 from tabler import Table
 import utils.Utils as Utils
 from datetime import datetime
-import io
-import re
+
 
 class Table_cog(commands.Cog):
     def __init__(self, bot):
@@ -522,7 +521,19 @@ class Table_cog(commands.Cog):
         if await self.check_callable(ctx, "largefinishtimes"): return
 
         if isinstance(error, commands.MissingRequiredArgument):
-            await self.send_messages(ctx, f"\nUsage: `{ctx.prefix}showlargetimes <yes/no>`")        
+            await self.send_messages(ctx, f"\nUsage: `{ctx.prefix}showlargetimes <yes/no>`")     
+
+    @commands.command(aliases=['showerrors', 'warnings', 'showwarnigns', 'err', 'warn', 'errs', 'warns'])
+    async def errors(self, ctx: commands.Context):
+        if await self.check_callable(ctx, "errors"): return
+        path = './error_footers/'
+        filename = f"warnings_and_errors-{ctx.channel.id}.txt"
+        warn_content = self.bot.table_instances[ctx.channel.id].get_warnings(override=True)
+        if "No warnings or room errors." not in warn_content: 
+            return await ctx.send("*No warnings or room errors.*")
+
+        err_file = Utils.create_temp_file(filename, warn_content, dir=path)
+        await ctx.send(file = discord.File(fp=err_file, filename=filename))
     
     #?picture
     @commands.command(aliases=['p', 'pic', 'wp', 'warpicture', 'tablepic', 'tablepicture', 'table', 'tp'])
@@ -550,29 +561,24 @@ class Table_cog(commands.Cog):
         img = await self.bot.table_instances[ctx.channel.id].get_table_img(by_race=byrace)
         
         f=discord.File(fp=img, filename='table.png')
-        em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].tag_str(), color=0x00ff6f)
+        em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].title_str(), color=0x00ff6f)
         
         value_field = "[Edit this table on gb.hlorenzi.com]("+self.bot.table_instances[ctx.channel.id].table_link+")"
         em.add_field(name='\u200b', value= value_field, inline=False)
         em.set_image(url='attachment://table.png')
-        is_overflow, error_footer, fixed_footer = self.bot.table_instances[ctx.channel.id].get_warnings(show_large_times = large_times)
-        if is_overflow:
-            em.set_footer(text = fixed_footer)
-        else:
-            em.set_footer(text = error_footer)
+        is_overflow, error_footer, full_footer = self.bot.table_instances[ctx.channel.id].get_warnings(show_large_times = large_times)
+        em.set_footer(text = error_footer)
         
         await ctx.send(embed=em, file=f)
         await pic_mes.delete()
 
         if is_overflow: #send file of errors
             path = "./error_footers/"
-            file_name = f'warnings_and_errors-{re.sub("[^0-9]", "", str(datetime.now()))}.txt'
-            with open(path+file_name, 'w', encoding='utf-8') as e_file:
-                e_file.write(error_footer)
-            e_file = io.BytesIO(open(path+file_name, 'rb').read())
-            Utils.delete_file(path+file_name)
-                
-            await ctx.send(file = discord.File(fp=e_file, filename=file_name))
+            filename = f'warnings_and_errors-{ctx.channel.id}.txt'
+            e_file = Utils.create_temp_file(filename, full_footer, dir=path)
+            # if isinstance(e_file, str):
+            #     return await ctx.send(e_file) 
+            await ctx.send(file = discord.File(fp=e_file, filename=filename))
     
     @commands.command()
     async def undo(self,ctx, *args):
@@ -614,13 +620,14 @@ class Table_cog(commands.Cog):
        
      
     #?reset
-    @commands.command(aliases=['stop', 'clear', 'quit'])
+    @commands.command(aliases=['stop', 'clear', 'quit', 'end'])
     async def reset(self,ctx):
         if not self.bot.table_instances[ctx.channel.id].table_running and not self.bot.table_instances[ctx.channel.id].confirm_room:
             await self.send_temp_messages(ctx, "You don't have an active table to reset.")
             return
         
         self.bot.table_instances[ctx.channel.id].check_mkwx_update.stop()
+        # Utils.destroy_temp_files(ctx.channel.id)
         self.bot.table_instances.pop(ctx.message.channel.id)
        
         await self.send_messages(ctx, f"Table has been reset. `{ctx.prefix}start` to start a new table.")

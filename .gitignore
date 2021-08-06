@@ -6,6 +6,7 @@ tag_testing/backup_tag_algo.py
 tag_testing/testTag.py
 resources/prefixes.json
 resources/settings.json
+error_footers/*.txt
 .env.testing
 .venv
 .vscode

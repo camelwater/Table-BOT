@@ -6,13 +6,12 @@ Created on Tue May 18 15:05:35 2021
 """
 from bs4 import BeautifulSoup
 import copy
-import re
 #from PIL import Image
 from io import BytesIO
 from urllib.parse import quote
 import aiohttp
 import concurrent.futures
-from urllib.request import urlopen
+# from urllib.request import urlopen
 import datetime
 import discord
 from discord.ext import tasks
@@ -428,16 +427,16 @@ class Table():
 
         elif "mkwx_bug" in warning_type:
             if "_increase" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get('orig_players'), warning.get('new_players'), ', '.join(map(str, warning.get('races')))).replace("[PREFIX]", self.prefix)
+                return WARNING_MAP.get(warning_type).format(warning.get('orig_players'), warning.get('new_players'), ', '.join(map(str, warning.get('races'))))
 
             elif "_change" in warning_type:
                 return WARNING_MAP.get(warning_type).format(warning.get('race'), warning.get('gp'))
             
             elif "_tr" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get("gp")).replace("[PREFIX]", self.prefix)
+                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get("gp"))
 
             elif "_delta" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get('gp')).replace("[PREFIX]", self.prefix)
+                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get('gp'))
             
             elif "_repeat" in warning_type:
                 return WARNING_MAP.get(warning_type).format(warning.get("num_affected"), warning.get('race'), warning.get('gp'))
@@ -458,7 +457,7 @@ class Table():
             return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
 
         elif warning_type == "tie":
-            return WARNING_MAP.get(warning_type).format([self.display_names[i] for i in warning.get('players')], warning.get('time')).replace("[PREFIX]", self.prefix)
+            return WARNING_MAP.get(warning_type).format([self.display_names[i] for i in warning.get('players')], warning.get('time'))
 
         elif warning_type == "sub":
             if warning.get('is_edited', False):
@@ -467,13 +466,14 @@ class Table():
                 return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
 
         elif warning_type == "large_time":
-            return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')], warning.get('time')).replace("[PREFIX]", self.prefix)
+            return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')], warning.get('time'))
 
         else:
             print("WARNING TYPE NOT FOUND:", warning_type)
             raise AssertionError
 
-    def get_warnings(self, show_large_times = None):
+    def get_warnings(self, show_large_times = None, override=False):
+        if override is True: show_large_times = True
         warnings = defaultdict(list)
 
         if show_large_times is False:
@@ -500,6 +500,7 @@ class Table():
 
         actual_warn_len = sum([len(i[1]) for i in warnings.items()])
         if actual_warn_len==0:
+            if override: return "No warnings or room errors. Table should be accurate."
             return False, "No warnings or room errors. Table should be accurate.", None
         warnings = defaultdict(list,dict(sorted(warnings.items(), key=lambda item: item[0])))
         ret = 'Room warnings/errors that could affect the table{}:\n'.format(f" ({self.prefix}dcs to fix dcs)" if len(self.dc_list)>0 else "")
@@ -519,10 +520,12 @@ class Table():
             for warning in i[1]:
                 ret+="       \t- {}\n".format(self.warn_to_str(warning) if isinstance(warning, dict) else warning)
 
+        ret = ret.replace("[[/PREFIX\]]", self.prefix)
+        if override: return ret
         if len(ret)>2020:
             fixed_ret = ret[:2020]
             fixed_ret+="... (full errors in file)"
-            return True, ret, fixed_ret 
+            return True, fixed_ret, ret
         
         return False, ret, None
     
@@ -659,7 +662,7 @@ class Table():
             self.graph= choice
             return "Table graph set to `{}`.".format(choice.get('type'))
 
-    def tag_str(self):
+    def title_str(self):
         ret = '{}{} '.format(Utils.full_format(self.format), "" if Utils.full_format(self.format)=="FFA" else ":")
         tags_copy = list(self.tags.keys())
         try:
@@ -672,9 +675,9 @@ class Table():
             pass
         for index, i in enumerate(tags_copy):
                 if index==len(tags_copy)-1:
-                    ret+="'{}' ".format(i)
+                    ret+=f"`{i}` "
                 else:
-                    ret+="'{}' vs ".format(i)
+                    ret+=f"`{i}` vs "
         ret+="({} {})".format(len(self.races), 'race' if len(self.races)==1 else 'races')
         return ret
     
@@ -2110,31 +2113,23 @@ class Table():
         img = await self.get_table_img()
         
         f=discord.File(fp=img, filename='table.png')
-        em = discord.Embed(title=self.tag_str(), color=0x00ff6f)
+        em = discord.Embed(title=self.title_str(), color=0x00ff6f)
         
         value_field = "[Edit this table on gb.hlorenzi.com]("+self.table_link+")"
         em.add_field(name='\u200b', value= value_field, inline=False)
         em.set_image(url='attachment://table.png')
-        is_overflow, error_footer, fixed_footer = self.get_warnings()
-        if is_overflow:
-            em.set_footer(text = fixed_footer)
-        else:
-            em.set_footer(text = error_footer)
+        is_overflow, error_footer, full_footer= self.get_warnings()
+        em.set_footer(text = error_footer)
         
         await self.ctx.send(embed=em, file=f)
         await pic_mes.delete()
-        await detect_mes.delete()
 
-        
         if is_overflow: #send file of errors
             path = "./error_footers/"
-            file_name = f'warnings_and_errors-{re.sub("[^0-9]", "", str(datetime.datetime.now()))}.txt'
-            with open(path+file_name, 'w', encoding='utf-8') as e_file:
-                e_file.write(error_footer)
-            e_file = BytesIO(open(path+file_name, 'rb').read())
-            Utils.delete_file(path+file_name)
-                
-            await self.ctx.send(file = discord.File(fp=e_file, filename=file_name))
+            filename = f'warnings_and_errors-{self.ctx.channel.id}.txt'
+            e_file = Utils.create_temp_file(filename, full_footer, dir=path)
+            
+            await self.ctx.send(file = discord.File(fp=e_file, filename=filename))
 
         self.picture_running=False
         
@@ -2449,7 +2444,10 @@ class Table():
             print(self.table_str)
 
         if not recalc:   
-            return "Table {}updated. Room {} has finished {} {}. Last race: {}.".format("auto-" if auto else "",rID, len(self.races), "race" if len(self.races)==1 else "races",self.tracks[len(self.races)-1])
+            # warn_content = self.get_warnings(override=True)
+            # if "No warnings or room errors." not in warn_content:
+            #     Utils.create_temp_file(f"warnings_and_errors-{self.ctx.channel.id}.txt", warn_content, dir='./error_footers/', no_ret=True)
+            return "Table {}updated. Room {} has finished {} {}. Last race: {}.".format("auto-" if auto else "", rID, len(self.races), "race" if len(self.races)==1 else "races",self.tracks[len(self.races)-1])
                 
 
     def create_string(self, by_race = False):

@@ -17,7 +17,10 @@ from datetime import datetime, timedelta
 import sqlite3
 import copy
 from utils.Utils import SETTINGS
+import utils.Utils as Utils
 import argparse
+from fnmatch import fnmatch
+import os
 
 creds = dotenv_values(".env.testing") or dotenv_values(".env") #.env.testing for local testing, .env for deployment
 KEY = creds['KEY']
@@ -56,6 +59,13 @@ def load_json(file):
 def update_json(file, contents):
     with open(file+'.json', 'w', encoding='utf-8') as f:
         json.dump(contents, f, ensure_ascii=True, indent = 4)
+
+# def clean_up_temp_files():
+#     print("Deleting all temp files...")
+#     for dir in ['./error_footers']:
+#         for file in os.listdir(dir):
+#             if fnmatch(file, '*.txt'):
+#                 Utils.delete_file(f"{dir}/{file}")
 
 SPLIT_DELIM = '{d/D17¤85xu§ey¶}'
 DEFAULT_PREFIXES = ['?', '!']
@@ -117,7 +127,7 @@ class TableBOT(commands.Bot):
             raise error
 
     async def on_ready(self):
-        print("Bot logged in as {0.user}".format(self)) 
+        print(f"Bot logged in as {self.user}") 
         for server in self.guilds:
             cur.execute('''INSERT OR IGNORE INTO servers
                             VALUES (?, ?, ?, ?, ?)''', 
@@ -128,11 +138,11 @@ class TableBOT(commands.Bot):
         try:
             self.cycle_presences.start()
         except RuntimeError:
-            pass
+            print("cycle_presences task failed to start.")
         try:
             self.check_inactivity.start()
         except RuntimeError:
-            pass
+            print("check_inactivity task failed to start.")
     
     async def on_guild_join(self, guild):
         cur.execute('''INSERT OR IGNORE INTO servers
@@ -143,8 +153,13 @@ class TableBOT(commands.Bot):
     #remove inactive table instances (inactivity == 30+ minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):
+        # for channel, instance in list(self.table_instances.items())[::-1]:
+        #     if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes=30):
+        #         Utils.destroy_temp_files(channel)
+        #         self.table_instances.pop(channel)
         self.table_instances = {channel: instance for (channel, instance) in self.table_instances.items() 
                                 if instance.last_command_sent is None or datetime.now() - instance.last_command_sent <= timedelta(minutes=30)}
+
 
     @tasks.loop(seconds=15)
     async def cycle_presences(self):
@@ -161,11 +176,7 @@ class TableBOT(commands.Bot):
     #     self.dump_stats_json()
     
     def get_active_tables(self):
-        count = 0
-        for t in list(self.table_instances.values()):
-            if t.table_running:
-                count+=1
-        return count
+        return sum([1 for t in list(self.table_instances.values()) if t.table_running])
 
     def get_guild_prefixes(self, guild, local_callable = callable_prefix):
         temp_msg = discord.Object(id=0)
@@ -306,7 +317,6 @@ class TableBOT(commands.Bot):
                 return self.settings.get(guild, default).get(type)
             return self.settings.get(guild, default).get(type).get('type')
         else:
-            print(self.settings.get(guild, default).get(type))
             return self.settings.get(guild, default).get(type)
 
     def dump_stats_json(self):
@@ -333,4 +343,5 @@ if __name__ == "__main__":
     @atexit.register
     def on_exit():
         bot.dump_stats_json()
+        # clean_up_temp_files()
     
