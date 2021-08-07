@@ -17,10 +17,10 @@ from datetime import datetime, timedelta
 import sqlite3
 import copy
 from utils.Utils import SETTINGS
-import utils.Utils as Utils
 import argparse
-from fnmatch import fnmatch
-import os
+import utils.Utils as Utils
+# from fnmatch import fnmatch
+# import os
 
 creds = dotenv_values(".env.testing") or dotenv_values(".env") #.env.testing for local testing, .env for deployment
 KEY = creds['KEY']
@@ -85,7 +85,7 @@ def callable_prefix(bot, msg, mention=True):
         base = default
     else:
         base.extend(bot.prefixes.get(msg.guild.id, default))
-        base.append('$')
+        base.append('%')
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
@@ -310,6 +310,8 @@ class TableBOT(commands.Bot):
         #                 FROM servers''')
         # print(cur.fetchall())
 
+        if setting in ['IgnoreLargeTimes']:
+            return f"`{setting}` setting set to `{Utils.insert_formats(default)}`."
         return "`{}` setting set to `{}`.".format(setting, default.get('type') if setting in ['graph', 'style'] else SETTINGS[setting].get(default, default))
     
     def get_setting(self, type, guild, raw = False):

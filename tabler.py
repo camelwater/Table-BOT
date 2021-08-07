@@ -491,15 +491,10 @@ class Table():
         return False, ret, None
     
     def set_sui(self, sui_setting):
-        per_team = Utils.convert_format(self.format)
-        if not sui_setting or sui_setting == "0": #Never
-            return
-        if '+' in sui_setting:
-            if per_team >= int(sui_setting.rstrip('+')):
-                self.sui = True
-        else:
-            if per_team == int(sui_setting):
-                self.sui=True
+        try:
+            self.sui = Utils.determine_ILT(sui_setting, self.format)
+        except (ValueError, IndexError):
+            pass #I don't think it will ever reach here, but just in case
 
     def check_num_teams(self):
         if len(self.tags)!=self.teams:

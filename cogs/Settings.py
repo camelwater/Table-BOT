@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from discord.ext import commands
 from utils.Utils import SETTINGS
+import utils.Utils as Utils
 RESERVED_DELIM = '{d/D17¤85xu§ey¶}'
 
 class Settings(commands.Cog):
@@ -78,6 +79,8 @@ class Settings(commands.Cog):
                     val = val['type']
                 except:
                     val = ''
+            elif name == 'IgnoreLargeTimes':
+                val = Utils.insert_formats(val)
             else:
                 val = SETTINGS[name].get(val, val)
             out+="\n{}{}:: {}".format(name, " "*(spaces-len(name)), val)
@@ -112,7 +115,8 @@ class Settings(commands.Cog):
             if not avail_settings:
                 await ctx.send("Invalid setting `{}`. Here are the customizable settings:\n{}".format(settingType, await self.settings(ctx, mes=False)))
             else:
-                await(await ctx.send("Specify a setting value for `{}`. The value can be any of the following:\n{}".format(settingType, avail_settings))).delete(delay=60)
+                await(await ctx.send(f"Specify a setting value for `{settingType}`. The value can be any of the following"
+                                + f"{' or any combination of the following separated by commas' if settingType=='IgnoreLargeTimes' else ''}:\n{avail_settings}")).delete(delay=60)
             return
 
         valid = False
@@ -128,29 +132,29 @@ class Settings(commands.Cog):
                         break
         else:
             #other settings (currently only IgnoreLargeTimes)
-            if default.lower() in SETTINGS[settingType]: valid = True
-            else:
-                for k, v in SETTINGS[settingType].items():
-                    if default.lower() == v.lower():
-                        default = k
-                        valid = True
-                        break
+            if settingType == "IgnoreLargeTimes":
+                try:
+                    default = Utils.parse_ILT_setting(default)
+                    valid=True
+                except (ValueError, IndexError):
+                    valid = False
 
         if not valid:
-            await ctx.send(f"Invalid value `{default}` for setting `{settingType}`. The value must be one of the following:\n{get_avail_settings(settingType)}")
+            await ctx.send(f"Invalid value `{default}` for setting `{settingType}`. The value must be one of the following"+
+                        f"{' or a combination of the following separated by commas' if settingType == 'IgnoreLargeTimes' else ''}:\n{get_avail_settings(settingType)}")
             return
 
         mes = self.bot.set_setting(ctx.guild.id, settingType, default)
         await ctx.send(mes)
     
-def get_avail_settings(setting):
-    setting = SETTINGS.get(setting)
-    if setting is None:
+def get_avail_settings(settingType):
+    setting_vals = SETTINGS.get(settingType)
+    if setting_vals is None:
         return None
 
     ret = ""
-    for ind, dic in setting.items():
-        ret+='`{}.` {}\n'.format(ind, " | ".join(map(lambda orig: "`{}`".format(orig), dic.values())) if setting in ['graph', 'style']
+    for ind, dic in setting_vals.items():
+        ret+='`{}.` {}\n'.format(ind, " | ".join(map(lambda orig: "`{}`".format(orig), dic.values())) if settingType in ['graph', 'style']
                                         else f'`{dic}`')
     
     return ret

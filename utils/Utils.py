@@ -4,6 +4,7 @@ Created on Sat Jun 5 15:30:03 2021
 
 @author: ryanz
 """
+import time
 import os
 import io
 
@@ -41,7 +42,71 @@ def is_rxx(arg):
     return re.match('^r[0-9]{7}$|^[a-z]{2}[0-9]{2}$', arg.lower()) is not None
     # return (arg3[0]=='r' and len(arg3)==8) or (arg3[2:].isnumeric() and len(arg3)==4)
 
+from more_itertools import consecutive_groups
+import itertools
 
+def insert_formats(string):
+    return string.replace('5', '5v5').replace('2', '2v2').replace('3','3v3').replace('4','4v4').replace('6','6v6').replace('1', 'FFA')
+def remove_formats(string):
+    return string.replace("5v5", '5').replace('2v2', '2').replace('3v3', '3').replace('4v4', '4').replace('6v6', '6').replace('ffa', '1')
+
+def parse_ILT_setting(string, local_inject = False):
+    args = remove_formats(string.strip().lower()).split(',')
+    for indx, i in list(enumerate(args))[::-1]:
+        i = i.strip()
+        check = i.rstrip('+')
+        if '-' not in check and (int(check)>6 or int(check)<0):
+            raise ValueError
+
+        if i=='1+': #always ignoreLargeTimes
+            if local_inject: return list(range(1,7))
+            return '1+'
+        if i=='0': #never ignoreLargeTimes
+            if local_inject: return list()
+            return '0'
+
+        if '-' in i:
+            start, end = i.split('-')
+            if int(start)>6 or int(start)<1 or int(end)<0 or int(end)>6:
+                raise ValueError
+            args.pop(indx)
+            args.extend(list(range(int(start), int(end)+1)))
+        elif i[-1] == '+':
+            start = int(i[0:-1])
+            args.pop(indx)
+            args.extend(list(range(start, 7)))
+        else:
+            args[indx] = int(i)
+    if local_inject:
+        return args
+
+    args = sorted(set(args))
+    for i in args:
+        if i>6 or i<1:
+            raise ValueError #bad input
+
+    consecutives = []
+    for group in consecutive_groups(args):
+        g = list(group)
+        if len(g)>2:
+            consecutives.append(g)
+    
+    all_in_cons = list(itertools.chain.from_iterable(consecutives))
+    args = [str(i) for i in args if i not in all_in_cons]
+    for indx,i in enumerate(consecutives):
+        if i[-1] == 6: args.append(f"{i[0]}+")
+        else: args.append(f"{i[0]}-{i[-1]}")
+    
+    return ', '.join(sorted(args))
+
+
+def determine_ILT(setting, format):
+    '''
+    determine whether large times should be ignored or not based on server settings and format
+    '''
+    format = convert_format(format)
+    excludes = parse_ILT_setting(setting, local_inject=True)
+    return format in excludes
 
 #-------------- Table.py methods --------------#
 
@@ -424,12 +489,21 @@ SETTINGS = {
 }
 
 if __name__ == "__main__":
-    import time
-    i = "A◇山周回のれみ"
-    sans = []
-    t = time.time()
-    for _ in range(1000):
-        sans.append(sanitize_uni(i))
-    print(time.time()-t)
-    print(sans[0])
+    setting = "1,2,3,5,6"
+    setting = parse_ILT_setting(setting)
+    print(setting)
+    
+    start = time.time()
+    
+    print(determine_ILT(setting, '4'))
+    
+    print(time.time()-start)
+    
+    # i = "A◇山周回のれみ"
+    # sans = []
+    # t = time.time()
+    # for _ in range(1000):
+    #     sans.append(sanitize_uni(i))
+    # print(time.time()-t)
+    # print(sans[0])
     
