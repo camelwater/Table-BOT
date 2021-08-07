@@ -16,7 +16,7 @@ def create_temp_file(filename, content, dir='.', no_ret = False):
 def delete_file(filename):
     try:
         os.remove(filename)
-    except:
+    except FileNotFoundError or IsADirectoryError:
         pass
 
 def get_file_bytes(file):
@@ -257,7 +257,7 @@ def check_repeat_times_slow(race, prev_races):
     
     try:
         max_key = max(repetitions, key=repetitions.get)
-    except:
+    except ValueError:
         max_key = None
 
     return (True, {'race': len(prev_races)-max_key, 'num_aff': repetitions[max_key]}) if max_key else (False, {})
@@ -363,7 +363,7 @@ WARNING_MAP = {
         "mkwx_bug_tr":"Room had {} players with track errors. Check [[/PREFIX\]]rr for errors. Table could be inaccurate for this GP ({}).", 
         "mkwx_bug_delta": "Room had time delay (lag) errors - {} affected player(s). Check [[/PREFIX\]]rr for errors. Table could be inaccuate for this GP ({}).",
 
-        "sub": "{}  -  Potential sub detected. If this player is a sub, use {}sub.", 
+        "sub": "{}  -  Potential sub detected. If this player is a sub, use [[/PREFIX\]]sub.", 
         "sub_conf": "{} - subbed in for {}.",
 
         "large_time": "{} had a large finish time - {}. Check [[/PREFIX\]]rr for errors."

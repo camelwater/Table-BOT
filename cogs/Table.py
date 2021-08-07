@@ -71,35 +71,32 @@ class Table_cog(commands.Cog):
             return True
         
     async def skip_search(self, ctx, arg, is_rxx):
-        # usage = f"Usage: `{ctx.prefix}start <format> <number of teams> <gps = 3>`"
         wait_mes = await ctx.send('Searching for room...')
         if is_rxx:
-            error, ask, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(rid = arg)
+            error, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(rid = arg)
         else:
-            error, ask, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(mii = arg)
+            error, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(mii = arg)
 
         if error:
-            if ask=='reset':
-                self.bot.table_instances.pop(ctx.message.channel.id)
             await wait_mes.delete()
-            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message)
+            return await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message)
+        
+        self.bot.table_instances[ctx.channel.id].confirm_room = True
+
+        if self.bot.table_instances[ctx.channel.id].format[0] == 'f':
+            mes = "Table successfully started. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (suppressing large finish time warnings)" if self.bot.table_instances[ctx.channel.id].sui else '')
+            self.bot.table_instances[ctx.channel.id].table_running = True
+            await wait_mes.delete()
+            await self.send_messages(ctx, mes)
+            self.bot.table_instances[ctx.channel.id].searching_room = False
+            self.bot.table_instances[ctx.channel.id].confirm_room = False
+            self.bot.table_instances[ctx.channel.id].check_num_teams()
+            self.bot.table_instances[ctx.channel.id].populate_table_flags()
+            self.bot.table_instances[ctx.channel.id].check_mkwx_update.start()
             return
-        if ask=="confirm":
-            self.bot.table_instances[ctx.channel.id].confirm_room = True
-            if self.bot.table_instances[ctx.channel.id].format[0] == 'f':
-                mes = "Table successfully started. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (suppressing large finish time warnings)" if self.bot.table_instances[ctx.channel.id].sui else '')
-                self.bot.table_instances[ctx.channel.id].table_running = True
-                await wait_mes.delete()
-                await self.send_messages(ctx, mes)
-                self.bot.table_instances[ctx.channel.id].searching_room = False
-                self.bot.table_instances[ctx.channel.id].confirm_room = False
-                self.bot.table_instances[ctx.channel.id].check_num_teams()
-                self.bot.table_instances[ctx.channel.id].populate_table_flags()
-                self.bot.table_instances[ctx.channel.id].check_mkwx_update.start()
-                return
-            await wait_mes.delete()    
-            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message)
-            return
+
+        await wait_mes.delete()   
+        await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message)
         
     async def cog_before_invoke(self,ctx):
         self.set_instance(ctx)
@@ -147,7 +144,7 @@ class Table_cog(commands.Cog):
             try:
                 teams = int(args[1])
                 assert(teams>0)
-            except:
+            except (ValueError, AssertionError):
                 await self.send_messages(ctx, "<teams> must be a postive number.", usage)
                 return
         
@@ -170,15 +167,13 @@ class Table_cog(commands.Cog):
                 if not gps.isnumeric() or int(gps)<1:
                     await self.sent_temp_messages(ctx, "Invalid number of gps. <gps> must a positive non-zero number.", usage)
                 break
+        self.bot.table_instances[ctx.channel.id].gps = int(gps)
 
         if sui!=None:
             self.bot.table_instances[ctx.channel.id].sui = True if sui[4:][0]=='y' else False 
         else:
             if ctx.guild:
                 self.bot.table_instances[ctx.channel.id].set_sui(self.bot.get_setting('IgnoreLargeTimes', ctx.guild.id))
-
-        self.bot.table_instances[ctx.channel.id].gps = int(gps)
-        
 
         if len(args)>2:
             arg3 = args[2]
@@ -231,31 +226,21 @@ class Table_cog(commands.Cog):
                 await self.send_messages(ctx, "Invalid room id: missing an 'r' or not in format 'XX00'.", usage)
                 return
             wait_mes = await ctx.send('Searching for room...')
-            error, ask, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(rid = search_args)
+            error, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(rid = search_args)
         elif search_type == "mii":   
             wait_mes = await ctx.send('Searching for room...')
-            error, ask, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(mii = search_args)
+            error, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(mii = search_args)
         else:
             await self.send_messages(ctx, f"Invalid argument for `{prefix}search`: <search type> must be 'rxx' or 'mii'", usage)
             return
         
         if error:
-            if ask=='reset':
-                self.bot.table_instances.pop(ctx.message.channel.id)
             await wait_mes.delete()
-            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message, usage)
-            return
+            return await self.send_messages(self.bot.table_instances[ctx.channel.id].choose_message, usage)
         
-        if ask == "match":
-            self.bot.table_instances[ctx.channel.id].choose_room= True
-            await wait_mes.delete()
-            await self.send_messages(ctx, "There were more than one possible matching rooms. Choose the desired room number.", self.bot.table_instances[ctx.channel.id].choose_message)
-            return
-        elif ask=="confirm":
-            self.bot.table_instances[ctx.channel.id].confirm_room = True
-            await wait_mes.delete()
-            await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message)
-            return
+        self.bot.table_instances[ctx.channel.id].confirm_room = True
+        await wait_mes.delete()
+        await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].choose_message)
     
     @search.error
     async def search_error(self,ctx: commands.Context, error):
@@ -561,10 +546,8 @@ class Table_cog(commands.Cog):
         img = await self.bot.table_instances[ctx.channel.id].get_table_img(by_race=byrace)
         
         f=discord.File(fp=img, filename='table.png')
-        em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].title_str(), color=0x00ff6f)
+        em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].title_str(),description="\n[Edit this table on gb.hlorenzi.com]("+self.bot.table_instances[ctx.channel.id].table_link+")", color=0x00ff6f)
         
-        value_field = "[Edit this table on gb.hlorenzi.com]("+self.bot.table_instances[ctx.channel.id].table_link+")"
-        em.add_field(name='\u200b', value= value_field, inline=False)
         em.set_image(url='attachment://table.png')
         is_overflow, error_footer, full_footer = self.bot.table_instances[ctx.channel.id].get_warnings(show_large_times = large_times)
         em.set_footer(text = error_footer)
@@ -591,7 +574,9 @@ class Table_cog(commands.Cog):
                 args = 0
             else:
                 args=-1
+        del_mes = await ctx.send("Undoing...")
         mes = await self.bot.table_instances[ctx.channel.id].undo_commands(args)
+        await del_mes.delete()
         await self.send_messages(ctx,mes)
     
     @commands.command(aliases=['undolist'])
@@ -610,7 +595,9 @@ class Table_cog(commands.Cog):
                 args = 0
             else:
                 args = -1
+        del_mes = await ctx.send("Redoing...")
         mes = await self.bot.table_instances[ctx.channel.id].redo_commands(args)
+        await del_mes.delete()
         await self.send_messages(ctx,mes)
     
     @commands.command(aliases=['redolist'])
@@ -730,12 +717,12 @@ class Table_cog(commands.Cog):
         
         try:
             p_indx = int(args[0])
-        except:
+        except ValueError:
             await self.send_temp_messages(ctx, "<player number> must be a number.", self.bot.table_instances[ctx.channel.id].get_player_list(), usage)
             return
         try:
             races = int(args[1])
-        except:
+        except ValueError:
             await self.send_temp_messages(ctx, "<correct races> must be a number.", self.bot.table_instances[ctx.channel.id].get_player_list(), usage)
             return
         is_in = args[2].lower()=='in'
@@ -743,7 +730,7 @@ class Table_cog(commands.Cog):
         if len(args)>3 and not is_in:
             try:
                 out_index = int(args[3])
-            except:
+            except ValueError:
                 await self.send_temp_messages(ctx, "<sub out index> must be a number.", self.bot.table_instances[ctx.channel.id].get_player_list(), usage)
                 return
             mes = self.bot.table_instances[ctx.channel.id].edit_sub_races(p_indx, races, is_in, out_index)
@@ -941,6 +928,10 @@ class Table_cog(commands.Cog):
         arg = arg.strip()
         search_args = arg.split(",")
         search_args = [i.strip() for i in search_args]
+
+        table_races = 4*self.bot.table_instances[ctx.channel.id].gps
+        if len(self.bot.table_instances[ctx.channel.id].races)>=table_races:
+            return await ctx.send(f"You cannot merge rooms because all races have finished ({table_races} races). If you would like to add more races, use `{ctx.prefix}gps`.")
         
         del_mes = await ctx.send("Merging rooms...")
         error, mes = await self.bot.table_instances[ctx.channel.id].merge_room(search_args)
@@ -1004,7 +995,7 @@ class Table_cog(commands.Cog):
                 gps = int(args[0])
                 assert(gps>0)
                 self.bot.table_instances[ctx.channel.id].change_gps(gps)
-        except:
+        except (ValueError, AssertionError):
             await self.send_temp_messages(ctx, "<num gps> must be a real number.", usage)
             return
         

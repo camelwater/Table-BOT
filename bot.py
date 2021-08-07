@@ -85,7 +85,7 @@ def callable_prefix(bot, msg, mention=True):
         base = default
     else:
         base.extend(bot.prefixes.get(msg.guild.id, default))
-        # base.append('$')
+        base.append('$')
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
@@ -103,7 +103,7 @@ class TableBOT(commands.Bot):
         for ext in INIT_EXT:
             self.load_extension(ext)  
 
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandNotFound):
             if not ctx.guild:
                 await(await ctx.send(f"I don't recognize that command. Use `{ctx.prefix}help` for a list of available commands.")).delete(delay=25)
@@ -119,6 +119,8 @@ class TableBOT(commands.Bot):
         elif isinstance(error, commands.MissingRequiredArgument):
             pass
             #raise error
+        elif isinstance(error, commands.errors.ExpectedClosingQuoteError):
+            await(ctx.send("Bad command input: missing a closing `\"`.", delete_after=10))
         else:
             await ctx.send(f"An unidentified internal bot error occurred. Wait a bit and try again later.\nIf this issue persists, `{ctx.prefix}reset` the table.")
             error_tb = ''.join(tb.format_exception(type(error), error, error.__traceback__))
@@ -220,7 +222,7 @@ class TableBOT(commands.Bot):
             return f"Prefix `{prefix}` has been removed." + (f' You must use my mention, {self.user.mention}, as the prefix now.' if len(self.prefixes[guild])==0 else "")
         except KeyError:
             return f"You don't have any custom prefixes registered. You can add or set custom prefixes with `{ctx_prefix}prefix`."
-        except:
+        except ValueError:
             return f"`{prefix}` is not a registered prefix."
         
     def set_prefix(self, guild, prefix):

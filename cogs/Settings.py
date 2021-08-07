@@ -159,12 +159,12 @@ def correct_settingName(setting):
     try:
         assert(setting in SETTINGS)
         return setting
-    except:
+    except AssertionError:
         try:
             lowered_keys = list(map(lambda l: l.lower(), SETTINGS.keys()))
             assert(setting.lower() in lowered_keys)
             return list(SETTINGS.keys())[lowered_keys.index(setting.lower())]
-        except:
+        except AssertionError:
             return setting
     
 def setup(bot):

@@ -5,6 +5,7 @@ Created on Tue May 18 15:05:35 2021
 @author: ryanz
 """
 from bs4 import BeautifulSoup
+from typing import Tuple, List
 import copy
 #from PIL import Image
 from io import BytesIO
@@ -24,9 +25,9 @@ from utils.WiimmfiMii import get_wiimmfi_mii, get_wiimmfi_mii_async
 import utils.Utils as Utils
 from utils.Utils import isFFA, WARNING_MAP, DC_MAP, STYLE_MAP, PTS_MAP
 from utils.Utils import GRAPH_MAP as GM
-graph_map = copy.deepcopy(GM)
-
-# NOTE: maybe automate first race dcs (18 and 15 pts) 
+merged_save_states = defaultdict(list)
+merged_restore_states = defaultdict(list)
+# TODO: maybe automate first race dcs (18 and 15 pts) 
 
 class Table():
     def __init__(self, ctx = None, bot = None, testing = False):
@@ -83,6 +84,7 @@ class Table():
         self.tags = {} #list of team tags and their respective players
         self.table_flags = {}
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
+        self.graph_map = copy.deepcopy(GM)
         self.graph = None #table picture graph
         self.style = None #table picture theme/style
         self.table_img = None
@@ -100,7 +102,7 @@ class Table():
         self.rxx = '' #rxx that table is watching
         self.gp = 0 #current gp
         self.num_players = 0 #number of players room is supposed to have (based on format and teams)
-        self.player_list = '' #string for bot printout of players and their ids
+        # self.player_list = '' #string for bot printout of players and their ids
         
 
         ##### Stuff for bot instances #####
@@ -131,223 +133,165 @@ class Table():
         
         self.IGNORE_FCS = True
         self.split_teams('3', 4)
+    
+    async def search_mii(self, mii) -> tuple:
+        '''
+        find room on mkwx with given mii names\n
+        returns
+        --
+        rxx of found room
+        '''
+        rxxs = defaultdict(int)
+        data = await self.fetch_mkwx_JSON(self.URL)
+        if isinstance(data, str) and 'error' in data:
+            if 'response' in data:
+                return True, "Wiimmfi appears to be down. Try again later."
+            else:
+                return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
+        
+        if len(data[1:-1])<1:
+            return True, "I am currently experiencing some issues with Wiimmfi's API. Try again later."
+        
+        for room in data:
+            if room.get("type")!="room": continue
+            room_rxx = room.get("room_id")
+            room_players = []
+            for player in room.get("members", []):
+                miiName = player.get('name')[0][0]
+                if not miiName or miiName == "no name": miiName = "Player"
+                room_players.append(Utils.sanitize_uni(miiName.strip(), for_search=True).lower())
+            if set(map(lambda l: Utils.sanitize_uni(l.strip(), for_search=True).lower(),mii)).issubset(room_players):
+                rxxs[room_rxx]+=1
 
-    async def find_room(self, rid = None, mii = None, merge=False, redo=False) -> tuple:
+        return False, rxxs
+
+    async def find_room_to_merge(self, rid: str=None, mii: List[str]=None, redo=False) -> Tuple[bool, str]:
+        '''
+        find room when `merge` command is used
+        '''
+        if rid is None: #mii names search
+            ret_error, rxxs = await self.search_mii(mii)
+            if ret_error:
+                return True, rxxs
+    
+            if len(rxxs)==0:
+                return True, "`{}` {} not found in any rooms.\nMake sure all mii names are correct.".format(mii, "were" if len(mii)>1 else "was")
+            if len(rxxs)>1:
+                if len(mii)==1:
+                    return True, "`{}` was found in multiple rooms: {}.\nTry again with a more refined search.".format(mii[0], list(rxxs.keys()))
+                rxx = [keys for keys,values in rxxs.items() if values == max(rxxs.values())]
+                if len(rxx)>1:
+                    return True, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(lambda l: f"`{l}`",mii)), "were" if len(mii)>1 else "was", rxx)
+            
+            rxx = 'r'+ str(max(rxxs, key=rxxs.get))
+            if rxx==self.rxx or rxx in self.prev_rxxs:
+                return True, "This room is already part of this table. Merge cancelled."
+            
+            room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rxx)
+            
+            soup = await self.fetch(room_url)
+            if isinstance(soup, str) and 'error' in soup:
+                if 'response' in soup:
+                    return True, "Wiimmfi appears to be down. Try again later."
+                else:
+                    return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
+                
+            if "No match found!" in list(soup.stripped_strings):
+                return True, f"The room ({rxx}) hasn't finished a race yet.\nRetry `{self.prefix}mergeroom` when the room has finished one race."
+            
+            if not redo:
+                self.modifications.append([("mergeroom {}".format(', '.join(mii)), len(self.prev_elems), rxx)])
+                self.undos.clear()
+            
+        else: #rxx search
+            rxx = rid[0]
+            if len(rxx) == 4: rxx = rxx.upper()
+
+            if rxx==self.rxx or rxx in self.prev_rxxs:
+                return True, "This room is already part of this table. Merge cancelled."
+            room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rxx)
+            
+            soup = await self.fetch(room_url)
+            if isinstance(soup, str) and 'error' in soup:
+                if 'response' in soup:
+                    return True, "Wiimmfi appears to be down. Try again later."
+                else:
+                    return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
+            
+            stripped = list(soup.stripped_strings)
+            if "No match found!" in stripped:
+                return True, f"The room ({rxx}) either doesn't exist or hasn't finished a race yet.\nRetry `{self.prefix}mergeroom` when the room has finished at least one race and ensure that the room id is in *rxx* or *XX00* format."
+            
+            if not redo:
+                self.modifications.append([(f"mergeroom {rxx}", len(self.prev_elems), rxx)])
+                self.undos.clear()
+
+        self.current_url = room_url
+        self.prev_rxxs.append(self.rxx)
+        self.prev_elems.append(self.current_elems)
+        self.current_elems=[]
+        self.rxx = rxx
+        self.last_race_update = None
+        new_elems = soup.select('tr[id*=r]')
+        return False, f"Rooms have successfully merged. Now watching room {self.rxx}. {len(self.races)+len(new_elems)} races played."
+            
+    async def find_room(self, rid: str = None, mii: List[str] = None) -> Tuple[bool, str]:
         """
         find mkwx room using either rxx or mii name search
         """
-        if merge:
+        if rid is None: #mii names search
+            ret_err, rxxs = await self.search_mii(mii)
+            if ret_err:
+                return True, rxxs
             
-            if rid is None:
-                rxxs = defaultdict(int)
-                data = await self.fetch_mkwx_JSON(self.URL)
-                if isinstance(data, str) and 'error' in data:
-                    if 'response' in data:
-                        return True, "Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
-                
-                # data = data[1:-1]
-                if len(data[1:-1])<1:
-                    return "I am currently experiencing some issues with Wiimmfi's API. Try again later."
-                
-                for room in data:
-                    if room.get("type")!="room": continue
-                    room_rxx = room.get("room_id")
-                    room_players = []
-                    for player in room.get("members", []):
-                        miiName = player.get('name')[0][0]
-                        if not miiName or miiName == "no name": miiName = "Player"
-                        room_players.append(Utils.sanitize_uni(miiName.strip(), for_search=True).lower())
-                    if set(map(lambda l: Utils.sanitize_uni(l.strip(), for_search=True).lower(),mii)).issubset(room_players):
-                        rxxs[room_rxx]+=1
+            if len(rxxs)==0:
+                return True, "{} {} not found in any rooms.\nMake sure all mii names are correct.".format(', '.join(map(str, mii)), "were" if len(mii)>1 else "was")
+            if len(rxxs)>1:
+                if len(mii)==1:
+                    return True, "{} was found in multiple rooms: {}.\nTry again with a more refined search.".format(mii[0], list(rxxs.keys()))
+                rxx = [keys for keys,values in rxxs.items() if values == max(rxxs.values())]
+                if len(rxx)>1:
+                    return True, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(str, mii)), "were" if len(mii)>1 else "was", ', '.join(map(str,rxx)))
+            
+            rxx = 'r' + str(max(rxxs, key=rxxs.get))
+            self.rxx = rxx
+
+            room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(self.rxx)
+            soup = await self.fetch(room_url)
+
+            if isinstance(soup, str) and 'error' in soup:
+                if 'response' in soup:
+                    return True, "Wiimmfi appears to be down. Try again later."
+                else:
+                    return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
+
+            if "No match found!" in list(soup.stripped_strings):
+                return True, "The room hasn't finished a race yet.\nRetry when the room has finished one race."    
+            
+        else: #room id search
+            rid = rid[0]
+            self.rxx = rid
+            if len(rid)==4: self.rxx = self.rxx.upper()
+            
+            room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rid)
+            soup = await self.fetch(room_url)
+
+            if isinstance(soup, str) and 'error' in soup:
+                if 'response' in soup:
+                    return True, "Wiimmfi appears to be down. Try again later."
+                else:
+                    return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
+            
+            if "No match found!" in list(soup.stripped_strings):
+                return True, f"The room either doesn't exist or hasn't finished a race yet.\nRetry when the room has finished a race and make sure the room id is in *rxx* or *XX00* format."
         
-                if len(rxxs)==0:
-                    return True, "`{}` {} not found in any rooms.\nMake sure all mii names are correct.".format(mii, "were" if len(mii)>1 else "was")
-                if len(rxxs)>1:
-                    if len(mii)==1:
-                        return True, "`{}` was found in multiple rooms: {}.\nTry again with a more refined search.".format(mii[0], list(rxxs.keys()))
-                    rxx = [keys for keys,values in rxxs.items() if values == max(rxxs.values())]
-                    if len(rxx)>1:
-                        return True, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(lambda l: f"`{l}`",mii)), "were" if len(mii)>1 else "was", rxx)
-               
-                rxx = 'r'+ str(max(rxxs, key=rxxs.get))
-                if rxx==self.rxx or rxx in self.prev_rxxs:
-                    return True, "This room is already part of this table. Merge cancelled."
-                
-                room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rxx)
-                
-                soup = await self.fetch(room_url)
-                if isinstance(soup, str) and 'error' in soup:
-                    if 'response' in soup:
-                        return True, "Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
-                    
-                if "No match found!" in list(soup.stripped_strings):
-                    return True, f"The room ({rxx}) hasn't finished a race yet.\nRetry `{self.prefix}mergeroom` when the room has finished one race."
-                
-                self.current_url = room_url
-                self.prev_rxxs.append(self.rxx)
-                self.prev_elems.append(self.current_elems)
-                self.current_elems=[]
-                self.rxx = rxx
-                self.last_race_update = None
-                if not redo:
-                    self.modifications.append([("mergeroom {}".format(', '.join(mii)), len(self.prev_elems), rxx)])
-                    self.undos.clear()
-                
-                new_elems = soup.select('tr[id*=r]')
-                return False, "Rooms have successfully merged. Now watching room {}. {} races played.".format(self.rxx, len(self.races)+len(new_elems))
-            
-            else:
-                rid = rid[0]
-                if rid==self.rxx or rid in self.prev_rxxs:
-                    return True, "This room is already part of this table. Merge cancelled."
-                room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rid)
-                
-                soup = await self.fetch(room_url)
-                if isinstance(soup, str) and 'error' in soup:
-                    if 'response' in soup:
-                        return True, "Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
-                
-                stripped = list(soup.stripped_strings)
-                if "No match found!" in stripped:
-                    return True, f"The room ({rid}) hasn't finished at least one race yet.\nRetry `{self.prefix}mergeroom` when the room has finished at least one race."
-                
-                self.current_url = room_url
-                self.prev_rxxs.append(self.rxx)
-                self.prev_elems.append(self.current_elems)
-                self.current_elems=[]
-                self.rxx = rid
-                if len(rid)==4: self.rxx = self.rxx.upper()
-                self.last_race_update = None
-                if not redo:
-                    self.modifications.append([(f"mergeroom {rid}", len(self.prev_elems), rid)])
-                    self.undos.clear()
-                
-                new_elems = soup.select('tr[id*=r]')
-                return False, "Rooms have successfully merged. Now watching room {}. {} races played.".format(self.rxx,len(self.races)+len(new_elems))
-        else:
-            type_ask = "none"
-            if rid is None: #mii names search
-                rxxs = defaultdict(int)
-                data = await self.fetch_mkwx_JSON(self.URL)
-                if isinstance(data, str) and 'error' in data:
-                    if 'response' in data:
-                        return True, type_ask,"Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True, type_ask,"I am currently experiencing some issues with Wiimmfi. Try again later."
-           
-                # data = data[1:-1]
-                if len(data[1:-1])<1:
-                    return "I am currently experiencing some issues with Wiimmfi's API. Try again later."
+        self.find_players(room_url, soup)
+        self.split_teams(self.format, self.teams)
+        self.current_url = room_url
+        string = self.room_list_str()
 
-                for room in data:
-                    if room.get("type")!="room": continue
-                    room_rxx = room.get("room_id")
-                    room_players = []
-                    for player in room.get("members", []):
-                        miiName = player.get('name')[0][0]
-                        if not miiName or miiName == "no name": miiName = "Player"
-                        room_players.append(Utils.sanitize_uni(miiName.strip(), for_search=True).lower())
-                   
-                    if set(map(lambda l: Utils.sanitize_uni(l.strip(), for_search=True).lower(),mii)).issubset(room_players):
-                        rxxs[room_rxx]+=1
-               
-                if len(rxxs)==0:
-                    return True, type_ask, "{} {} not found in any rooms.\nMake sure all mii names are correct.".format(', '.join(map(str, mii)), "were" if len(mii)>1 else "was")
-                if len(rxxs)>1:
-                    if len(mii)==1:
-                        return True, type_ask, "{} was found in multiple rooms: {}.\nTry again with a more refined search.".format(mii[0], list(rxxs.keys()))
-                    rxx = [keys for keys,values in rxxs.items() if values == max(rxxs.values())]
-                    if len(rxx)>1:
-                        return True, type_ask, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(str, mii)), "were" if len(mii)>1 else "was", ', '.join(map(str,rxx)))
-               
-                rxx = 'r' + str(max(rxxs, key=rxxs.get))
-                self.rxx = rxx
-    
-                room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(self.rxx)
-                soup = await self.fetch(room_url)
-                if isinstance(soup, str) and 'error' in soup:
-                    if 'response' in soup:
-                        return True, type_ask, "Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True,type_ask, "I am currently experiencing some issues with Wiimmfi. Try again later."
+        return False, f"Room {self.rxx} found.\n{string}\n\n**Is this room correct?** (`{self.prefix}yes` / `{self.prefix}no`)"
 
-                if "No match found!" in list(soup.stripped_strings):
-                    return True, type_ask, "The room hasn't finished a race yet.\nRetry when the room has finished one race."
-                else:
-                    self.find_players(room_url, soup)
-                    self.split_teams(self.format, self.teams)
-                    type_ask = "confirm"
-                    self.current_url = room_url
-                    string = ""
-                
-                    counter = 1
-                    if isFFA(self.format):
-                        string+='\n__FFA__'
-                        for p in self.players.keys():
-                            string+="\n{}. {}".format(counter,self.display_names[p])
-                            self.player_ids[str(counter)] = p
-                            counter+=1          
-                    else:
-                        self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].upper())))
-                        for tag in self.tags.keys():
-                            string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
-                            for p in self.tags[tag]:
-                                string+="\n\t{}. {}".format(counter,Utils.dis_clean(self.display_names[p]))
-                                self.player_ids[str(counter)] = p
-                                counter+=1
-                                    
-                    self.player_list = string
-                    return False, type_ask, f"Room {self.rxx} found.\n{string}\n\n**Is this correct?** (`{self.prefix}yes` / `{self.prefix}no`)"    
-                
-            else: #room id search
-                rid = rid[0]
-                self.rxx = rid
-                if len(rid)==4: self.rxx = self.rxx.upper()
-                
-                room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rid)
-                
-                soup = await self.fetch(room_url)
-
-                if isinstance(soup, str) and 'error' in soup:
-                    if 'response' in soup:
-                        return True, type_ask, "Wiimmfi appears to be down. Try again later."
-                    else:
-                        return True,type_ask, "I am currently experiencing some issues with Wiimmfi. Try again later."
-                
-                stripped = list(soup.stripped_strings)
-                if "No match found!" in stripped:
-                    return True, type_ask, f"The room either doesn't exist or hasn't finished a race yet.\nRetry `{self.prefix}search` when the room has finished one race and make sure the room id is in *rxx* or *XX00* format."
-                else:
-                    self.find_players(room_url, soup)
-                    self.split_teams(self.format, self.teams)
-                    type_ask = "confirm"
-                    self.current_url = room_url
-                    string = ""
-                    
-                    counter = 1
-                    if isFFA(self.format):
-                        string+='\n_FFA_'
-                        for p in self.players.keys():
-                            string+="\n{}. {}".format(counter,self.display_names[p])
-                            self.player_ids[str(counter)] = p
-                            counter+=1          
-                    else:
-                        self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].upper())))
-                        for tag in self.tags.keys():  
-                            string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
-                            for p in self.tags[tag]:
-                                string+="\n\t{}. {}".format(counter,Utils.dis_clean(self.display_names[p]))
-                                self.player_ids[str(counter)] = p
-                                counter+=1
-                    self.player_list = string
-                    return False, type_ask, f"Room {self.rxx} found.\n{string}\n\n**Is this room correct?** (`{self.prefix}yes` / `{self.prefix}no`)"
-    
     def populate_table_flags(self):
         '''
         get Miis of all players and get their region codes
@@ -362,8 +306,26 @@ class Table():
 
                 except Exception as exc:
                     raise exc
-
     
+    def room_list_str(self) -> str:
+        string = ""
+        counter = 1
+        if isFFA(self.format):
+            string+='\n__FFA__'
+            for p in self.players.keys():
+                string+="\n{}. {}".format(counter,self.display_names[p])
+                self.player_ids[str(counter)] = p
+                counter+=1          
+        else:
+            self.tags = dict(sorted(self.tags.items(), key=lambda item: Utils.sanitize_uni(item[0].upper())))
+            for tag in self.tags.keys():
+                string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
+                for p in self.tags[tag]:
+                    string+="\n\t{}. {}".format(counter,Utils.dis_clean(self.display_names[p]))
+                    self.player_ids[str(counter)] = p
+                    counter+=1
+        return string
+
     def split_teams(self, f, num_teams):
         """
         split players into teams based on tags
@@ -390,7 +352,6 @@ class Table():
             for i in teams.items():
                 teams[i[0]] = [self.fcs[j] for j in i[1]]  
         self.tags = teams
-        self.all_players = copy.deepcopy(self.tags)
         self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].lower())))
         self.tags = {("NO TEAM" if k.strip()=="" else k.strip()): v for (k, v) in self.tags.items()}
 
@@ -545,16 +506,15 @@ class Table():
             self.set_teams(len(self.tags))
 
     def set_teams(self, teams):
-        global graph_map
 
         self.teams = teams
-        if self.teams!=2 and 3 in graph_map:
-            graph_map.pop(3)
+        if self.teams!=2 and 3 in self.graph_map:
+            self.graph_map.pop(3)
             if self.graph and self.graph.get('table') == 'diff':
                 self.default_graph = copy.deepcopy(self.graph)
                 self.graph = None
-        elif self.teams==2 and 3 not in graph_map:
-            graph_map[3] = copy.copy(GM[3])
+        elif self.teams==2 and 3 not in self.graph_map:
+            self.graph_map[3] = copy.copy(GM[3])
 
     def style_options(self):
         ret = 'Table style options:'
@@ -564,7 +524,7 @@ class Table():
     
     def graph_options(self):
         ret = 'Table graph options:'
-        for num,graph in graph_map.items():
+        for num,graph in self.graph_map.items():
             ret+="\n   {} {}".format("**{}.**".format(num) if self.graph and self.graph.get('type') == graph.get('type') else "`{}.`".format(num), graph.get('type'))
         return ret
 
@@ -619,9 +579,9 @@ class Table():
      
         if choice.lstrip('+').lstrip('-').isnumeric():
             c_indx = int(choice)
-            choice = graph_map.get(c_indx, None)
+            choice = self.graph_map.get(c_indx, None)
             if not choice:
-                return "`{}` is not a valid graph number. The graph number must be from 1-{}. Look at `{}graph` for reference.".format(c_indx, len(graph_map), self.prefix)
+                return "`{}` is not a valid graph number. The graph number must be from 1-{}. Look at `{}graph` for reference.".format(c_indx, len(self.graph_map), self.prefix)
             
             if self.teams != 2 and choice.get('table') == 'diff':
                 return "The graph type `{}` can only be used when there are two teams.".format('Difference')
@@ -636,18 +596,18 @@ class Table():
         else:
             o_choice = choice
             not_in = True
-            for i in list(graph_map.values()):
+            for i in list(self.graph_map.values()):
                 if choice.lower() in map(lambda l: l.lower(), i.values()):
                     not_in=False
                     break
             if not_in:
                 options = ''
-                for i in list(graph_map.values()):
+                for i in list(self.graph_map.values()):
                     options+='   - {}\n'.format(" | ".join(map(lambda orig: "`{}`".format(orig), i.values())))
                     
                 return "`{}` is not a valid graph. The following are the only available graph options:\n".format(o_choice)+options
             
-            for i in list(graph_map.values()):
+            for i in list(self.graph_map.values()):
                 if choice.lower() in map(lambda l: l.lower(), i.values()):
                     choice = i
                     break
@@ -667,11 +627,11 @@ class Table():
         tags_copy = list(self.tags.keys())
         try:
             tags_copy.remove("SUBS")
-        except:
+        except ValueError:
             pass
         try:
             tags_copy.remove("")
-        except:
+        except ValueError:
             pass
         for index, i in enumerate(tags_copy):
                 if index==len(tags_copy)-1:
@@ -702,16 +662,17 @@ class Table():
                 data = self.tags.pop(orig)
                 new = self.check_tags(new)
                 self.tags[new]= data
-                self.all_players[new] = self.all_players.pop(orig)
                 ret+= "Edited tag `{}` to `{}`.{}".format(orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
                 
             else:
                 comp = orig.upper()
+                actual_orig = orig
                 try:
                     data = None
                     for i in self.tags.keys():
                         if comp == i.upper():
                             data = self.tags.pop(i)
+                            actual_orig = i
                             break
                     assert(data is not None)
                 except:
@@ -721,11 +682,10 @@ class Table():
                     return string
                 new = self.check_tags(new)
                 self.tags[new] = data
-                self.all_players[new] = self.all_players.pop(orig)
-                ret+= "Edited tag `{}` to `{}`.{}".format(orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
+                ret+= "Edited tag `{}` to `{}`.{}".format(actual_orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
                 
             if not reundo and self.table_running:
-                self.modifications.append([(f'edittag {t_orig} {new}', new, orig)])
+                self.modifications.append([(f'edittag {t_orig} {new}', new, actual_orig)])
                 self.undos.clear()
 
         return ret
@@ -784,7 +744,6 @@ class Table():
                 old_tag = i[0]
                 old_indx = i[1].index(player)
                 i[1].remove(player)
-                self.all_players[i[0]].remove(player)
         existing_tag = None
         if tag in self.tags:
             existing_tag = tag
@@ -797,13 +756,10 @@ class Table():
         if existing_tag:
             if reundo and restore_indx is not None:
                 self.tags[existing_tag].insert(restore_indx, player)
-                self.all_players[existing_tag].insert(restore_indx, player)
             else:
                 self.tags[existing_tag].append(player)
-                self.all_players[existing_tag].append(player)
         else:
             self.tags[tag] = [player]
-            self.all_players[tag] = [player]
 
         empty_keys = [k[0] for k in list(self.tags.items()) if len(k[1])==0]
         for k in empty_keys:
@@ -817,12 +773,14 @@ class Table():
        
     def group_tags(self,dic, redo=False):
         if not redo:
-            orig_tags = self.tags
+            orig_tags = copy.deepcopy(self.tags)
             dic_str = ''
-            for i in dic.items():
+            for ind, i in enumerate(list(dic.items())):
                 dic_str+="{} ".format(i[0])
                 for j in i[1]:
                     dic_str+='{} '.format(j)
+                if ind!=len(dic)-1: dic_str+="/ "
+
         affected_players = []
         for i in dic.items():
             for j in range(len(i[1])):
@@ -835,18 +793,15 @@ class Table():
             for j in affected_players:
                 if j in i[1]:
                     i[1].remove(j)
-                    self.all_players[i[0]].remove(j)
         leftovers = []
         for i in dic.items():
             if i[0] not in self.tags:
                 self.tags[i[0]] = i[1]
-                self.all_players[i[0]] = copy.copy(i[1])
             else:
                 for j in self.tags[i[0]]:
                     if j not in i[1] and j not in affected_players:
                         leftovers.append(j)
                 self.tags[i[0]] = i[1]
-                self.all_players[i[0]] = copy.copy(i[1])
         
         per_team = Utils.convert_format(self.format)
         if len(leftovers)>0:
@@ -854,7 +809,6 @@ class Table():
                 while len(i[1])!=per_team:
                     try:
                         i[1].append(leftovers[0])
-                        self.all_players[i[0]].append(leftovers[0])
                         del leftovers[0]
                     except:
                         break
@@ -863,7 +817,6 @@ class Table():
             if len(x[1])==0: removal.append(x[0])
         for i in removal:
             self.tags.pop(i)
-            self.all_players.pop(i)
         
         if not redo and self.table_running:
             self.modifications.append([(f"tags {dic_str}", orig_tags, dic)])
@@ -948,8 +901,8 @@ class Table():
                     
                     counter+=1
 
-        self.player_list = string
-        return self.player_list
+        # self.player_list = string
+        return string
 
     def dc_to_str(self, dc):
         dc_type = dc.get('type')
@@ -1033,7 +986,7 @@ class Table():
                 
                 try:
                     self.manual_warnings[-1].remove("GP {} scores have been manually modified by the tabler.".format(gp))
-                except:
+                except ValueError:
                     pass
                 self.manual_warnings[-1].append("GP {} scores have been manually modified by the tabler.".format(gp))
                     
@@ -1047,7 +1000,7 @@ class Table():
                 
                 try:
                     self.manual_warnings[-1].remove("GP {} scores have been manually modified by the tabler.".format(gp))
-                except:
+                except ValueError:
                     pass
                 self.manual_warnings[-1].append("GP {} scores have been manually modified by the tabler.".format(gp))
                         
@@ -1105,8 +1058,8 @@ class Table():
                     
                     counter+=1
                     
-        self.player_list = string
-        return self.player_list
+        # self.player_list = string
+        return string
     
     def penalty(self,player, pen, reundo=False):
         if not reundo:
@@ -1285,8 +1238,9 @@ class Table():
                 self.display_names[fc] = miiName
         
         self.players = dict(sorted(self.players.items(), key=lambda item: item[0]))
+        self.all_players = list(copy.deepcopy(self.players).keys())
+
         if isFFA(self.format): 
-            self.all_players = list(copy.deepcopy(self.players).keys())
             print(self.players.keys())
         
     def check_name(self,name):
@@ -1298,46 +1252,29 @@ class Table():
             new = name+'-'+str(x)
         return new
     
+    def sort_AP(self, player):
+        found_tag = ""
+        for tag, tag_players in self.tags.items():
+            if player in tag_players:
+                found_tag = tag
+                break
+        return (0 if found_tag!="" else 1, Utils.sanitize_uni(found_tag), Utils.sanitize_uni(self.display_names.get(player,"")))
+
     def get_all_players(self): 
         ret = ''
-        if isFFA(self.format):
-            for i, p in enumerate(self.all_players):
-                ret+="\n{}. {}".format(i+1, Utils.dis_clean(self.display_names[p]))
-                if p in self.deleted_players:
-                    ret+=' (removed by tabler)'
-            return ret
+        self.all_players = sorted(self.all_players, key = lambda l: self.sort_AP(l))
 
-        for tag, players in self.tags.items():
-            if tag not in self.all_players:
-                for t1 in self.all_players.items():
-                    for p in players:
-                        if p in t1[1]:
-                            self.all_players[t1[0]].remove(p)
-                self.all_players[tag] = players
-                continue
-            
-            for p in players: 
-                if p not in self.all_players[tag]:
-                    self.all_players[tag].append(p)
-
-        self.all_players = dict(sorted(self.all_players.items(), key=lambda item: unidecode(item[0].upper())))
-
-        count = 0
-        for tag in self.all_players.items():
-            for p in tag[1]:
-                count+=1
-                ret+="\n{}. {}".format(count, Utils.dis_clean(self.display_names[p]))
-                if p in self.deleted_players:
-                    ret+=' (removed by tabler)'
-        
+        for i, p in enumerate(self.all_players):
+            ret+="\n{}. {}".format(i+1, Utils.dis_clean(self.display_names[p]))
+            if p in self.deleted_players:
+                ret+=' (removed by tabler)'
         return ret
-            
+
+        
     async def add_sub_player(self,player, fc):
         if fc in self.all_players: return 'failed'
-        if isFFA(self.format): self.all_players.append(fc)
+        self.all_players.append(fc)
         self.players[fc] = [0,[0]*self.gps, [0]*self.gps*4]
-        wiimm_mii = await get_wiimmfi_mii_async(fc)
-        if wiimm_mii: self.table_flags[fc] = wiimm_mii.countryCode
         self.fcs[player] = fc
         self.display_names[fc] = player
         if len(self.players)-1<self.num_players: #TEST: test if new missing players DC filling working (for multiple GPS: 1 + 2)
@@ -1359,9 +1296,10 @@ class Table():
                 return 'not sub'
         
         if not isFFA(self.format):
-            if "SUBS" not in self.tags:
+            if "SUBS" not in self.tags or len(self.tags['SUBS'])==0:
                 self.tags['SUBS'] = []
             self.tags["SUBS"].append(fc)
+
         return 'success'
     
     def find_tag(self, player, fc):
@@ -1372,7 +1310,6 @@ class Table():
             for tag in self.tags.items():
                 if len(tag[1])<per_team:
                     self.tags[tag[0]].append(fc)
-                    self.all_players[tag[0]].append(fc)
                     return
 
         #prefix tag matching
@@ -1383,7 +1320,6 @@ class Table():
                     match = [tag, len(tag)]
         if match[1]>0:
             self.tags[match[0]].append(fc)
-            self.all_players[match[0]].append(fc)
             return
 
         #suffix tag matching
@@ -1394,7 +1330,6 @@ class Table():
                     match = [tag, len(tag)]
         if match[1]>0:
             self.tags[match[0]].append(fc)
-            self.all_players[match[0]].append(fc)
             return
         
         #common substring matching if 2v2
@@ -1407,20 +1342,17 @@ class Table():
                         match = [lcs, len(lcs)]
             if match[0]!="":   
                 self.tags[match[0]].append(fc)
-                self.all_players[match[0]].append(fc)
                 return
         
         #no tags matched, so randomly fill
         for i in self.tags.items():
             if len(i[1])<per_team:
                 self.tags[i[0]].append(fc)
-                self.all_players[i[0]].append(fc)
                 return
 
         #all tags were full, so create new tag
         new_tag = self.check_tags(Utils.replace_brackets(player)[0])
         self.tags[new_tag] = [fc]
-        self.all_players[new_tag] = [fc]
 
     def get_subs(self):
         ret = 'Room subs:\n'
@@ -1491,12 +1423,11 @@ class Table():
                     t[1].remove(in_player)
                     in_tag = t[0]
                     break
-                except:
+                except ValueError:
                     pass
                 
             if tag!="" and in_player not in self.tags[tag]:
                 self.tags[tag].append(in_player)
-                self.all_players[tag].append(in_player)
        
             self.tags = {k:v for k,v in self.tags.items() if len(v)!=0}
         
@@ -1537,37 +1468,33 @@ class Table():
         else:
             try:
                 self.edited_scores.pop(in_player)
-            except:
+            except KeyError:
                 pass
         if restore['out_edited_scores'] is not None and len(restore['out_edited_scores']) >0:
             self.edited_scores[out_player] = restore['out_edited_scores'] 
         else:
             try:
                 self.edited_scores.pop(out_player)
-            except:
+            except KeyError:
                 pass
 
         if not isFFA(self.format):
             for tag in self.tags.items():
                 try:
                     tag[1].remove(in_player)
-                    self.all_players[tag[0]].remove(in_player)
                     try:
                         self.tags[restore['in_tag']].append(in_player)
-                        self.all_players[restore['in_tag']].append(in_player)
                     except KeyError:
                         self.tags[restore['in_tag']] = [in_player]
-                        self.all_players[restore['in_tag']] = [in_player]
 
                     break
-                except:
+                except ValueError:
                     pass
+
             try:
                 self.tags[restore['out_tag']].append(out_player)
-                self.all_players[restore['out_tag']].append(out_player)
             except KeyError:
                 self.tags[restore['out_tag']] = [out_player]
-                self.all_players[restore['out_tag']] = [out_player]
         
         
         self.players[in_player][1] = [a-b for a, b in zip(self.players[in_player][1], self.players[out_player][1])]
@@ -1859,7 +1786,7 @@ class Table():
             
             try:
                 self.manual_warnings[raceNum].remove("Placements for this race have been manually altered by the tabler.")
-            except:
+            except ValueError:
                 pass
             self.manual_warnings[raceNum].append("Placements for this race have been manually altered by the tabler.")
             
@@ -1874,33 +1801,40 @@ class Table():
         is_rxx = len(arg)==1 and Utils.is_rxx(arg[0])
             
         if is_rxx:
-            error, mes = await self.find_room(rid = arg, merge=True, redo=redo)
+            error, mes = await self.find_room_to_merge(rid = arg, redo=redo)
         else:
-            error, mes= await self.find_room(mii=arg, merge=True, redo=redo)
+            error, mes= await self.find_room_to_merge(mii=arg, redo=redo)
         
         if redo:
-            self.races = self.restore_merged[-1][0]
-            self.tracks = self.restore_merged[-1][1]
-            self.finish_times = self.restore_merged[-1][2]
-            self.warnings = self.restore_merged[-1][3]
-            self.dc_list = self.restore_merged[-1][4]
-            self.dc_list_ids = self.restore_merged[-1][5]
-            self.players = self.restore_merged[-1][6]
-            self.manual_warnings = self.restore_merged[-1][7]
-            self.restore_merged.pop(-1)
+            # self.races = self.restore_merged[-1][0]
+            # self.tracks = self.restore_merged[-1][1]
+            # self.finish_times = self.restore_merged[-1][2]
+            # self.warnings = self.restore_merged[-1][3]
+            # self.dc_list = self.restore_merged[-1][4]
+            # self.dc_list_ids = self.restore_merged[-1][5]
+            # self.players = self.restore_merged[-1][6]
+            
+            # self.manual_warnings = self.restore_merged[-1][7]
+            # if not isFFA(self.format):
+            #     self.all_players = self.restore_merged[-1][8]
+            #     self.tags = self.restore_merged[-1][9]
+            # self.restore_merged.pop(-1)
 
             if len(self.races)<4*self.gps and not self.check_mkwx_update.is_running():
                 try:
                     self.check_mkwx_update.start()
-                except:
+                except RuntimeError:
                     pass
-        
+            elif not self.check_mkwx_update.is_running():
+                await self.auto_send_pic()
+            
         return error, mes
 
-    def un_merge_room(self, merge_num): #TEST: test if updated un_merge works properly
-        self.restore_merged.append((copy.copy(self.races), copy.copy(self.tracks), 
-            copy.deepcopy(self.finish_times), copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), 
-            copy.deepcopy(self.dc_list_ids), copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings)))
+    async def un_merge_room(self, merge_num): #TEST: test if updated un_merge works properly
+        # self.restore_merged.append((copy.deepcopy(self.races), copy.copy(self.tracks), 
+        #     copy.deepcopy(self.finish_times), copy.deepcopy(self.warnings), copy.deepcopy(self.dc_list), 
+        #     copy.deepcopy(self.dc_list_ids), copy.deepcopy(self.players), copy.deepcopy(self.manual_warnings),
+        #     copy.deepcopy(self.all_players), copy.deepcopy(self.tags)))
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  
         self.races = self.races[:len(self.prev_elems[merge_indx])-len(self.removed_races)]
@@ -1924,7 +1858,7 @@ class Table():
         recorded_players = []
         for raceNum,race in enumerate(self.races):
             cur_room_size= len(race)
-            gp = int(raceNum/4)
+            gp = self.gp = int(raceNum/4)
             
             for placement, player in enumerate(race):
                 player = player[2]
@@ -1943,7 +1877,7 @@ class Table():
             for dc in list(self.dc_pts.items()):
                 for j in dc[1]:
                     if raceNum+1 in j[1]:
-                        self.players[dc[0]][1][self.gp]+=3
+                        self.players[dc[0]][1][gp]+=3
                         self.players[dc[0]][2][raceNum]=3
                         break
         
@@ -1953,15 +1887,25 @@ class Table():
                 self.players.pop(i)
                 self.fcs.pop(self.display_names[i])
                 self.display_names.pop(i)
-                for tag in self.tags.items():
-                    if i in tag[1]:
-                        tag[1].remove(i)
+                try:
+                    self.all_players.remove(i)
+                except ValueError:
+                    pass
 
+                if not isFFA(self.format):
+                    for tag in list(self.tags.items())[::-1]:
+                        if i in tag[1]:
+                            tag[1].remove(i)
+                            if len(self.tags[tag[0]])==0:
+                                self.tags.pop(tag[0])
+ 
         if len(self.races)<4*self.gps and not self.check_mkwx_update.is_running():
             try:
                 self.check_mkwx_update.start()
-            except:
+            except RuntimeError:
                 pass
+        elif not self.check_mkwx_update.is_running():
+            await self.auto_send_pic()
                 
     
     async def remove_race(self, raceNum, redo=False): 
@@ -2068,7 +2012,7 @@ class Table():
         if not self.check_mkwx_update.is_running():
             try:
                 self.check_mkwx_update.start()
-            except:
+            except RuntimeError:
                 pass
           
     async def room_is_updated(self):
@@ -2102,6 +2046,12 @@ class Table():
         # cur_iter = self.check_mkwx_update.current_loop
         if not await self.room_is_updated(): return
 
+        await self.auto_send_pic()
+        
+        if len(self.races)>=self.gps*4 or (self.last_race_update is not None and datetime.datetime.now()-self.last_race_update>datetime.timedelta(minutes=30)):
+            self.check_mkwx_update.stop()
+
+    async def auto_send_pic(self):
         self.bot.command_stats['picture_generated']+=1
         self.picture_running = True
         self.last_command_sent = datetime.datetime.now()
@@ -2113,16 +2063,15 @@ class Table():
         img = await self.get_table_img()
         
         f=discord.File(fp=img, filename='table.png')
-        em = discord.Embed(title=self.title_str(), color=0x00ff6f)
+        em = discord.Embed(title=self.title_str(), description="\n[Edit this table on gb.hlorenzi.com]("+self.table_link+")", color=0x00ff6f)
         
-        value_field = "[Edit this table on gb.hlorenzi.com]("+self.table_link+")"
-        em.add_field(name='\u200b', value= value_field, inline=False)
         em.set_image(url='attachment://table.png')
         is_overflow, error_footer, full_footer= self.get_warnings()
         em.set_footer(text = error_footer)
         
         await self.ctx.send(embed=em, file=f)
         await pic_mes.delete()
+        await detect_mes.delete()
 
         if is_overflow: #send file of errors
             path = "./error_footers/"
@@ -2131,11 +2080,7 @@ class Table():
             
             await self.ctx.send(file = discord.File(fp=e_file, filename=filename))
 
-        self.picture_running=False
-        
-        if len(self.races)>=self.gps*4 or (self.last_race_update is not None and datetime.datetime.now()-self.last_race_update>datetime.timedelta(minutes=30)):
-            self.check_mkwx_update.stop()
-            
+        self.picture_running=False  
 
     async def update_table(self, prnt=True, auto=False, recalc = False, reference_warnings = None):
         def find_if_edited(player, raceNum, ref):
@@ -2216,6 +2161,7 @@ class Table():
        
         iter_races = new_races if not recalc else self.races[self.gp*4:]
         init_shift = 0 if not recalc else self.gp*4
+        sub_miis = []
         last_race_players = []
         for raceNum, race in enumerate(iter_races):
             raceNum+=init_shift
@@ -2352,6 +2298,8 @@ class Table():
                 #sub player
                 if fc not in self.players and fc not in self.deleted_players:
                     status = await self.add_sub_player(self.check_name(player[0]), fc)
+                    if status!='failed':
+                        sub_miis.append(fc)
                     if not isFFA(self.format) and status == 'success':
                         self.warnings[shift+raceNum+1].append({'type':'sub', 'player': fc})
 
@@ -2437,11 +2385,13 @@ class Table():
             
             
         if not recalc: self.races+=new_races
+        if len(sub_miis)>0: self.populate_sub_miis(sub_miis)
         self.table_str = self.create_string()
 
         if prnt:
             print()
             print(self.table_str)
+            # print(sub_miis)
 
         if not recalc:   
             # warn_content = self.get_warnings(override=True)
@@ -2549,6 +2499,18 @@ class Table():
                     ret+='\nPenalty -{}'.format(self.team_pens[tag])
                             
         return ret
+    
+    def populate_sub_miis(self, fcs):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
+            future_fcs = {executor.submit(get_wiimmfi_mii, fc): fc for fc in fcs}
+            for future in concurrent.futures.as_completed(future_fcs):
+                fc = future_fcs[future]
+                try:
+                    mii_result = future.result()
+                    if mii_result: self.table_flags[fc] = mii_result.countryCode
+
+                except Exception as exc:
+                    raise exc
     
     def get_table_text(self):
         self.table_str = self.create_string()
@@ -2692,7 +2654,7 @@ class Table():
             self.edit_sub_races(j[1], j[3], j[4], out_index=j[5], reundo=True)
         
         elif 'mergeroom' in j[0]:
-            self.un_merge_room(j[1])
+            await self.un_merge_room(j[1])
         
         elif 'edittag' in j[0]:
             self.edit_tag_name([[j[1], j[2]]], reundo=True)

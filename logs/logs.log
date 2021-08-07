@@ -41,3 +41,2262 @@ Traceback (most recent call last):
 IndexError: bytearray index out of range
 
 
+2021-08-06 16:43:58,092 ERROR -> in command: start
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 187, in start
+    await self.skip_search(ctx, data, is_rxx)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 78, in skip_search
+    error, self.bot.table_instances[ctx.channel.id].choose_message = await self.bot.table_instances[ctx.channel.id].find_room(mii = arg)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 242, in find_room
+    ret_err, rxxs = await self.search_mii()
+TypeError: search_mii() missing 1 required positional argument: 'mii'
+
+
+2021-08-06 16:44:49,562 ERROR -> in command: start
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\bot.py", line 939, in invoke
+    await ctx.command.invoke(ctx)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 855, in invoke
+    await self.prepare(ctx)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 789, in prepare
+    await self._parse_arguments(ctx)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 713, in _parse_arguments
+    transformed = await self.transform(ctx, param)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 549, in transform
+    argument = view.get_quoted_word()
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\view.py", line 148, in get_quoted_word
+    raise ExpectedClosingQuoteError(close_quote)
+discord.ext.commands.errors.ExpectedClosingQuoteError: Expected closing ".
+
+2021-08-06 16:52:16,507 ERROR -> in command: picture
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 554, in picture
+    is_overflow, error_footer, full_footer = self.bot.table_instances[ctx.channel.id].get_warnings(show_large_times = large_times)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 482, in get_warnings
+    ret+="       \t- {}\n".format(self.warn_to_str(warning) if isinstance(warning, dict) else warning)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 427, in warn_to_str
+    return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
+KeyError: '3957-3713-3566'
+
+
+2021-08-06 17:19:42,075 ERROR -> in command: mergeroom
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 931, in mergeroom
+    error, mes = await self.bot.table_instances[ctx.channel.id].merge_room(search_args)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1842, in merge_room
+    error, mes = await self.find_room_to_merge(rid = arg, redo=redo)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 228, in find_room_to_merge
+    merged_save_states[self.ctx.channel.id].append(copy.deepcopy(self))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 205, in _deepcopy_list
+    append(deepcopy(a, memo))
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 172, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 270, in _reconstruct
+    state = deepcopy(state, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 230, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 146, in deepcopy
+    y = copier(x, memo)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\copy.py", line 228, in _deepcopy_dict
+    memo[id(x)] = y
+RecursionError: maximum recursion depth exceeded while calling a Python object
+
+
+2021-08-06 17:22:40,802 ERROR -> in command: undo
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 579, in undo
+    mes = await self.bot.table_instances[ctx.channel.id].undo_commands(args)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2757, in undo_commands
+    await self.undo(i)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2657, in undo
+    self.un_merge_room(j[1])
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1917, in un_merge_room
+    self.all_players.pop(i)
+KeyError: '3957-3713-3566'
+
+
+2021-08-06 17:25:01,079 ERROR -> in command: allplayers
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 744, in allplayers
+    await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_all_players())
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1290, in get_all_players
+    ret+="\n{}. {}".format(count, Utils.dis_clean(self.display_names[p]))
+KeyError: '3957-3713-3566'
+
+
+2021-08-06 17:31:32,684 ERROR -> in command: undo
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 579, in undo
+    mes = await self.bot.table_instances[ctx.channel.id].undo_commands(args)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2759, in undo_commands
+    await self.undo(i)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2659, in undo
+    self.un_merge_room(j[1])
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1919, in un_merge_room
+    self.all_players.pop(i)
+KeyError: '3957-3713-3566'
+
+
+2021-08-06 17:36:12,315 ERROR -> in command: picture
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 554, in picture
+    is_overflow, error_footer, full_footer = self.bot.table_instances[ctx.channel.id].get_warnings(show_large_times = large_times)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 483, in get_warnings
+    ret+="       \t- {}\n".format(self.warn_to_str(warning) if isinstance(warning, dict) else warning)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 428, in warn_to_str
+    return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
+KeyError: '3957-3713-3566'
+
+
+2021-08-06 18:03:02,374 ERROR -> in command: picture
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 554, in picture
+    is_overflow, error_footer, full_footer = self.bot.table_instances[ctx.channel.id].get_warnings(show_large_times = large_times)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 483, in get_warnings
+    ret+="       \t- {}\n".format(self.warn_to_str(warning) if isinstance(warning, dict) else warning)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 428, in warn_to_str
+    return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
+KeyError: '3957-3713-3566'
+
+
+2021-08-06 18:27:28,958 ERROR -> in command: allplayers
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 744, in allplayers
+    await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_all_players())
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1290, in get_all_players
+    ret+="\n{}. {}".format(count, Utils.dis_clean(self.display_names[p]))
+KeyError: '3957-3713-3566'
+
+
+2021-08-06 18:29:49,707 ERROR -> in command: redo
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 598, in redo
+    mes = await self.bot.table_instances[ctx.channel.id].redo_commands(args)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2812, in redo_commands
+    await self.redo(i)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2751, in redo
+    await self.merge_room([j[2]], redo=True)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1865, in merge_room
+    await self.update_table()
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2420, in update_table
+    self.table_str = self.create_string()
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2499, in create_string
+    p2 = self.display_names[p2]
+KeyError: '3957-3713-3566'
+
+
+2021-08-06 18:34:50,558 ERROR -> in command: redo
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 598, in redo
+    mes = await self.bot.table_instances[ctx.channel.id].redo_commands(args)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2812, in redo_commands
+    await self.redo(i)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2751, in redo
+    await self.merge_room([j[2]], redo=True)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1865, in merge_room
+    await self.update_table()
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2420, in update_table
+    if len(sub_miis)>0: self.populate_sub_miis(sub_miis)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2499, in create_string
+    p2 = self.display_names[p2]
+KeyError: '3957-3713-3566'
+
+
+2021-08-06 18:53:06,991 ERROR -> in command: picture
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 557, in picture
+    await ctx.send(embed=em, file=f)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\abc.py", line 1045, in send
+    data = await state.http.send_files(channel.id, files=[file], allowed_mentions=allowed_mentions,
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\http.py", line 254, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50035): Invalid Form Body
+In embed.fields.0.value: Must be 1024 or fewer in length.
+
+
+2021-08-06 19:04:38,567 ERROR -> in command: picture
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 557, in picture
+    await ctx.send(embed=em, file=f)
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\abc.py", line 1045, in send
+    data = await state.http.send_files(channel.id, files=[file], allowed_mentions=allowed_mentions,
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\http.py", line 254, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 400 Bad Request (error code: 50035): Invalid Form Body
+In embed.fields.0.value: Must be 1024 or fewer in length.
+
+
+2021-08-06 19:07:29,517 ERROR -> in command: picture
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 549, in picture
+    em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].title_str(),description="[Edit this table on gb.hlorenzi.com]("+self.table_link+")\n", color=0x00ff6f)
+AttributeError: 'Table_cog' object has no attribute 'table_link'
+
+
+2021-08-06 19:39:43,449 ERROR -> in command: undo
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 579, in undo
+    await del_mes.delete()
+AttributeError: 'coroutine' object has no attribute 'delete'
+
+
+2021-08-06 19:45:13,878 ERROR -> in command: tags
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 381, in tags
+    mes = self.bot.table_instances[ctx.channel.id].group_tags(dic)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 781, in group_tags
+    orig_tags = copy.deeopcopy(self.tags)
+AttributeError: module 'copy' has no attribute 'deeopcopy'
+
+
+2021-08-06 19:49:58,949 ERROR -> in command: undo
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 578, in undo
+    mes = await self.bot.table_instances[ctx.channel.id].undo_commands(args)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2795, in undo_commands
+    await self.undo(i)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2695, in undo
+    await self.un_merge_room(j[1])
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1935, in un_merge_room
+    self.all_players[tag[0]].remove(i)
+KeyError: 'SUBS'
+
+
+2021-08-06 20:17:54,271 ERROR -> in command: allplayers
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 746, in allplayers
+    await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_all_players())
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1287, in get_all_players
+    ret+="\n{}. {}".format(i+1, Utils.dis_clean(self.display_names[p]))
+KeyError: '4215-0802-3263'
+
+
+2021-08-06 20:18:27,341 ERROR -> in command: allplayers
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 746, in allplayers
+    await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].get_all_players())
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1287, in get_all_players
+    ret+="\n{}. {}".format(i+1, Utils.dis_clean(self.display_names[p]))
+KeyError: '4215-0802-3263'
+
+
+2021-08-06 20:19:50,899 ERROR -> in command: undo
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 578, in undo
+    mes = await self.bot.table_instances[ctx.channel.id].undo_commands(args)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2798, in undo_commands
+    await self.undo(i)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2698, in undo
+    await self.un_merge_room(j[1])
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1938, in un_merge_room
+    self.all_players[tag[0]].remove(i)
+TypeError: list indices must be integers or slices, not str
+
+
+2021-08-06 20:21:48,178 ERROR -> in command: undo
+Traceback (most recent call last):
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
+    ret = await coro(*args, **kwargs)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 578, in undo
+    mes = await self.bot.table_instances[ctx.channel.id].undo_commands(args)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2795, in undo_commands
+    await self.undo(i)
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2695, in undo
+    await self.un_merge_room(j[1])
+  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 1931, in un_merge_room
+    self.all_players.pop(i)
+TypeError: 'str' object cannot be interpreted as an integer
+
+

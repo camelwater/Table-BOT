@@ -360,10 +360,7 @@ def assert_correct(teams, un_players, per_team, num_teams, num_teams_supposed):
             for tag, players in teams.items():
                 if len(players)!=per_team:
                     popped = teams.pop(tag)
-                    try:
-                        un_players.extend(popped)
-                    except:
-                        pass
+                    un_players.extend(popped)
                     break
     
     for tag in corrupt_tags:
@@ -412,10 +409,8 @@ def select_top(all_tags, per_team, num_teams, num_teams_supposed, teams, players
         top_key = list(all_tags.keys())[0]
         teams[top_key] = list(all_tags[top_key])
         for p in all_tags[top_key]:
-            try:
-                players.remove(p)
-            except:
-                pass
+            players.remove(p)
+
         all_tags.pop(top_key)
 
 def squeeze_player_names(teams):
