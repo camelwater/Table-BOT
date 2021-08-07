@@ -85,8 +85,9 @@ class Stats(commands.Cog):
     @commands.command(name='help',aliases = ['h'])
     async def _help(self, ctx: commands.Context):
         e = discord.Embed(title="Help")
+        link1 = "[Basics](https://github.com/camelwater/Table-BOT/blob/main/README.md)"
         link = "[Documentation](https://github.com/camelwater/Table-BOT/blob/main/README.md)"
-        e.add_field(name='\u200b', value= link, inline=False)
+        e.add_field(name='\u200b', value= link1 +'\n'+link, inline=False)
 
         await ctx.send(embed=e)
 
