@@ -175,7 +175,7 @@ class Table():
                 return True, rxxs
     
             if len(rxxs)==0:
-                return True, "`{}` {} not found in any rooms.\nMake sure all mii names are correct.".format(', '.join(map(lambda l: f"`{Utils.backtick_clean(l)}`",mii)), "were" if len(mii)>1 else "was")
+                return True, "{} {} not found in any rooms.\nMake sure all mii names are correct.".format(', '.join(map(lambda l: f"`{Utils.backtick_clean(l)}`",mii)), "were" if len(mii)>1 else "was")
             if len(rxxs)>1:
                 if len(mii)==1:
                     return True, "`{}` was found in multiple rooms: {}.\nTry again with a more refined search.".format(Utils.backtick_clean(mii)[0], list(rxxs.keys()))
@@ -245,7 +245,7 @@ class Table():
                 return True, rxxs
             
             if len(rxxs)==0:
-                return True, "`{}` {} not found in any rooms.\nMake sure all mii names are correct.".format(', '.join(map(lambda l: f"`{Utils.backtick_clean(l)}`",mii)), "were" if len(mii)>1 else "was")
+                return True, "{} {} not found in any rooms.\nMake sure all mii names are correct.".format(', '.join(map(lambda l: f"`{Utils.backtick_clean(l)}`",mii)), "were" if len(mii)>1 else "was")
             if len(rxxs)>1:
                 if len(mii)==1:
                     return True, "`{}` was found in multiple rooms: {}.\nTry again with a more refined search.".format(Utils.backtick_clean(mii[0]), list(rxxs.keys()))
@@ -312,7 +312,7 @@ class Table():
         if isFFA(self.format):
             string+='\n__FFA__'
             for p in self.players.keys():
-                string+="\n{}. {}".format(counter,self.display_names[p])
+                string+="\n{}. {}".format(counter, Utils.disc_clean(self.display_names[p]))
                 self.player_ids[str(counter)] = p
                 counter+=1          
         else:
@@ -925,7 +925,7 @@ class Table():
         for race in list(self.dc_list.items()):
             ret+='**Race #{}: {}**\n'.format(race[0], self.tracks[int(race[0]-1)])
             for dc in race[1]:
-                ret+='\t`{}.` **{}\n'.format(dc_count, Utils.disc_clean(self.dc_to_str(dc)))
+                ret+='\t`{}.` **{}\n'.format(dc_count, self.dc_to_str(dc))
                 dc_count+=1
                 
         if len(self.dc_list)==0:

@@ -768,16 +768,16 @@ class Table_cog(commands.Cog):
         
         for i in arg:
             if len(i)<1:
-                await self.send_temp_messages(ctx, "Error: Missing <player number>.", self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
+                await self.send_temp_messages(ctx, "Error: Missing <player number>.", usage)
                 return
             if len(i)<2:
-                await self.send_temp_messages(ctx, "Error processing command: missing <gp number> for player number {}.".format(i[0]), self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
+                await self.send_temp_messages(ctx, "Error processing command: missing <gp number> for player number {}.".format(i[0]), usage)
                 return
             if len(i)<3:
                 await self.send_temp_messages(ctx, f"Error: missing <gp score> for player number {i[0]}.")
                 return
             if len(i)>3:
-                await self.send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <player number>, <gp number>, and <gp score>.".format(i[0]), self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
+                await self.send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <player number>, <gp number>, and <gp score>.".format(i[0]), usage)
                 return
             for j in i:
                 if not j.lstrip('-').lstrip('+').isnumeric():
