@@ -535,9 +535,11 @@ class Table_cog(commands.Cog):
         if len(arg)>0:
             if 'byrace' in arg or 'race' in arg: byrace = True
             bool_list = ['largetimes=' in i for i in arg]
-            if any(bool_list): check_arg = arg[bool_list[::-1].index(True)]
-            if check_arg[check_arg.find('=')+1:][0]=='y': large_times = True
-            elif check_arg[check_arg.find('=')+1:][0]=='n': large_times = False
+            if any(bool_list): 
+                check_arg = arg[bool_list[::-1].index(True)]
+
+                if check_arg[check_arg.find('=')+1:][0]=='y': large_times = True
+                elif check_arg[check_arg.find('=')+1:][0]=='n': large_times = False
 
         wait_mes = await ctx.send("Updating scores...")
         mes = await self.bot.table_instances[ctx.channel.id].update_table()

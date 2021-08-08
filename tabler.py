@@ -1353,7 +1353,7 @@ class Table():
         if len(self.sub_names)==0:
             ret+=" **No subs.**"
         for in_player, sub in self.subs.items():
-            ret+=f" - **{Utils.disc_clean(self.display_names[in_player])}** subbed in for **{Utils.disc_clean(self.display_names[sub.get('sub_out')])}** (after {sub.get('out_races')} races).\n"
+            ret+=f" - **{Utils.disc_clean(self.display_names[in_player])}** subbed in for **{Utils.disc_clean(self.display_names[sub.get('sub_out')])}** (after {sub.get('out_races')} races played).\n"
         return ret
 
     def sub_in(self, _in, out, out_races, reundo=False): 
