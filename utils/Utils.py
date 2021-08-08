@@ -340,7 +340,7 @@ def check_repeat_times_slow(race, prev_races):
 
 ### constants + maps
 
-VALID_CHARS = "/\*^+-_.!?@%&()\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz" + "abcdefghijklmnopqrstuvwxyz0123456789 ".upper()
+VALID_CHARS = "/\*`^+-_.!?@%&()\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz" + "abcdefghijklmnopqrstuvwxyz0123456789 ".upper()
 PRE_REMOVE = "/\*^+-_.!?#%() "
 POST_REMOVE = "/\*^+-.!?# "
 

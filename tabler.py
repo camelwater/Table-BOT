@@ -175,13 +175,13 @@ class Table():
                 return True, rxxs
     
             if len(rxxs)==0:
-                return True, "`{}` {} not found in any rooms.\nMake sure all mii names are correct.".format(mii, "were" if len(mii)>1 else "was")
+                return True, "`{}` {} not found in any rooms.\nMake sure all mii names are correct.".format(', '.join(map(lambda l: f"`{Utils.backtick_clean(l)}`",mii)), "were" if len(mii)>1 else "was")
             if len(rxxs)>1:
                 if len(mii)==1:
-                    return True, "`{}` was found in multiple rooms: {}.\nTry again with a more refined search.".format(mii[0], list(rxxs.keys()))
+                    return True, "`{}` was found in multiple rooms: {}.\nTry again with a more refined search.".format(Utils.backtick_clean(mii)[0], list(rxxs.keys()))
                 rxx = [keys for keys,values in rxxs.items() if values == max(rxxs.values())]
                 if len(rxx)>1:
-                    return True, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(lambda l: f"`{l}`",mii)), "were" if len(mii)>1 else "was", rxx)
+                    return True, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(lambda l: f"`{Utils.backtick_clean(l)}`",mii)), "were" if len(mii)>1 else "was", rxx)
             
             rxx = 'r'+ str(max(rxxs, key=rxxs.get))
             if rxx==self.rxx or rxx in self.prev_rxxs:
@@ -245,13 +245,13 @@ class Table():
                 return True, rxxs
             
             if len(rxxs)==0:
-                return True, "{} {} not found in any rooms.\nMake sure all mii names are correct.".format(', '.join(map(str, mii)), "were" if len(mii)>1 else "was")
+                return True, "`{}` {} not found in any rooms.\nMake sure all mii names are correct.".format(', '.join(map(lambda l: f"`{Utils.backtick_clean(l)}`",mii)), "were" if len(mii)>1 else "was")
             if len(rxxs)>1:
                 if len(mii)==1:
-                    return True, "{} was found in multiple rooms: {}.\nTry again with a more refined search.".format(mii[0], list(rxxs.keys()))
+                    return True, "`{}` was found in multiple rooms: {}.\nTry again with a more refined search.".format(Utils.backtick_clean(mii[0]), list(rxxs.keys()))
                 rxx = [keys for keys,values in rxxs.items() if values == max(rxxs.values())]
                 if len(rxx)>1:
-                    return True, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(str, mii)), "were" if len(mii)>1 else "was", ', '.join(map(str,rxx)))
+                    return True, "{} {} found in multiple rooms: {}.\nTry again with a more refined search.".format(', '.join(map(lambda l: f"`{Utils.backtick_clean(l)}`",mii)), "were" if len(mii)>1 else "was", ', '.join(map(str,rxx)))
             
             rxx = 'r' + str(max(rxxs, key=rxxs.get))
             self.rxx = rxx
@@ -657,7 +657,7 @@ class Table():
                 data = self.tags.pop(orig)
                 new = self.check_tags(new)
                 self.tags[new]= data
-                ret+= "Edited tag `{}` to `{}`.{}".format(orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
+                ret+= "Edited tag `{}` to `{}`.{}".format(Utils.backtick_clean(orig), Utils.backtick_clean(new), '\n' if len(l)>1 and num <len(l)-1 else "")
                 
             else:
                 comp = orig.upper()
@@ -671,13 +671,13 @@ class Table():
                             break
                     assert(data is not None)
                 except:
-                    string = "Tag `{}` is not a valid tag. The tag to edit must be one of the following:\n".format(orig)
+                    string = "Tag `{}` is not a valid tag. The tag to edit must be one of the following:\n".format(Utils.backtick_clean(orig))
                     for i in list(self.tags.keys()):
                         string+='   - `{}`\n'.format(i)
                     return string
                 new = self.check_tags(new)
                 self.tags[new] = data
-                ret+= "Edited tag `{}` to `{}`.{}".format(actual_orig, new, '\n' if len(l)>1 and num <len(l)-1 else "")
+                ret+= "Edited tag `{}` to `{}`.{}".format(Utils.backtick_clean(actual_orig), Utils.backtick_clean(new), '\n' if len(l)>1 and num <len(l)-1 else "")
                 
             if not reundo and self.table_running:
                 self.modifications.append([(f'edittag {t_orig} {new}', new, actual_orig)])
@@ -760,7 +760,7 @@ class Table():
         for k in empty_keys:
             del self.tags[k]
 
-        ret = "`{}` tag changed from `{}` to `{}`.".format(Utils.backtick_clean(self.display_names[player]), old_tag, existing_tag if existing_tag else tag)  
+        ret = "`{}` tag changed from `{}` to `{}`.".format(Utils.backtick_clean(self.display_names[player]), Utils.backtick_clean(old_tag), Utils.backtick_clean(existing_tag if existing_tag else tag))  
         if not reundo and self.table_running:
             self.modifications.append([(f"changetag {p_indx} {tag}", player, tag, old_tag, old_indx)])
 
@@ -846,7 +846,7 @@ class Table():
             if not redo:
                 self.modifications.append([(f'changename {p_indx} {new_name}', player, new_name, old_name, should_del)])
                 self.undos.clear()
-            ret+="`{}` name changed to `{}`{}.\n".format(old_name, new_name, " (removed from table)" if should_del else "")
+            ret+="`{}` name changed to `{}`{}.\n".format(Utils.backtick_clean(old_name), Utils.backtick_clean(new_name), " (removed from table)" if should_del else "")
         
         return ret
 
@@ -1084,7 +1084,7 @@ class Table():
             if not reundo:
                 self.modifications.append([(f'pen {p_indx} {pen}', player, pen)])
                 self.undos.clear()
-            return "`-{}` penalty given to `{}`.".format(pen, self.display_names[player])
+            return "`-{}` penalty given to `{}`.".format(pen, Utils.backtick_clean(self.display_names[player]))
     
     def unpenalty(self, player, unpen, reundo=False):
         if unpen !=None:
@@ -1131,7 +1131,7 @@ class Table():
                 team = list(self.tags.keys())[lowered_tags.index(sanitized_tag)]
         except:
             valid_teams = ", ".join(list(map(lambda l: f'`{l}`', self.tags.keys())))
-            return "Invalid team name `{}`. Valid teams: {}.".format(team, valid_teams)
+            return "Invalid team name `{}`. Valid teams: {}.".format(Utils.backtick_clean(team), valid_teams)
         
         if pen[0] == '=':
             pen = int(pen.lstrip('=').lstrip('-'))
@@ -1142,7 +1142,7 @@ class Table():
                 self.modifications.append([('teampen {} {}'.format(team, '='+str(pen)), team, '='+str(pen))])
                 self.undos.clear()
                 
-            return "Team `{}` penalty set to `-{}`.".format(team, pen)
+            return "Team `{}` penalty set to `-{}`.".format(Utils.backtick_clean(team), pen)
         
         else:
             pen = int(pen.lstrip('-'))
@@ -1155,7 +1155,7 @@ class Table():
             if not reundo:
                 self.modifications.append([(f'teampen {team} {pen}', team, pen)])
                 self.undos.clear()
-            return "`-{}` penalty given to team `{}`.".format(pen, team)
+            return "`-{}` penalty given to team `{}`.".format(pen, Utils.backtick_clean(team))
     
     def team_unpenalty(self, team, unpen, reundo=False):
         if unpen !=None:
@@ -1176,10 +1176,10 @@ class Table():
                 team = list(self.tags.keys())[lowered_tags.index(sanitized_tag)]
         except:
             valid_teams = ", ".join(list(map(lambda l: f'`{l}`', self.tags.keys())))
-            return "Invalid team name `{}`. Valid teams: {}.".format(team, valid_teams)
+            return "Invalid team name `{}`. Valid teams: {}.".format(Utils.backtick_clean(team), valid_teams)
 
         if team not in self.team_pens:
-            return "Team `{}` doesn't have any penalties.".format(team)
+            return "Team `{}` doesn't have any penalties.".format(Utils.backtick_clean(team))
         else:
             if unpen ==None:
                 orig_pen = self.team_pens[team]
@@ -1187,7 +1187,7 @@ class Table():
                 if not reundo:
                     self.modifications.append([(f'teamunpen {team}', team, orig_pen)])
                     self.undos.clear()
-                return "Penalties for team `{}` have been removed.".format(team)
+                return "Penalties for team `{}` have been removed.".format(Utils.backtick_clean(team))
             else:
                 self.team_pens[team] -= unpen
                 if self.team_pens[team] == 0: self.team_pens.pop(team)
@@ -1195,7 +1195,7 @@ class Table():
                 if not reundo: 
                     self.modifications.append([(f'teamunpen {team} {unpen}', team, unpen)])
                     self.undos.clear()
-                return "Penalty for team `{}` reduced by `{}`.".format(team, unpen)
+                return "Penalty for team `{}` reduced by `{}`.".format(Utils.backtick_clean(team), unpen)
 
     def find_players(self,url, soup): 
        
@@ -1353,7 +1353,7 @@ class Table():
         if len(self.sub_names)==0:
             ret+=" **No subs.**"
         for in_player, sub in self.subs.items():
-            ret+=f" - **{Utils.disc_clean(self.display_names[in_player]})** subbed in for **{Utils.disc_clean(self.display_names[sub.get('sub_out')]})** (after {sub.get('out_races')} races).\n"
+            ret+=f" - **{Utils.disc_clean(self.display_names[in_player])}** subbed in for **{Utils.disc_clean(self.display_names[sub.get('sub_out')])}** (after {sub.get('out_races')} races).\n"
         return ret
 
     def sub_in(self, _in, out, out_races, reundo=False): 
@@ -1527,7 +1527,7 @@ class Table():
             self.modifications.append([("editsub {} {} {} {}".format(indx, races, 'in' if is_in else 'out', out_index if not is_in else ""), player, races, orig_races, is_in, out_index)])
             self.undos.clear()
 
-        return "Changed `{}` sub {}{} races to {}.".format(Utils.backtick_clean(self.display_names[player]), 'in' if is_in else 'out', '' if is_in else ' (`{}`)'.format(self.backtick_clean(self.sub_names[player]['sub_out'][out_index-1])), races)
+        return "Changed `{}` sub {}{} races to {}.".format(Utils.backtick_clean(self.display_names[player]), 'in' if is_in else 'out', '' if is_in else ' (`{}`)'.format(Utils.backtick_clean(self.sub_names[player]['sub_out'][out_index-1])), races)
          
     def edit_dc_status(self,L, reundo=False): 
         ret=''
@@ -1652,7 +1652,7 @@ class Table():
                     continue
             
             if cor_room_size == orig_room_size:
-                ret+='Race {} room size is already {} - no change made.\n'.format(raceNum+1, cor_room_size)
+                ret+='Race `{}` room size is already `{}` - no change made.\n'.format(raceNum+1, cor_room_size)
                 continue
             
             orig_pts = {}
