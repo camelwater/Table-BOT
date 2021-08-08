@@ -85,7 +85,7 @@ def callable_prefix(bot, msg, mention=True):
         base = default
     else:
         base.extend(bot.prefixes.get(msg.guild.id, default))
-        # base.append('%')
+        # base.append('$')
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)

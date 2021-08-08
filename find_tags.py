@@ -54,8 +54,8 @@ def get_test_case(large = False):
         # players = ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', '@*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA h', 'USA K', 'ABBA']
         # players = ['Æ big', 'PP hi', "PP powerplant", 'PP POWERGRID', 'Æ vamp', 'PP ger', 'Æ hello', 'Æ oo', 'big PP', 'shuyx@Æ']
         # players = ['Ac☆Mirymeg', 'Z☆', 'WC top 2', 'Player', 'MonkeyTime', 'z おk', 'Ac Stubbz', 'Hosseini','MΞ☆Mγτh','Hτ chξΣ◇€£', 'Player', 'WC △△◎◎♪☆○']
-        # players= ['A◇山周回のれみ','CRYLIXDAWN', 'さぼA', 'DG★mila*', 'C☆Latent', 'Player-1','Dovi', 'らいよんのRemi', 'にしのだいせんせい',
-        #             'Player-2', 'ライオンのRemi', 'だいせんせい'] 
+        players= ['A◇山周回のれみ','CRYLIXDAWN', 'さぼA', 'DG★mila*', 'C☆Latent', 'Player-1','Dovi', 'らいよんのRemi', 'にしのだいせんせい',
+                    'Player-2', 'ライオンのRemi', 'だいせんせい', 'ωΖ hALr', '[ωZ] PogU']
 
     return players, (lengths if large else None)
 
@@ -506,7 +506,6 @@ def tag_algo(players, per_team, num_teams):
     all_tag_matches = find_possible_tags(players)
 
     clean_subsets(all_tag_matches) #get rid of tags that have overlapping players (shorter tags with subset of players)
-
     select_top(all_tag_matches, per_team, num_teams, supposed_teams, teams, players) #select best tags that meet requirements
     # assert_correct(teams, players, per_team, num_teams, supposed_teams) #contingency in case of rare errors
     fix_tags(teams)
@@ -528,7 +527,7 @@ if __name__ == "__main__":
     #find_possible_tags faster than commonaffix (maybe should change for split_acutal_tag)
 
     tick = time.perf_counter()
-    per_team = 5
+    per_team = 2
     teams = tag_algo(players, per_team=per_team, num_teams=6)
     # print(dict(sorted(t.items(), key = lambda l: l[0])))
     if not large: print(teams)

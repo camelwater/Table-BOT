@@ -65,22 +65,23 @@ def parse_ILT_setting(string, local_inject = False):
             if local_inject: return list()
             return '0'
 
-        if '-' in i:
+        if '-' in i: #range
             start, end = i.split('-')
-            if int(start)>6 or int(start)<1 or int(end)<0 or int(end)>6:
+            start, end = int(start), int(end)
+            if start>6 or start<1 or end<0 or end>6:
                 raise ValueError
             args.pop(indx)
-            args.extend(list(range(int(start), int(end)+1)))
-        elif i[-1] == '+':
-            start = int(i[0:-1])
+            args.extend(list(range(start, end+1)))
+        elif i[-1] == '+': #range to end
+            start = int(i.rstrip('+'))
             args.pop(indx)
             args.extend(list(range(start, 7)))
-        else:
+        else: #only one format
             args[indx] = int(i)
     if local_inject:
         return args
 
-    args = sorted(set(args))
+    args = set(args)
     for i in args:
         if i>6 or i<1:
             raise ValueError #bad input
@@ -88,17 +89,15 @@ def parse_ILT_setting(string, local_inject = False):
     consecutives = []
     for group in consecutive_groups(args):
         g = list(group)
-        if len(g)>2:
-            consecutives.append(g)
+        if len(g)>2: consecutives.append(g)
     
     all_in_cons = list(itertools.chain.from_iterable(consecutives))
     args = [str(i) for i in args if i not in all_in_cons]
-    for indx,i in enumerate(consecutives):
+    for i in consecutives:
         if i[-1] == 6: args.append(f"{i[0]}+")
         else: args.append(f"{i[0]}-{i[-1]}")
     
     return ', '.join(sorted(args))
-
 
 def determine_ILT(setting, format):
     '''
@@ -372,7 +371,9 @@ CHAR_MAP = {
     
     "ý": "y", "ÿ": "y", "γ": "y", "¥": "Y", "Ύ": "Y", "Ϋ": "Y", "Ý": "Y", "Ÿ": "Y",
     
-    "ζ": "Z"
+    "ζ": "Z", "Ζ": "Z",
+
+    "「": "[", "」": "]", "『": "[", "』": "]"
 }
 
 MULT_CHAR_MAP = {
@@ -489,16 +490,11 @@ SETTINGS = {
 }
 
 if __name__ == "__main__":
-    setting = "1,2,3,5,6"
+    setting = "1,+2++"
     setting = parse_ILT_setting(setting)
     print(setting)
-    
-    start = time.time()
-    
     print(determine_ILT(setting, '4'))
-    
-    print(time.time()-start)
-    
+        
     # i = "A◇山周回のれみ"
     # sans = []
     # t = time.time()

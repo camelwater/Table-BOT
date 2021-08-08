@@ -546,7 +546,7 @@ class Table_cog(commands.Cog):
         img = await self.bot.table_instances[ctx.channel.id].get_table_img(by_race=byrace)
         
         f=discord.File(fp=img, filename='table.png')
-        em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].title_str(),description="\n[Edit this table on gb.hlorenzi.com]("+self.bot.table_instances[ctx.channel.id].table_link+")", color=0x00ff6f)
+        em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].title_str(),description="\n[Edit this table on gb.hlorenzi.com]("+self.bot.table_instances[ctx.channel.id].table_link+")")
         
         em.set_image(url='attachment://table.png')
         is_overflow, error_footer, full_footer = self.bot.table_instances[ctx.channel.id].get_warnings(show_large_times = large_times)

@@ -74,7 +74,7 @@ class Table():
         self.removed_warn_dcs = {} #for restoring when ?removerace undone
         
         self.room_sizes = [] #list of room sizes for different gps (check if room size increases mid-gp, to send warning message - ?changeroomsize might be necessary)
-        self.room_players = [] #list of list of players at beginning of GP (check if room changes mid-gp, send warning)
+        self.room_players = [] #list of lists of players at beginning of GP (check if room changes mid-gp, send warning)
         self.room_sizes_error_affected = [] #races affected by mkwx messing up room sizes
         self.room_error_index = [] #to update room size warnings
         
@@ -82,7 +82,7 @@ class Table():
         self.edited_scores = defaultdict(lambda: defaultdict(int)) #players with edited gp scores
                    
         self.tags = {} #list of team tags and their respective players
-        self.table_flags = {}
+        self.table_flags = {} #players mapped to their location codes
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
         self.graph_map = copy.deepcopy(GM)
         self.graph = None #table picture graph
@@ -292,20 +292,19 @@ class Table():
 
         return False, f"Room {self.rxx} found.\n{string}\n\n**Is this room correct?** (`{self.prefix}yes` / `{self.prefix}no`)"
 
-    def populate_table_flags(self):
+    def populate_table_flags(self, subs=None):
         '''
         get Miis of all players and get their region codes
         '''
         with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
-            future_fcs = {executor.submit(get_wiimmfi_mii, fc): fc for fc in self.players.keys()}
+            future_fcs = {executor.submit(get_wiimmfi_mii, fc): fc for fc in (self.players.keys() if subs is None else subs)}
             for future in concurrent.futures.as_completed(future_fcs):
                 fc = future_fcs[future]
                 try:
                     mii_result = future.result()
                     if mii_result: self.table_flags[fc] = mii_result.countryCode
-
-                except Exception as exc:
-                    raise exc
+                except Exception as e:
+                    raise e
     
     def room_list_str(self) -> str:
         string = ""
@@ -506,7 +505,7 @@ class Table():
         if self.teams!=2 and 3 in self.graph_map:
             self.graph_map.pop(3)
             if self.graph and self.graph.get('table') == 'diff':
-                self.default_graph = copy.deepcopy(self.graph)
+                # self.graph_map = copy.deepcopy(self.graph)
                 self.graph = None
         elif self.teams==2 and 3 not in self.graph_map:
             self.graph_map[3] = copy.copy(GM[3])
@@ -892,11 +891,10 @@ class Table():
                         p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                     else:
                         p2 = self.display_names[p2]
-                    string+="\n\t{}{}".format('`{}.` '.format(counter) if p_form and not team_command else '{}. '.format(counter),Utils.dis_clean(p2))
+                    string+="\n{}{}{}".format('\t' if include_tag else " "*3,'`{}.` '.format(counter) if p_form and not team_command else '{}. '.format(counter),Utils.dis_clean(p2))
                     
                     counter+=1
 
-        # self.player_list = string
         return string
 
     def dc_to_str(self, dc):
@@ -2058,12 +2056,13 @@ class Table():
         img = await self.get_table_img()
         
         f=discord.File(fp=img, filename='table.png')
-        em = discord.Embed(title=self.title_str(), description="\n[Edit this table on gb.hlorenzi.com]("+self.table_link+")", color=0x00ff6f)
+        em = discord.Embed(title=self.title_str(), description="\n[Edit this table on gb.hlorenzi.com]("+self.table_link+")")
         
         em.set_image(url='attachment://table.png')
         is_overflow, error_footer, full_footer= self.get_warnings()
         em.set_footer(text = error_footer)
         
+        self.picture_running=False 
         await self.ctx.send(embed=em, file=f)
         await pic_mes.delete()
         await detect_mes.delete()
@@ -2075,8 +2074,7 @@ class Table():
             
             await self.ctx.send(file = discord.File(fp=e_file, filename=filename))
 
-        self.picture_running=False  
-
+         
     async def update_table(self, prnt=True, auto=False, recalc = False, reference_warnings = None):
         def find_if_edited(player, raceNum, ref):
             for i in ref[raceNum]:
@@ -2380,7 +2378,7 @@ class Table():
             
             
         if not recalc: self.races+=new_races
-        if len(sub_miis)>0: self.populate_sub_miis(sub_miis)
+        if len(sub_miis)>0: self.populate_table_flags(subs=sub_miis)
         self.table_str = self.create_string()
 
         if prnt:
@@ -2494,19 +2492,7 @@ class Table():
                     ret+='\nPenalty -{}'.format(self.team_pens[tag])
                             
         return ret
-    
-    def populate_sub_miis(self, fcs):
-        with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
-            future_fcs = {executor.submit(get_wiimmfi_mii, fc): fc for fc in fcs}
-            for future in concurrent.futures.as_completed(future_fcs):
-                fc = future_fcs[future]
-                try:
-                    mii_result = future.result()
-                    if mii_result: self.table_flags[fc] = mii_result.countryCode
 
-                except Exception as exc:
-                    raise exc
-    
     def get_table_text(self):
         self.table_str = self.create_string()
         return Utils.dis_clean(self.table_str)
