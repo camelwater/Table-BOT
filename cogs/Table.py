@@ -544,6 +544,9 @@ class Table_cog(commands.Cog):
         await wait_mes.edit(content=mes)
         pic_mes = await ctx.send("Fetching table picture...")
         img = await self.bot.table_instances[ctx.channel.id].get_table_img(by_race=byrace)
+        if isinstance(img, str):
+            await pic_mes.delete()
+            return await ctx.send(img)
         
         f=discord.File(fp=img, filename='table.png')
         em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].title_str(),description="\n[Edit this table on gb.hlorenzi.com]("+self.bot.table_instances[ctx.channel.id].table_link+")")
@@ -771,7 +774,7 @@ class Table_cog(commands.Cog):
                 await self.send_temp_messages(ctx, "Error processing command: missing <gp number> for player number {}.".format(i[0]), self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
                 return
             if len(i)<3:
-                await self.send_temp_messages(ctx, "Error: missing <gp score> for player number {}.")
+                await self.send_temp_messages(ctx, f"Error: missing <gp score> for player number {i[0]}.")
                 return
             if len(i)>3:
                 await self.send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <player number>, <gp number>, and <gp score>.".format(i[0]), self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)

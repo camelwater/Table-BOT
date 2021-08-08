@@ -281,8 +281,18 @@ def replace_brackets(string): #don't really need this anymore
     
     return string
 
-def dis_clean(string):
-    return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~")
+def disc_clean(string):
+    return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~").replace("`", "\`")
+
+def backtick_clean(string):
+    if '`' not in string:
+        return string
+    if string[0] == '`':
+        return "`` "+string+"``"
+    elif string[-1]=='`':
+        return "``"+string+" ``"
+    else:
+        return '``'+string+'``'
 
 from collections import defaultdict
 
@@ -429,8 +439,8 @@ WARNING_MAP = {
         "mkwx_bug_tr":"Room had {} players with track errors. Check [[/PREFIX\]]rr for errors. Table could be inaccurate for this GP ({}).", 
         "mkwx_bug_delta": "Room had time delay (lag) errors - {} affected player(s). Check [[/PREFIX\]]rr for errors. Table could be inaccuate for this GP ({}).",
 
-        "sub": "{}  -  Potential sub detected. If this player is a sub, use [[/PREFIX\]]sub.", 
-        "sub_conf": "{} - subbed in for {}.",
+        "sub": "{} : potential sub detected. If this player is a sub, use [[/PREFIX\]]sub.", 
+        "sub_conf": "{} : subbed in for {}.",
 
         "large_time": "{} had a large finish time - {}. Check [[/PREFIX\]]rr for errors."
         }

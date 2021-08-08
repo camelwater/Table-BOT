@@ -318,9 +318,9 @@ class Table():
         else:
             self.tags = dict(sorted(self.tags.items(), key=lambda item: Utils.sanitize_uni(item[0].upper())))
             for tag in self.tags.keys():
-                string+='\n**Tag: {}**'.format(Utils.dis_clean(tag))
+                string+='\n**Tag: {}**'.format(Utils.disc_clean(tag))
                 for p in self.tags[tag]:
-                    string+="\n\t{}. {}".format(counter,Utils.dis_clean(self.display_names[p]))
+                    string+="\n\t{}. {}".format(counter,Utils.disc_clean(self.display_names[p]))
                     self.player_ids[str(counter)] = p
                     counter+=1
         return string
@@ -462,8 +462,9 @@ class Table():
         if actual_warn_len==0:
             if override: return "No warnings or room errors. Table should be accurate."
             return False, "No warnings or room errors. Table should be accurate.", None
+            
         warnings = defaultdict(list,dict(sorted(warnings.items(), key=lambda item: item[0])))
-        ret = 'Room warnings/errors that could affect the table{}:\n'.format(f" ({self.prefix}dcs to fix dcs)" if len(self.dc_list)>0 else "")
+        ret = 'Room warnings/errors{}:\n'.format(f" ({self.prefix}dcs to fix dcs)" if len(self.dc_list)>0 else "")
         
         for indx,i in enumerate(warnings[-1]):
             if "scores have been manually modified" in i:
@@ -706,7 +707,7 @@ class Table():
         ret+="Race #{} - {}:\n".format(race, self.tracks[race-1])
         for i in list(results.items()):
             count+=1
-            ret+="   {}. {} - {}\n".format(count, Utils.dis_clean(self.display_names[i[0]]), i[1])
+            ret+="   {}. {} - {}\n".format(count, Utils.disc_clean(self.display_names[i[0]]), i[1])
             if not isFFA(self.format):
                 for t in self.tags.items():
                     if i[0] in t[1]:
@@ -759,7 +760,7 @@ class Table():
         for k in empty_keys:
             del self.tags[k]
 
-        ret = "`{}` tag changed from `{}` to `{}`.".format(self.display_names[player], old_tag, existing_tag if existing_tag else tag)  
+        ret = "`{}` tag changed from `{}` to `{}`.".format(Utils.backtick_clean(self.display_names[player]), old_tag, existing_tag if existing_tag else tag)  
         if not reundo and self.table_running:
             self.modifications.append([(f"changetag {p_indx} {tag}", player, tag, old_tag, old_indx)])
 
@@ -874,12 +875,12 @@ class Table():
                     p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                 else:
                     p2 = self.display_names[p2]
-                string+="\n{}{}".format('`{}.` '.format(counter) if p_form else '{}. '.format(counter),Utils.dis_clean(p2))
+                string+="\n{}{}".format('`{}.` '.format(counter) if p_form else '{}. '.format(counter),Utils.disc_clean(p2))
                 self.player_ids[str(counter)] = p
                 counter+=1
         else:
             for t_indx, tag in enumerate(list(self.tags.keys())):
-                string+=f'\n{f"`{t_indx+1}.` " if team_command else ""}**{"Tag: " if include_tag else ""}{Utils.dis_clean(tag)}**'
+                string+=f'\n{f"`{t_indx+1}.` " if team_command else ""}**{"Tag: " if include_tag else ""}{Utils.disc_clean(tag)}**'
                 for p in self.tags[tag]:
                     self.player_ids[str(counter)] = p
                     p2 = p
@@ -891,7 +892,7 @@ class Table():
                         p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                     else:
                         p2 = self.display_names[p2]
-                    string+="\n{}{}{}".format('\t' if include_tag else " "*3,'`{}.` '.format(counter) if p_form and not team_command else '{}. '.format(counter),Utils.dis_clean(p2))
+                    string+="\n{}{}{}".format('\t' if include_tag else " "*3,'`{}.` '.format(counter) if p_form and not team_command else '{}. '.format(counter),Utils.disc_clean(p2))
                     
                     counter+=1
 
@@ -924,7 +925,7 @@ class Table():
         for race in list(self.dc_list.items()):
             ret+='**Race #{}: {}**\n'.format(race[0], self.tracks[int(race[0]-1)])
             for dc in race[1]:
-                ret+='\t`{}.` **{}\n'.format(dc_count, self.dc_to_str(dc))
+                ret+='\t`{}.` **{}\n'.format(dc_count, Utils.disc_clean(self.dc_to_str(dc)))
                 dc_count+=1
                 
         if len(self.dc_list)==0:
@@ -983,7 +984,7 @@ class Table():
                     pass
                 self.manual_warnings[-1].append("GP {} scores have been manually modified by the tabler.".format(gp))
                     
-                return "`{}` GP `{}` score changed to `{}`.".format(self.display_names[player], gp, self.edited_scores[player][int(gp)])
+                return "`{}` GP `{}` score changed to `{}`.".format(Utils.backtick_clean(self.display_names[player]), gp, self.edited_scores[player][int(gp)])
             else:
                 self.edited_scores[player][int(gp)] = int(score)
                 
@@ -997,7 +998,7 @@ class Table():
                     pass
                 self.manual_warnings[-1].append("GP {} scores have been manually modified by the tabler.".format(gp))
                         
-                ret+="`{}` GP `{}` score changed to `{}`.\n".format(self.display_names[player], gp, score)
+                ret+="`{}` GP `{}` score changed to `{}`.\n".format(Utils.backtick_clean(self.display_names[player]), gp, score)
         return ret
     
     def undo_edit(self, player, gp):
@@ -1028,12 +1029,12 @@ class Table():
                     p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                 else:
                     p2 = self.display_names[p2]
-                string+="\n{}. {} {}".format('`{}`'.format(counter) if c_form else counter,Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                string+="\n{}. {} {}".format('`{}`'.format(counter) if c_form else counter,Utils.disc_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                 
                 counter+=1
         else:
             for t_indx, tag in enumerate(list(self.tags.keys())):
-                string+=f'\n{f"`{t_indx+1}`. " if team_command else ""}**{Utils.dis_clean(tag)}**'
+                string+=f'\n{f"`{t_indx+1}`. " if team_command else ""}**{Utils.disc_clean(tag)}**'
                 if tag in self.team_pens.keys(): 
                     string+=" **(-{})**".format(self.team_pens.get(tag))
                 for p in self.tags[tag]:
@@ -1047,7 +1048,7 @@ class Table():
                         p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
                     else:
                         p2 = self.display_names[p2]
-                    string+="\n\t{}. {} {}".format('`{}`'.format(counter) if c_form and not team_command else counter, Utils.dis_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
+                    string+="\n\t{}. {} {}".format('`{}`'.format(counter) if c_form and not team_command else counter, Utils.disc_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                     
                     counter+=1
                     
@@ -1070,7 +1071,7 @@ class Table():
                 self.modifications.append([('pen {} {}'.format(p_indx, '='+str(pen)), player, '='+str(pen))])
                 self.undos.clear()
                 
-            return "`{}` penalty set to `-{}`.".format(self.display_names[player], pen)
+            return "`{}` penalty set to `-{}`.".format(Utils.backtick_clean(self.display_names[player]), pen)
         
         else:
             pen = int(pen.lstrip('-'))
@@ -1095,7 +1096,7 @@ class Table():
             except:
                 return "Invalid player number `{}`.".format(player)
         if player not in self.pens:
-            return "`{}` doesn't have any penalties.".format(self.display_names[player])
+            return "`{}` doesn't have any penalties.".format(Utils.backtick_clean(self.display_names[player]))
         else:
             if unpen ==None:
                 orig_pen = self.pens[player]
@@ -1103,7 +1104,7 @@ class Table():
                 if not reundo:
                     self.modifications.append([(f'unpen {p_indx}', player, orig_pen)])
                     self.undos.clear()
-                return "Penalties for `{}` have been removed.".format(self.display_names[player])
+                return "Penalties for `{}` have been removed.".format(Utils.backtick_clean(self.display_names[player]))
             else:
                 self.pens[player] -= unpen
                 if self.pens[player] == 0: self.pens.pop(player)
@@ -1111,7 +1112,7 @@ class Table():
                 if not reundo: 
                     self.modifications.append([(f'unpen {p_indx} {unpen}', player, unpen)])
                     self.undos.clear()
-                return "Penalty for `{}` reduced by `{}`.".format(self.display_names[player], unpen)
+                return "Penalty for `{}` reduced by `{}`.".format(Utils.backtick_clean(self.display_names[player]), unpen)
             
     def team_penalty(self, team, pen, reundo = False):
         if team.isnumeric():
@@ -1258,7 +1259,7 @@ class Table():
         self.all_players = sorted(self.all_players, key = lambda l: self.sort_AP(l))
 
         for i, p in enumerate(self.all_players):
-            ret+="\n{}. {}".format(i+1, Utils.dis_clean(self.display_names[p]))
+            ret+="\n{}. {}".format(i+1, Utils.disc_clean(self.display_names[p]))
             if p in self.deleted_players:
                 ret+=' (removed by tabler)'
         return ret
@@ -1352,7 +1353,7 @@ class Table():
         if len(self.sub_names)==0:
             ret+=" **No subs.**"
         for in_player, sub in self.subs.items():
-            ret+=f" - **{self.display_names[in_player]}** subbed in for **{self.display_names[sub.get('sub_out')]}** (after {sub.get('out_races')} races).\n"
+            ret+=f" - **{Utils.disc_clean(self.display_names[in_player]})** subbed in for **{Utils.disc_clean(self.display_names[sub.get('sub_out')]})** (after {sub.get('out_races')} races).\n"
         return ret
 
     def sub_in(self, _in, out, out_races, reundo=False): 
@@ -1443,7 +1444,7 @@ class Table():
                 restore['pens'] = out_pens
             self.modifications.append([(f'sub {out} {out_races} {_in}', in_player, out_player, out_races, restore)])
             self.undos.clear()
-        return "Subbed in `{}` for `{}` (played `{}` races).".format(self.display_names[in_player], out_player_name, out_races)
+        return "Subbed in `{}` for `{}` (played `{}` races).".format(Utils.backtick_clean(self.display_names[in_player]), Utils.backtick_clean(out_player_name), out_races)
     
     def undo_sub(self, in_player, out_player, restore):
         self.sub_names.pop(in_player)
@@ -1511,7 +1512,7 @@ class Table():
         try:
             assert(player in self.sub_names)
         except:
-            return "`{}` is not a subbed in player.".format(self.display_names[player])
+            return "`{}` is not a subbed in player.".format(Utils.backtick_clean(self.display_names[player]))
         if is_in:
             orig_races = self.sub_names[player]['in_races']
             self.sub_names[player]['in_races'] = races
@@ -1526,7 +1527,7 @@ class Table():
             self.modifications.append([("editsub {} {} {} {}".format(indx, races, 'in' if is_in else 'out', out_index if not is_in else ""), player, races, orig_races, is_in, out_index)])
             self.undos.clear()
 
-        return "Changed `{}` sub {}{} races to {}.".format(self.display_names[player], 'in' if is_in else 'out', '' if is_in else ' (`{}`)'.format(self.sub_names[player]['sub_out'][out_index-1]), races)
+        return "Changed `{}` sub {}{} races to {}.".format(Utils.backtick_clean(self.display_names[player]), 'in' if is_in else 'out', '' if is_in else ' (`{}`)'.format(self.backtick_clean(self.sub_names[player]['sub_out'][out_index-1])), races)
          
     def edit_dc_status(self,L, reundo=False): 
         ret=''
@@ -1619,7 +1620,7 @@ class Table():
                 self.modifications.append([(f'dcs {dc_num} {status}', dc_num, orig_status, status)]) 
                 self.undos.clear()   
 
-            ret+= "Changed `{}` DC status for race `{}` to `{}`.\n".format(self.display_names[player], raceNum, status)
+            ret+= "Changed `{}` DC status for race `{}` to `{}`.\n".format(Utils.backtick_clean(self.display_names[player]), raceNum, status)
        
         return ret
                 
@@ -1775,7 +1776,7 @@ class Table():
                 self.players[a][1][gp] += (aff_new_pts[a] - aff_orig_pts[a])
                 self.players[a][2][raceNum-1] = aff_new_pts[a]
             
-            ret+='`{}` race {} placement changed to {}.{}'.format(self.display_names[player], raceNum, correct_pos+1, '\n' if num==len(l)-1 else "")
+            ret+='`{}` race {} placement changed to {}.{}'.format(Utils.backtick_clean(self.display_names[player]), raceNum, correct_pos+1, '\n' if num==len(l)-1 else "")
             
             try:
                 self.manual_warnings[raceNum].remove("Placements for this race have been manually altered by the tabler.")
@@ -2054,6 +2055,11 @@ class Table():
         await wait_mes.edit(content=mes)
         pic_mes = await self.ctx.send("Fetching table picture...")
         img = await self.get_table_img()
+        if isinstance(img, str):
+            await pic_mes.delete()
+            await detect_mes.delete()
+            self.picture_running=False
+            return await self.ctx.send(img)
         
         f=discord.File(fp=img, filename='table.png')
         em = discord.Embed(title=self.title_str(), description="\n[Edit this table on gb.hlorenzi.com]("+self.table_link+")")
@@ -2315,7 +2321,7 @@ class Table():
                     
                     self.ties[shift+raceNum+1][time].append(fc)
                 
-                if ":" in time and int(time[0:time.find(':')])>=4:
+                if ":" in time and int(time[0:time.find(':')])>=5:
                     self.warnings[shift+raceNum+1].append({'type': 'large_time', 'player':fc, 'time':time})
                     # if self.sui:
                     #     if "Large finish times occurred, but are being ignored. Table could be inaccurate." not in self.warnings[-1]:
@@ -2495,7 +2501,7 @@ class Table():
 
     def get_table_text(self):
         self.table_str = self.create_string()
-        return Utils.dis_clean(self.table_str)
+        return Utils.disc_clean(self.table_str)
     
     async def get_table_img(self, by_race = False):
         if by_race:
@@ -2509,10 +2515,14 @@ class Table():
        
         timeout = 10
         async with aiohttp.ClientSession() as session:
-            async with session.get(png_link, timeout=timeout) as resp:
-                if resp.status!=200:
-                    return await self.ctx.send("Error while fetching table picture: table picture rendering site is down.")
-                return BytesIO(await resp.read())
+            try:
+                async with session.get(png_link, timeout=timeout) as resp:
+                    if resp.status!=200:
+                        return "Error while fetching table picture: table picture rendering site is down."
+                    return BytesIO(await resp.read())
+            except:
+                return "Error while fetching table picture: timed out."
+
         # with urlopen(png_link) as url:
         #     output = BytesIO(url.read())
         # return output
@@ -2740,7 +2750,7 @@ class Table():
                 mod = self.modifications[-1]
                 self.undos.append(mod)
                 del self.modifications[-1]
-                return f"Last table modification ({self.prefix}{mod[0][0]}) has been undone."
+                return f"Last table modification ({Utils.disc_clean(self.prefix+mod[0][0])}) has been undone."
             return "No manual modifications to the table to undo."
         
     async def redo_commands(self, num):
@@ -2763,7 +2773,7 @@ class Table():
                 mod = self.undos[-1]
                 self.modifications.append(mod)
                 del self.undos[-1]
-                return f"Last table modification undo ({self.prefix}{mod[0][0]}) has been redone."
+                return f"Last table modification undo ({Utils.disc_clean(self.prefix+mod[0][0])}) has been redone."
             return "No table modification undos to redo."
         
         
