@@ -2285,7 +2285,7 @@ class Table():
         if not recalc: self.races+=new_races
         if len(sub_miis)>0: self.populate_table_flags(subs=sub_miis)
         self.table_str = self.create_string()
-        self.update_warn_file()
+        # self.update_warn_file()
 
         if prnt:
             print()

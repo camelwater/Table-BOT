@@ -517,15 +517,16 @@ class Table_cog(commands.Cog):
     @commands.command(aliases=['showerrors', 'warnings', 'showwarnigns', 'err', 'warn', 'errs', 'warns'])
     async def errors(self, ctx: commands.Context):
         if await self.check_callable(ctx, "errors"): return
+        path = "./error_footers/"
         filename = f"warnings_and_errors-{ctx.channel.id}.txt"
-        err_file = Utils.get_errors_file(filename)
-        if isinstance(err_file, str):
-            return await ctx.send(err_file)
-        # warn_content = self.bot.table_instances[ctx.channel.id].get_warnings(override=True)
-        # if "No warnings or room errors." in warn_content: 
-        #     return await ctx.send("*No warnings or room errors.*")
-        # err_file = Utils.create_temp_file(filename, warn_content, dir=path)
-        # Utils.delete_file(path+filename)
+        # err_file = Utils.get_errors_file(filename)
+        # if isinstance(err_file, str):
+        #     return await ctx.send(err_file)
+        warn_content = self.bot.table_instances[ctx.channel.id].get_warnings(override=True)
+        if "No warnings or room errors." in warn_content: 
+            return await ctx.send("*No warnings or room errors.*")
+        err_file = Utils.create_temp_file(filename, warn_content, dir=path)
+        Utils.delete_file(path+filename)
         await ctx.send(file = discord.File(fp=err_file, filename=filename))
     
     #?picture
@@ -570,10 +571,14 @@ class Table_cog(commands.Cog):
         await pic_mes.delete()
 
         if is_overflow: #send file of errors
+            path = "./error_footers/"
             filename = f'warnings_and_errors-{ctx.channel.id}.txt'
-            e_file = Utils.get_errors_file(filename)
-            if isinstance(e_file, str):
-                return await ctx.send(e_file) 
+            # e_file = Utils.get_errors_file(filename)
+            # if isinstance(e_file, str):
+            #     return await ctx.send(e_file) 
+            e_file = Utils.create_temp_file(filename, full_footer, dir=path)
+            Utils.delete_file(path+filename)
+
 
             await ctx.send(file = discord.File(fp=e_file, filename=filename))
     
