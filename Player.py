@@ -6,7 +6,8 @@ from typing import Tuple, List, Dict
 @dataclass(unsafe_hash=True)
 class Player:
     '''
-    Player object\n
+    Player object
+    
     fc, name, scores, edited_scores, flag, dc_pts, pens
     '''
     fc: str

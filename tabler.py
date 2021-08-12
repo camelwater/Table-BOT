@@ -1543,7 +1543,7 @@ class Table():
             try:
                 raceNum = int(i[0])-1
                 assert(raceNum>=0)
-                orig_room_size = len(self.races[raceNum]) 
+                orig_room_size = len(self.races[raceNum][2]) 
                 if raceNum+1 in self.changed_room_sizes and len(self.changed_room_sizes[raceNum+1])>0:
                     orig_room_size = self.changed_room_sizes[raceNum+1][-1]
                     

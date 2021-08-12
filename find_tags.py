@@ -11,6 +11,7 @@ import tag_testing.simulatedAnnealingTag as simAnl
 def get_test_case(large = False):
     """
     return a test case for the tag algorithm (manual).
+
     `large` is for large performance testing - more than what is usually required of the algorithm.
     """
     if large:
@@ -69,7 +70,8 @@ def count_pre_tags(tag, players):
 
 def rank_tags(tag, players, per_team):
     '''
-    rank tags based on how likely they are to be correct tags.\n
+    rank tags based on how likely they are to be correct tags.
+
     prefix tags first, then suffix tags, then mixed tags
     '''
     if isinstance(tag, tuple):
@@ -116,8 +118,10 @@ def overlaps(p, tag, all_tags, per_team):
 
 def check_overlaps(players, tag, all_tags, per_team):
     '''
-    check if players in overflowing tags either:\n
-    1. fit into a better sized team (correct number of players)\n
+    check if players in overflowing tags either:
+
+    1. fit into a better sized team (correct number of players)
+
     2. fit into a better tagged team (location of another tag is better than current)
     '''
     def more_prefix(players, tag):
@@ -244,7 +248,8 @@ def split_by_actual(players, tag, per_team, all_tags):
         
 def split_chunks(players, tag, per_team, all_tags):
     '''
-    split tags with too many people into even chunks.\n
+    split tags with too many people into even chunks.
+
     prefix players and suffix players will try to be kept in their respective groupings
     '''
     # if tag has too many people at this point, then it is very likely that
@@ -298,7 +303,8 @@ def split_chunks(players, tag, per_team, all_tags):
 
 def handle_undetermined(teams, un_players, per_team):
     '''
-    try to tag players whose tags couldn't be determined.\n
+    try to tag players whose tags couldn't be determined.
+
     first, fill tags that aren't full. then, if necessary, create random groupings.
     '''
     #substring tag for 2v2s check
@@ -388,7 +394,8 @@ def assert_correct(teams, un_players, per_team, num_teams, num_teams_supposed):
 
 def select_top(all_tags, per_team, num_teams, num_teams_supposed, teams, players):
     '''
-    choose best combination of tags.\n
+    choose best combination of tags.
+    
     first, resolve tag conflicts. then, go through tags and finalize top-ranked tags.
     '''
     # all_tags = dict(sorted(all_tags.items(), key=lambda l: len(l[1]), reverse=True))
