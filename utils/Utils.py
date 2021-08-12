@@ -17,12 +17,14 @@ def create_temp_file(filename, content, dir='.', no_ret = False):
 def delete_file(filename):
     try:
         os.remove(filename)
-    except FileNotFoundError or IsADirectoryError:
+    except (FileNotFoundError,IsADirectoryError):
         pass
 
-def get_file_bytes(file):
-    if not os.path.isfile(file):
-        return "No room errors."
+def get_errors_file(file): #ONLY FOR ?ERRORS
+    file = './error_footers/'+ file
+
+    if not os.path.exists(file):
+        return "*No warnings or room errors.*"
     try:
         f = io.BytesIO(open(file, 'rb').read())
     except:
@@ -30,12 +32,13 @@ def get_file_bytes(file):
     return f
 
 def destroy_temp_files(channel):
-    for dir in ['./error_footers/']: #can add more temp folders when needed
-        delete_file(dir+("warnings_and_errors-" if dir=='./error_footers/' else "")+channel+'.txt')
+    for ind, dir in enumerate(['./error_footers/warnings_and_errors-']): # , './save_states/'
+        delete_file(dir+channel+'.txt') # '.pickle' if ind==1 else 
+
 
 import re
 
-def is_rxx(arg):
+def is_rxx(arg: str):
     '''
     check if string is a roomID (if it is in rxx or xx00 format)
     '''
@@ -45,37 +48,37 @@ def is_rxx(arg):
 from more_itertools import consecutive_groups
 import itertools
 
-def insert_formats(string):
+def insert_formats(string: str):
     return string.replace('5', '5v5').replace('2', '2v2').replace('3','3v3').replace('4','4v4').replace('6','6v6').replace('1', 'FFA')
 def remove_formats(string):
     return string.replace("5v5", '5').replace('2v2', '2').replace('3v3', '3').replace('4v4', '4').replace('6v6', '6').replace('ffa', '1')
 
-def parse_ILT_setting(string, local_inject = False):
+def parse_ILT_setting(string: str, max_format=6, local_inject = False):
     args = remove_formats(string.strip().lower()).split(',')
+    args = sorted(args)
     for indx, i in list(enumerate(args))[::-1]:
         i = i.strip()
-        check = i.rstrip('+')
-        if '-' not in check and (int(check)>6 or int(check)<0):
+        check = i.strip('+')
+        if '-' not in check and (int(check)>max_format or int(check)<0):
             raise ValueError
 
         if i=='1+': #always ignoreLargeTimes
-            if local_inject: return list(range(1,7))
+            if local_inject: return list(range(1,max_format+1))
             return '1+'
         if i=='0': #never ignoreLargeTimes
             if local_inject: return list()
             return '0'
 
         if '-' in i: #range
-            start, end = i.split('-')
-            start, end = int(start), int(end)
-            if start>6 or start<1 or end<0 or end>6:
+            n_range = sorted([int(n) for n in i.split('-')])
+            start, end = n_range[0], n_range[-1]
+            if start>max_format or start<1 or end<0 or end>max_format:
                 raise ValueError
             args.pop(indx)
             args.extend(list(range(start, end+1)))
         elif i[-1] == '+': #range to end
-            start = int(i.rstrip('+'))
             args.pop(indx)
-            args.extend(list(range(start, 7)))
+            args.extend(list(range(int(i.rstrip('+')), max_format+1)))
         else: #only one format
             args[indx] = int(i)
     if local_inject:
@@ -83,7 +86,7 @@ def parse_ILT_setting(string, local_inject = False):
 
     args = set(args)
     for i in args:
-        if i>6 or i<1:
+        if i>max_format or i<1:
             raise ValueError #bad input
 
     consecutives = []
@@ -94,7 +97,7 @@ def parse_ILT_setting(string, local_inject = False):
     all_in_cons = list(itertools.chain.from_iterable(consecutives))
     args = [str(i) for i in args if i not in all_in_cons]
     for i in consecutives:
-        if i[-1] == 6: args.append(f"{i[0]}+")
+        if i[-1] == max_format: args.append(f"{i[0]}+")
         else: args.append(f"{i[0]}-{i[-1]}")
     
     return ', '.join(sorted(args))
@@ -143,7 +146,7 @@ def isfloat(n):
     except:
         return False
 
-def convert_format(f) -> int:
+def convert_format(f: str) -> int:
     """
     get players per team based on format
 
@@ -153,29 +156,19 @@ def convert_format(f) -> int:
         return 1
     return int(f)
 
-def full_format(f):
+def full_format(f: str):
     if not f[0].isnumeric():
         return 'FFA'
     return '{}v{}'.format(int(f[0]), int(f[0]))
 
-def isFFA(f):
+def isFFA(f: str):
     if not f[0].isnumeric():
         return True
     return False
 
 def chunks(l, n):
     """
-    split list into smaller lists
-
-    Parameters
-    ----------
-    l : list to split
-    n : number of elements per sublist
-
-    Yields
-    ------
-    smaller lists of l with len(n) each
-
+    split list into consecutive n-sized chunks
     """
     for i in range(0, len(l), n):
         yield l[i:i+n]
@@ -213,7 +206,7 @@ def LCS(X, Y) -> str:
     # return longest common substring having length `maxLength`
     return X[endingIndex - maxLength: endingIndex]
 
-def is_CJK(char):
+def is_CJK(char) -> bool:
     return any([start <= ord(char) <= end for start, end in 
                 [(4352, 4607), (11904, 42191), (43072, 43135), (44032, 55215), 
                  (63744, 64255), (65072, 65103), (65381, 65500), 
@@ -222,7 +215,7 @@ def is_CJK(char):
 
 from unidecode import unidecode
 
-def sanitize_uni(string, for_search = False):
+def sanitize_uni(string: str, for_search = False):
     '''
     convert known/common un-unidecodable and unicode strings to ASCII and clean string for tag-matching
 
@@ -275,16 +268,19 @@ def sanitize_tag_uni(string):
 
     return ''.join(string)
 
-def replace_brackets(string): #don't really need this anymore
+def replace_brackets(string: str): #don't really need this anymore
     string = string.lstrip('[').lstrip(']').lstrip('(').lstrip(')').lstrip('{').lstrip('}')
     string = sanitize_uni(string)
     
     return string
 
-def disc_clean(string):
+def disc_clean(string:str):
     return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~")
 
 def backtick_clean(string: str):
+    '''
+    LMAOOOO
+    '''
     # if '`' not in string:
     #     return string
     # ins_tick = '`' if string.count('`')%2!=0 else ''
@@ -299,12 +295,14 @@ def backtick_clean(string: str):
 from collections import defaultdict
 
 def check_repeat_times(race, prev_races):
+    race = [i for i in race[2]]
+    prev_races = [i[2] for i in prev_races]
     repetitions = defaultdict(int)
     dc_repetitions = defaultdict(int)
 
     for c_indx, compare in enumerate(prev_races[::-1]):
         for player1, player2 in zip(race, compare):
-            if player1[2] == player2[2]:
+            if player1[0] == player2[0]:
                 if player1[1] != 'DC' and player1[1] == player2[1]:
                     repetitions[c_indx] += 1
                 elif player1[1] == 'DC' and player1[1] == player2[1]:
@@ -502,11 +500,11 @@ SETTINGS = {
 }
 
 if __name__ == "__main__":
-    setting = "1,+2++"
+    setting = "1,6-2-3"
     setting = parse_ILT_setting(setting)
     print(setting)
-    print(determine_ILT(setting, '4'))
-        
+    print(determine_ILT(setting, '3'))
+
     # i = "A◇山周回のれみ"
     # sans = []
     # t = time.time()

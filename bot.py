@@ -19,8 +19,8 @@ import copy
 from utils.Utils import SETTINGS
 import argparse
 import utils.Utils as Utils
-# from fnmatch import fnmatch
-# import os
+from fnmatch import fnmatch
+import os
 
 creds = dotenv_values(".env.testing") or dotenv_values(".env") #.env.testing for local testing, .env for deployment
 KEY = creds['KEY']
@@ -60,12 +60,12 @@ def update_json(file, contents):
     with open(file+'.json', 'w', encoding='utf-8') as f:
         json.dump(contents, f, ensure_ascii=True, indent = 4)
 
-# def clean_up_temp_files():
-#     print("Deleting all temp files...")
-#     for dir in ['./error_footers']:
-#         for file in os.listdir(dir):
-#             if fnmatch(file, '*.txt'):
-#                 Utils.delete_file(f"{dir}/{file}")
+def clean_up_temp_files():
+    print("Deleting all temp files...")
+    for dir in ['./error_footers']: #, './save_states'
+        for file in os.listdir(dir):
+            if fnmatch(file, '*.txt'): #or fnmatch(file, '*.pickle')
+                Utils.delete_file(f"{dir}/{file}")
 
 SPLIT_DELIM = '{d/D17¤85xu§ey¶}'
 DEFAULT_PREFIXES = ['?', '!']
@@ -78,14 +78,14 @@ def fetch_prefixes_and_settings():
    
     return {int(k): (p.split(SPLIT_DELIM) if p else []) for k, p in server_pxs.items()}, server_sets
 
-def callable_prefix(bot, msg, mention=True):
+def callable_prefix(bot, msg: discord.Message, mention=True):
     base = []
     default = DEFAULT_PREFIXES
     if msg.guild is None:
         base = default
     else:
         base.extend(bot.prefixes.get(msg.guild.id, default))
-        # base.append('$')
+        base.append('$')
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
@@ -129,6 +129,7 @@ class TableBOT(commands.Bot):
             raise error
 
     async def on_ready(self):
+        clean_up_temp_files()
         print(f"Bot logged in as {self.user}") 
         for server in self.guilds:
             cur.execute('''INSERT OR IGNORE INTO servers
@@ -146,7 +147,7 @@ class TableBOT(commands.Bot):
         except RuntimeError:
             print("check_inactivity task failed to start.")
     
-    async def on_guild_join(self, guild):
+    async def on_guild_join(self, guild: discord.Guild):
         cur.execute('''INSERT OR IGNORE INTO servers
                         VALUES (?, ?, ?, ?, ?)''',
                         (guild.id, SPLIT_DELIM.join(DEFAULT_PREFIXES), None, None, "0")) #id, prefixes, graph, style, IgnoreLargeTimes
@@ -155,13 +156,12 @@ class TableBOT(commands.Bot):
     #remove inactive table instances (inactivity == 30+ minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):
-        # for channel, instance in list(self.table_instances.items())[::-1]:
-        #     if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes=30):
-        #         Utils.destroy_temp_files(channel)
-        #         self.table_instances.pop(channel)
-        self.table_instances = {channel: instance for (channel, instance) in self.table_instances.items() 
-                                if instance.last_command_sent is None or datetime.now() - instance.last_command_sent <= timedelta(minutes=30)}
-
+        for channel, instance in list(self.table_instances.items())[::-1]:
+            if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes=30):
+                Utils.destroy_temp_files(channel)
+                self.table_instances.pop(channel)
+        # self.table_instances = {channel: instance for (channel, instance) in self.table_instances.items() 
+        #                         if instance.last_command_sent is None or datetime.now() - instance.last_command_sent <= timedelta(minutes=30)}
 
     @tasks.loop(seconds=15)
     async def cycle_presences(self):
@@ -189,10 +189,8 @@ class TableBOT(commands.Bot):
     def add_prefix(self, guild, prefix):
         if len(self.prefixes.get(guild, [])) >=5:
             return "You cannot have more than 5 custom prefixes."
-
         if prefix in [f'<@!{self.BOT_ID}>', f'<@{self.BOT_ID}>']:
             return "My mention is a default prefix and cannot be added as a custom prefix."
-
         if prefix in self.prefixes.get(guild, []):
             return f"`{prefix}` is already registered as a prefix."
         
@@ -280,7 +278,7 @@ class TableBOT(commands.Bot):
             try:
                 default = default_sets.get(setting)
                 self.settings[guild][setting] = default
-            except:
+            except KeyError:
                 pass
 
             cur.execute(f'''UPDATE servers 
@@ -297,7 +295,7 @@ class TableBOT(commands.Bot):
 
         try:
             self.settings[guild][setting] = default
-        except:
+        except KeyError:
             self.settings[guild] = {}
             self.settings[guild][setting] = default
         
@@ -347,5 +345,5 @@ if __name__ == "__main__":
     @atexit.register
     def on_exit():
         bot.dump_stats_json()
-        # clean_up_temp_files()
+        clean_up_temp_files()
     

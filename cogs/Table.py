@@ -10,6 +10,8 @@ from tabler import Table
 import utils.Utils as Utils
 from datetime import datetime
 
+# TODO: save_state before command is executed and add user command message.
+# if command was successful, only then actually write the save state to the file
 
 class Table_cog(commands.Cog):
     def __init__(self, bot):
@@ -54,7 +56,7 @@ class Table_cog(commands.Cog):
             await self.send_temp_messages(ctx, "Please answer the last confirmation question:", self.bot.table_instances[ctx.channel.id].choose_message)
             return True
         if command in ['yes', 'no']:
-            if not self.bot.table_instances[ctx.channel.id].choose_room:
+            if not self.bot.table_instances[ctx.channel.id].confirm_room and not self.bot.table_instances[ctx.channel.id].confirm_reset:
                 await self.send_temp_messages(ctx, f"You can only use `{ctx.prefix}{command}` when the bot prompts you to do so.")
                 return True
         else:
@@ -404,7 +406,7 @@ class Table_cog(commands.Cog):
             return
         
         if self.bot.table_instances[ctx.channel.id].confirm_room:
-            if self.bot.table_instances[ctx.channel.id].choose_room: self.bot.table_instances[ctx.channel.id].choose_room = False
+            # if self.bot.table_instances[ctx.channel.id].choose_room: self.bot.table_instances[ctx.channel.id].choose_room = False
             if len(self.bot.table_instances[ctx.channel.id].players)> self.bot.table_instances[ctx.channel.id].num_players:
                 mes = "**Warning:** *The number of players in the room doesn't match the given format and teams.*\nTable started, *but will likely be inaccurate*. Watching room {}{}.".format(self.bot.table_instances[ctx.channel.id].rxx, " (suppressing large finish time warnings)" if self.bot.table_instances[ctx.channel.id].sui else '')
             else:   
@@ -431,7 +433,6 @@ class Table_cog(commands.Cog):
         
     @commands.command(aliases=['n'])
     async def no(self,ctx):
-        
         if not self.bot.table_instances[ctx.channel.id].confirm_room and not self.bot.table_instances[ctx.channel.id].confirm_reset:
             await self.send_temp_messages(ctx, f"You can only use `{ctx.prefix}no` if the bot prompts you to do so.")
             return 
@@ -483,7 +484,6 @@ class Table_cog(commands.Cog):
         mes = self.bot.table_instances[ctx.channel.id].change_graph(choice)
         await ctx.send(mes)
     
-
     @graph.error
     async def graph_error(self, ctx, error):
         self.set_instance(ctx)
@@ -492,13 +492,19 @@ class Table_cog(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await self.send_messages(ctx, self.bot.table_instances[ctx.channel.id].graph_options(), f"\nUsage: `{ctx.prefix}graph <graphNumber|graphName>`")        
     
-    @commands.command(aliases=['showlarge', 'showlargefinishtimes', 'large', 'largefinish', 'showlargefinish', 'largefinishtimes', 'largetimes'])
-    async def showlargetimes(self,ctx, choice: str):
+    @commands.command(aliases=['showlarge', 'showlargefinishtimes', 'large', 'largefinish', 'showlargefinish', 
+                        'largefinishtimes', 'largetimes', 'ignorelargetimes', 'ignorelarge', 'ignoretimes', 'ignorelargefinish', 'ignorelargefinishtimes',
+                        'ignorefinishtimes'])
+    async def showlargetimes(self,ctx: commands.Context, choice: str):
         if await self.check_callable(ctx, "showlargetimes"): return
-        if choice.lower() not in {'yes', 'y', 'no', 'n'}: return await ctx.send(f"Invalid value `{choice}`. You must put either yes or no.")
+        if choice.lower() not in {'yes', 'y', 'no', 'n'}: 
+            return await ctx.send(f"Invalid value `{choice}`. You must put either yes or no.")
+
         show_large = True if choice.lower() in {'yes', 'y'} else False
-        self.bot.table_instances[ctx.channel.id].sui = not show_large
-        await ctx.send("Table now showing large finish times." if show_large else "Table now suppressing large finish times.")
+        if 'ignore' not in self.ctx.invoked_with:
+            show_large = not show_large
+        self.bot.table_instances[ctx.channel.id].change_sui(show_large)
+        await ctx.send("Table now showing large finish times." if not show_large else "Table now suppressing large finish times.")
 
     @showlargetimes.error
     async def largefinishtimes_error(self, ctx, error):
@@ -511,13 +517,15 @@ class Table_cog(commands.Cog):
     @commands.command(aliases=['showerrors', 'warnings', 'showwarnigns', 'err', 'warn', 'errs', 'warns'])
     async def errors(self, ctx: commands.Context):
         if await self.check_callable(ctx, "errors"): return
-        path = './error_footers/'
         filename = f"warnings_and_errors-{ctx.channel.id}.txt"
-        warn_content = self.bot.table_instances[ctx.channel.id].get_warnings(override=True)
-        if "No warnings or room errors." in warn_content: 
-            return await ctx.send("*No warnings or room errors.*")
-
-        err_file = Utils.create_temp_file(filename, warn_content, dir=path)
+        err_file = Utils.get_errors_file(filename)
+        if isinstance(err_file, str):
+            return await ctx.send(err_file)
+        # warn_content = self.bot.table_instances[ctx.channel.id].get_warnings(override=True)
+        # if "No warnings or room errors." in warn_content: 
+        #     return await ctx.send("*No warnings or room errors.*")
+        # err_file = Utils.create_temp_file(filename, warn_content, dir=path)
+        # Utils.delete_file(path+filename)
         await ctx.send(file = discord.File(fp=err_file, filename=filename))
     
     #?picture
@@ -551,7 +559,8 @@ class Table_cog(commands.Cog):
             return await ctx.send(img)
         
         f=discord.File(fp=img, filename='table.png')
-        em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].title_str(),description="\n[Edit this table on gb.hlorenzi.com]("+self.bot.table_instances[ctx.channel.id].table_link+")")
+        em = discord.Embed(title=self.bot.table_instances[ctx.channel.id].title_str(),
+                        description="\n[Edit this table on gb.hlorenzi.com]("+self.bot.table_instances[ctx.channel.id].table_link+")")
         
         em.set_image(url='attachment://table.png')
         is_overflow, error_footer, full_footer = self.bot.table_instances[ctx.channel.id].get_warnings(show_large_times = large_times)
@@ -561,11 +570,11 @@ class Table_cog(commands.Cog):
         await pic_mes.delete()
 
         if is_overflow: #send file of errors
-            path = "./error_footers/"
             filename = f'warnings_and_errors-{ctx.channel.id}.txt'
-            e_file = Utils.create_temp_file(filename, full_footer, dir=path)
-            # if isinstance(e_file, str):
-            #     return await ctx.send(e_file) 
+            e_file = Utils.get_errors_file(filename)
+            if isinstance(e_file, str):
+                return await ctx.send(e_file) 
+
             await ctx.send(file = discord.File(fp=e_file, filename=filename))
     
     @commands.command()
@@ -612,7 +621,7 @@ class Table_cog(commands.Cog):
        
      
     #?reset
-    @commands.command(aliases=['stop', 'clear', 'quit', 'end'])
+    @commands.command(aliases=['stop', 'clear', 'quit', 'end', 'done', 'finish', 'destroy'])
     async def reset(self,ctx):
         if not self.bot.table_instances[ctx.channel.id].table_running and not self.bot.table_instances[ctx.channel.id].confirm_room:
             await self.send_temp_messages(ctx, "You don't have an active table to reset.")
@@ -643,12 +652,12 @@ class Table_cog(commands.Cog):
                 await self.send_temp_messages(ctx, "Error processing command: missing <DC status> for DC number {}.".format(i[0]), self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
                 return
             if len(i)>2:
-                await self.send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <DC number> and <DC status>.".format(i[0]), self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
+                return await self.send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <DC number> and <DC status>.".format(i[0]), self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
             if not i[0].isnumeric():
-                await self.send_temp_messages(ctx, "DC numbers must be numeric.", self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
-                return
+                return await self.send_temp_messages(ctx, "DC numbers must be numeric.", self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
+
             if not (i[1] == "on" or i[1]=='during') and not (i[1]=='off' or i[1] == "before"):
-                await self.send_temp_messages(ctx, "The <DC status> argument must be either 'on'/'during' or 'off'/'before'.", self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
+                return await self.send_temp_messages(ctx, "The <DC status> argument must be either 'on'/'during' or 'off'/'before'.", self.bot.table_instances[ctx.channel.id].dc_list_str(), usage)
             
         mes = self.bot.table_instances[ctx.channel.id].edit_dc_status(arg)
         await self.send_messages(ctx, mes)
@@ -680,6 +689,7 @@ class Table_cog(commands.Cog):
             return
         if len(args)<3:
             await self.send_temp_messages(ctx, "Missing <sub in>.",self.bot.table_instances[ctx.channel.id].get_player_list(), usage)
+            return
         
         subIn = args[2]
         subOut = args[0]
@@ -739,10 +749,10 @@ class Table_cog(commands.Cog):
                 await self.send_temp_messages(ctx, "<sub out index> must be a number.", self.bot.table_instances[ctx.channel.id].get_player_list(), usage)
                 return
             mes = self.bot.table_instances[ctx.channel.id].edit_sub_races(p_indx, races, is_in, out_index)
-            await self.send_messages(ctx, mes)
         else:
             mes = self.bot.table_instances[ctx.channel.id].edit_sub_races(p_indx, races, is_in)
-            await self.send_messages(ctx, mes)
+        
+        await self.send_messages(ctx, mes)
             
     @commands.command(aliases=['ap'])
     async def allplayers(self, ctx):
@@ -954,34 +964,17 @@ class Table_cog(commands.Cog):
             await self.send_temp_messages(ctx, f'Usage: `{ctx.prefix}mergeroom <rxx or mii name(s) in room>`')
     
     @commands.command(aliases=['remove'])
-    async def removerace(self, ctx, *arg):
-        
+    async def removerace(self, ctx, raceNum = -1):
         if await self.check_callable(ctx, "removerace"): return
         usage = f"Usage: `{ctx.prefix}removerace <race number>`"
-        
-        if len(arg)==0:
-            await ctx.send("**Note:** *This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally, this command should be used immediately after the table picture updates with the race that needs to be removed.*")
-            mes = await self.bot.table_instances[ctx.channel.id].remove_race(-1)
-            await self.send_messages(ctx, mes)
-            return
-        arg = arg[0]
-        if not arg.isnumeric():
+
+        if not raceNum.isnumeric():
             await self.send_temp_messages(ctx, "The <race number> must be a number.", usage)
             return
         
         await ctx.send("**Note:** *This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally, this command should be used immediately after the table picture updates with the race that needs to be removed.*")
-        mes = await self.bot.table_instances[ctx.channel.id].remove_race(int(arg))
+        mes = await self.bot.table_instances[ctx.channel.id].remove_race(int(raceNum))
         await self.send_messages(ctx, mes)
-        
-    @removerace.error
-    async def removerace_error(self, ctx, error):
-        self.set_instance(ctx)
-        if await self.check_callable(ctx, "removerace"): return
-        
-        if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("**Note:** *This command should be used with caution as it is unstable and could cause unintended consequences on the table.\nIdeally, this command should be used immediately after the table picture updates with the race that needs to be removed.*")
-            mes = self.bot.table_instances[ctx.channel.id].remove_race(-1)
-            await self.send_messages(ctx, mes)
     
     @commands.command(aliases=['gps'])
     async def changegps(self, ctx, *args):
@@ -992,24 +985,19 @@ class Table_cog(commands.Cog):
             await self.send_temp_messages(ctx, usage)
             return
         try:
+            gps = int(args[0])
             if args[0][0] == '+' or args[0][0] == '-':
-                gps = int(args[0])
-                assert(self.bot.table_instances[ctx.channel.id].gps+gps>0)
-                self.bot.table_instances[ctx.channel.id].change_gps(self.bot.table_instances[ctx.channel.id].gps+gps)
-            else:   
-                gps = int(args[0])
-                assert(gps>0)
-                self.bot.table_instances[ctx.channel.id].change_gps(gps)
+                gps = self.bot.table_instances[ctx.channel.id].gps+gps 
+            assert(gps>0)
         except (ValueError, AssertionError):
-            await self.send_temp_messages(ctx, "<num gps> must be a real number.", usage)
-            return
+            return await self.send_temp_messages(ctx, "<num gps> must be a real number.", usage)
         
+        self.bot.table_instances[ctx.channel.id].change_gps(gps)
         await self.send_messages(ctx, "Changed total gps to `{}`.".format(self.bot.table_instances[ctx.channel.id].gps))
         
         
     @commands.command(aliases=['quickedit', 'qe', 'er', 'editplace', 'editpos', 'ep', 'pe'])
     async def editrace(self,ctx, *, arg):
-        
         if await self.check_callable(ctx, "editrace"): return
         
         usage = f"Usage: `{ctx.prefix}editrace <race number> <player id> <corrected placement>`"

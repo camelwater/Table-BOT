@@ -8,6 +8,7 @@ resources/prefixes.json
 resources/settings.json
 error_footers/*.txt
 REFACTORING
+save_states
 .env.testing
 .venv
 .vscode

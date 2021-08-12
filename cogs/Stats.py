@@ -26,7 +26,7 @@ class Stats(commands.Cog):
                 self.bot.command_stats['help']+=1
 
     @commands.Cog.listener()
-    async def on_command(self, ctx):
+    async def on_command(self, ctx: commands.Context):
         command = ctx.command.qualified_name
         self.bot.command_stats[command] +=1
 

@@ -5,7 +5,7 @@ Created on Tue May 18 15:05:35 2021
 @author: ryanz
 """
 from bs4 import BeautifulSoup
-from typing import Tuple, List
+from typing import Tuple, List, Dict, Any
 import copy
 #from PIL import Image
 from io import BytesIO
@@ -15,7 +15,7 @@ import concurrent.futures
 # from urllib.request import urlopen
 import datetime
 import discord
-from discord.ext import tasks
+from discord.ext import tasks, commands
 import time as timer
 from unidecode import unidecode
 from collections import defaultdict, Counter
@@ -25,8 +25,8 @@ from utils.WiimmfiMii import get_wiimmfi_mii, get_wiimmfi_mii_async
 import utils.Utils as Utils
 from utils.Utils import isFFA, WARNING_MAP, DC_MAP, STYLE_MAP, PTS_MAP
 from utils.Utils import GRAPH_MAP as GM
-merged_save_states = defaultdict(list)
-merged_restore_states = defaultdict(list)
+from Player import Player
+
 # TODO: maybe automate first race dcs (18 and 15 pts) 
 
 class Table():
@@ -41,36 +41,29 @@ class Table():
         self.current_url = ""
         self.last_race_update = None #timestamp of last auto-update table
         
-        self.modifications = [] #keep track of all user modifications to the table
-        self.undos = [] #keep track of all user undos of modifications to the table
+        self.modifications: List[List[Tuple]] = [] #keep track of all user modifications to the table
+        self.undos: List[List[Tuple]] = [] #keep track of all user undos of modifications to the table
         
-        self.recorded_elems = [] #don't record races that have already been recorded
-        self.players = {} #dictionary of players: holds their total score, gp scores, and race scores
-        self.finish_times = {} #finish times of each race (used for ?rr)
-        self.races = [] #list (race) of lists (placements for each race) 
-        self.pens = {} # mapping players to penalties
+        self.recorded_elems: List[str] = [] #don't record races that have already been recorded
+        self.players: List[Player] = [] #dictionary of players: holds their total score, gp scores, and race scores
+        self.races: List[Tuple[str, str, List]] = [] #list (race) of lists (placements for each race) 
         self.team_pens = {} #mapping penalties to teams
-        self.fcs = {} #map fcs to mii name (so no conflicts with mii names - uniqueness)
-        self.display_names = {} #provides corresponding mii name of given FC
-        self.player_ids = {} #used to map player ids to players (player id from bot)
-        self.all_players = [] #list of every player who has been in the room
-        self.sub_names = {} #players who are subbed in (used to convert their names on tables)
-        self.subs = {} #players who are subbed
-        self.deleted_players = [] #players who have been removed from table through ?changename
+        self.player_ids: Dict[int, Player] = {} #used to map player ids to players (player id from bot)
+        self.all_players: List[Player] = [] #list of every player who has been in the room
+        self.subs: List[Dict[str, Any]] = [] #players who have been subbed out 
+        self.deleted_players: List[Player] = [] #players who have been removed from table through ?changename
        
         self.warnings = defaultdict(list) #race: list of warnings
         self.manual_warnings = defaultdict(list) #warnings of manual changes to the table
 
         self.dc_list = defaultdict(list) # race: list of player dcs (?dcs)
-        self.tracks = [] #track list
-        self.dup_names = [] #in case some players have same mii name. fc: edited mii name (ex. 'Player-1' instead of 'Player') for clarity purposes on table
-        self.ties = {} #tied race times
-        self.gp_dcs = {} #gp: list of players who have dced in gp (to ensure dc warnings are simplified in embed)
-        self.dc_pts = {} #player: number of races to award +3 DC points 
-        self.dc_list_ids = {} #mapping dcs to an id (used for the command ?dcs)
+        self.dup_names: List[str] = [] #in case some players have same mii name. fc: edited mii name (ex. 'Player-1' instead of 'Player') for clarity purposes on table
+        self.names: List[str] = []
+        self.gp_dcs: Dict[int, List[Player]] = {} #gp: list of players who have dced in gp (to ensure dc warnings are simplified in embed)
+        self.dc_list_ids: Dict[int, Tuple[Player, int]] = {} #mapping dcs to an id (used for the command ?dcs)
         self.temp_dc_list = []
         
-        self.removed_races = {} #races removed with ?removerace (for restoring from ?undo)
+        self.removed_races: Dict[int, List] = {} #races removed with ?removerace (for restoring from ?undo)
         self.removed_warn_dcs = {} #for restoring when ?removerace undone
         
         self.room_sizes = [] #list of room sizes for different gps (check if room size increases mid-gp, to send warning message - ?changeroomsize might be necessary)
@@ -81,8 +74,7 @@ class Table():
         self.changed_room_sizes = defaultdict(list) #races that have edited room sizes (?changeroomsize)
         self.edited_scores = defaultdict(lambda: defaultdict(int)) #players with edited gp scores
                    
-        self.tags = {} #list of team tags and their respective players
-        self.table_flags = {} #players mapped to their location codes
+        self.tags: Dict[str, List[Player]] = {} #list of team tags and their respective players
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
         self.graph_map = copy.deepcopy(GM)
         self.graph = None #table picture graph
@@ -91,10 +83,10 @@ class Table():
         self.table_link = '' #gb.hlorenzi image URI link
         self.sui = False #whether should ignore large finish times or not
         
-        self.prev_rxxs = [] # for rooms that have been merged
-        self.prev_elems = [] #prev elems of rooms before merge
-        self.current_elems = [] #elem list of current room
-        self.restore_merged = []
+        self.prev_rxxs: List[List[str]] = [] # for rooms that have been merged
+        self.prev_elems: List[List[str]] = [] #prev elems of rooms before merge
+        self.current_elems: List[str] = [] #elem list of current room
+        # self.restore_merged = []
         
         self.format = "" #format (FFA, 2v2, etc.)
         self.teams = 0 #number of teams
@@ -102,23 +94,18 @@ class Table():
         self.rxx = '' #rxx that table is watching
         self.gp = 0 #current gp
         self.num_players = 0 #number of players room is supposed to have (based on format and teams)
-        # self.player_list = '' #string for bot printout of players and their ids
         
-
         ##### Stuff for bot instances #####
         self.choose_message = ""
         self.searching_room = False
-        self.choose_room = False
         self.confirm_room = False
         self.confirm_reset = False
         self.reset_args = None
-        self.undo_empty = False
-        self.redo_empty = False
         self.table_running = False
         self.picture_running = False
-        self.ctx = ctx
+        self.ctx: commands.Context = ctx
         self.prefix = ctx.prefix
-        self.bot = bot
+        self.bot: commands.Bot = bot
         self.last_command_sent = None
         ##### Stuff for bot instances #####
         
@@ -134,7 +121,7 @@ class Table():
         self.IGNORE_FCS = True
         self.split_teams('3', 4)
     
-    async def search_mii(self, mii) -> tuple:
+    async def search_mii(self, mii) -> Tuple[bool, Any]:
         '''
         find room on mkwx with given mii names\n
         returns
@@ -297,12 +284,12 @@ class Table():
         get Miis of all players and get their region codes
         '''
         with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
-            future_fcs = {executor.submit(get_wiimmfi_mii, fc): fc for fc in (self.players.keys() if subs is None else subs)}
-            for future in concurrent.futures.as_completed(future_fcs):
-                fc = future_fcs[future]
+            futures = {executor.submit(get_wiimmfi_mii, player.getFC()): player for player in (self.players if subs is None else subs)}
+            for future in concurrent.futures.as_completed(futures):
+                player: Player = futures[future]
                 try:
                     mii_result = future.result()
-                    if mii_result: self.table_flags[fc] = mii_result.countryCode
+                    if mii_result: player.flag_code = mii_result.countryCode
                 except Exception as e:
                     raise e
     
@@ -311,16 +298,16 @@ class Table():
         counter = 1
         if isFFA(self.format):
             string+='\n__FFA__'
-            for p in self.players.keys():
-                string+="\n{}. {}".format(counter, Utils.disc_clean(self.display_names[p]))
+            for p in self.players:
+                string+=f"\n{counter}. {Utils.disc_clean(p.getName())}"
                 self.player_ids[str(counter)] = p
                 counter+=1          
         else:
             self.tags = dict(sorted(self.tags.items(), key=lambda item: Utils.sanitize_uni(item[0].upper())))
             for tag in self.tags.keys():
-                string+='\n**Tag: {}**'.format(Utils.disc_clean(tag))
+                string+=f'\n**Tag: {Utils.disc_clean(tag)}**'
                 for p in self.tags[tag]:
-                    string+="\n\t{}. {}".format(counter,Utils.disc_clean(self.display_names[p]))
+                    string+=f"\n\t{counter}. {Utils.disc_clean(p.getName())}"
                     self.player_ids[str(counter)] = p
                     counter+=1
         return string
@@ -335,7 +322,10 @@ class Table():
         if not f.isnumeric():
             return
         per_team = int(f)
-        player_copy = list(self.display_names.values()) if not self.IGNORE_FCS else list(copy.deepcopy(self.players).keys())
+        name_to_player = {}
+        for i in self.players:
+            name_to_player[i.getName()] = i
+        player_copy = list(name_to_player.keys()) if not self.IGNORE_FCS else list(copy.deepcopy(self.players).keys())
         
         teams = tag_algo(player_copy, per_team = per_team, num_teams = num_teams)
         
@@ -344,14 +334,15 @@ class Table():
             for i in teams.items():
                 L.append([Utils.sanitize_uni(i[0]).lower(), list(map(lambda l: (Utils.sanitize_uni(l.strip()).lower(), l), i[1]))])
             cost_check = simAnl.SimulatedAnnealing(L, per_team)
-            print("cost:",cost_check.E(L))
+            print("cost:", cost_check.E(L))
 
         if not self.IGNORE_FCS:
             print(teams)
-            for i in teams.items():
-                teams[i[0]] = [self.fcs[j] for j in i[1]]  
+            for t, ps in teams.items():
+                teams[t] = [name_to_player[name] for name in ps]
+
         self.tags = teams
-        self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].lower())))
+        self.tags = dict(sorted(self.tags.items(), key=lambda item: Utils.sanitize_uni(item[0].lower())))
         self.tags = {("NO TEAM" if k.strip()=="" else k.strip()): v for (k, v) in self.tags.items()}
 
         print()
@@ -359,7 +350,7 @@ class Table():
         print("tag algo time:",timer.time()-tick)
         
 
-    def warn_to_str(self, warning):                
+    def warn_to_str(self, warning: Dict[str, Any]) -> str:                
         warning_type = warning.get('type')
 
         if "dc_" in warning_type:
@@ -370,18 +361,18 @@ class Table():
                 warning_type = warning_type+"_confirmed" if is_edited else warning_type
                 race = warning.get('race')
                 if race == 1:
-                    ret = WARNING_MAP.get((warning_type, race)).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('gp')) 
+                    ret = WARNING_MAP.get((warning_type, race)).format(warning.get('player').getName(), warning.get('gp'), warning.get('gp')) 
                 elif race == -1:
-                    ret = WARNING_MAP.get((warning_type, race)).format(self.display_names[warning.get('player')], warning.get('gp'))
+                    ret = WARNING_MAP.get((warning_type, race)).format(warning.get('player').getName(), warning.get('gp'))
                 else:
-                    ret = WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('pts'))
+                    ret = WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('gp'), warning.get('pts'))
             
             else:
                 race = warning.get('race')
                 if race == 1:
-                    ret = WARNING_MAP.get((warning_type,race)).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('gp'), warning.get('gp'))
+                    ret = WARNING_MAP.get((warning_type,race)).format(warning.get('player').getName(), warning.get('gp'), warning.get('gp'), warning.get('gp'))
                 else:
-                    ret = WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')], warning.get('gp'), warning.get('pts'))
+                    ret = WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('gp'), warning.get('pts'))
         
             return ret + '{}'.format(" - determined by tabler" if is_edited else "")
 
@@ -408,31 +399,31 @@ class Table():
             return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
         
         elif warning_type == "missing_w_sub":
-            return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('num_missing'), [self.display_names[i] for i in warning.get('missing_players')])
+            return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('num_missing'), [i.getName() for i in warning.get('missing_players')])
         
         elif warning_type == "overflow":
             return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
         
         elif warning_type == "blank_time":
-            return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
+            return WARNING_MAP.get(warning_type).format(warning.get('player').getName())
 
         elif warning_type == "tie":
-            return WARNING_MAP.get(warning_type).format([self.display_names[i] for i in warning.get('players')], warning.get('time'))
+            return WARNING_MAP.get(warning_type).format([i.getName() for i in warning.get('players')], warning.get('time'))
 
         elif warning_type == "sub":
             if warning.get('is_edited', False):
-                return WARNING_MAP.get("sub_conf").format(self.display_names[warning.get('player')], self.display_names[warning.get('sub_out')])
+                return WARNING_MAP.get("sub_conf").format(warning.get('player').getName(), warning.get('sub_out').getName())
             else:
-                return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')])
+                return WARNING_MAP.get(warning_type).format(warning.get('player').getName())
 
         elif warning_type == "large_time":
-            return WARNING_MAP.get(warning_type).format(self.display_names[warning.get('player')], warning.get('time'))
+            return WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('time'))
 
         else:
             print("WARNING TYPE NOT FOUND:", warning_type)
             raise AssertionError
 
-    def get_warnings(self, show_large_times = None, override=False):
+    def get_warnings(self, show_large_times = None, override=False) -> Tuple[bool, str, str]:
         if override is True: show_large_times = True
         warnings = defaultdict(list)
 
@@ -475,11 +466,11 @@ class Table():
                 continue
             if i[0]==-1:
                 for warning in i[1]:
-                    ret+='     - {}\n'.format(warning)
+                    ret+=f'     - {warning}\n'
                 continue
-            ret+="     Race #{}: {}\n".format(i[0], self.tracks[i[0]-1])
+            ret+=f"     Race #{i[0]}: {self.races[i[0]-1][1]}\n"
             for warning in i[1]:
-                ret+="       \t- {}\n".format(self.warn_to_str(warning) if isinstance(warning, dict) else warning)
+                ret+=f"       \t- {self.warn_to_str(warning) if isinstance(warning, dict) else warning}\n"
 
         ret = ret.replace("[[/PREFIX\]]", self.prefix)
         if override: return ret
@@ -501,7 +492,6 @@ class Table():
             self.set_teams(len(self.tags))
 
     def set_teams(self, teams):
-
         self.teams = teams
         if self.teams!=2 and 3 in self.graph_map:
             self.graph_map.pop(3)
@@ -523,7 +513,7 @@ class Table():
             ret+="\n   {} {}".format("**{}.**".format(num) if self.graph and self.graph.get('type') == graph.get('type') else "`{}.`".format(num), graph.get('type'))
         return ret
 
-    def change_style(self, choice, reundo=False):
+    def change_style(self, choice: str, reundo=False):
         if choice is None:
             self.style=choice
             return
@@ -567,7 +557,7 @@ class Table():
             self.style = choice
             return "Table style set to `{}`.".format(choice.get('type'))
 
-    def change_graph(self, choice, reundo=False):
+    def change_graph(self, choice: str, reundo=False):
         if choice is None:
             self.graph = choice
             return
@@ -617,8 +607,8 @@ class Table():
             self.graph= choice
             return "Table graph set to `{}`.".format(choice.get('type'))
 
-    def title_str(self):
-        ret = '{}{} '.format(Utils.full_format(self.format), "" if Utils.full_format(self.format)=="FFA" else ":")
+    def title_str(self) -> str:
+        ret = f'{Utils.full_format(self.format)}{"" if Utils.full_format(self.format)=="FFA" else ":"} '
         tags_copy = list(self.tags.keys())
         try:
             tags_copy.remove("SUBS")
@@ -633,10 +623,10 @@ class Table():
                     ret+=f"`{i}` "
                 else:
                     ret+=f"`{i}` vs "
-        ret+="({} {})".format(len(self.races), 'race' if len(self.races)==1 else 'races')
+        ret+=f"({len(self.races)} {'race' if len(self.races)==1 else 'races'})"
         return ret
     
-    def check_tags(self, tag):
+    def check_tags(self, tag) -> str:
         x=1
         new = tag
         if tag in self.tags:
@@ -652,12 +642,12 @@ class Table():
             if orig.isnumeric():
                 try:
                     orig = list(self.tags.keys())[int(orig)-1]
-                except:
-                    return "Tag index `{}` is out of range. The tag number must be from 1-{}".format(orig, len(self.tags))
+                except IndexError:
+                    return f"Tag index `{orig}` is out of range. The tag number must be from 1-{len(self.tags)}"
                 data = self.tags.pop(orig)
                 new = self.check_tags(new)
                 self.tags[new]= data
-                ret+= "Edited tag `{}` to `{}`.{}".format(Utils.backtick_clean(orig), Utils.backtick_clean(new), '\n' if len(l)>1 and num <len(l)-1 else "")
+                ret+= f"Edited tag `{Utils.backtick_clean(orig)}` to `{Utils.backtick_clean(new)}`."+ ('\n' if len(l)>1 and num <len(l)-1 else '')
                 
             else:
                 comp = orig.upper()
@@ -670,14 +660,14 @@ class Table():
                             actual_orig = i
                             break
                     assert(data is not None)
-                except:
-                    string = "Tag `{}` is not a valid tag. The tag to edit must be one of the following:\n".format(Utils.backtick_clean(orig))
+                except AssertionError:
+                    string = f"Tag `{Utils.backtick_clean(orig)}` is not a valid tag. The tag to edit must be one of the following:\n"
                     for i in list(self.tags.keys()):
                         string+='   - `{}`\n'.format(i)
                     return string
                 new = self.check_tags(new)
                 self.tags[new] = data
-                ret+= "Edited tag `{}` to `{}`.{}".format(Utils.backtick_clean(actual_orig), Utils.backtick_clean(new), '\n' if len(l)>1 and num <len(l)-1 else "")
+                ret+= f"Edited tag `{Utils.backtick_clean(actual_orig)}` to `{Utils.backtick_clean(new)}`."+ ('\n' if len(l)>1 and num <len(l)-1 else '')
                 
             if not reundo and self.table_running:
                 self.modifications.append([(f'edittag {t_orig} {new}', new, actual_orig)])
@@ -687,30 +677,36 @@ class Table():
     
     def tracklist(self):
         ret = ''
-        for i, track in enumerate(self.tracks):
-            ret+='Race #{}: {}\n'.format(i+1, track)
+        for i, race in enumerate(self.races):
+            track = race[1]
+            ret+=f'Race #{i+1}: {track}\n'
         return ret
     
-    def race_results(self,race):
+    def get_finish_times(self, index) -> Dict[Player, str]:
+        race = self.races[index]
+        return {player[0]: player[1] for player in race[2]}
+
+    def race_results(self,race) -> Tuple[bool, str]:
         ret = ''
         results = {}
         tag_places = defaultdict(list)
         if race==-1:
-            results = self.finish_times[len(self.races)-1]
             race = len(self.races)
+            results = self.get_finish_times(race-1)
+
         else: 
-            if race-1 not in self.finish_times:
-                return True, "Race `{}` doesn't exist. The race number should be from 1-{}.".format(race, len(self.races))
-            results = self.finish_times[race-1]
+            if race > len(self.races):
+                return True, f"Race `{race}` doesn't exist. The race number should be from 1-{len(self.races)}."
+            results = self.get_finish_times(race-1)
        
         count = 0
-        ret+="Race #{} - {}:\n".format(race, self.tracks[race-1])
-        for i in list(results.items()):
+        ret+=f"Race #{race} - {self.races[race-1][1]}:\n"
+        for player, time in list(results.items()):
             count+=1
-            ret+="   {}. {} - {}\n".format(count, Utils.disc_clean(self.display_names[i[0]]), i[1])
+            ret+=f"   {count}. {Utils.disc_clean(player.getName())} - {time}\n"
             if not isFFA(self.format):
                 for t in self.tags.items():
-                    if i[0] in t[1]:
+                    if player in t[1]:
                         tag_places[t[0]].append(count)
             
         if not isFFA(self.format):
@@ -718,21 +714,21 @@ class Table():
 
             ret+="\n"
             for tag, placements in tag_places.items():
-                ret+="**{}** -".format(tag)
+                ret+=f"**{tag}** -"
                 for p in placements:
-                    ret+=' {}{}'.format(p, '' if p==placements[-1] else ',')
+                    ret+=f" {p}{'' if p==placements[-1] else ' ,'}"
                 pts_sum = sum([PTS_MAP[count][i-1] for i in placements])
                 ret+=f" (**{pts_sum}** {'pt' if pts_sum == 1 else 'pts'})"
                 ret+= "" if tag==list(tag_places.items())[-1][0] else "   |   "
         return False,ret
     
-    def change_tag(self,player, tag, restore_indx = None,reundo=False):
+    def change_tag(self, player: str, tag: str, restore_indx = None,reundo=False):
         if not reundo:
             p_indx=player
             try:
-                player = self.player_ids[player]
-            except:
-                return "Player number `{}` is not valid. It must be from {}-{}.".format(player, 0,len(self.players))
+                player: Player = self.player_ids[player]
+            except KeyError:
+                return f"Player number `{player}` is not valid. It must be from {1}-{len(self.players)}."
         old_tag = ""
         for i in self.tags.items():
             if player in i[1]:
@@ -760,13 +756,12 @@ class Table():
         for k in empty_keys:
             del self.tags[k]
 
-        ret = "`{}` tag changed from `{}` to `{}`.".format(Utils.backtick_clean(self.display_names[player]), Utils.backtick_clean(old_tag), Utils.backtick_clean(existing_tag if existing_tag else tag))  
         if not reundo and self.table_running:
             self.modifications.append([(f"changetag {p_indx} {tag}", player, tag, old_tag, old_indx)])
 
-        return ret
+        return f"`{Utils.backtick_clean(player.getName())}` tag changed from `{Utils.backtick_clean(old_tag)}` to `{Utils.backtick_clean(existing_tag if existing_tag else tag)}`."
        
-    def group_tags(self,dic, redo=False):
+    def group_tags(self, dic, redo=False):
         if not redo:
             orig_tags = copy.deepcopy(self.tags)
             dic_str = ''
@@ -782,7 +777,7 @@ class Table():
                 try:
                     affected_players.append(self.player_ids[i[1][j]])
                     i[1][j] = self.player_ids[i[1][j]]
-                except:
+                except KeyError:
                     del i[1][j]
         for i in self.tags.items():
             for j in affected_players:
@@ -803,9 +798,8 @@ class Table():
             for i in self.tags.items():
                 while len(i[1])!=per_team:
                     try:
-                        i[1].append(leftovers[0])
-                        del leftovers[0]
-                    except:
+                        i[1].append(leftovers.pop(0))
+                    except IndexError:
                         break
         removal = []
         for x in self.tags.items():
@@ -819,6 +813,9 @@ class Table():
         return "Tags updated."
     
     def undo_group_tags(self, restore_tags):
+        for tag, tag_players in self.tags.items():
+            if tag == "SUBS" or "":
+                restore_tags[tag].extend(tag_players)
         self.tags = restore_tags
 
     def change_name(self, l, redo=False): 
@@ -826,13 +823,17 @@ class Table():
         for j in l:
             player = p_indx = j[0]
             if not redo:
-                player = self.player_ids[player]
-            old_name = self.display_names[player] 
+                try:
+                    player: Player = self.player_ids[player]
+                except KeyError:
+                    ret+=f"Invalid player number `{player}`."
+            old_name = player.getName() 
             if len(j)<2:
                 new_name='#'
             else:
                 new_name = j[1]
             new_name = self.check_name(new_name)
+            self.names.append(new_name)
 
             should_del = False
             if new_name[0] in ['#','-']:
@@ -841,21 +842,20 @@ class Table():
             if should_del: 
                 self.deleted_players.append(player)
             else:
-                self.display_names[player] = new_name
+                player.name = new_name
             
             if not redo:
                 self.modifications.append([(f'changename {p_indx} {new_name}', player, new_name, old_name, should_del)])
                 self.undos.clear()
-            ret+="`{}` name changed to `{}`{}.\n".format(Utils.backtick_clean(old_name), Utils.backtick_clean(new_name), " (removed from table)" if should_del else "")
+            ret+=f"`{Utils.backtick_clean(old_name)}` name changed to `{Utils.backtick_clean(player.getName())}`{' (removed from table)' if should_del else ''}.\n"
         
         return ret
 
-    def undo_change_name(self, player, restore_name, was_deleted):
+    def undo_change_name(self, player: Player, restore_name, was_deleted):
         if was_deleted:
             self.deleted_players.remove(player)
         else:
-            self.display_names[player] = restore_name
-        return
+            player.name = restore_name
 
     def get_player_list(self, p_form = True, include_tag = None, team_command = False):
         if include_tag is None:
@@ -863,19 +863,12 @@ class Table():
         
         counter = 1
         string =''
-        self.tags = dict(sorted(self.tags.items(), key=lambda item: unidecode(item[0].upper())))
+        self.tags = dict(sorted(self.tags.items(), key=lambda item: Utils.sanitize_uni(item[0].upper())))
         if isFFA(self.format):
-            for p in list(self.players.keys()):
-                p2 = p
+            for p in self.players:
                 if p in self.deleted_players: continue
-                if p in self.sub_names: 
-                    p2 = ''
-                    for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                        p2 += '{}({})/'.format(self.display_names[x], r)
-                    p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
-                else:
-                    p2 = self.display_names[p2]
-                string+="\n{}{}".format('`{}.` '.format(counter) if p_form else '{}. '.format(counter),Utils.disc_clean(p2))
+                
+                string+=f"\n{f'`{counter}.` ' if p_form else f'{counter}. '}{Utils.disc_clean(p.get_full_name(len(self.races)))}"
                 self.player_ids[str(counter)] = p
                 counter+=1
         else:
@@ -883,22 +876,14 @@ class Table():
                 string+=f'\n{f"`{t_indx+1}.` " if team_command else ""}**{"Tag: " if include_tag else ""}{Utils.disc_clean(tag)}**'
                 for p in self.tags[tag]:
                     self.player_ids[str(counter)] = p
-                    p2 = p
                     if p in self.deleted_players: continue
-                    if p in self.sub_names: 
-                        p2 = ''
-                        for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                            p2 += '{}({})/'.format(self.display_names[x], r)
-                        p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
-                    else:
-                        p2 = self.display_names[p2]
-                    string+="\n{}{}{}".format('\t' if include_tag else " "*3,'`{}.` '.format(counter) if p_form and not team_command else '{}. '.format(counter),Utils.disc_clean(p2))
-                    
+                   
+                    string+=f"\n{' '*4 if include_tag else ' '*3}{f'`{counter}.` ' if p_form and not team_command else f'{counter}. '}{Utils.disc_clean(p.get_full_name(len(self.races)))}"
                     counter+=1
 
         return string
 
-    def dc_to_str(self, dc):
+    def dc_to_str(self, dc: Dict[str, Any]) -> str:
         dc_type = dc.get('type')
         is_edited = dc.get('is_edited', False)
         race = dc.get('race', 0)
@@ -907,43 +892,43 @@ class Table():
         if '_on' in dc_type:
             dc_type = dc_type+'_confirmed' if is_edited else dc_type
             if race == 1:
-                ret = DC_MAP.get((dc_type, 1)).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('gp'))
+                ret = DC_MAP.get((dc_type, 1)).format(dc.get('player').getName(), dc.get('gp'), dc.get('gp'))
             elif race == -1:
-                ret = DC_MAP.get((dc_type, -1)).format(self.display_names[dc.get('player')], dc.get('gp'))
+                ret = DC_MAP.get((dc_type, -1)).format(dc.get('player').getName(), dc.get('gp'))
             else:
-                ret = DC_MAP.get(dc_type).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('pts'))
+                ret = DC_MAP.get(dc_type).format(dc.get('player').getName(), dc.get('gp'), dc.get('pts'))
         else:
             if race == 1:
-                ret = DC_MAP.get((dc_type, 1)).format(self.display_names[dc.get('player')], dc.get('gp'), dc.get('gp'), dc.get('gp'))
+                ret = DC_MAP.get((dc_type, 1)).format(dc.get('player').getName(), dc.get('gp'), dc.get('gp'), dc.get('gp'))
             else:
-                ret = DC_MAP.get(dc_type).format(self.display_names[dc.get('player')],  dc.get('gp'), dc.get('pts'))
-        return ret + '{}'.format(' - edited by tabler' if is_edited else "")
+                ret = DC_MAP.get(dc_type).format(dc.get('player').getName(),  dc.get('gp'), dc.get('pts'))
+
+        return ret + (' - edited by tabler' if is_edited else "")
 
     def dc_list_str(self): 
         ret = "DCs in the room:\n"
-        dc_count = 1
-        for race in list(self.dc_list.items()):
-            ret+='**Race #{}: {}**\n'.format(race[0], self.tracks[int(race[0]-1)])
-            for dc in race[1]:
-                ret+='\t`{}.` **{}\n'.format(dc_count, self.dc_to_str(dc))
-                dc_count+=1
-                
+
         if len(self.dc_list)==0:
             ret+="**No DCs.**"
+            return ret
+
+        dc_count = 1
+        for race in list(self.dc_list.items()):
+            ret+=f'**Race #{race[0]}: {self.races[int(race[0]-1)][1]}**\n'
+            for dc in race[1]:
+                ret+=f'\t`{dc_count}.` **{self.dc_to_str(dc)}\n'
+                dc_count+=1
+                
         return ret
         
-    def dc_ids_append(self,player, race):
-        # i = 1
-        # while i in self.dc_list_ids:
-        #     i+=1
-        # self.dc_list_ids[i] = [player,race]
+    def dc_ids_append(self,player: Player, race: int):
         self.temp_dc_list.append([player, race])
-        self.temp_dc_list = sorted(self.temp_dc_list, key=lambda l: (l[1], Utils.sanitize_uni(l[0])))
+        self.temp_dc_list = sorted(self.temp_dc_list, key=lambda l: (l[1], Utils.sanitize_uni(l[0].getName())))
         self.dc_list_ids = {}
         for dcID, dc in enumerate(self.temp_dc_list):
             self.dc_list_ids[dcID+1] = dc
         for race, dcs in self.dc_list.items(): #sort dc_list within races
-            self.dc_list[race] = sorted(dcs, key = lambda l: Utils.sanitize_uni(l.get('player','')))
+            self.dc_list[race] = sorted(dcs, key = lambda l: Utils.sanitize_uni(l.get('player').getName()))
         self.dc_list = defaultdict(list, dict(sorted(self.dc_list.items(), key = lambda l: l[0])))
 
     def edit(self,l, redo=False): 
@@ -956,55 +941,55 @@ class Table():
             if not redo:    
                 try:
                     p_indx = int(player)
-                    player = self.player_ids[player]
-                except:
-                    ret+="`{}` was not a valid player index. The player number must be from 1-{}.\n".format(player, len(self.players))
+                    player: Player = self.player_ids[player]
+                except KeyError:
+                    ret+=f"`{player}` was not a valid player index. The player number must be from 1-{len(self.players)}.\n"
                     continue
         
             try:
                 assert(int(gp)-1 <=self.gp)
-            except:
-                ret+="`{}` was not a valid gp (player number `{}`). The gp number must be from 1-{}.\n".format(gp, p_indx, self.gp+1)
+            except AssertionError:
+                ret+=f"`{gp}` was not a valid gp (player number `{p_indx}`). The gp number must be from 1-{self.gp+1}.\n"
                 continue
+            orig_edited_scores = copy.deepcopy(player.edited_scores)
             
             if '-' in score or '+' in score:
-                if int(gp) in self.edited_scores[player]:
-                    self.edited_scores[player][int(gp)] += int(score)                    
+                if int(gp) in player.edited_scores:
+                    player.edited_scores[int(gp)] += int(score)                    
                 else:
-                    self.edited_scores[player][int(gp)] = self.players[player][1][int(gp)-1] + int(score)
-                    
+                    player.edited_scores[int(gp)] = player.scores[1][int(gp)-1] + int(score)
                 
                 if not redo:
-                    self.modifications.append([(f'edit {p_indx} {gp} {score}', player, gp, score)])
+                    self.modifications.append([(f'edit {p_indx} {gp} {score}', player, gp, score, orig_edited_scores)])
                     self.undos.clear()
                 
                 try:
-                    self.manual_warnings[-1].remove("GP {} scores have been manually modified by the tabler.".format(gp))
+                    self.manual_warnings[-1].remove(f"GP {gp} scores have been manually modified by the tabler.")
                 except ValueError:
                     pass
-                self.manual_warnings[-1].append("GP {} scores have been manually modified by the tabler.".format(gp))
+                self.manual_warnings[-1].append(f"GP {gp} scores have been manually modified by the tabler.")
                     
-                return "`{}` GP `{}` score changed to `{}`.".format(Utils.backtick_clean(self.display_names[player]), gp, self.edited_scores[player][int(gp)])
+                ret += f"`{Utils.backtick_clean(player.getName())}` GP `{gp}` score changed to `{player.edited_scores[int(gp)]}`."
             else:
-                self.edited_scores[player][int(gp)] = int(score)
+                player.edited_scores[int(gp)] = int(score)
                 
                 if not redo:
-                    self.modifications.append([(f'edit {p_indx} {gp} {score}', player, gp, score)])
+                    self.modifications.append([(f'edit {p_indx} {gp} {score}', player, gp, score, orig_edited_scores)])
                     self.undos.clear()
                 
                 try:
-                    self.manual_warnings[-1].remove("GP {} scores have been manually modified by the tabler.".format(gp))
+                    self.manual_warnings[-1].remove(f"GP {gp} scores have been manually modified by the tabler.")
                 except ValueError:
                     pass
-                self.manual_warnings[-1].append("GP {} scores have been manually modified by the tabler.".format(gp))
+                self.manual_warnings[-1].append(f"GP {gp} scores have been manually modified by the tabler.")
                         
-                ret+="`{}` GP `{}` score changed to `{}`.\n".format(Utils.backtick_clean(self.display_names[player]), gp, score)
+                ret+=f"`{Utils.backtick_clean(player.getName())}` GP `{gp}` score changed to `{score}`.\n"
         return ret
     
-    def undo_edit(self, player, gp):
-        self.edited_scores[player].pop(int(gp))
+    def undo_edit(self, player: Player, orig_edited_scores):
+        player.edited_scores = orig_edited_scores
        
-    def get_rxx(self):
+    def get_rxx(self) -> str:
         ret = ""
         if len(self.prev_rxxs)>0:
             ret+="*Past rooms:*\n"
@@ -1013,125 +998,106 @@ class Table():
         ret+= f'{"**Current room:**" if len(self.prev_rxxs)>0 else "Current room:"} {self.rxx} | {self.ROOM_URL.format(self.rxx)}'
         return ret
         
-    def get_pen_player_list(self, c_form=True, team_command = False):
+    def get_pen_player_list(self, c_form=True, team_command = False) -> str:
         counter = 1
         string =''
-        self.tags = dict(sorted(self.tags.items(), key=lambda item: item[0].upper()))
+        self.tags = dict(sorted(self.tags.items(), key=lambda item: Utils.sanitize_uni(item[0].upper())))
         if isFFA(self.format):
-            for p in list(self.players.keys()):
+            for p in self.players:
                 self.player_ids[str(counter)] = p
-                p2 = p
                 if p in self.deleted_players: continue
-                if p in self.sub_names: 
-                    p2 = ''
-                    for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                        p2 += '{}({})/'.format(self.display_names[x], r)
-                    p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
-                else:
-                    p2 = self.display_names[p2]
-                string+="\n{}. {} {}".format('`{}`'.format(counter) if c_form else counter,Utils.disc_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
                 
+                string+=f"\n{f'`{counter}`' if c_form else counter}. {Utils.disc_clean(p.get_full_name(len(self.races)))} {'' if p.getPens() == 0 else f'(-{p.getPens()})'}"
                 counter+=1
         else:
             for t_indx, tag in enumerate(list(self.tags.keys())):
                 string+=f'\n{f"`{t_indx+1}`. " if team_command else ""}**{Utils.disc_clean(tag)}**'
                 if tag in self.team_pens.keys(): 
-                    string+=" **(-{})**".format(self.team_pens.get(tag))
+                    string+=f" **(-{self.team_pens.get(tag)})**"
                 for p in self.tags[tag]:
                     self.player_ids[str(counter)] = p
-                    p2 = p
                     if p in self.deleted_players: continue
-                    if p in self.sub_names: 
-                        p2 = ''
-                        for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                            p2 += '{}({})/'.format(self.display_names[x], r)
-                        p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
-                    else:
-                        p2 = self.display_names[p2]
-                    string+="\n\t{}. {} {}".format('`{}`'.format(counter) if c_form and not team_command else counter, Utils.disc_clean(p2), '' if self.pens.get(p)==None else '(-{})'.format(self.pens.get(p)))
-                    
+                   
+                    string+=f"\n\t{f'`{counter}`' if c_form and not team_command else counter}. {Utils.disc_clean(p.get_full_name(len(self.races)))} {'' if p.getPens()==0 else f'(-{p.getPens()})'}"
                     counter+=1
                     
-        # self.player_list = string
         return string
     
-    def penalty(self,player, pen, reundo=False):
+    def penalty(self,player, pen: str, reundo=False):
         if not reundo:
             try:
                 p_indx = player
-                player = self.player_ids[player]
-            except:
-                return "Invalid player number `{}`.".format(player)
+                player: Player = self.player_ids[player]
+            except KeyError:
+                return f"Invalid player number `{player}`."
+
         if pen[0] == '=':
             pen = int(pen.lstrip('=').lstrip('-'))
-            self.pens[player] = pen
-            if self.pens[player] == 0: self.pens.pop(player)
+            pen = int(pen.lstrip('=').lstrip('-'))
+            player.pens = pen
             
             if not reundo:
                 self.modifications.append([('pen {} {}'.format(p_indx, '='+str(pen)), player, '='+str(pen))])
                 self.undos.clear()
                 
-            return "`{}` penalty set to `-{}`.".format(Utils.backtick_clean(self.display_names[player]), pen)
+            return f"`{Utils.backtick_clean(player.getName())}` penalty set to `{pen}`."
         
         else:
             pen = int(pen.lstrip('-'))
-            if player in self.pens:
-                self.pens[player]+=pen
-            else:
-                self.pens[player] = pen
-            if self.pens[player] == 0: self.pens.pop(player)
+            player.pens+=pen
             
             if not reundo:
                 self.modifications.append([(f'pen {p_indx} {pen}', player, pen)])
                 self.undos.clear()
-            return "`-{}` penalty given to `{}`.".format(pen, Utils.backtick_clean(self.display_names[player]))
+
+            return f"`-{pen}` penalty given to `{Utils.backtick_clean(player.getName())}`."
     
-    def unpenalty(self, player, unpen, reundo=False):
+    def unpenalty(self, player, unpen: str, reundo=False):
         if unpen !=None:
             unpen = int(unpen.lstrip('='))
         if not reundo:
             try:
                 p_indx = player
-                player = self.player_ids[player]
-            except:
-                return "Invalid player number `{}`.".format(player)
-        if player not in self.pens:
-            return "`{}` doesn't have any penalties.".format(Utils.backtick_clean(self.display_names[player]))
+                player: Player = self.player_ids[player]
+            except KeyError:
+                return f"Invalid player number `{player}`."
+
+        if player.pens==0:
+            return f"`{Utils.backtick_clean(player.getName())}` doesn't have any penalties."
+
+        if unpen is None:
+            orig_pen = player.pens
+            player.pens = 0
+            if not reundo:
+                self.modifications.append([(f'unpen {p_indx}', player, orig_pen)])
+                self.undos.clear()
+            return f"Penalties for `{Utils.backtick_clean(player.getName())}` have been removed."
         else:
-            if unpen ==None:
-                orig_pen = self.pens[player]
-                self.pens.pop(player)
-                if not reundo:
-                    self.modifications.append([(f'unpen {p_indx}', player, orig_pen)])
-                    self.undos.clear()
-                return "Penalties for `{}` have been removed.".format(Utils.backtick_clean(self.display_names[player]))
-            else:
-                self.pens[player] -= unpen
-                if self.pens[player] == 0: self.pens.pop(player)
-                
-                if not reundo: 
-                    self.modifications.append([(f'unpen {p_indx} {unpen}', player, unpen)])
-                    self.undos.clear()
-                return "Penalty for `{}` reduced by `{}`.".format(Utils.backtick_clean(self.display_names[player]), unpen)
+            player.pens -= unpen
             
-    def team_penalty(self, team, pen, reundo = False):
+            if not reundo: 
+                self.modifications.append([(f'unpen {p_indx} {unpen}', player, unpen)])
+                self.undos.clear()
+            return f"Penalty for `{Utils.backtick_clean(player.getName())}` reduced by `{unpen}`."
+        
+    def team_penalty(self, team: str, pen: str, reundo = False):
         if team.isnumeric():
             try:
                 t_indx = int(team)-1
                 team = list(self.tags.keys())[t_indx]
-            except:
-                return "Invalid team number `{}`.".format(team)
+            except IndexError:
+                return f"Invalid team number `{team}`."
         try:
             try:
                 assert(team in self.tags.keys())
-            except:
+            except AssertionError:
                 lowered_tags = list(map(lambda l: Utils.sanitize_uni(l.strip()).lower(), self.tags.keys()))
                 sanitized_tag = Utils.sanitize_uni(team.strip()).lower()
                 assert(sanitized_tag in lowered_tags)
                 team = list(self.tags.keys())[lowered_tags.index(sanitized_tag)]
-        except:
+        except AssertionError:
             valid_teams = ", ".join(list(map(lambda l: f'`{l}`', self.tags.keys())))
-            return "Invalid team name `{}`. Valid teams: {}.".format(Utils.backtick_clean(team), valid_teams)
+            return f"Invalid team name `{Utils.backtick_clean(team)}`. Valid teams: {valid_teams}."
         
         if pen[0] == '=':
             pen = int(pen.lstrip('=').lstrip('-'))
@@ -1139,10 +1105,10 @@ class Table():
             if self.team_pens[team] == 0: self.team_pens.pop(team)
             
             if not reundo:
-                self.modifications.append([('teampen {} {}'.format(team, '='+str(pen)), team, '='+str(pen))])
+                self.modifications.append([(f"teampen {team} {'='+str(pen)}", team, '='+str(pen))])
                 self.undos.clear()
                 
-            return "Team `{}` penalty set to `-{}`.".format(Utils.backtick_clean(team), pen)
+            return f"Team `{Utils.backtick_clean(team)}` penalty set to `-{pen}`."
         
         else:
             pen = int(pen.lstrip('-'))
@@ -1155,50 +1121,49 @@ class Table():
             if not reundo:
                 self.modifications.append([(f'teampen {team} {pen}', team, pen)])
                 self.undos.clear()
-            return "`-{}` penalty given to team `{}`.".format(pen, Utils.backtick_clean(team))
+            return f"`-{pen}` penalty given to team `{Utils.backtick_clean(team)}`."
     
-    def team_unpenalty(self, team, unpen, reundo=False):
+    def team_unpenalty(self, team: str, unpen: str, reundo=False):
         if unpen !=None:
             unpen = int(unpen.lstrip('='))
         if team.isnumeric():
             try:
                 t_indx = int(team)-1
                 team = list(self.tags.keys())[t_indx]
-            except:
-                return "Invalid team number `{}`.".format(team)
+            except IndexError:
+                return f"Invalid team number `{team}`."
         try:
             try:
                 assert(team in self.tags.keys())
-            except:
+            except AssertionError:
                 lowered_tags = list(map(lambda l: Utils.sanitize_uni(l.strip()).lower(), self.tags.keys()))
                 sanitized_tag = Utils.sanitize_uni(team.strip()).lower()
                 assert(sanitized_tag in lowered_tags)
                 team = list(self.tags.keys())[lowered_tags.index(sanitized_tag)]
-        except:
+        except AssertionError:
             valid_teams = ", ".join(list(map(lambda l: f'`{l}`', self.tags.keys())))
-            return "Invalid team name `{}`. Valid teams: {}.".format(Utils.backtick_clean(team), valid_teams)
+            return f"Invalid team name `{Utils.backtick_clean(team)}`. Valid teams: {valid_teams}."
 
         if team not in self.team_pens:
-            return "Team `{}` doesn't have any penalties.".format(Utils.backtick_clean(team))
-        else:
-            if unpen ==None:
-                orig_pen = self.team_pens[team]
-                self.team_pens.pop(team)
-                if not reundo:
-                    self.modifications.append([(f'teamunpen {team}', team, orig_pen)])
-                    self.undos.clear()
-                return "Penalties for team `{}` have been removed.".format(Utils.backtick_clean(team))
-            else:
-                self.team_pens[team] -= unpen
-                if self.team_pens[team] == 0: self.team_pens.pop(team)
-                
-                if not reundo: 
-                    self.modifications.append([(f'teamunpen {team} {unpen}', team, unpen)])
-                    self.undos.clear()
-                return "Penalty for team `{}` reduced by `{}`.".format(Utils.backtick_clean(team), unpen)
+            return f"Team `{Utils.backtick_clean(team)}` doesn't have any penalties."
 
-    def find_players(self,url, soup): 
-       
+        if unpen is None:
+            orig_pen = self.team_pens[team]
+            self.team_pens.pop(team)
+            if not reundo:
+                self.modifications.append([(f'teamunpen {team}', team, orig_pen)])
+                self.undos.clear()
+            return f"Penalties for team `{Utils.backtick_clean(team)}` have been removed."
+        else:
+            self.team_pens[team] -= unpen
+            if self.team_pens[team] == 0: self.team_pens.pop(team)
+            
+            if not reundo: 
+                self.modifications.append([(f'teamunpen {team} {unpen}', team, unpen)])
+                self.undos.clear()
+            return f"Penalty for team `{Utils.backtick_clean(team)}` reduced by `{unpen}`."
+
+    def find_players(self,url, soup: BeautifulSoup): 
         elem = soup.select('tr[id*=r]')[-1]
         next_elem = elem.findNext('tr').findNext('tr')
         
@@ -1216,144 +1181,141 @@ class Table():
         self.dup_names = set([x for x in player_names if player_names.count(x) > 1])
 
         for miiName, fc in players:
-            self.players[fc] = [0,[0]*self.gps, [0]*self.gps*4]
             if miiName in self.dup_names:
                 x = 1
                 name = miiName+'-'+str(x)
-                while name in self.fcs:
+                while name in self.names:
                     x+=1
                     name = miiName+'-'+str(x)
-                
-                self.fcs[name] = fc
-                self.display_names[fc] = name
+                miiName = name
             
-            else:
-                self.fcs[miiName] = fc
-                self.display_names[fc] = miiName
-        
-        self.players = dict(sorted(self.players.items(), key=lambda item: item[0]))
-        self.all_players = list(copy.deepcopy(self.players).keys())
+            self.players.append(Player(fc=fc, name=miiName, scores=[0,[0]*self.gps, [0]*self.gps*4]))
+
+            self.names.append(miiName)
+            
+        self.all_players = copy.copy(self.players)
 
         if isFFA(self.format): 
-            print(self.players.keys())
+            print(self.players)
         
-    def check_name(self,name):
-        if name not in self.display_names.values():
+    def check_name(self, name) -> str:
+        if name not in self.dup_names and name not in self.names:
             return name
         x = 1
         new = name
-        while new in self.display_names.values():
+        while new in self.dup_names or name in self.names:
             new = name+'-'+str(x)
         return new
     
-    def sort_AP(self, player):
+    def sort_AP(self, player: Player) -> Tuple[int, str, str]:
         found_tag = ""
         for tag, tag_players in self.tags.items():
             if player in tag_players:
                 found_tag = tag
                 break
-        return (0 if found_tag!="" else 1, Utils.sanitize_uni(found_tag), Utils.sanitize_uni(self.display_names.get(player,"")))
+        return (0 if found_tag!="" else 1, Utils.sanitize_uni(found_tag), Utils.sanitize_uni(player.getName()))
 
-    def get_all_players(self): 
+    def get_all_players(self) -> str: 
         ret = ''
         self.all_players = sorted(self.all_players, key = lambda l: self.sort_AP(l))
 
         for i, p in enumerate(self.all_players):
-            ret+="\n{}. {}".format(i+1, Utils.disc_clean(self.display_names[p]))
+            ret+="\n{}. {}".format(i+1, Utils.disc_clean(p.getName()))
             if p in self.deleted_players:
                 ret+=' (removed by tabler)'
         return ret
 
+    async def add_sub_player(self, player: Player) -> str:
+        # player = Player(fc=fc, name=name, scores = [0,[0]*self.gps, [0]*self.gps*4])
+        if player in self.all_players: return 'failed'
+        self.all_players.append(player)
+        self.players.append(player)
         
-    async def add_sub_player(self,player, fc):
-        if fc in self.all_players: return 'failed'
-        self.all_players.append(fc)
-        self.players[fc] = [0,[0]*self.gps, [0]*self.gps*4]
-        self.fcs[player] = fc
-        self.display_names[fc] = player
         if len(self.players)-1<self.num_players: #TEST: test if new missing players DC filling working (for multiple GPS: 1 + 2)
             warn_replaced = False
             for gp in range(0, self.gp):
                 for warn_item in enumerate(self.warnings[gp*4+1]):
                     if warn_item[1].get('type') == "missing":
                         #print(ind,i)
-                        self.dc_list[gp*4+1].append({'type': 'dc_before', 'race':1, 'player': fc, 'gp': gp+1})
-                        self.warnings[gp*4+1].append({'type': 'dc_before','race': 1, 'player': fc, 'gp': gp+1})
-                        self.dc_ids_append(fc, gp*4+1)
+                        self.dc_list[gp*4+1].append({'type': 'dc_before', 'race':1, 'player': player, 'gp': gp+1})
+                        self.warnings[gp*4+1].append({'type': 'dc_before','race': 1, 'player': player, 'gp': gp+1})
+                        self.dc_ids_append(player, gp*4+1)
                         if gp not in self.gp_dcs: self.gp_dcs[gp] = []
-                        self.gp_dcs[gp].append(fc)
+                        self.gp_dcs[gp].append(player)
                         if len(self.players)==self.num_players:
                             self.warnings[gp*4+1].pop(warn_item[0])
                         warn_replaced = True
+
             if warn_replaced:           
-                if not isFFA(self.format): self.find_tag(player, fc)
+                if not isFFA(self.format): self.find_tag(player)
                 return 'not sub'
         
         if not isFFA(self.format):
             if "SUBS" not in self.tags or len(self.tags['SUBS'])==0:
                 self.tags['SUBS'] = []
-            self.tags["SUBS"].append(fc)
+            self.tags["SUBS"].append(player)
 
         return 'success'
     
-    def find_tag(self, player, fc):
+    def find_tag(self, player: Player):
+        name = player.getName()
         per_team = int(self.format[0])
 
         #only one spot left to be filled
         if len(self.players)==self.num_players:
             for tag in self.tags.items():
                 if len(tag[1])<per_team:
-                    self.tags[tag[0]].append(fc)
+                    self.tags[tag[0]].append(player)
                     return
 
         #prefix tag matching
         match = ["", 0]
         for tag in self.tags.keys():
-            if Utils.sanitize_uni(player.strip()).lower().find(Utils.sanitize_uni(tag).lower())==0 and len(self.tags[tag]<per_team):
+            if Utils.sanitize_uni(name.strip()).lower().find(Utils.sanitize_uni(tag).lower())==0 and len(self.tags[tag]<per_team):
                 if len(tag)>match[1]:
                     match = [tag, len(tag)]
         if match[1]>0:
-            self.tags[match[0]].append(fc)
+            self.tags[match[0]].append(player)
             return
 
         #suffix tag matching
         match = ["", 0]
         for tag in self.tags.keys():
-            if Utils.sanitize_uni(player[::-1].strip()).lower().find(Utils.sanitize_uni(tag[::-1]).lower())==0 and len(self.tags[tag]<per_team):
+            if Utils.sanitize_uni(name[::-1].strip()).lower().find(Utils.sanitize_uni(tag[::-1]).lower())==0 and len(self.tags[tag]<per_team):
                 if len(tag)>match[1]:
                     match = [tag, len(tag)]
         if match[1]>0:
-            self.tags[match[0]].append(fc)
+            self.tags[match[0]].append(player)
             return
         
         #common substring matching if 2v2
         if per_team==2:
             match = ["", 0]
             for tag in self.tags.keys():
-                lcs = Utils.LCS(Utils.sanitize_uni(player.strip()).lower(), Utils.sanitize_uni(tag).lower())
+                lcs = Utils.LCS(Utils.sanitize_uni(name.strip()).lower(), Utils.sanitize_uni(tag).lower())
                 if len(lcs)>1 and lcs==tag and len(self.tags[tag]<per_team):
                     if len(lcs)>match[1]:
                         match = [lcs, len(lcs)]
             if match[0]!="":   
-                self.tags[match[0]].append(fc)
+                self.tags[match[0]].append(player)
                 return
         
         #no tags matched, so randomly fill
         for i in self.tags.items():
             if len(i[1])<per_team:
-                self.tags[i[0]].append(fc)
+                self.tags[i[0]].append(player)
                 return
 
         #all tags were full, so create new tag
-        new_tag = self.check_tags(Utils.replace_brackets(player)[0])
-        self.tags[new_tag] = [fc]
+        new_tag = self.check_tags(Utils.sanitize_uni(name)[0])
+        self.tags[new_tag] = [player]
 
-    def get_subs(self):
+    def get_subs(self) -> str:
         ret = 'Room subs:\n'
-        if len(self.sub_names)==0:
+        if len(self.subs)==0:
             ret+=" **No subs.**"
-        for in_player, sub in self.subs.items():
-            ret+=f" - **{Utils.disc_clean(self.display_names[in_player])}** subbed in for **{Utils.disc_clean(self.display_names[sub.get('sub_out')])}** (after {sub.get('out_races')} races played).\n"
+        for sub in self.subs:
+            ret+=f" - **{Utils.disc_clean(sub.get('in_player').getName())}** subbed in for **{Utils.disc_clean(sub.get('out_player').getName())}** (after {sub.get('out_races')} races played).\n"
         return ret
 
     def sub_in(self, _in, out, out_races, reundo=False): 
@@ -1361,50 +1323,27 @@ class Table():
         out_races = int(out_races)
         if not reundo:
             try:
-                in_player = self.player_ids[_in]
-            except:
-                return "`{}` was not a valid player number. The player number must be from 1-{}.".format(_in, len(self.player_ids))
+                in_player: Player = self.player_ids[_in]
+            except KeyError:
+                return f"`{_in}` was not a valid player number. The player number must be from 1-{len(self.player_ids)}."
             try:
-                out_player = self.player_ids[out]
-            except:
-                return "`{}` was not a valid player number. The player number must be from 1-{}.".format(out, len(self.player_ids))
+                out_player: Player = self.player_ids[out]
+            except KeyError:
+                return f"`{out}` was not a valid player number. The player number must be from 1-{len(self.player_ids)}."
         
-        self.subs[in_player] = {'sub_out': out_player, "out_races": out_races}
-        if out_player in self.sub_names:
-            self.sub_names[in_player] = {'sub_out': self.sub_names[out_player]['sub_out']+[out_player], 
-                                         'in_races': self.gps*4-sum(self.sub_names[out_player]['out_races']+[out_races]), 
-                                         "out_races": self.sub_names[out_player]['out_races']+[out_races]}
-            self.sub_names.pop(out_player)
+        # for sub in self.subs: #checking whether this player has already subbed in for someone
+        #     if in_player == sub.get('in_player'):
+        #         return f"`{Utils.backtick_clean(in_player.getName())}` has already subbed in for `{Utils.backtick_clean(sub.get('out_player'))}`."
+        if len(in_player.getSubs())>0:
+            return f"`{Utils.backtick_clean(in_player.getName())}` has already subbed in for `{Utils.backtick_clean(in_player.getSubs()[-1][0].getName())}`."
 
-        else:
-            self.sub_names[in_player] = {'sub_out': [out_player], 'in_races': self.gps*4-out_races, "out_races": [out_races]}
-            
-        self.players[in_player][1] = [a+b for a, b in zip(self.players[in_player][1], self.players[out_player][1])]
-        self.players[in_player][2] = [a+b for a, b in zip(self.players[in_player][2], self.players[out_player][2])]
-        self.players[in_player][0] = self.players[out_player][0]+self.players[in_player][0]
+        self.subs.append({'in_player': in_player, 'out_player': out_player, "out_races": out_races})
 
-        out_edited_scores = self.edited_scores.pop(out_player, None)
-        in_edited_scores = self.edited_scores.get(in_player, None)
-        for i in out_edited_scores.items():
-            if i[0] in self.edited_scores[in_player]:
-                self.edited_scores[in_player][i[0]] += i[1]
-            else:
-                self.edited_scores[in_player][i[0]] = i[1]
-        
+        in_player.add_sub(out_player, out_races)
+        self.players.remove(out_player)
 
-        out_pens = None
-        if out_player in self.pens:
-            self.pens[in_player] = out_pens = self.pens.pop(out_player) 
-        
-        pts=self.players.pop(out_player)
-        out_player_name=self.display_names[out_player]
-        self.fcs.pop(self.display_names[out_player])
-        try:
-            pid = self.player_ids.pop(list(self.player_ids.keys())[list(self.player_ids.values()).index(out_player)])
-        except:
-            pid = None
-        tag = ""
-        in_tag = ''
+        tag = ''
+        in_tag = ""
         if not isFFA(self.format):
             for t in self.tags.items():
                 if out_player in t[1]:
@@ -1425,8 +1364,8 @@ class Table():
        
             self.tags = {k:v for k,v in self.tags.items() if len(v)!=0}
         
-        edited_warning = None
         done = False
+        edited_warning = None
         for i, r in self.warnings.items():
             for w in r:
                 if w.get('type') == 'sub' and w.get('player') == in_player:
@@ -1439,38 +1378,21 @@ class Table():
                 break
 
         if not reundo: 
-            restore = {'pts':pts, 'name': self.display_names.get(out_player), 'out_tag':tag, 'id':pid, 'in_tag': in_tag, 'out_edited_scores': out_edited_scores, 'in_edited_scores': in_edited_scores, 'warning': edited_warning}
-            if out_pens!=None:
-                restore['pens'] = out_pens
+            restore = {'out_tag': tag,  'in_tag': in_tag, 'warning': edited_warning, 'in_edited_scores': copy.deepcopy(in_player.edited_scores)}
             self.modifications.append([(f'sub {out} {out_races} {_in}', in_player, out_player, out_races, restore)])
             self.undos.clear()
-        return "Subbed in `{}` for `{}` (played `{}` races).".format(Utils.backtick_clean(self.display_names[in_player]), Utils.backtick_clean(out_player_name), out_races)
+        return f"Subbed in `{Utils.backtick_clean(in_player.getName())}` for `{Utils.backtick_clean(out_player.getName())}` (played `{out_races}` races)."
     
-    def undo_sub(self, in_player, out_player, restore):
-        self.sub_names.pop(in_player)
-        self.subs.pop(in_player)
-        self.players[out_player] = restore['pts']
-        self.fcs[restore['name']] = out_player
-        self.display_names[out_player] = restore['name']
+    def undo_sub(self, in_player: Player, out_player: Player, restore: Dict[str, Any]): 
+        self.subs.pop(-1) # pop last sub (always last because undos can only go linearly one by one)
+        self.players.append(out_player)
 
         if restore['warning']:
             restore['warning']['is_edited'] = False
             restore['warning'].pop('sub_out')
 
         if restore['in_edited_scores'] is not None and len(restore['in_edited_scores']) >0:
-            self.edited_scores[in_player] = restore['in_edited_scores'] 
-        else:
-            try:
-                self.edited_scores.pop(in_player)
-            except KeyError:
-                pass
-        if restore['out_edited_scores'] is not None and len(restore['out_edited_scores']) >0:
-            self.edited_scores[out_player] = restore['out_edited_scores'] 
-        else:
-            try:
-                self.edited_scores.pop(out_player)
-            except KeyError:
-                pass
+            in_player.edited_scores = restore['in_edited_scores'] 
 
         if not isFFA(self.format):
             for tag in self.tags.items():
@@ -1489,78 +1411,69 @@ class Table():
                 self.tags[restore['out_tag']].append(out_player)
             except KeyError:
                 self.tags[restore['out_tag']] = [out_player]
-        
-        
-        self.players[in_player][1] = [a-b for a, b in zip(self.players[in_player][1], self.players[out_player][1])]
-        self.players[in_player][2] = [a-b for a, b in zip(self.players[in_player][2], self.players[out_player][2])]
-        self.players[in_player][0] = self.players[in_player][0] - self.players[out_player][0]
 
-        if 'pens' in restore:
-            self.pens[out_player] = restore['pens']
-            self.pens[in_player] = self.pens[in_player]-restore['pens']
-            if self.pens[in_player]==0:
-                self.pens.pop(in_player)
+        in_player.remove_last_sub(out_player)
         
         
     def edit_sub_races(self, indx, races, is_in, out_index = 1, reundo=False):
         player = indx
         if not reundo:    
             try:
-                player = self.player_ids[str(indx)]
-            except:
-                return "Player number `{}` was invalid. The player number must be from 1-{}.".format(indx, len(self.player_ids))
+                player: Player = self.player_ids[str(indx)]
+            except KeyError:
+                return f"Player number `{indx}` was invalid. The player number must be from 1-{len(self.player_ids)}."
         try:
-            assert(player in self.sub_names)
-        except:
-            return "`{}` is not a subbed in player.".format(Utils.backtick_clean(self.display_names[player]))
+            assert(len(player.getSubs())>0)
+        except AssertionError:
+            return f"`{Utils.backtick_clean(player.getName())}` is not a subbed-in player."
+
         if is_in:
-            orig_races = self.sub_names[player]['in_races']
-            self.sub_names[player]['in_races'] = races
+            orig_races = player.races_played
+            player.races_played = races
         else:
             try:
-                orig_races = self.sub_names[player]['out_races'][out_index-1]
-                self.sub_names[player]['out_races'][out_index-1] = races
-            except:
-                return "Sub out index `{}` was invalid. It must be from 1-{}.".format(out_index, len(self.sub_names[player]['out_races']))
+                orig_races = player.subs[out_index-1][1]
+                player.subs[out_index-1][1] = races
+            except IndexError:
+                return f"Sub out index `{out_index}` was invalid. It must be from 1-{len(player.getSubs())}."
             
         if not reundo: 
-            self.modifications.append([("editsub {} {} {} {}".format(indx, races, 'in' if is_in else 'out', out_index if not is_in else ""), player, races, orig_races, is_in, out_index)])
+            self.modifications.append([(f"editsub {indx} {races} {'in' if is_in else 'out'} {out_index if not is_in else ''}", player, races, orig_races, is_in, out_index)])
             self.undos.clear()
 
-        return "Changed `{}` sub {}{} races to {}.".format(Utils.backtick_clean(self.display_names[player]), 'in' if is_in else 'out', '' if is_in else ' (`{}`)'.format(Utils.backtick_clean(self.sub_names[player]['sub_out'][out_index-1])), races)
+        return f"Changed `{Utils.backtick_clean(player.getName())}` sub {'in' if is_in else 'out'}{'' if is_in else f' (`{Utils.backtick_clean(player.subs[out_index-1][0].getName())}`)'} races to {races}."
          
     def edit_dc_status(self,L, reundo=False): 
         ret=''
         for i in L:
             try:
                 dc_num = i[0]
-                player = self.dc_list_ids[int(i[0])][0]
+                player: Player = self.dc_list_ids[int(i[0])][0]
                 raceNum = self.dc_list_ids[int(i[0])][1]
-            except:
+            except KeyError:
                 if len(self.dc_list_ids)==0:
-                    ret+="DC number `{}` was invalid. There are no DCs to edit.\n".format(i[0])
+                    ret+=f"DC number `{i[0]}` was invalid. There are no DCs to edit.\n"
                 else: 
-                    ret+="DC number `{}` was invalid. DC numbers must be from 1-{}.\n".format(i[0], len(self.dc_list_ids))
+                    ret+=f"DC number `{i[0]}` was invalid. DC numbers must be from 1-{len(self.dc_list_ids)}.\n"
                 continue
             
             status = i[1]
-            players = [i[2] for i in self.races[raceNum-1]]
+            players = [i[0] for i in self.races[raceNum-1][2]]
             if status == "on" or status == "during": #CHANGE TO 'ON'
                 orig_status = 'on'
                 if player not in players:
                     orig_status = "before"
-                    self.change_room_size([[raceNum, len(self.races[raceNum-1])+1]], self_call=True)
-                    self.races[raceNum-1].append((self.display_names[player], 'DC', player))
-                    self.finish_times[raceNum-1][player] = 'DC'
+                    self.change_room_size([[raceNum, len(self.races[raceNum-1][2])+1]], self_call=True)
+                    self.races[raceNum-1][2].append((player, 'DC', "", ""))
                     gp = int((raceNum-1)/4)
 
                     if raceNum %4 != 1:
-                        self.players[player][1][gp] -=3
-                        self.players[player][2][raceNum-1] = 0
+                        player.scores[1][gp] -=3
+                        player.scores[2][raceNum-1] = 0
                         
-                        for indx,i in enumerate(self.dc_pts[player]):
+                        for indx,i in enumerate(player.dc_pts):
                             if i[0]==raceNum:
-                                self.dc_pts[player][indx][1].pop(0)
+                                player.dc_pts[indx][1].pop(0)
                                 break
                             
                         for indx,i in enumerate(self.warnings[raceNum]):
@@ -1588,17 +1501,16 @@ class Table():
                 orig_status = 'before'
                 if player in players:
                     orig_status = 'on'
-                    self.change_room_size([[raceNum, len(self.races[raceNum-1])-1]], self_call=True)
-                    #print(mes)
+                    self.change_room_size([[raceNum, len(self.races[raceNum-1][2])-1]], self_call=True, player=player)
                     gp = int((raceNum-1)/4)
                     
                     if raceNum %4 != 1:
-                        self.players[player][1][gp] +=3
-                        self.players[player][2][raceNum-1] = 3
+                        player.scores[1][gp] +=3
+                        player.scores[2][raceNum-1] = 3
                         
-                        for indx,i in enumerate(self.dc_pts[player]):
+                        for indx,i in enumerate(player.dc_pts):
                             if i[0]==raceNum:
-                                self.dc_pts[player][indx][1].insert(0, raceNum)
+                                player.dc_pts[indx][1].insert(0, raceNum)
                             break
                         
                         for indx,i in enumerate(self.warnings[raceNum]):
@@ -1620,12 +1532,12 @@ class Table():
                 self.modifications.append([(f'dcs {dc_num} {status}', dc_num, orig_status, status)]) 
                 self.undos.clear()   
 
-            ret+= "Changed `{}` DC status for race `{}` to `{}`.\n".format(Utils.backtick_clean(self.display_names[player]), raceNum, status)
+            ret+= f"Changed `{Utils.backtick_clean(player.getName())}` DC status for race `{raceNum}` to `{status}`.\n"
        
         return ret
                 
                  
-    def change_room_size(self, l, self_call = False, reundo=False, undo=False): 
+    def change_room_size(self, l, self_call = False, player=None, reundo=False, undo=False): 
         ret = ''
         for i in l:
             try:
@@ -1636,28 +1548,27 @@ class Table():
                     orig_room_size = self.changed_room_sizes[raceNum+1][-1]
                     
                 gp = int(raceNum/4)
-            except:
-                ret+= "Invalid <race number>. The race number must be from 1-{}.\n".format(len(self.races))
+            except AssertionError:
+                ret+= f"Invalid race number `{raceNum+1}`. The race number must be from 1-{len(self.races)}.\n"
                 continue
             try:
                 cor_room_size = int(i[1])
                 assert(cor_room_size>0 and cor_room_size<=len(self.players) and (cor_room_size <=orig_room_size or self_call))
                 
-            except:
-                
+            except AssertionError:
                 if cor_room_size> orig_room_size and cor_room_size<=len(self.players):
                     ret+=f"**Note:** *If a race is missing player(s) due to DCs, it is advised to use `{self.prefix}dcs` instead.\nOnly use this command if no DCs were shown for the race in question.*\n\n"
                 else:
-                    ret+= "Invalid <corrected room size> for race `{}`. The corrected room size must be a number from 1-{}.\n".format(raceNum+1, len(self.players))
+                    ret+= f"Invalid <corrected room size> for race `{raceNum+1}`. The corrected room size must be a number from 1-{len(self.players)}.\n"
                     continue
             
             if cor_room_size == orig_room_size:
-                ret+='Race `{}` room size is already `{}` - no change made.\n'.format(raceNum+1, cor_room_size)
+                ret+=f'Race `{raceNum+1}` room size is already `{cor_room_size}` - no change made.\n'
                 continue
             
             orig_pts = {}
-            for place, p in enumerate(self.races[raceNum]):
-                player = p[2]
+            for place, p in enumerate(self.races[raceNum][2]):
+                player = p[0]
                 try:
                     pts = PTS_MAP[orig_room_size][place]
                 except KeyError:
@@ -1666,50 +1577,52 @@ class Table():
             
             fixed_pts = {}
             
-            for place, p in enumerate(self.races[raceNum]):
-                player = p[2]
+            if self_call and player is not None:
+                for pos, player in enumerate(self.races[raceNum][2]):
+                    if player[0] == player:
+                        self.races[raceNum].pop(pos)
+
+            for place, p in enumerate(self.races[raceNum][2]):
+                player = p[0]
                 try:
                     pts = PTS_MAP[cor_room_size][place]
                 except KeyError:
                     pts = 0
                 fixed_pts[player] = pts
                 
-            for player in list(fixed_pts.items()):
-                self.players[player[0]][1][gp] += (player[1] - orig_pts[player[0]])
-                self.players[player[0]][2][raceNum] = player[1]
+            for player, pts in fixed_pts.items():
+                player.scores[1][gp] += (pts - orig_pts[player])
+                player.scores[2][raceNum] = pts
 
-            if not reundo:
-                restore = (self.races[raceNum], self.finish_times[raceNum])
-                self.races[raceNum] = self.races[raceNum][:cor_room_size]
-                removal = list(self.finish_times[raceNum].keys())[:cor_room_size]
-                self.finish_times[raceNum] = {k : self.finish_times[raceNum][k] for k in removal}
+            if not reundo and not self_call:
+                restore = copy.deepcopy(self.races[raceNum])
+                self.races[raceNum][2] = self.races[raceNum][2][:cor_room_size]
                 
             if not self_call:
                 done = False
                 for indx,i in enumerate(self.manual_warnings[raceNum+1]):
                     if i.find("Room size changed to") == 0:
-                        self.manual_warnings[raceNum+1][indx] = "Room size changed to {} by the tabler for this race.".format(cor_room_size)
+                        self.manual_warnings[raceNum+1][indx] = f"Room size changed to {cor_room_size} by the tabler for this race."
                         done = True
                         break
                 if not done:
-                    self.manual_warnings[raceNum+1].append("Room size changed to {} by the tabler for this race.".format(cor_room_size))
+                    self.manual_warnings[raceNum+1].append(f"Room size changed to {cor_room_size} by the tabler for this race.")
                 
+                if not undo: self.changed_room_sizes[raceNum+1].append(cor_room_size)
         
-            ret+='Changed race {} room size to {}.\n'.format(raceNum+1, cor_room_size)
-            
-            if not self_call and not undo:
-                self.changed_room_sizes[raceNum+1].append(cor_room_size)
             if not reundo and not self_call:
                 self.modifications.append([(f"changeroomsize {raceNum+1} {cor_room_size}", raceNum+1, orig_room_size, cor_room_size, restore)])
                 self.undos.clear()
+            
+            ret+=f'Changed race {raceNum+1} room size to {cor_room_size}.\n'
+
 
         return ret
             
     def undo_crs(self, raceNum, orig_size, restore): 
         raceNum -=1
 
-        self.races[raceNum] =  restore[0]
-        self.finish_times[raceNum] = restore[1]
+        self.races[raceNum] =  restore
         self.change_room_size([[raceNum+1, orig_size]], undo=True,reundo=True)
         if raceNum+1 in self.changed_room_sizes:
             self.changed_room_sizes[raceNum+1].pop()
@@ -1723,61 +1636,59 @@ class Table():
             player =p_indx= elem[1]
             if not reundo:
                 try:
-                    player = self.player_ids[player]
-                except:
-                    return "Player index `{}` was invalid. The player number must be from 1-{}.".format(player,len(self.players))
+                    player: Player = self.player_ids[player]
+                except KeyError:
+                    return f"Player index `{player}` was invalid. The player number must be from 1-{len(self.players)}."
                 
             correct_pos = int(elem[2])-1
             try:
                 raceNum = int(raceNum)
-                corresponding_rr = self.races[raceNum-1]
-            except:
-                return "Race number `{}` was invalid. It must be a number from 1-{}".format(raceNum, len(self.races))
+                corresponding_rr = self.races[raceNum-1][2]
+            except IndexError:
+                return f"Race number `{raceNum}` was invalid. It must be a number from 1-{len(self.races)}"
             
-            corresponding_rr = [i[2] for i in corresponding_rr]
+            corresponding_rr = [i[0] for i in corresponding_rr]
             
             orig_pos = corresponding_rr.index(player)
             orig_pts = PTS_MAP[len(corresponding_rr)][orig_pos]
             try:   
                 cor_pts = PTS_MAP[len(corresponding_rr)][int(correct_pos)]
-            except:
-                return "Corrected position `{}` was invalid. It must be a number from 1-{}.".format(correct_pos+1, len(corresponding_rr))
+            except KeyError:
+                return f"Corrected position `{correct_pos+1}` was invalid. It must be a number from 1-{len(corresponding_rr)}."
             
             if orig_pos<correct_pos:
-                aff = [self.races[raceNum-1][i][2] for i in range(orig_pos+1,correct_pos+1)]
+                aff = [self.races[raceNum-1][2][i][0] for i in range(orig_pos+1,correct_pos+1)]
             else:
-                aff = [self.races[raceNum-1][i][2] for i in range(correct_pos,orig_pos)]
+                aff = [self.races[raceNum-1][2][i][0] for i in range(correct_pos,orig_pos)]
                 
             aff_orig_pts = {}
             for a in aff:
                 aff_orig_pts[a] = PTS_MAP[len(corresponding_rr)][corresponding_rr.index(a)]
             
-            correct_ft_order = list(self.finish_times[raceNum-1].keys())
-            correct_ft_order.insert(correct_pos, correct_ft_order.pop(orig_pos))
-            self.finish_times[raceNum-1] = {k : self.finish_times[raceNum-1][k] for k in correct_ft_order}
+            # correct_ft_order = list(self.finish_times[raceNum-1].keys())
+            # correct_ft_order.insert(correct_pos, correct_ft_order.pop(orig_pos))
+            # self.finish_times[raceNum-1] = {k : self.finish_times[raceNum-1][k] for k in correct_ft_order}
             
-            self.races[raceNum-1].insert(correct_pos, self.races[raceNum-1].pop(orig_pos))
+            self.races[raceNum-1][2].insert(correct_pos, self.races[raceNum-1][2].pop(orig_pos))
 
             aff_new_pts = {}
-            corresponding_rr = self.races[raceNum-1]
-            corresponding_rr = [i[2] for i in corresponding_rr]
+            corresponding_rr = self.races[raceNum-1][2]
+            corresponding_rr = [i[0] for i in corresponding_rr]
             
             for a in aff:
                 aff_new_pts[a] = PTS_MAP[len(corresponding_rr)][corresponding_rr.index(a)]
             
             gp = int((raceNum-1)/4)
 
-            self.players[player][0] += (cor_pts-orig_pts)
-            self.players[player][1][gp] += (cor_pts-orig_pts)
-            self.players[player][2][raceNum-1] = cor_pts
+            player.scores[0] += (cor_pts-orig_pts)
+            player.scores[1][gp] += (cor_pts-orig_pts)
+            player.scores[2][raceNum-1] = cor_pts
 
             for a in aff:
-                self.players[a][0]+= (aff_new_pts[a] - aff_orig_pts[a])
-                self.players[a][1][gp] += (aff_new_pts[a] - aff_orig_pts[a])
-                self.players[a][2][raceNum-1] = aff_new_pts[a]
-            
-            ret+='`{}` race {} placement changed to {}.{}'.format(Utils.backtick_clean(self.display_names[player]), raceNum, correct_pos+1, '\n' if num==len(l)-1 else "")
-            
+                a.scores[0]+= (aff_new_pts[a] - aff_orig_pts[a])
+                a.scores[1][gp] += (aff_new_pts[a] - aff_orig_pts[a])
+                a.scores[2][raceNum-1] = aff_new_pts[a]
+                        
             try:
                 self.manual_warnings[raceNum].remove("Placements for this race have been manually altered by the tabler.")
             except ValueError:
@@ -1785,6 +1696,9 @@ class Table():
             self.manual_warnings[raceNum].append("Placements for this race have been manually altered by the tabler.")
             
             mods.append((f'editrace {raceNum} {p_indx} {correct_pos+1}', player, raceNum, orig_pos+1, correct_pos+1))
+
+            ret+=f'`{Utils.backtick_clean(player.getName())}` race `{raceNum}` placement changed to `{correct_pos+1}`.'+("\n" if num==len(l)-1 else "")
+
      
         if not reundo and len(mods)>0:
             self.modifications.append(mods)
@@ -1832,22 +1746,20 @@ class Table():
         merge_indx = merge_num-1
         self.rxx = self.prev_rxxs[merge_indx]  
         self.races = self.races[:len(self.prev_elems[merge_indx])-len(self.removed_races)]
-        self.tracks = self.tracks[:len(self.races)]
         self.current_elems = self.prev_elems[merge_indx]
         self.prev_elems = self.prev_elems[:merge_indx]
         self.prev_rxxs = self.prev_rxxs[:merge_indx]
         self.recorded_elems = self.prev_elems+self.current_elems
         self.current_url = self.ROOM_URL.format(self.rxx)
         
-        self.finish_times = {k:v for k,v in self.finish_times.items() if k<len(self.races)}
         self.warnings = defaultdict(list,{k:v for k,v in self.warnings.items() if k<=len(self.races)})
         self.manual_warnings = defaultdict(list,{k:v for k,v in self.manual_warnings.items() if k<=len(self.races)})
         self.dc_list = defaultdict(list, {k:v for k, v in self.dc_list.items() if k<=len(self.races)})
         
         self.dc_list_ids = {k:v for k, v in self.dc_list_ids.items() if v[1]<=len(self.races)}
         
-        for p in list(self.players.keys()):
-            self.players[p] = [0,[0]*self.gps, [0]*self.gps*4]
+        for p in list(self.players):
+            p.scores = [0,[0]*self.gps, [0]*self.gps*4]
         
         recorded_players = []
         for raceNum,race in enumerate(self.races):
@@ -1855,32 +1767,29 @@ class Table():
             gp = self.gp = int(raceNum/4)
             
             for placement, player in enumerate(race):
-                player = player[2]
+                player: Player = player[0]
 
-                for dc in list(self.dc_pts.items()):    
-                    for indx,j in enumerate(dc[1]):
-                        if raceNum+1 in j[1] and dc[0] == player:
-                            self.dc_pts[dc[0]].pop(indx)
-                            continue
+                for indx, j in enumerate(player.dc_pts):
+                    if raceNum+1 in j[1]:
+                        player.dc_pts.pop(indx)
+                        break
 
                 recorded_players.append(player)
-                self.players[player][1][gp] += PTS_MAP[cur_room_size][placement]
-                self.players[player][2][raceNum] += PTS_MAP[cur_room_size][placement]
-                self.players[player][0] += PTS_MAP[cur_room_size][placement]
+                player.scores[1][gp] += PTS_MAP[cur_room_size][placement]
+                player.scores[raceNum] += PTS_MAP[cur_room_size][placement]
+                player.scores[0] += PTS_MAP[cur_room_size][placement]
 
-            for dc in list(self.dc_pts.items()):
-                for j in dc[1]:
+                for j in player.dc_pts:
                     if raceNum+1 in j[1]:
-                        self.players[dc[0]][1][gp]+=3
-                        self.players[dc[0]][2][raceNum]=3
-                        break
+                        player.dc_pts[0]+=3
+                        player.dc_pts[1][gp]+=3
+                        player.dc_pts[2][raceNum]=3
+                        break 
         
         x = copy.deepcopy(self.players)
-        for i in x.keys():
+        for i in x:
             if i not in recorded_players:
-                self.players.pop(i)
-                self.fcs.pop(self.display_names[i])
-                self.display_names.pop(i)
+                self.players.remove(i)
                 try:
                     self.all_players.remove(i)
                 except ValueError:
@@ -1901,27 +1810,25 @@ class Table():
         elif not self.check_mkwx_update.is_running():
             await self.auto_send_pic()
                 
-    
     async def remove_race(self, raceNum, redo=False): 
         if raceNum==-1: raceNum = len(self.races)
         try:
-            assert(raceNum<=len(self.races) and raceNum>0)
-        except:
-            return "`{}` was not a valid race number. The race number must be from 1-{}.".format(raceNum,len(self.races))
+            assert(0<raceNum<=len(self.races))
+        except AssertionError:
+            return f"`{raceNum}` was not a valid race number. The race number must be from 1-{len(self.races)}."
         
-        track = self.tracks.pop(raceNum-1)
-        self.removed_races[raceNum] = [self.races.pop(raceNum-1), track]
+        track = self.races[raceNum-1][1]
+        self.removed_races[raceNum] = [self.races.pop(raceNum-1)]
        
         try:
             rem_warn = self.warnings.pop(raceNum)
-        except:
+        except KeyError:
             rem_warn = None
         try:
             rem_dc_list = self.dc_list.pop(raceNum)
-        except:
+        except KeyError:
             rem_dc_list = None
             
-        #self.removed_warn_dcs[raceNum] = {'warnings':rem_warn, 'dc_list':rem_dc_list, 'dc_list_ids': removed_dc_list_ids, 'dc_pts':removed_dc_pts}
         self.removed_warn_dcs[raceNum] = {'warnings':rem_warn, 'dc_list':rem_dc_list, 'm_warnings': self.manual_warnings.pop(raceNum) if raceNum in self.manual_warnings else None}
 
         self.shift_warnings(start=raceNum, direction='left')
@@ -1931,14 +1838,13 @@ class Table():
             self.modifications.append([(f'removerace {raceNum}', raceNum, track)])
             self.undos.clear()
 
-        self.manual_warnings[-1].append("Race #{} (originally) - {} has been removed by the tabler.".format(raceNum, track))
+        self.manual_warnings[-1].append(f"Race #{raceNum} (originally) - {track} has been removed by the tabler.")
             
-        return "Removed race {} - {} from table.".format(raceNum, track)
+        return f"Removed race {raceNum} - {track} from table."
     
     async def restore_removed_race(self, raceNum):
-        restore_race, restore_track = self.removed_races.pop(raceNum)
+        restore_race = self.removed_races.pop(raceNum)
         self.races.insert(raceNum-1, restore_race)
-        self.tracks.insert(raceNum-1, restore_track)
         self.shift_warnings(start=raceNum, direction='right')
         restore_warn = self.removed_warn_dcs.pop(raceNum)
         if restore_warn.get('warnings') is not None:
@@ -1963,15 +1869,11 @@ class Table():
     
     async def recalc_table(self, start = 0): #TEST: need to more extensively test different scenarios to ensure this works
         self.gp = int((start-1)/4)
-        for player in self.players.items():
-            for num,gp in enumerate(player[1][1]):
-                if num>=self.gp:
-                    self.players[player[0]][1][num] = 0
-            for num, race in enumerate(player[1][2]):
-                if int(num/4)>=self.gp:
-                    self.players[player[0]][2][num] = 0
-            pts = sum([race for race in self.players[player[0]][1]])
-            self.players[player[0]][0] = pts
+
+        for player in self.players:
+            player.scores[1] = [score if gp<self.gp else 0 for (gp, score) in enumerate(player.scores[1])]
+            player.scores[2] = [score if int(race/4)<self.gp else 0 for (race, score) in enumerate(player.scores[2])]
+            player.scores[0] = sum([gp for gp in player.scores[1]])
 
         reference_warnings = copy.deepcopy(self.warnings)
         
@@ -1979,15 +1881,10 @@ class Table():
         self.dc_list = defaultdict(list, {k:v for k, v in self.dc_list.items() if k<self.gp*4+1})
         #self.manual_warnings = defaultdict(list, {k:v for k, v in self.dc_list.items() if k<self.gp*4+1})
                 
-        self.finish_times = {k:v for k,v in self.finish_times.items() if k+1<(self.gp+1)*4-3}
-        self.ties = {k:v for k,v in self.ties.items() if k<(self.gp+1)*4-3} 
         self.gp_dcs = {k:v for k,v in self.gp_dcs.items() if k<self.gp} 
         
-        for player, dcs in self.dc_pts.items():
-            for indx, dc in enumerate(dcs):
-                if dc[0]>=(self.gp+1)*4-3:
-                    self.dc_pts[player].pop(indx)
-        self.dc_pts = {k:v for k, v in self.dc_pts.items() if len(v)>0}
+        for player in self.players:
+            player.dc_pts = [dc for dc in player.dc_pts if dc[0]<(self.gp+1)*4-3]
         
         self.dc_list_ids = {k:v for k,v in self.dc_list_ids.items() if v[1]<(self.gp+1)*4-3} 
         
@@ -1998,17 +1895,33 @@ class Table():
         
         await self.update_table(recalc=True, reference_warnings = reference_warnings)
         
-    def change_gps(self,gps): 
-        for player in list(self.players.keys()):
-            self.players[player][1]+=[0]*(gps-self.gps)
-            self.players[player][2]+=[0]*(gps-self.gps)*4
+    def change_gps(self,gps, reundo=False): 
+        for player in self.players:
+            player.scores[1]+=[0]*(gps-self.gps)
+            player.scores[2]+=[0]*(gps-self.gps)*4
+        orig_gps = self.gps
         self.gps = gps
+        
+        if not reundo:
+            self.modifications.append([(f'gps {orig_gps}'), orig_gps, gps])
+            self.undos.clear()
+
         if not self.check_mkwx_update.is_running():
             try:
                 self.check_mkwx_update.start()
             except RuntimeError:
                 pass
-          
+    
+    def change_sui(self, setting, reundo=False):
+        orig_sui = self.sui
+        self.sui = setting
+
+        if not reundo:
+            self.modifications.append([(f"largetimes {setting}", orig_sui, setting)])
+    
+    def create_new_player(self, name, fc):
+        return Player(fc=fc, name=name, scores=[0, [0]*self.gps, [0]*self.gps*4])
+                  
     async def room_is_updated(self):
         if self.last_race_update is not None and datetime.datetime.now() - self.last_race_update < datetime.timedelta(seconds=45): return False
         soup = await self.fetch(self.current_url)
@@ -2062,7 +1975,8 @@ class Table():
             return await self.ctx.send(img)
         
         f=discord.File(fp=img, filename='table.png')
-        em = discord.Embed(title=self.title_str(), description="\n[Edit this table on gb.hlorenzi.com]("+self.table_link+")")
+        em = discord.Embed(title=self.title_str(), 
+                        description="\n[Edit this table on gb.hlorenzi.com]("+self.table_link+")")
         
         em.set_image(url='attachment://table.png')
         is_overflow, error_footer, full_footer= self.get_warnings()
@@ -2077,6 +1991,7 @@ class Table():
             path = "./error_footers/"
             filename = f'warnings_and_errors-{self.ctx.channel.id}.txt'
             e_file = Utils.create_temp_file(filename, full_footer, dir=path)
+            Utils.delete_file(path+filename)
             
             await self.ctx.send(file = discord.File(fp=e_file, filename=filename))
 
@@ -2100,28 +2015,30 @@ class Table():
                     return "I am currently experiencing some issues with Wiimmfi. The table could not be updated. Try again later."
             
             new_races = []
-            new_tracks = []
             elems = soup.select('tr[id*=r]')
             new_elems = []
             for i in elems:
-                race = []
                 elem = i
-                if elem in self.recorded_elems:
+                raceID = elem.findAll('a')[0].text
+
+                if raceID in self.recorded_elems:
+                    # print("RACE ALREADY RECORDED")
                     break
-                new_elems.append(elem)
+                new_elems.append(raceID)
                     
                 try:
                     track = elem.findAll('a')[-1].text
                     assert(elem.findAll('a')[2] == elem.findAll('a')[-1])
                     track = track[0:track.find('(')-1]
-                except:
+                except (AssertionError, IndexError):
                     track = "Unknown Track"
-                
-                new_tracks.insert(0, track)
+                    
+                race = (raceID, track,[])
                 next_elem = elem.findNext('tr').findNext('tr')
                 
                 while next_elem not in elems and next_elem !=None:
                     fin_time = next_elem.findAll('td', align='center')[-1].text
+                    # col_indx, dec_indx = fin_time.find(":"), fin_time.find('.')
                     fin_time = 'DC' if fin_time == '—' else fin_time
                     miiName = next_elem.find('td', class_='mii-font').text
                     if miiName == "no name": miiName = "Player"
@@ -2133,7 +2050,15 @@ class Table():
                     except IndexError:
                         delta = next_elem.find_all('td',{"align" : "center"})[5].text
                     
-                    race.append((miiName, fin_time, fc, tr, delta))
+                    player_obj = None
+                    for player in self.players:
+                        if player.getFC()==fc:
+                            player_obj = player
+                            break
+                    if player_obj is None: 
+                        player_obj = self.create_new_player(self.check_name(miiName), fc)
+
+                    race[2].append((player_obj, fin_time, tr, delta))
                     next_elem = next_elem.findNext('tr')
                     
                 new_races.append(race)
@@ -2147,10 +2072,6 @@ class Table():
                     new_races = []
                 else:
                     new_races = new_races[:self.gps*4-len(self.races)]
-            
-            self.tracks+=new_tracks
-            if len(self.tracks)>self.gps*4:
-                self.tracks = self.tracks[:self.gps*4]
             
             self.recorded_elems+=new_elems
             self.current_elems+=new_elems
@@ -2168,28 +2089,25 @@ class Table():
             if (shift+raceNum)%4 == 0: #new gp
                 if (raceNum!=init_shift and recalc) or (not recalc and raceNum+shift+init_shift!=0):
                     self.gp+=1
-                self.room_sizes.append(len(race))
-                self.room_players.append([i[2] for i in race])
+                self.room_sizes.append(len(race[2]))
+                self.room_players.append([i[0] for i in race[2]])
                 self.room_sizes_error_affected.append([])
                 self.room_error_index.append([-1,-1])
                 if self.gp>=self.gps: 
-                    for i in self.players.values():
-                        i[1].append(0)
+                    for p in self.players:
+                        p.scores[1].append(0)
+                        p.scores[2].extend([0]*4)
                         
-            cur_room_size = len(race)
-            cur_race_players = [i[2] for i in race]
+            cur_room_size = len(race[2])
+            cur_race_players = [i[0] for i in race[2]]
             
             all_blank = False
             dc_count = 0
-            for i, r in enumerate(race):
+            for i, r in enumerate(race[2]):
                 if r[1] == 'DC':
                     dc_count +=1
             if dc_count == cur_room_size:
                 self.warnings[shift+raceNum+1].append({"type": "mkwx_bug_blank", 'gp':self.gp+1})
-                fin_times = {}
-                for i in race:
-                    fin_times[i[0]] = i[1]
-                self.finish_times[shift+raceNum] = fin_times
                 all_blank = True
                 #continue
 
@@ -2201,12 +2119,12 @@ class Table():
                                                         'num_affected':check_repeat_times[1].get('num_aff'), 'gp': self.gp+1})
 
                 #tr check
-                tr_count = Counter([i[3] for i in race])[True]
+                tr_count = Counter([i[2] for i in race[2]])[True]
                 if tr_count>0:
                     self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_tr", 'aff_players': tr_count, 'gp': self.gp+1})
             
                 #delay check
-                delay_count = len([i[4] for i in race if i[4]=="—" or (Utils.isfloat(i[4]) and (float(i[4])>7.0 or float(i[4])<-7.0))])
+                delay_count = len([i[3] for i in race[2] if i[3]=="—" or (Utils.isfloat(i[3]) and (float(i[3])>7.0 or float(i[3])<-7.0))])
                 if delay_count>0:
                     self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_delta", 'aff_players':delay_count, 'gp': self.gp+1})
 
@@ -2236,11 +2154,11 @@ class Table():
                 self.warnings[shift+raceNum+1].append({'type': 'overflow', 'cur_players': cur_room_size, 'sup_players': self.num_players, 'gp': self.gp+1})
              
             elif cur_room_size<len(self.players):
-                f_codes = [i[2] for i in race]
+                players = cur_race_players
                 total_missing_players = []
                 missing_players = []
                 for i in self.players:
-                    if i not in f_codes:
+                    if i not in players:
                         total_missing_players.append(i)
                         if (i in self.room_players[self.gp] and (shift+raceNum+1)%4!=1) or (i in self.room_players[self.gp-1] and (shift+raceNum+1)%4==1): 
                             missing_players.append(i)
@@ -2270,122 +2188,104 @@ class Table():
                                 self.warnings[shift+raceNum+1].append({'type':'dc_before', 'race':shift+raceNum+1, 'rem_races':4-((shift+raceNum)%4), 'pts':0, 'gp':self.gp+1,'player':mp, "is_edited":is_edited})    
                                 self.dc_list[shift+raceNum+1].append({'type':'dc_before', 'race':shift+raceNum+1, 'rem_races':4-((shift+raceNum)%4), 'pts':0, 'gp':self.gp+1,'player':mp, "is_edited":is_edited})    
                                 
-                                try:
-                                    self.dc_pts[mp].append([shift+raceNum+1, [i for i in range(shift+raceNum+1, shift+raceNum+1+(4-((shift+raceNum)%4))%4)]])
-                                
-                                except:
-                                    self.dc_pts[mp] = [[shift+raceNum+1, [i for i in range(shift+raceNum+1, shift+raceNum+1+(4-((shift+raceNum)%4))%4)]]]
-                                    
+                                mp.dc_pts.append([shift+raceNum+1, [i for i in range(shift+raceNum+1, shift+raceNum+1+(4-((shift+raceNum)%4))%4)]])
+                                        
                                 self.dc_ids_append(mp, shift+raceNum+1)
                                 if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                                 self.gp_dcs[self.gp].append(mp)
             
             
             last_finish_times = {}
+            ties = {}
             
-            for place,player in enumerate(race):
+            for place, player in enumerate(race[2]):
                 time = player[1]
-                fc = player[2]
-                is_edited = find_if_edited(fc, shift+raceNum+1, reference_warnings)
+                player_obj = player[0]
+                is_edited = find_if_edited(player_obj, shift+raceNum+1, reference_warnings)
 
-                for dc in list(self.dc_pts.items()):    
-                    for indx,j in enumerate(dc[1]):
-                        if shift+raceNum+1 in j[1] and dc[0] == fc:
-                            self.dc_pts[dc[0]].pop(indx)
-                            continue
+                for indx, j in enumerate(player_obj.dc_pts):
+                    if shift+raceNum+1 in j[1]:
+                        player_obj.dc_pts.pop(indx)
                 
                 #sub player
-                if fc not in self.players and fc not in self.deleted_players:
-                    status = await self.add_sub_player(self.check_name(player[0]), fc)
+                if player_obj not in self.players and player_obj not in self.deleted_players:
+                    status = await self.add_sub_player(player_obj)
                     if status!='failed':
-                        sub_miis.append(fc)
+                        sub_miis.append(player_obj)
                     if not isFFA(self.format) and status == 'success':
-                        self.warnings[shift+raceNum+1].append({'type':'sub', 'player': fc})
-
-                miiName = self.display_names[fc]
+                        self.warnings[shift+raceNum+1].append({'type':'sub', 'player': player_obj})
                 
-                self.players[fc][1][self.gp] += PTS_MAP[cur_room_size][place]
-                self.players[fc][2][shift+raceNum] = PTS_MAP[cur_room_size][place]
-                self.players[fc][0] += PTS_MAP[cur_room_size][place]
+                player_obj.scores[1][self.gp] += PTS_MAP[cur_room_size][place]
+                player_obj.scores[2][shift+raceNum] = PTS_MAP[cur_room_size][place]
+                player_obj.scores[0] += PTS_MAP[cur_room_size][place]
                 
                 #check for ties
                 if time != 'DC' and time in list(last_finish_times.values()):
                     for index,t in enumerate(list(last_finish_times.values())):
                         if t == time:
-                            if shift+raceNum+1 not in self.ties:
-                                self.ties[shift+raceNum+1] = {}
-                            if time in self.ties[shift+raceNum+1]:
-                                self.ties[shift+raceNum+1][time].append(list(last_finish_times.keys())[index])
+                            if time in ties:
+                                ties[time].append(list(last_finish_times.keys())[index])
                             else:
-                                self.ties[shift+raceNum+1][time] = [list(last_finish_times.keys())[index]]
+                                ties[time] = [list(last_finish_times.keys())[index]]
                     
-                    self.ties[shift+raceNum+1][time].append(fc)
+                    ties[time].append(player_obj)
                 
-                if ":" in time and int(time[0:time.find(':')])>=5:
-                    self.warnings[shift+raceNum+1].append({'type': 'large_time', 'player':fc, 'time':time})
-                    # if self.sui:
-                    #     if "Large finish times occurred, but are being ignored. Table could be inaccurate." not in self.warnings[-1]:
-                    #         self.warnings[-1].append("Large finish times occurred, but are being ignored. Table could be inaccurate.")
-                    # else:
-                    #     self.warnings[shift+raceNum+1].append({'type': 'large_time', 'player':fc, 'time':time})
-
-                last_finish_times[fc] = time
+                colon_indx = time.find(":")
+                if time!='DC' and colon_indx>-1 and int(time[:colon_indx])>=5:
+                    self.warnings[shift+raceNum+1].append({'type': 'large_time', 'player':player_obj, 'time':time})
+                   
+                last_finish_times[player_obj] = time
 
                 try:
                     assert(time!='DC' or all_blank)
                 except AssertionError:
-                    if self.gp not in self.gp_dcs or fc not in self.gp_dcs[self.gp]:
+                    if self.gp not in self.gp_dcs or player_obj not in self.gp_dcs[self.gp]:
                         if (shift+raceNum)%4==0:
-                            self.warnings[shift+raceNum+1].append({'type': 'dc_on', 'race':1, 'gp':self.gp+1, 'player':fc, "is_edited":is_edited})
-                            self.dc_list[shift+raceNum+1].append({'type': 'dc_on', 'race':1, 'gp':self.gp+1, 'player':fc, "is_edited":is_edited})
+                            self.warnings[shift+raceNum+1].append({'type': 'dc_on', 'race':1, 'gp':self.gp+1, 'player':player_obj, "is_edited":is_edited})
+                            self.dc_list[shift+raceNum+1].append({'type': 'dc_on', 'race':1, 'gp':self.gp+1, 'player':player_obj, "is_edited":is_edited})
                             
                         else: 
                             if (4-((shift+raceNum+1)%4))%4 == 0:
-                                self.warnings[shift+raceNum+1].append({'type': "dc_on", 'race':-1, 'player':fc, 'gp':self.gp+1, "is_edited":is_edited})
-                                self.dc_list[shift+raceNum+1].append({'type': "dc_on", 'race':-1, 'player':fc, 'gp':self.gp+1, "is_edited":is_edited})
+                                self.warnings[shift+raceNum+1].append({'type': "dc_on", 'race':-1, 'player':player_obj, 'gp':self.gp+1, "is_edited":is_edited})
+                                self.dc_list[shift+raceNum+1].append({'type': "dc_on", 'race':-1, 'player':player_obj, 'gp':self.gp+1, "is_edited":is_edited})
                         
                             else:
-                                self.warnings[shift+raceNum+1].append({'type': "dc_on", 'race':shift+raceNum+1, 'rem_races': (4-((shift+raceNum+1)%4))%4, 'pts':0, 'player':fc, 'gp':self.gp+1, "is_edited":is_edited})
-                                self.dc_list[shift+raceNum+1].append({'type': "dc_on", 'race':shift+raceNum+1, 'rem_races': (4-((shift+raceNum+1)%4))%4, 'pts':0, 'player':fc, 'gp':self.gp+1, "is_edited":is_edited})
+                                self.warnings[shift+raceNum+1].append({'type': "dc_on", 'race':shift+raceNum+1, 'rem_races': (4-((shift+raceNum+1)%4))%4, 'pts':0, 'player':player_obj, 'gp':self.gp+1, "is_edited":is_edited})
+                                self.dc_list[shift+raceNum+1].append({'type': "dc_on", 'race':shift+raceNum+1, 'rem_races': (4-((shift+raceNum+1)%4))%4, 'pts':0, 'player':player_obj, 'gp':self.gp+1, "is_edited":is_edited})
                             
-                            try:
-                                self.dc_pts[fc].append([shift+raceNum+1, [i for i in range(shift+raceNum+2, shift+raceNum+2+(4-((shift+raceNum+1)%4))%4)]])
-                                
-                            except:
-                                self.dc_pts[fc] = [[shift+raceNum+1, [i for i in range(shift+raceNum+2, shift+raceNum+2+(4-((shift+raceNum+1)%4))%4)]]]
-                        
-                        self.dc_ids_append(fc, shift+raceNum+1)
+                            player_obj.dc_pts.append([shift+raceNum+1, [i for i in range(shift+raceNum+2, shift+raceNum+2+(4-((shift+raceNum+1)%4))%4)]])
+                             
+                        self.dc_ids_append(player_obj, shift+raceNum+1)
                         if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
-                        self.gp_dcs[self.gp].append(fc)
+                        self.gp_dcs[self.gp].append(player_obj)
                     else:
-                        self.warnings[shift+raceNum+1].append({'type': 'blank_time', 'player': fc})                            
-                      
-            for dc in list(self.dc_pts.items()):
-                for j in dc[1]:
+                        self.warnings[shift+raceNum+1].append({'type': 'blank_time', 'player': player_obj})                            
+
+            for player_ref in self.players:
+                for j in player_ref.dc_pts:
                     if shift+raceNum+1 in j[1]:
-                        self.players[dc[0]][1][self.gp]+=3
+                        player_ref.scores[1][self.gp]+=3
+                        player_ref.scores[2][shift+raceNum+1]=3
+
                         for ind,w in enumerate(self.warnings[j[0]]):
-                            if w.get('player') == dc[0]:
+                            if w.get('player') == player_ref:
                                 self.warnings[j[0]][ind]['pts']+=3
                                 break
                         for ind, d in enumerate(self.dc_list[j[0]]):
-                            if d.get('player') == dc[0]:
+                            if d.get('player') == player_ref:
                                 self.dc_list[j[0]][ind]['pts'] +=3
                                 break
-                            
-                        self.players[dc[0]][2][raceNum]=3
                         break
 
-            if shift+raceNum+1 in self.ties:
-                for tie in list(self.ties[shift+raceNum+1].items()):     
+            if len(ties)>0:
+                for tie in list(ties.items()):     
                     self.warnings[shift+raceNum+1].append({'type':'tie', "time":tie[0], 'players':tie[1]}) 
-            
-            self.finish_times[shift+raceNum] = last_finish_times
-            
+                        
             
         if not recalc: self.races+=new_races
         if len(sub_miis)>0: self.populate_table_flags(subs=sub_miis)
         self.table_str = self.create_string()
+        self.update_warn_file()
 
         if prnt:
             print()
@@ -2393,12 +2293,13 @@ class Table():
             # print(sub_miis)
 
         if not recalc:   
-            # warn_content = self.get_warnings(override=True)
-            # if "No warnings or room errors." not in warn_content:
-            #     Utils.create_temp_file(f"warnings_and_errors-{self.ctx.channel.id}.txt", warn_content, dir='./error_footers/', no_ret=True)
-            return "Table {}updated. Room {} has finished {} {}. Last race: {}.".format("auto-" if auto else "", rID, len(self.races), "race" if len(self.races)==1 else "races",self.tracks[len(self.races)-1])
-                
+            return "Table {}updated. Room {} has finished {} {}. Last race: {}.".format("auto-" if auto else "", rID, len(self.races), "race" if len(self.races)==1 else "races",self.races[-1][1])
 
+    def update_warn_file(self):
+        warn_content = self.get_warnings(override=True)
+        if "No warnings or room errors." not in warn_content:
+            Utils.create_temp_file(f"warnings_and_errors-{self.ctx.channel.id}.txt", warn_content, dir='./error_footers/', no_ret=True)
+                       
     def create_string(self, by_race = False):
         self.tags = {k:v for k,v in self.tags.items() if len(v)>0}
         
@@ -2410,90 +2311,27 @@ class Table():
 
         if isFFA(self.format):
             ret+='\nFFA'
-            for p in self.players.keys():
-                p2 = p
-                if p in self.deleted_players: continue
-                if p in self.sub_names: 
-                    p2 = ''
-                    for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                        p2 += '{}({})/'.format(self.display_names[x], r)
-                    p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
-                else:
-                    p2 = self.display_names[p2]
-                ret+="\n{} ".format(p2)
+            for player in self.players:
+                if player in self.deleted_players: 
+                    continue
+                ret+="\n{} ".format(player.get_full_name(len(self.races)))
                 #flag insertion by region
-                flag_code = self.table_flags.get(p, '')
+                flag_code = player.getFlag()
                 ret+=f"[{flag_code if flag_code else ''}] "
-                if by_race: 
-                    scores = self.players[p][2]
-                else:
-                    scores = self.players[p][1]
-                for num,gp in enumerate(scores):
-                    if by_race:
-                        if int(num/4)+1 in self.edited_scores[p]:
-                            if num/4 +1 in self.edited_scores[p]:
-                                ret+="{}".format(self.edited_scores[p][int(num/4)+1])
-                            else:
-                                ret+='0'
-                            if num+1!=len(scores):
-                                ret+='|'
-                            continue
-                    else:
-                        if num+1 in self.edited_scores[p]:
-                            ret+='{}'.format(self.edited_scores[p][num+1])
-                            if num+1!=len(scores):
-                                ret+='|'
-                            continue
-
-                    ret+="{}".format(gp)
-                    if num+1!=len(scores):
-                        ret+='|'
-                if p in self.pens:
-                    ret+='-{}'.format(self.pens[p])
+                ret+= player.get_score_str(by_race)
                 
         else:
             for tag in self.tags.keys():
                 ret+='\n\n{}'.format(tag)
-                for p in self.tags[tag]:
-                    p2 = p
-                    if p in self.deleted_players: continue
-                    if p in self.sub_names: 
-                        p2 = ''
-                        for x,r in zip(self.sub_names[p]['sub_out'], self.sub_names[p]['out_races']):
-                            p2 += '{}({})/'.format(self.display_names[x], r)
-                        p2+='{}({})'.format(self.display_names[p], self.sub_names[p]['in_races'])
-                    else:
-                        p2 = self.display_names[p2]
-                    ret+="\n{} ".format(p2)
+                for player in self.tags[tag]:
+                    if player in self.deleted_players: 
+                        continue
+                    ret+="\n{} ".format(player.get_full_name(len(self.races)))
                     #flag insertion by region
-                    flag_code = self.table_flags.get(p, '')
-                    ret+=f"[{flag_code if flag_code else ''}] " 
-                    if by_race: 
-                        scores = self.players[p][2]
-                    else:
-                        scores = self.players[p][1]
-                    for num,gp in enumerate(scores):
-                        if by_race:
-                            if int(num/4)+1 in self.edited_scores[p]:
-                                if num/4 +1 in self.edited_scores[p]:
-                                    ret+="{}".format(self.edited_scores[p][int(num/4)+1])
-                                else:
-                                    ret+='0'
-                                if num+1!=len(scores):
-                                    ret+='|'
-                                continue      
-                        else:
-                            if num+1 in self.edited_scores[p]:
-                                ret+='{}'.format(self.edited_scores[p][num+1])
-                                if num+1!=len(scores):
-                                    ret+='|'
-                                continue
-                            
-                        ret+="{}".format(gp)
-                        if num+1!=len(scores):
-                            ret+='|'
-                    if p in self.pens:
-                        ret+='-{}'.format(self.pens[p])
+                    flag_code = player.getFlag()
+                    ret+=f"[{flag_code if flag_code else ''}] "
+                    ret+= player.get_score_str(by_race)
+                    
                 if tag in self.team_pens.keys():
                     ret+='\nPenalty -{}'.format(self.team_pens[tag])
                             
@@ -2532,7 +2370,7 @@ class Table():
         if len(self.modifications)==0:
             ret+="No table modifications to undo."
         for i,m in enumerate(self.modifications):
-            ret+='{}. {}{}\n'.format(i+1, self.prefix, m[0][0])
+            ret+=f'{i+1}. {self.prefix}{m[0][0]}\n'
         return ret
     
     def get_undos(self):
@@ -2541,7 +2379,7 @@ class Table():
             ret+="No table modification undos to redo."
         
         for i,u in enumerate(self.undos):
-            ret+="{}. {}{}\n".format(i+1, self.prefix, u[0][0])
+            ret+=f"{i+1}. {self.prefix}{u[0][0]}\n"
         return ret
     
     def undo_warning(self,mod):
@@ -2554,7 +2392,7 @@ class Table():
                 for j in x:
                     if 'edit ' in j[0] and int(j[2])==gp:
                         count+=1
-            if count==1: self.manual_warnings[-1].remove("GP {} scores have been manually modified by the tabler.".format(gp))
+            if count==1: self.manual_warnings[-1].remove(f"GP {gp} scores have been manually modified by the tabler.")
             
         elif 'editrace' in mod_type:
             raceNum = int(mod[2])
@@ -2590,7 +2428,7 @@ class Table():
                     break
         
         else:
-            raceNum= int(mod[1])
+            raceNum = int(mod[1])
             count=0
             for x in self.modifications:
                 for j in x:
@@ -2605,9 +2443,9 @@ class Table():
         self.warnings = defaultdict(list,{k:v for k,v in self.warnings.items() if len(v)>0})
         self.manual_warnings = defaultdict(list,{k:v for k,v in self.manual_warnings.items() if len(v)>0})  
     
-    async def undo(self, j):
+    async def undo(self, j: Tuple[str, Any]):
         if j[0].find('edit ') == 0:
-            self.undo_edit(j[1], j[2])
+            self.undo_edit(j[1], j[4])
             self.undo_warning(j)
                 
         elif 'editrace' in j[0]: 
@@ -2664,6 +2502,12 @@ class Table():
         
         elif 'style ' in j[0]:
             self.change_style(j[1], reundo=True)
+        
+        elif 'gps ' in j[0]:
+            self.change_gps(j[1], reundo=True)
+        
+        elif 'largetimes' in j[0]:
+            self.change_sui(j[1], reundo=True)
         
         else:
             print("UNKNOWN UNDO TYPE:",j[0])
@@ -2727,6 +2571,12 @@ class Table():
         elif 'style ' in j[0]:
             self.change_style(j[2], reundo=True)
         
+        elif 'gps ' in j[0]:
+            self.change_gps(j[2], reundo=True)
+        
+        elif 'largetimes' in j[0]:
+            self.change_sui(j[2], reundo=True)
+        
         else:
             print("UNKNOWN REDO TYPE:",j[0])
             raise AssertionError
@@ -2762,8 +2612,8 @@ class Table():
                 
                 self.modifications = list(reversed(self.undos))
                 self.undos = []
-                return "All manual table modifications undos have been redone."
-            return "No table modification undos to redo."
+                return "All manual table modifications have been redone."
+            return "No table modifications to redo."
         
         else: #redo last undo
             if len(self.undos)>0:
@@ -2774,7 +2624,7 @@ class Table():
                 self.modifications.append(mod)
                 del self.undos[-1]
                 return f"Last table modification undo ({Utils.disc_clean(self.prefix+mod[0][0])}) has been redone."
-            return "No table modification undos to redo."
+            return "No table modifications to redo."
         
         
     async def fetch(self, url, headers=None): 
@@ -2785,9 +2635,7 @@ class Table():
                     async with session.get(url, timeout=timeout) as response:
                         if response.status!=200:
                             return 'response error'
-                        resp = await response.text()
-                        soup = BeautifulSoup(resp, 'html.parser')
-                        return soup
+                        return BeautifulSoup(await response.text(), 'html.parser')
                 except:
                     return 'timeout error'
 
@@ -2796,9 +2644,7 @@ class Table():
                     async with session.get(url, timeout=timeout, headers=headers) as response:
                         if response.status!=200:
                             return 'response error'
-                        resp = await response.text()
-                        soup = BeautifulSoup(resp, 'html.parser')
-                        return soup
+                        return BeautifulSoup(await response.text(), 'html.parser')
                 except:
                     return 'timeout error'
 
@@ -2811,8 +2657,7 @@ class Table():
                     async with session.get(url, timeout=timeout) as response:
                         if response.status!=200:
                             return 'response error'
-                        resp = await response.json()
-                        return resp
+                        return await response.json()
                 except:
                     return 'timeout error'
 
@@ -2821,8 +2666,7 @@ class Table():
                     async with session.get(url, timeout=timeout, headers=headers) as response:
                         if response.status!=200:
                             return 'response error'
-                        resp = await response.json()
-                        return resp
+                        return await response.json()
                 except:
                     return 'timeout error'
         
