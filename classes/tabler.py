@@ -17,20 +17,21 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 import time as timer
-from unidecode import unidecode
+# from unidecode import unidecode
 from collections import defaultdict, Counter
 from find_tags import tag_algo
 import tag_testing.simulatedAnnealingTag as simAnl
-from utils.WiimmfiMii import get_wiimmfi_mii, get_wiimmfi_mii_async
+from utils.WiimmfiMii import get_wiimmfi_mii # get_wiimmfi_mii_async
 import utils.Utils as Utils
 from utils.Utils import isFFA, WARNING_MAP, DC_MAP, STYLE_MAP, PTS_MAP
 from utils.Utils import GRAPH_MAP as GM
-from Player import Player
+from classes.Player import Player
+import classes.Channel as Channel
 
 # TODO: maybe automate first race dcs (18 and 15 pts) 
 
 class Table():
-    def __init__(self, ctx = None, bot = None, testing = False):
+    def __init__(self, testing = False):
         self.TESTING = testing
         self.IGNORE_FCS = False
         if self.TESTING:
@@ -94,20 +95,8 @@ class Table():
         self.rxx = '' #rxx that table is watching
         self.gp = 0 #current gp
         self.num_players = 0 #number of players room is supposed to have (based on format and teams)
-        
-        ##### Stuff for bot instances #####
-        self.choose_message = ""
-        self.searching_room = False
-        self.confirm_room = False
-        self.confirm_reset = False
-        self.reset_args = None
-        self.table_running = False
-        self.picture_running = False
-        self.ctx: commands.Context = ctx
-        self.prefix = ctx.prefix
-        self.bot: commands.Bot = bot
-        self.last_command_sent = None
-        ##### Stuff for bot instances #####
+
+        self.channel: Channel.Channel = None #must be set by Channel class during initialization
         
     def init_testing(self):
 
@@ -184,7 +173,7 @@ class Table():
                     return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
                 
             if "No match found!" in list(soup.stripped_strings):
-                return True, f"The room ({rxx}) hasn't finished a race yet.\nRetry `{self.prefix}mergeroom` when the room has finished one race."
+                return True, f"The room ({rxx}) hasn't finished a race yet.\nRetry `{self.channel.prefix}mergeroom` when the room has finished one race."
             
             if not redo:
                 self.modifications.append([("mergeroom {}".format(', '.join(mii)), len(self.prev_elems), rxx)])
@@ -207,7 +196,7 @@ class Table():
             
             stripped = list(soup.stripped_strings)
             if "No match found!" in stripped:
-                return True, f"The room ({rxx}) either doesn't exist or hasn't finished a race yet.\nRetry `{self.prefix}mergeroom` when the room has finished at least one race and ensure that the room id is in *rxx* or *XX00* format."
+                return True, f"The room ({rxx}) either doesn't exist or hasn't finished a race yet.\nRetry `{self.channel.prefix}mergeroom` when the room has finished at least one race and ensure that the room id is in *rxx* or *XX00* format."
             
             if not redo:
                 self.modifications.append([(f"mergeroom {rxx}", len(self.prev_elems), rxx)])
@@ -277,7 +266,7 @@ class Table():
         self.current_url = room_url
         string = self.room_list_str()
 
-        return False, f"Room {self.rxx} found.\n{string}\n\n**Is this room correct?** (`{self.prefix}yes` / `{self.prefix}no`)"
+        return False, f"Room {self.rxx} found.\n{string}\n\n**Is this room correct?** (`{self.channel.prefix}yes` / `{self.channel.prefix}no`)"
 
     def populate_table_flags(self, subs=None):
         '''
@@ -409,6 +398,9 @@ class Table():
 
         elif warning_type == "tie":
             return WARNING_MAP.get(warning_type).format([i.getName() for i in warning.get('players')], warning.get('time'))
+        
+        elif warning_type == "tie_dc":
+            return WARNING_MAP.get(warning_type).format([i.getName() for i in warning.get('players')])
 
         elif warning_type == "sub":
             if warning.get('is_edited', False):
@@ -420,8 +412,7 @@ class Table():
             return WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('time'))
 
         else:
-            print("WARNING TYPE NOT FOUND:", warning_type)
-            raise AssertionError
+            raise AssertionError("WARNING TYPE NOT FOUND:", warning_type)
 
     def get_warnings(self, show_large_times = None, override=False) -> Tuple[bool, str, str]:
         if override is True: show_large_times = True
@@ -455,7 +446,7 @@ class Table():
             return False, "No warnings or room errors. Table should be accurate.", None
             
         warnings = defaultdict(list,dict(sorted(warnings.items(), key=lambda item: item[0])))
-        ret = 'Room warnings/errors{}:\n'.format(f" ({self.prefix}dcs to fix dcs)" if len(self.dc_list)>0 else "")
+        ret = 'Room warnings/errors{}:\n'.format(f" ({self.channel.prefix}dcs to fix dcs)" if len(self.dc_list)>0 else "")
         
         for indx,i in enumerate(warnings[-1]):
             if "scores have been manually modified" in i:
@@ -472,7 +463,7 @@ class Table():
             for warning in i[1]:
                 ret+=f"       \t- {self.warn_to_str(warning) if isinstance(warning, dict) else warning}\n"
 
-        ret = ret.replace("[[/PREFIX\]]", self.prefix)
+        ret = ret.replace("[[/PREFIX\]]", self.channel.prefix)
         if override: return ret
         if len(ret)>2020:
             fixed_ret = ret[:2020]
@@ -522,7 +513,7 @@ class Table():
             c_indx = int(choice)
             choice = STYLE_MAP.get(c_indx, None)
             if not choice:
-                return f"`{c_indx}` is not a valid style number. The style number must be from 1-{len(STYLE_MAP)}. Look at `{self.prefix}style` for reference."
+                return f"`{c_indx}` is not a valid style number. The style number must be from 1-{len(STYLE_MAP)}. Look at `{self.channel.prefix}style` for reference."
             
             if not reundo:
                 self.modifications.append([(f"style {c_indx}", self.style.get('type') if self.style is not None else None, choice.get('type'))])
@@ -566,7 +557,7 @@ class Table():
             c_indx = int(choice)
             choice = self.graph_map.get(c_indx, None)
             if not choice:
-                return "`{}` is not a valid graph number. The graph number must be from 1-{}. Look at `{}graph` for reference.".format(c_indx, len(self.graph_map), self.prefix)
+                return "`{}` is not a valid graph number. The graph number must be from 1-{}. Look at `{}graph` for reference.".format(c_indx, len(self.graph_map), self.channel.prefix)
             
             if self.teams != 2 and choice.get('table') == 'diff':
                 return "The graph type `{}` can only be used when there are two teams.".format('Difference')
@@ -669,7 +660,7 @@ class Table():
                 self.tags[new] = data
                 ret+= f"Edited tag `{Utils.backtick_clean(actual_orig)}` to `{Utils.backtick_clean(new)}`."+ ('\n' if len(l)>1 and num <len(l)-1 else '')
                 
-            if not reundo and self.table_running:
+            if not reundo and self.channel.table_running:
                 self.modifications.append([(f'edittag {t_orig} {new}', new, actual_orig)])
                 self.undos.clear()
 
@@ -756,7 +747,7 @@ class Table():
         for k in empty_keys:
             del self.tags[k]
 
-        if not reundo and self.table_running:
+        if not reundo and self.channel.table_running:
             self.modifications.append([(f"changetag {p_indx} {tag}", player, tag, old_tag, old_indx)])
 
         return f"`{Utils.backtick_clean(player.getName())}` tag changed from `{Utils.backtick_clean(old_tag)}` to `{Utils.backtick_clean(existing_tag if existing_tag else tag)}`."
@@ -807,7 +798,7 @@ class Table():
         for i in removal:
             self.tags.pop(i)
         
-        if not redo and self.table_running:
+        if not redo and self.channel.table_running:
             self.modifications.append([(f"tags {dic_str}", orig_tags, dic)])
         
         return "Tags updated."
@@ -1202,9 +1193,11 @@ class Table():
         if name not in self.dup_names and name not in self.names:
             return name
         x = 1
-        new = name
-        while new in self.dup_names or name in self.names:
+        if name in self.dup_names:
             new = name+'-'+str(x)
+        while new in self.dup_names or new in self.names:
+            new = name+'-'+str(x)
+            x+=1
         return new
     
     def sort_AP(self, player: Player) -> Tuple[int, str, str]:
@@ -1467,6 +1460,20 @@ class Table():
                     self.races[raceNum-1][2].append((player, 'DC', "", ""))
                     gp = int((raceNum-1)/4)
 
+                    # checking for multiple DCs in the same race
+                    DC_ties = [p[0] for p in self.races[raceNum-1][2] if p[1]=='DC']
+                    if len(DC_ties)>1:
+                        exists = False
+                        for indx, w in enumerate(self.warnings[raceNum]):
+                            if w.get('type') == "tie_dc" and not set(DC_ties).issubset(w.get('players')):
+                                dc_players = set(w.get('players'))
+                                dc_players.update(DC_ties)
+                                w['players'] = dc_players
+                                exists=True
+                                break
+                        if not exists:
+                            self.warnings[raceNum].append({'type': 'tie_dc', 'players': DC_ties})
+
                     if raceNum %4 != 1:
                         player.scores[1][gp] -=3
                         player.scores[2][raceNum-1] = 0
@@ -1475,7 +1482,7 @@ class Table():
                             if i[0]==raceNum:
                                 player.dc_pts[indx][1].pop(0)
                                 break
-                            
+                        
                         for indx,i in enumerate(self.warnings[raceNum]):
                             if i.get('player') == player and "before" in i.get('type'):
                                 if (4-(raceNum%4))%4 == 0:
@@ -1557,7 +1564,7 @@ class Table():
                 
             except AssertionError:
                 if cor_room_size> orig_room_size and cor_room_size<=len(self.players):
-                    ret+=f"**Note:** *If a race is missing player(s) due to DCs, it is advised to use `{self.prefix}dcs` instead.\nOnly use this command if no DCs were shown for the race in question.*\n\n"
+                    ret+=f"**Note:** *If a race is missing player(s) due to DCs, it is advised to use `{self.channel.prefix}dcs` instead.\nOnly use this command if no DCs were shown for the race in question.*\n\n"
                 else:
                     ret+= f"Invalid <corrected room size> for race `{raceNum+1}`. The corrected room size must be a number from 1-{len(self.players)}.\n"
                     continue
@@ -1728,13 +1735,13 @@ class Table():
             #     self.tags = self.restore_merged[-1][9]
             # self.restore_merged.pop(-1)
 
-            if len(self.races)<4*self.gps and not self.check_mkwx_update.is_running():
+            if len(self.races)<4*self.gps and not self.channel.mkwx_update.is_running():
                 try:
-                    self.check_mkwx_update.start()
+                    self.channel.mkwx_update.start()
                 except RuntimeError:
                     pass
-            elif not self.check_mkwx_update.is_running():
-                await self.auto_send_pic()
+            elif not self.channel.mkwx_update.is_running():
+                await self.channel.auto_send_pic()
             
         return error, mes
 
@@ -1802,13 +1809,13 @@ class Table():
                             if len(self.tags[tag[0]])==0:
                                 self.tags.pop(tag[0])
  
-        if len(self.races)<4*self.gps and not self.check_mkwx_update.is_running():
+        if len(self.races)<4*self.gps and not self.channel.mkwx_update.is_running():
             try:
-                self.check_mkwx_update.start()
+                self.channel.mkwx_update.start()
             except RuntimeError:
                 pass
-        elif not self.check_mkwx_update.is_running():
-            await self.auto_send_pic()
+        elif not self.channel.mkwx_update.is_running():
+            await self.channel.auto_send_pic()
                 
     async def remove_race(self, raceNum, redo=False): 
         if raceNum==-1: raceNum = len(self.races)
@@ -1896,22 +1903,32 @@ class Table():
         await self.update_table(recalc=True, reference_warnings = reference_warnings)
         
     def change_gps(self,gps, reundo=False): 
+        restore_scores = {}
         for player in self.players:
+            if not reundo:
+                restore_scores[player] = copy.deepcopy(player.scores)
+
             player.scores[1]+=[0]*(gps-self.gps)
             player.scores[2]+=[0]*(gps-self.gps)*4
+
+            player.scores[1] = player.scores[1][:gps]
+            player.scores[2] = player.scores[2][:gps*4]
         orig_gps = self.gps
         self.gps = gps
         
         if not reundo:
-            self.modifications.append([(f'gps {orig_gps}'), orig_gps, gps])
+            self.modifications.append([(f'changegps {orig_gps}', orig_gps, gps, (len(self.races),restore_scores))])
             self.undos.clear()
-
-        if not self.check_mkwx_update.is_running():
-            try:
-                self.check_mkwx_update.start()
-            except RuntimeError:
-                pass
     
+    def undo_changegps(self, gps, restore_scores: Tuple[int, Dict[Player, List]]): #NOTE: maybe change how self.gps affects scores
+        self.change_gps(gps, reundo=True)
+        stop = restore_scores[0]
+        gp_stop = int(stop/4)
+        for player, scores in restore_scores[1].items():
+            player.scores[2][:stop] = scores[2][:stop]
+            player.scores[1][:gp_stop] = [sum(gp) for gp in list(Utils.chunks(player.scores[2], 4))[:gp_stop]]
+
+
     def change_sui(self, setting, reundo=False):
         orig_sui = self.sui
         self.sui = setting
@@ -1947,54 +1964,6 @@ class Table():
                 self.last_race_update = datetime.datetime.now()
             return True
         return False
-    
-    @tasks.loop(seconds=5)
-    async def check_mkwx_update(self): 
-        # cur_iter = self.check_mkwx_update.current_loop
-        if not await self.room_is_updated(): return
-
-        await self.auto_send_pic()
-        
-        if len(self.races)>=self.gps*4 or (self.last_race_update is not None and datetime.datetime.now()-self.last_race_update>datetime.timedelta(minutes=30)):
-            self.check_mkwx_update.stop()
-
-    async def auto_send_pic(self):
-        self.bot.command_stats['picture_generated']+=1
-        self.picture_running = True
-        self.last_command_sent = datetime.datetime.now()
-        detect_mes = await self.ctx.send("Detected race finish.")
-        wait_mes = await self.ctx.send("Updating scores...")
-        mes = await self.update_table(auto=True)
-        await wait_mes.edit(content=mes)
-        pic_mes = await self.ctx.send("Fetching table picture...")
-        img = await self.get_table_img()
-        if isinstance(img, str):
-            await pic_mes.delete()
-            await detect_mes.delete()
-            self.picture_running=False
-            return await self.ctx.send(img)
-        
-        f=discord.File(fp=img, filename='table.png')
-        em = discord.Embed(title=self.title_str(), 
-                        description="\n[Edit this table on gb.hlorenzi.com]("+self.table_link+")")
-        
-        em.set_image(url='attachment://table.png')
-        is_overflow, error_footer, full_footer= self.get_warnings()
-        em.set_footer(text = error_footer)
-        
-        self.picture_running=False 
-        await self.ctx.send(embed=em, file=f)
-        await pic_mes.delete()
-        await detect_mes.delete()
-
-        if is_overflow: #send file of errors
-            path = "./error_footers/"
-            filename = f'warnings_and_errors-{self.ctx.channel.id}.txt'
-            e_file = Utils.create_temp_file(filename, full_footer, dir=path)
-            Utils.delete_file(path+filename)
-            
-            await self.ctx.send(file = discord.File(fp=e_file, filename=filename))
-
          
     async def update_table(self, prnt=True, auto=False, recalc = False, reference_warnings = None):
         def find_if_edited(player, raceNum, ref):
@@ -2015,6 +1984,7 @@ class Table():
                     return "I am currently experiencing some issues with Wiimmfi. The table could not be updated. Try again later."
             
             new_races = []
+            limbo_players = []
             elems = soup.select('tr[id*=r]')
             new_elems = []
             for i in elems:
@@ -2036,9 +2006,8 @@ class Table():
                 race = (raceID, track,[])
                 next_elem = elem.findNext('tr').findNext('tr')
                 
-                while next_elem not in elems and next_elem !=None:
+                while next_elem not in elems and next_elem is not None:
                     fin_time = next_elem.findAll('td', align='center')[-1].text
-                    # col_indx, dec_indx = fin_time.find(":"), fin_time.find('.')
                     fin_time = 'DC' if fin_time == '—' else fin_time
                     miiName = next_elem.find('td', class_='mii-font').text
                     if miiName == "no name": miiName = "Player"
@@ -2048,15 +2017,20 @@ class Table():
                     try:
                         delta = next_elem.select('td[title*=delay]')[0].text
                     except IndexError:
-                        delta = next_elem.find_all('td',{"align" : "center"})[5].text
+                        delta = next_elem.find_all('td', {"align" : "center"})[5].text
                     
                     player_obj = None
                     for player in self.players:
                         if player.getFC()==fc:
                             player_obj = player
                             break
+                    for player in limbo_players:
+                        if player.getFC()==fc:
+                            player_obj = player
+                            break
                     if player_obj is None: 
                         player_obj = self.create_new_player(self.check_name(miiName), fc)
+                        limbo_players.append(player_obj)
 
                     race[2].append((player_obj, fin_time, tr, delta))
                     next_elem = next_elem.findNext('tr')
@@ -2196,11 +2170,12 @@ class Table():
             
             
             last_finish_times = {}
-            ties = {}
+            ties = defaultdict(list)
+            DC_ties = []
             
             for place, player in enumerate(race[2]):
                 time = player[1]
-                player_obj = player[0]
+                player_obj: Player = player[0]
                 is_edited = find_if_edited(player_obj, shift+raceNum+1, reference_warnings)
 
                 for indx, j in enumerate(player_obj.dc_pts):
@@ -2214,6 +2189,7 @@ class Table():
                         sub_miis.append(player_obj)
                     if not isFFA(self.format) and status == 'success':
                         self.warnings[shift+raceNum+1].append({'type':'sub', 'player': player_obj})
+            
                 
                 player_obj.scores[1][self.gp] += PTS_MAP[cur_room_size][place]
                 player_obj.scores[2][shift+raceNum] = PTS_MAP[cur_room_size][place]
@@ -2227,8 +2203,19 @@ class Table():
                                 ties[time].append(list(last_finish_times.keys())[index])
                             else:
                                 ties[time] = [list(last_finish_times.keys())[index]]
-                    
                     ties[time].append(player_obj)
+                
+                if time in list(last_finish_times.values()):
+                    to_add = DC_ties if time=="DC" else ties
+                    for index,t in enumerate(list(last_finish_times.values())):
+                        if t == time:
+                            if time!='DC':
+                                if time in to_add:
+                                    to_add[time].append(list(last_finish_times.keys())[index])
+                                to_add[time].append(player_obj)
+                            else:
+                                to_add.append(player_obj)
+             
                 
                 colon_indx = time.find(":")
                 if time!='DC' and colon_indx>-1 and int(time[:colon_indx])>=5:
@@ -2265,7 +2252,7 @@ class Table():
                 for j in player_ref.dc_pts:
                     if shift+raceNum+1 in j[1]:
                         player_ref.scores[1][self.gp]+=3
-                        player_ref.scores[2][shift+raceNum+1]=3
+                        player_ref.scores[2][shift+raceNum]=3
 
                         for ind,w in enumerate(self.warnings[j[0]]):
                             if w.get('player') == player_ref:
@@ -2279,7 +2266,9 @@ class Table():
 
             if len(ties)>0:
                 for tie in list(ties.items()):     
-                    self.warnings[shift+raceNum+1].append({'type':'tie', "time":tie[0], 'players':tie[1]}) 
+                    self.warnings[shift+raceNum+1].append({'type':'tie', "time":tie[0], 'players':tie[1]})
+            if len(DC_ties)>0:
+                self.warnings[shift+raceNum+1].append({'type': "tie_dc", 'players': DC_ties}) 
                         
             
         if not recalc: self.races+=new_races
@@ -2295,10 +2284,10 @@ class Table():
         if not recalc:   
             return "Table {}updated. Room {} has finished {} {}. Last race: {}.".format("auto-" if auto else "", rID, len(self.races), "race" if len(self.races)==1 else "races",self.races[-1][1])
 
-    def update_warn_file(self):
-        warn_content = self.get_warnings(override=True)
-        if "No warnings or room errors." not in warn_content:
-            Utils.create_temp_file(f"warnings_and_errors-{self.ctx.channel.id}.txt", warn_content, dir='./error_footers/', no_ret=True)
+    # def update_warn_file(self):
+    #     warn_content = self.get_warnings(override=True)
+    #     if "No warnings or room errors." not in warn_content:
+    #         Utils.create_temp_file(f"warnings_and_errors-{self.ctx.channel.id}.txt", warn_content, dir='./error_footers/', no_ret=True)
                        
     def create_string(self, by_race = False):
         self.tags = {k:v for k,v in self.tags.items() if len(v)>0}
@@ -2370,7 +2359,7 @@ class Table():
         if len(self.modifications)==0:
             ret+="No table modifications to undo."
         for i,m in enumerate(self.modifications):
-            ret+=f'{i+1}. {self.prefix}{m[0][0]}\n'
+            ret+=f'{i+1}. {self.channel.prefix}{m[0][0]}\n'
         return ret
     
     def get_undos(self):
@@ -2379,7 +2368,7 @@ class Table():
             ret+="No table modification undos to redo."
         
         for i,u in enumerate(self.undos):
-            ret+=f"{i+1}. {self.prefix}{u[0][0]}\n"
+            ret+=f"{i+1}. {self.channel.prefix}{u[0][0]}\n"
         return ret
     
     def undo_warning(self,mod):
@@ -2503,15 +2492,14 @@ class Table():
         elif 'style ' in j[0]:
             self.change_style(j[1], reundo=True)
         
-        elif 'gps ' in j[0]:
+        elif 'changegps ' in j[0]:
             self.change_gps(j[1], reundo=True)
         
         elif 'largetimes' in j[0]:
             self.change_sui(j[1], reundo=True)
         
         else:
-            print("UNKNOWN UNDO TYPE:",j[0])
-            raise AssertionError
+            raise AssertionError("UNKNOWN UNDO TYPE: ", j[0])
     
     async def redo(self, j):
         if j[0].find('edit ') == 0:
@@ -2571,15 +2559,14 @@ class Table():
         elif 'style ' in j[0]:
             self.change_style(j[2], reundo=True)
         
-        elif 'gps ' in j[0]:
+        elif 'changegps ' in j[0]:
             self.change_gps(j[2], reundo=True)
         
         elif 'largetimes' in j[0]:
             self.change_sui(j[2], reundo=True)
         
         else:
-            print("UNKNOWN REDO TYPE:",j[0])
-            raise AssertionError
+            raise AssertionError("UNKNOWN REDO TYPE:",j[0])
             
     async def undo_commands(self, num): 
         if num == 0: #undo all
@@ -2600,7 +2587,7 @@ class Table():
                 mod = self.modifications[-1]
                 self.undos.append(mod)
                 del self.modifications[-1]
-                return f"Last table modification ({Utils.disc_clean(self.prefix+mod[0][0])}) has been undone."
+                return f"Last table modification ({Utils.disc_clean(self.channel.prefix+mod[0][0])}) has been undone."
             return "No manual modifications to the table to undo."
         
     async def redo_commands(self, num):
@@ -2623,7 +2610,7 @@ class Table():
                 mod = self.undos[-1]
                 self.modifications.append(mod)
                 del self.undos[-1]
-                return f"Last table modification undo ({Utils.disc_clean(self.prefix+mod[0][0])}) has been redone."
+                return f"Last table modification undo ({Utils.disc_clean(self.channel.prefix+mod[0][0])}) has been redone."
             return "No table modifications to redo."
         
         
@@ -2671,9 +2658,9 @@ class Table():
                     return 'timeout error'
         
     
-if __name__ == "__main__":
-    import urllib3
-    http = urllib3.PoolManager()
-    page = http.request('GET', "www.wiimmfi.de/stats/mkwx/list/{}")
-    soup = BeautifulSoup(page.data, "html.parser")
+# if __name__ == "__main__":
+#     import urllib3
+#     http = urllib3.PoolManager()
+#     page = http.request('GET', "www.wiimmfi.de/stats/mkwx/list/{}")
+#     soup = BeautifulSoup(page.data, "html.parser")
     

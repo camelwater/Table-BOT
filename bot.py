@@ -16,11 +16,13 @@ from itertools import cycle
 from datetime import datetime, timedelta
 import sqlite3
 import copy
-from utils.Utils import SETTINGS
 import argparse
-import utils.Utils as Utils
 from fnmatch import fnmatch
 import os
+from utils.Utils import SETTINGS
+import utils.Utils as Utils
+import classes.Channel as Channel
+from typing import Dict, List, Tuple, Any
 
 creds = dotenv_values(".env.testing") or dotenv_values(".env") #.env.testing for local testing, .env for deployment
 KEY = creds['KEY']
@@ -70,7 +72,7 @@ def clean_up_temp_files():
 SPLIT_DELIM = '{d/D17¤85xu§ey¶}'
 DEFAULT_PREFIXES = ['?', '!']
 
-def fetch_prefixes_and_settings():
+def fetch_prefixes_and_settings() -> Tuple[Dict, Dict]:
     cur.execute('SELECT * FROM servers')
     server_rows = cur.fetchall()
     server_pxs = {k[0]: k[1] for k in server_rows}
@@ -78,14 +80,14 @@ def fetch_prefixes_and_settings():
    
     return {int(k): (p.split(SPLIT_DELIM) if p else []) for k, p in server_pxs.items()}, server_sets
 
-def callable_prefix(bot, msg: discord.Message, mention=True):
+def callable_prefix(bot, msg: discord.Message, mention=True) -> List[str]:
     base = []
     default = DEFAULT_PREFIXES
     if msg.guild is None:
         base = default
     else:
         base.extend(bot.prefixes.get(msg.guild.id, default))
-        # base.append('$')
+        base.append('$')
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
@@ -96,7 +98,7 @@ class TableBOT(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix = callable_prefix, case_insensitive=True, intents = discord.Intents.all(), help_command = None)      
         self.prefixes, self.settings = fetch_prefixes_and_settings()
-        self.table_instances = {}
+        self.channel_instances: Dict[int, Channel.Channel] = {}
         self.presences = cycle(['?help', '{} tables'])
         self.BOT_ID = 844640178630426646
 
@@ -111,11 +113,11 @@ class TableBOT(commands.Bot):
         elif isinstance(error, commands.NoPrivateMessage):
             await(await ctx.send("This command cannot be used in DMs.")).delete(delay=7)
         elif isinstance(error, commands.MissingPermissions):
-            await(await ctx.send("Sorry {}, you don't have permission to use this command.".format(ctx.author.mention))).delete(delay=10.0)
+            await(await ctx.send(f"Sorry {ctx.author.mention}, you don't have permission to use this command.")).delete(delay=10.0)
         elif isinstance(error, commands.CommandOnCooldown):
-            await(await ctx.send("This command can only be used once every {:.0f} seconds. You can retry in {:.1f} seconds.".format(error.cooldown.per, error.retry_after))).delete(delay=7)
+            await(await ctx.send(f"This command can only be used once every {error.cooldown.per:.0f} seconds. You can retry in {error.retry_after:.1f} seconds.")).delete(delay=7)
         elif isinstance(error, commands.MaxConcurrencyReached):
-            await(await ctx.send("This command can only be used by {} user at a time. Try again later.".format(error.number))).delete(delay=7)
+            await(await ctx.send(f"This command can only be used by {error.number} user at a time. Try again later.")).delete(delay=7)
         elif isinstance(error, commands.MissingRequiredArgument):
             pass
             #raise error
@@ -134,7 +136,7 @@ class TableBOT(commands.Bot):
         for server in self.guilds:
             cur.execute('''INSERT OR IGNORE INTO servers
                             VALUES (?, ?, ?, ?, ?)''', 
-                            (server.id, SPLIT_DELIM.join(DEFAULT_PREFIXES), None, None, "0")) # id, prefixes, graph, style, IgnoreLargeTimes
+                            (server.id, SPLIT_DELIM.join(DEFAULT_PREFIXES), None, None, "0")) # id, prefixes, graph, style, IgnoreLargeTimes (all default values)
             conn.commit()
 
         self.prefixes, self.settings = fetch_prefixes_and_settings()
@@ -156,18 +158,18 @@ class TableBOT(commands.Bot):
     #remove inactive table instances (inactivity == 30+ minutes)
     @tasks.loop(minutes = 15)
     async def check_inactivity(self):
-        for channel, instance in list(self.table_instances.items())[::-1]:
-            if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes=30):
-                Utils.destroy_temp_files(channel)
-                self.table_instances.pop(channel)
-        # self.table_instances = {channel: instance for (channel, instance) in self.table_instances.items() 
-        #                         if instance.last_command_sent is None or datetime.now() - instance.last_command_sent <= timedelta(minutes=30)}
+        # for channel, instance in list(self.channel_instances.items())[::-1]:
+        #     if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes=30):
+        #         Utils.destroy_temp_files(channel)
+        #         self.channel_instances.pop(channel)
+        self.table_instances = {channel: instance for (channel, instance) in self.channel_instances.items() 
+                                if instance.last_command_sent is None or datetime.now() - instance.last_command_sent <= timedelta(minutes=30)}
 
     @tasks.loop(seconds=15)
     async def cycle_presences(self):
         next_pres = next(self.presences)
         if "tables" in next_pres:
-            active_tables= self.get_active_tables()
+            active_tables= self.count_active_channels()
             next_pres = next_pres.format(active_tables)
             if active_tables==1: next_pres = next_pres.replace("tables", "table")
         pres = discord.Activity(type=discord.ActivityType.watching, name=next_pres)
@@ -177,10 +179,10 @@ class TableBOT(commands.Bot):
     # async def routine_stats_dump(self):
     #     self.dump_stats_json()
     
-    def get_active_tables(self):
-        return sum([1 for t in list(self.table_instances.values()) if t.table_running])
+    def count_active_channels(self):
+        return sum([1 for chan in list(self.channel_instances.values()) if chan.table_running])
 
-    def get_guild_prefixes(self, guild, local_callable = callable_prefix):
+    def get_guild_prefixes(self, guild, local_callable = callable_prefix) -> List[str]:
         temp_msg = discord.Object(id=0)
         temp_msg.guild = guild
 
@@ -255,7 +257,7 @@ class TableBOT(commands.Bot):
 
         return "Server prefixes have been reset to default."
 
-    def get_guild_settings(self, guild):
+    def get_guild_settings(self, guild) -> Dict[str, Any]:
         default = {'IgnoreLargeTimes': "0", 'graph': None, 'style': None}
 
         return self.settings.get(guild, default)

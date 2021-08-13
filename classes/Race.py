@@ -1,5 +1,5 @@
 from typing import List, Tuple, Dict
-from Player import Player
+from classes.Player import Player
 #TODO: finish and implement
 
 class Race:

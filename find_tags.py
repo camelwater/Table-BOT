@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import utils.Utils as Utils
-from os.path import commonprefix
+# from os.path import commonprefix
 from collections import defaultdict
 import copy
 import random as rand
@@ -395,7 +395,7 @@ def assert_correct(teams, un_players, per_team, num_teams, num_teams_supposed):
 def select_top(all_tags, per_team, num_teams, num_teams_supposed, teams, players):
     '''
     choose best combination of tags.
-    
+
     first, resolve tag conflicts. then, go through tags and finalize top-ranked tags.
     '''
     # all_tags = dict(sorted(all_tags.items(), key=lambda l: len(l[1]), reverse=True))

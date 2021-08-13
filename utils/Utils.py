@@ -7,6 +7,7 @@ Created on Sat Jun 5 15:30:03 2021
 import time
 import os
 import io
+from typing import Dict, Tuple, List
 
 def create_temp_file(filename, content, dir='.', no_ret = False):
     with open(dir+filename, 'w', encoding='utf-8') as e_file:
@@ -50,7 +51,7 @@ import itertools
 
 def insert_formats(string: str):
     return string.replace('5', '5v5').replace('2', '2v2').replace('3','3v3').replace('4','4v4').replace('6','6v6').replace('1', 'FFA')
-def remove_formats(string):
+def remove_formats(string: str):
     return string.replace("5v5", '5').replace('2v2', '2').replace('3v3', '3').replace('4v4', '4').replace('6v6', '6').replace('ffa', '1')
 
 def parse_ILT_setting(string: str, max_format=6, local_inject = False):
@@ -102,7 +103,7 @@ def parse_ILT_setting(string: str, max_format=6, local_inject = False):
     
     return ', '.join(sorted(args))
 
-def determine_ILT(setting, format):
+def determine_ILT(setting, format) -> bool:
     '''
     determine whether large times should be ignored or not based on server settings and format
     '''
@@ -134,7 +135,6 @@ def get_num_players(f, teams):
     else: f = int(f)
     
     return teams*f
-
 
 
 #============= tabler.py stuff ==============#
@@ -294,7 +294,7 @@ def backtick_clean(string: str):
 
 from collections import defaultdict
 
-def check_repeat_times(race, prev_races):
+def check_repeat_times(race, prev_races) -> Tuple[bool, Dict]:
     race = [i for i in race[2]]
     prev_races = [i[2] for i in prev_races]
     repetitions = defaultdict(int)
@@ -431,6 +431,7 @@ WARNING_MAP = {
         "blank_time": "{} had a blank race time and was on results. If this wasn't a DC, this is an MKWX ERROR.",
 
         "tie": "{} had tied race times ({}). Check [[/PREFIX\]]rr for errors.", 
+        "tie_dc": "{} all DCed and were on results. Their positions could be wrong, so check [[/PREFIX\]]rr for errors.",
 
         "mkwx_bug_increase": "Room size increased mid-GP from {} to {}. This is impossible unless if there was a reset or mid-GP sub(s), and likely an MKWX ERROR. Affected races: {}. Run [[/PREFIX\]]changeroomsize to fix this.", 
         "mkwx_bug_change": "Players in the room changed mid-GP (race {}). Unless if there were mid-GP sub(s) this race or a reset, this is an MKWX ERROR. Table could be inaccurate for this GP ({}).", 
