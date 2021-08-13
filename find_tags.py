@@ -546,7 +546,6 @@ if __name__ == "__main__":
     players, lengths = get_test_case(large=large)
     rand.shuffle(players)
     # print(players)
-    # players = ['gas mob', '¢ant', 'Ryan@X', 'GG EZ', 'gassed up', 'xxx', 'coolio', 'kaya yanar', 'yaka ranar', 'cool kid cool', 'yaya kanar', 'x#1']
     #find_possible_tags faster than commonaffix (maybe should change for split_acutal_tag)
 
     tick = time.perf_counter()
