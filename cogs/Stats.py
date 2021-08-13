@@ -93,7 +93,7 @@ class Stats(commands.Cog):
 
 def get_LOC():
     LOC_count = 0
-    for dir in ['.', './cogs', './utils']:
+    for dir in ['.', './cogs', './utils', './classes']:
         for file in os.listdir(dir):   
             if fnmatch(file, '*.py'):
                 with open(f"{dir}/{file}", encoding='utf-8') as f:
