@@ -12,8 +12,6 @@ import utils.Utils as Utils
 from classes.tabler import Table
 import classes.Channel as Channel
 
-# TODO: save_state before command is executed and add user command message.
-# if command was successful, only then actually write the save state to the file
 
 class Table_cog(commands.Cog):
     def __init__(self, bot: bot.TableBOT):

@@ -1,0 +1,1 @@
+Information that the bot uses. The database is where server information is stored (prefixes, server settings), and the stats.json file contains stats on command usage.

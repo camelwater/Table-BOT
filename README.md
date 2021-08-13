@@ -41,7 +41,7 @@ ex. `?picture byrace`
 
 Fetches a [table picture][hlorenziWebsite] of the room's scores. `byrace/race` is an optional argument that can be included if you would like to see the table scores organized by each race (by default it is every gp, which is every 4 races).
 
-## Full Documentation
+## Documentation
 
 Table BOT's full documentation can be found at this GitHub repository's [Wiki page](https://github.com/camelwater/Table-BOT/wiki).
 

@@ -75,7 +75,7 @@ class Stats(commands.Cog):
         e = discord.Embed(title='Table BOT', description='')
 
         e.add_field(name='\u200b', value=f'_WRITTEN IN:_ python with discord.py v1.7.3\n\
-                                    _LINES OF CODE:_ {get_LOC()}\n_SERVER:_ AWS - Amazon Linux 2 AMI', inline=False)
+                                    _LINES OF CODE:_ {count_LOC()}\n_SERVER:_ AWS - Amazon Linux 2 AMI', inline=False)
 
         link = "[GitHub Repository](https://github.com/camelwater/Table-BOT)"
         e.add_field(name='\u200b', value= link, inline=False)
@@ -91,7 +91,7 @@ class Stats(commands.Cog):
 
         await ctx.send(embed=e)
 
-def get_LOC():
+def count_LOC():
     LOC_count = 0
     for dir in ['.', './cogs', './utils', './classes']:
         for file in os.listdir(dir):   

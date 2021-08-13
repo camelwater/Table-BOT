@@ -1,0 +1,1 @@
+Scripts that run on my AWS server instance during the CI/CD pipeline.

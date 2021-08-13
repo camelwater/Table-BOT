@@ -103,8 +103,9 @@ class TableBOT(commands.Bot):
         self.BOT_ID = 844640178630426646
 
         for ext in INIT_EXT:
-            self.load_extension(ext)  
+            self.load_extension(ext) 
 
+             
     async def on_command_error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandNotFound):
             if not ctx.guild:
@@ -169,7 +170,7 @@ class TableBOT(commands.Bot):
     async def cycle_presences(self):
         next_pres = next(self.presences)
         if "tables" in next_pres:
-            active_tables= self.count_active_channels()
+            active_tables = self.count_active_channels()
             next_pres = next_pres.format(active_tables)
             if active_tables==1: next_pres = next_pres.replace("tables", "table")
         pres = discord.Activity(type=discord.ActivityType.watching, name=next_pres)
@@ -286,7 +287,7 @@ class TableBOT(commands.Bot):
             cur.execute(f'''UPDATE servers 
                             SET {setting}=? 
                             WHERE id=?''',
-                        (default, guild))
+                            (default, guild))
             conn.commit()
 
             return f"`{setting}` setting restored to default."
@@ -304,7 +305,7 @@ class TableBOT(commands.Bot):
         cur.execute(f'''UPDATE servers 
                         SET {setting}=? 
                         WHERE id=?''',
-                    (key, guild))
+                        (key, guild))
         conn.commit()
         # cur.execute('''SELECT * 
         #                 FROM servers''')
@@ -348,4 +349,5 @@ if __name__ == "__main__":
     def on_exit():
         bot.dump_stats_json()
         clean_up_temp_files()
+        conn.close()
     

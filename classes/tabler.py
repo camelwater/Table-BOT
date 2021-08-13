@@ -48,14 +48,14 @@ class Table():
         self.recorded_elems: List[str] = [] #don't record races that have already been recorded
         self.players: List[Player] = [] #dictionary of players: holds their total score, gp scores, and race scores
         self.races: List[Tuple[str, str, List]] = [] #list (race) of lists (placements for each race) 
-        self.team_pens = {} #mapping penalties to teams
+        self.team_pens: Dict[str, int] = defaultdict(int) #mapping penalties to teams
         self.player_ids: Dict[int, Player] = {} #used to map player ids to players (player id from bot)
         self.all_players: List[Player] = [] #list of every player who has been in the room
         self.subs: List[Dict[str, Any]] = [] #players who have been subbed out 
         self.deleted_players: List[Player] = [] #players who have been removed from table through ?changename
        
-        self.warnings = defaultdict(list) #race: list of warnings
-        self.manual_warnings = defaultdict(list) #warnings of manual changes to the table
+        self.warnings: Dict[int, List[Dict[str, Any]]] = defaultdict(list) #race: list of warnings
+        self.manual_warnings: Dict[int, List[str]] = defaultdict(list) #warnings of manual changes to the table
 
         self.dc_list = defaultdict(list) # race: list of player dcs (?dcs)
         self.dup_names: List[str] = [] #in case some players have same mii name. fc: edited mii name (ex. 'Player-1' instead of 'Player') for clarity purposes on table
@@ -71,9 +71,7 @@ class Table():
         self.room_players = [] #list of lists of players at beginning of GP (check if room changes mid-gp, send warning)
         self.room_sizes_error_affected = [] #races affected by mkwx messing up room sizes
         self.room_error_index = [] #to update room size warnings
-        
-        self.changed_room_sizes = defaultdict(list) #races that have edited room sizes (?changeroomsize)
-        self.edited_scores = defaultdict(lambda: defaultdict(int)) #players with edited gp scores
+        self.changed_room_sizes: Dict[int, List[int]] = defaultdict(list) #races that have edited room sizes (?changeroomsize)
                    
         self.tags: Dict[str, List[Player]] = {} #list of team tags and their respective players
         self.table_str = "" #argument for data (to get pic from gb.hlorenzi.com)
@@ -1003,7 +1001,7 @@ class Table():
         else:
             for t_indx, tag in enumerate(list(self.tags.keys())):
                 string+=f'\n{f"`{t_indx+1}`. " if team_command else ""}**{Utils.disc_clean(tag)}**'
-                if tag in self.team_pens.keys(): 
+                if self.team_pens[tag] > 0: 
                     string+=f" **(-{self.team_pens.get(tag)})**"
                 for p in self.tags[tag]:
                     self.player_ids[str(counter)] = p
@@ -1093,7 +1091,6 @@ class Table():
         if pen[0] == '=':
             pen = int(pen.lstrip('=').lstrip('-'))
             self.team_pens[team] = pen
-            if self.team_pens[team] == 0: self.team_pens.pop(team)
             
             if not reundo:
                 self.modifications.append([(f"teampen {team} {'='+str(pen)}", team, '='+str(pen))])
@@ -1103,12 +1100,8 @@ class Table():
         
         else:
             pen = int(pen.lstrip('-'))
-            if team in self.team_pens:
-                self.team_pens[team]+=pen
-            else:
-                self.team_pens[team] = pen
-            if self.team_pens[team] == 0: self.team_pens.pop(team)
-            
+            self.team_pens[team]+=pen
+                        
             if not reundo:
                 self.modifications.append([(f'teampen {team} {pen}', team, pen)])
                 self.undos.clear()
@@ -1135,20 +1128,20 @@ class Table():
             valid_teams = ", ".join(list(map(lambda l: f'`{l}`', self.tags.keys())))
             return f"Invalid team name `{Utils.backtick_clean(team)}`. Valid teams: {valid_teams}."
 
-        if team not in self.team_pens:
+        if self.team_pens[team] == 0:
             return f"Team `{Utils.backtick_clean(team)}` doesn't have any penalties."
 
         if unpen is None:
             orig_pen = self.team_pens[team]
-            self.team_pens.pop(team)
+            self.team_pens[team] == 0
             if not reundo:
                 self.modifications.append([(f'teamunpen {team}', team, orig_pen)])
                 self.undos.clear()
             return f"Penalties for team `{Utils.backtick_clean(team)}` have been removed."
         else:
-            self.team_pens[team] -= unpen
-            if self.team_pens[team] == 0: self.team_pens.pop(team)
-            
+            unpen = min(unpen, self.team_pens[team]) #can't have negative penalties (unless if I decide to add bonuses)
+            self.team_pens[team] -= unpen 
+
             if not reundo: 
                 self.modifications.append([(f'teamunpen {team} {unpen}', team, unpen)])
                 self.undos.clear()
@@ -2321,8 +2314,8 @@ class Table():
                     ret+=f"[{flag_code if flag_code else ''}] "
                     ret+= player.get_score_str(by_race)
                     
-                if tag in self.team_pens.keys():
-                    ret+='\nPenalty -{}'.format(self.team_pens[tag])
+                if self.team_pens[tag] > 0:
+                    ret+=f'\nPenalty -{self.team_pens[tag]}'
                             
         return ret
 
