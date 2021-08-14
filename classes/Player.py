@@ -26,6 +26,7 @@ class Player:
             return o.getFC() == self.getFC()
         except:
             return False
+
     def getFC(self) -> str:
         return self.fc
 
@@ -54,6 +55,12 @@ class Player:
             return ""
         this_races = (num_races-sub_races) if self.__races_played is None else self.__races_played
         return f"({this_races})"
+    
+    def get_races_played(self):
+        return self.__races_played
+    
+    def set_races_played(self, races):
+        self.__races_played = races
     
     def get_score_str(self, by_race=False) -> str:
         scores_iter = self.scores[2] if by_race else self.scores[1]
@@ -99,7 +106,6 @@ class Player:
     def add_sub(self, out_player: 'Player', out_races_played: int):
         self.subs.append((out_player, out_races_played))
         self.combine_scores(out_player)
-        self.combine_pens(out_player)
     
     def remove_last_sub(self, out_player: 'Player'):
         self.subs.pop(-1)
@@ -119,9 +125,7 @@ class Player:
                 self.edited_scores[gp] += score
             except KeyError:
                 self.edited_scores[gp] = score
-            
 
-    def combine_pens(self, out_player: 'Player'):
         self.pens+=out_player.getPens()
     
 

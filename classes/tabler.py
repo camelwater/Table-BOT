@@ -14,15 +14,14 @@ import aiohttp
 import concurrent.futures
 # from urllib.request import urlopen
 import datetime
-import discord
-from discord.ext import tasks, commands
 import time as timer
-# from unidecode import unidecode
 from collections import defaultdict, Counter
 from find_tags import tag_algo
 import tag_testing.simulatedAnnealingTag as simAnl
 from utils.WiimmfiMii import get_wiimmfi_mii # get_wiimmfi_mii_async
 import utils.Utils as Utils
+import utils.wiimmfiUtils as wiimmfiUtils
+import utils.tagUtils as tagUtils
 from utils.Utils import isFFA, WARNING_MAP, DC_MAP, STYLE_MAP, PTS_MAP
 from utils.Utils import GRAPH_MAP as GM
 from classes.Player import Player
@@ -40,7 +39,7 @@ class Table():
         self.URL = "https://wiimmfi.de/stats/mkwx"
         self.ROOM_URL = "https://wiimmfi.de/stats/mkwx/list/{}"
         self.current_url = ""
-        self.last_race_update = None #timestamp of last auto-update table
+        self.last_race_update = None #timestamp of table's last auto-update
         
         self.modifications: List[List[Tuple]] = [] #keep track of all user modifications to the table
         self.undos: List[List[Tuple]] = [] #keep track of all user undos of modifications to the table
@@ -107,44 +106,13 @@ class Table():
         
         self.IGNORE_FCS = True
         self.split_teams('3', 4)
-    
-    async def search_mii(self, mii) -> Tuple[bool, Any]:
-        '''
-        find room on mkwx with given mii names\n
-        returns
-        --
-        rxx of found room
-        '''
-        rxxs = defaultdict(int)
-        data = await self.fetch_mkwx_JSON(self.URL)
-        if isinstance(data, str) and 'error' in data:
-            if 'response' in data:
-                return True, "Wiimmfi appears to be down. Try again later."
-            else:
-                return True, "I am currently experiencing some issues with Wiimmfi. Try again later."
-        
-        if len(data[1:-1])<1:
-            return True, "I am currently experiencing some issues with Wiimmfi's API. Try again later."
-        
-        for room in data:
-            if room.get("type")!="room": continue
-            room_rxx = room.get("room_id")
-            room_players = []
-            for player in room.get("members", []):
-                miiName = player.get('name')[0][0]
-                if not miiName or miiName == "no name": miiName = "Player"
-                room_players.append(Utils.sanitize_uni(miiName.strip(), for_search=True).lower())
-            if set(map(lambda l: Utils.sanitize_uni(l.strip(), for_search=True).lower(),mii)).issubset(room_players):
-                rxxs[room_rxx]+=1
-
-        return False, rxxs
 
     async def find_room_to_merge(self, rid: str=None, mii: List[str]=None, redo=False) -> Tuple[bool, str]:
         '''
         find room when `merge` command is used
         '''
         if rid is None: #mii names search
-            ret_error, rxxs = await self.search_mii(mii)
+            ret_error, rxxs = await wiimmfiUtils.search_mii(mii, self.URL)
             if ret_error:
                 return True, rxxs
     
@@ -161,9 +129,9 @@ class Table():
             if rxx==self.rxx or rxx in self.prev_rxxs:
                 return True, "This room is already part of this table. Merge cancelled."
             
-            room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rxx)
+            room_url = f"https://wiimmfi.de/stats/mkwx/list/{rxx}"
             
-            soup = await self.fetch(room_url)
+            soup = await wiimmfiUtils.fetch(room_url)
             if isinstance(soup, str) and 'error' in soup:
                 if 'response' in soup:
                     return True, "Wiimmfi appears to be down. Try again later."
@@ -174,7 +142,7 @@ class Table():
                 return True, f"The room ({rxx}) hasn't finished a race yet.\nRetry `{self.channel.prefix}mergeroom` when the room has finished one race."
             
             if not redo:
-                self.modifications.append([("mergeroom {}".format(', '.join(mii)), len(self.prev_elems), rxx)])
+                self.modifications.append([(f"mergeroom {', '.join(mii)}", len(self.prev_elems), rxx)])
                 self.undos.clear()
             
         else: #rxx search
@@ -183,9 +151,9 @@ class Table():
 
             if rxx==self.rxx or rxx in self.prev_rxxs:
                 return True, "This room is already part of this table. Merge cancelled."
-            room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rxx)
+            room_url = f"https://wiimmfi.de/stats/mkwx/list/{rxx}"
             
-            soup = await self.fetch(room_url)
+            soup = await wiimmfiUtils.fetch(room_url)
             if isinstance(soup, str) and 'error' in soup:
                 if 'response' in soup:
                     return True, "Wiimmfi appears to be down. Try again later."
@@ -214,7 +182,7 @@ class Table():
         find mkwx room using either rxx or mii name search
         """
         if rid is None: #mii names search
-            ret_err, rxxs = await self.search_mii(mii)
+            ret_err, rxxs = await wiimmfiUtils.search_mii(mii, self.URL)
             if ret_err:
                 return True, rxxs
             
@@ -230,8 +198,8 @@ class Table():
             rxx = 'r' + str(max(rxxs, key=rxxs.get))
             self.rxx = rxx
 
-            room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(self.rxx)
-            soup = await self.fetch(room_url)
+            room_url = f"https://wiimmfi.de/stats/mkwx/list/{self.rxx}"
+            soup = await wiimmfiUtils.fetch(room_url)
 
             if isinstance(soup, str) and 'error' in soup:
                 if 'response' in soup:
@@ -246,9 +214,8 @@ class Table():
             rid = rid[0]
             self.rxx = rid
             if len(rid)==4: self.rxx = self.rxx.upper()
-            
-            room_url = "https://wiimmfi.de/stats/mkwx/list/{}".format(rid)
-            soup = await self.fetch(room_url)
+            room_url = f"https://wiimmfi.de/stats/mkwx/list/{rid}"
+            soup = await wiimmfiUtils.fetch(room_url)
 
             if isinstance(soup, str) and 'error' in soup:
                 if 'response' in soup:
@@ -259,12 +226,11 @@ class Table():
             if "No match found!" in list(soup.stripped_strings):
                 return True, f"The room either doesn't exist or hasn't finished a race yet.\nRetry when the room has finished a race and make sure the room id is in *rxx* or *XX00* format."
         
-        self.find_players(room_url, soup)
+        self.find_players(soup)
         self.split_teams(self.format, self.teams)
         self.current_url = room_url
-        string = self.room_list_str()
 
-        return False, f"Room {self.rxx} found.\n{string}\n\n**Is this room correct?** (`{self.channel.prefix}yes` / `{self.channel.prefix}no`)"
+        return False, f"Room {self.rxx} found.\n{self.room_list_str()}\n\n**Is this room correct?** (`{self.channel.prefix}yes` / `{self.channel.prefix}no`)"
 
     def populate_table_flags(self, subs=None):
         '''
@@ -290,7 +256,7 @@ class Table():
                 self.player_ids[str(counter)] = p
                 counter+=1          
         else:
-            self.tags = dict(sorted(self.tags.items(), key=lambda item: Utils.sanitize_uni(item[0].upper())))
+            self.tags = dict(sorted(self.tags.items(), key=lambda item: tagUtils.sanitize_uni(item[0].upper())))
             for tag in self.tags.keys():
                 string+=f'\n**Tag: {Utils.disc_clean(tag)}**'
                 for p in self.tags[tag]:
@@ -298,16 +264,49 @@ class Table():
                     self.player_ids[str(counter)] = p
                     counter+=1
         return string
+    
+    def find_players(self, soup: BeautifulSoup): 
+        elem = soup.select('tr[id*=r]')[-1]
+        next_elem = elem.findNext('tr').findNext('tr')
+        players = []
+        
+        while next_elem !=None:
+            miiName = next_elem.find('td', class_='mii-font').text
+            if miiName == "no name": miiName = "Player"
+            fc = next_elem.select('span[title*=PID]')[0].text
+            
+            players.append((miiName, fc))
+            next_elem = next_elem.findNext('tr') 
 
-    def split_teams(self, f, num_teams):
+        player_names = [i[0] for i in players]
+        self.dup_names = set([x for x in player_names if player_names.count(x) > 1])
+
+        for miiName, fc in players:
+            if miiName in self.dup_names:
+                x = 1
+                name = miiName+'-'+str(x)
+                while name in self.names:
+                    x+=1
+                    name = miiName+'-'+str(x)
+                miiName = name
+            
+            self.players.append(Player(fc=fc, name=miiName, scores=[0,[0]*self.gps, [0]*self.gps*4]))
+            self.names.append(miiName)
+            
+        self.all_players = copy.copy(self.players)
+
+        if isFFA(self.format): 
+            print(self.players)
+
+    def split_teams(self, f: str, num_teams: int):
         """
         split players into teams based on tags
         """
-        
-        tick=timer.time()
         f = f[0]
         if not f.isnumeric():
             return
+
+        tick=timer.time()
         per_team = int(f)
         name_to_player = {}
         for i in self.players:
@@ -319,7 +318,7 @@ class Table():
         if self.TESTING:
             L = []
             for i in teams.items():
-                L.append([Utils.sanitize_uni(i[0]).lower(), list(map(lambda l: (Utils.sanitize_uni(l.strip()).lower(), l), i[1]))])
+                L.append([tagUtils.sanitize_uni(i[0]).lower(), list(map(lambda l: (tagUtils.sanitize_uni(l.strip()).lower(), l), i[1]))])
             cost_check = simAnl.SimulatedAnnealing(L, per_team)
             print("cost:", cost_check.E(L))
 
@@ -329,88 +328,13 @@ class Table():
                 teams[t] = [name_to_player[name] for name in ps]
 
         self.tags = teams
-        self.tags = dict(sorted(self.tags.items(), key=lambda item: Utils.sanitize_uni(item[0].lower())))
+        self.tags = dict(sorted(self.tags.items(), key=lambda item: tagUtils.sanitize_uni(item[0].lower())))
         self.tags = {("NO TEAM" if k.strip()=="" else k.strip()): v for (k, v) in self.tags.items()}
 
         print()
         print(self.tags)
         print("tag algo time:",timer.time()-tick)
-        
 
-    def warn_to_str(self, warning: Dict[str, Any]) -> str:                
-        warning_type = warning.get('type')
-
-        if "dc_" in warning_type:
-            ret = ''
-            is_edited = warning.get('is_edited', False)
-
-            if "on" in warning_type:
-                warning_type = warning_type+"_confirmed" if is_edited else warning_type
-                race = warning.get('race')
-                if race == 1:
-                    ret = WARNING_MAP.get((warning_type, race)).format(warning.get('player').getName(), warning.get('gp'), warning.get('gp')) 
-                elif race == -1:
-                    ret = WARNING_MAP.get((warning_type, race)).format(warning.get('player').getName(), warning.get('gp'))
-                else:
-                    ret = WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('gp'), warning.get('pts'))
-            
-            else:
-                race = warning.get('race')
-                if race == 1:
-                    ret = WARNING_MAP.get((warning_type,race)).format(warning.get('player').getName(), warning.get('gp'), warning.get('gp'), warning.get('gp'))
-                else:
-                    ret = WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('gp'), warning.get('pts'))
-        
-            return ret + '{}'.format(" - determined by tabler" if is_edited else "")
-
-        elif "mkwx_bug" in warning_type:
-            if "_increase" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get('orig_players'), warning.get('new_players'), ', '.join(map(str, warning.get('races'))))
-
-            elif "_change" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get('race'), warning.get('gp'))
-            
-            elif "_tr" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get("gp"))
-
-            elif "_delta" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get('gp'))
-            
-            elif "_repeat" in warning_type:
-                return WARNING_MAP.get(warning_type).format(warning.get("num_affected"), warning.get('race'), warning.get('gp'))
-
-            else:
-                return WARNING_MAP.get(warning_type).format(warning.get('gp'))
-
-        elif warning_type == "missing":
-            return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
-        
-        elif warning_type == "missing_w_sub":
-            return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('num_missing'), [i.getName() for i in warning.get('missing_players')])
-        
-        elif warning_type == "overflow":
-            return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
-        
-        elif warning_type == "blank_time":
-            return WARNING_MAP.get(warning_type).format(warning.get('player').getName())
-
-        elif warning_type == "tie":
-            return WARNING_MAP.get(warning_type).format([i.getName() for i in warning.get('players')], warning.get('time'))
-        
-        elif warning_type == "tie_dc":
-            return WARNING_MAP.get(warning_type).format([i.getName() for i in warning.get('players')])
-
-        elif warning_type == "sub":
-            if warning.get('is_edited', False):
-                return WARNING_MAP.get("sub_conf").format(warning.get('player').getName(), warning.get('sub_out').getName())
-            else:
-                return WARNING_MAP.get(warning_type).format(warning.get('player').getName())
-
-        elif warning_type == "large_time":
-            return WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('time'))
-
-        else:
-            raise AssertionError("WARNING TYPE NOT FOUND:", warning_type)
 
     def get_warnings(self, show_large_times = None, override=False) -> Tuple[bool, str, str]:
         if override is True: show_large_times = True
@@ -444,7 +368,7 @@ class Table():
             return False, "No warnings or room errors. Table should be accurate.", None
             
         warnings = defaultdict(list,dict(sorted(warnings.items(), key=lambda item: item[0])))
-        ret = 'Room warnings/errors{}:\n'.format(f" ({self.channel.prefix}dcs to fix dcs)" if len(self.dc_list)>0 else "")
+        ret = f'Room warnings/errors{f" ({self.channel.prefix}dcs to fix dcs)" if len(self.dc_list)>0 else ""}:\n'
         
         for indx,i in enumerate(warnings[-1]):
             if "scores have been manually modified" in i:
@@ -459,7 +383,7 @@ class Table():
                 continue
             ret+=f"     Race #{i[0]}: {self.races[i[0]-1][1]}\n"
             for warning in i[1]:
-                ret+=f"       \t- {self.warn_to_str(warning) if isinstance(warning, dict) else warning}\n"
+                ret+=f"       \t- {Utils.warn_to_str(warning) if isinstance(warning, dict) else warning}\n"
 
         ret = ret.replace("[[/PREFIX\]]", self.channel.prefix)
         if override: return ret
@@ -518,7 +442,7 @@ class Table():
                 self.undos.clear()
             
             self.style = choice
-            return "Table style set to `{}`.".format(choice.get('type'))
+            return f"Table style set to `{choice.get('type')}`."
 
         else:
             o_choice = choice
@@ -530,9 +454,9 @@ class Table():
             if not_in:
                 options = ''
                 for i in list(STYLE_MAP.values()):
-                    options+='   - {}\n'.format(" | ".join(map(lambda orig: "`{}`".format(orig), i.values())))
+                    options+='   - {}\n'.format(" | ".join(map(lambda orig: f"`{orig}`", i.values())))
                     
-                return "`{}` is not a valid style. The following are the only available style options:\n".format(o_choice)+options
+                return f"`{o_choice}` is not a valid style. The following are the only available style options:\n"+options
             
             for i in list(STYLE_MAP.values()):
                 if choice.lower() in map(lambda l: l.lower(), i.values()):
@@ -544,7 +468,7 @@ class Table():
                 self.undos.clear()
             
             self.style = choice
-            return "Table style set to `{}`.".format(choice.get('type'))
+            return f"Table style set to `{choice.get('type')}`."
 
     def change_graph(self, choice: str, reundo=False):
         if choice is None:
@@ -555,17 +479,17 @@ class Table():
             c_indx = int(choice)
             choice = self.graph_map.get(c_indx, None)
             if not choice:
-                return "`{}` is not a valid graph number. The graph number must be from 1-{}. Look at `{}graph` for reference.".format(c_indx, len(self.graph_map), self.channel.prefix)
+                return f"`{c_indx}` is not a valid graph number. The graph number must be from 1-{len(self.graph_map)}. Look at `{self.channel.prefix}graph` for reference."
             
             if self.teams != 2 and choice.get('table') == 'diff':
-                return "The graph type `{}` can only be used when there are two teams.".format('Difference')
+                return "The graph type `Difference` can only be used when there are two teams."
 
             if not reundo:
                 self.modifications.append([(f"graph {c_indx}", self.graph.get('type') if self.graph is not None else None, choice.get('type'))])
                 self.undos.clear()
             
             self.graph = choice
-            return "Table graph set to `{}`.".format(choice.get('type'))
+            return f"Table graph set to `{choice.get('type')}`."
 
         else:
             o_choice = choice
@@ -577,9 +501,9 @@ class Table():
             if not_in:
                 options = ''
                 for i in list(self.graph_map.values()):
-                    options+='   - {}\n'.format(" | ".join(map(lambda orig: "`{}`".format(orig), i.values())))
+                    options+='   - {}\n'.format(" | ".join(map(lambda orig: f"`{orig}`", i.values())))
                     
-                return "`{}` is not a valid graph. The following are the only available graph options:\n".format(o_choice)+options
+                return f"`{o_choice}` is not a valid graph. The following are the only available graph options:\n"+options
             
             for i in list(self.graph_map.values()):
                 if choice.lower() in map(lambda l: l.lower(), i.values()):
@@ -587,14 +511,14 @@ class Table():
                     break
             
             if self.teams != 2 and choice.get('table') == 'diff':
-                return "The graph type `{}` can only be used when there are two teams.".format('Difference')
+                return "The graph type `Difference` can only be used when there are two teams."
             
             if not reundo:
                 self.modifications.append([(f"graph {o_choice}", self.graph.get('type') if self.graph is not None else None, choice.get('type'))])
                 self.undos.clear()
             
             self.graph= choice
-            return "Table graph set to `{}`.".format(choice.get('type'))
+            return f"Table graph set to `{choice.get('type')}`."
 
     def title_str(self) -> str:
         ret = f'{Utils.full_format(self.format)}{"" if Utils.full_format(self.format)=="FFA" else ":"} '
@@ -652,7 +576,7 @@ class Table():
                 except AssertionError:
                     string = f"Tag `{Utils.backtick_clean(orig)}` is not a valid tag. The tag to edit must be one of the following:\n"
                     for i in list(self.tags.keys()):
-                        string+='   - `{}`\n'.format(i)
+                        string+=f'   - `{i}`\n'
                     return string
                 new = self.check_tags(new)
                 self.tags[new] = data
@@ -728,7 +652,7 @@ class Table():
         if tag in self.tags:
             existing_tag = tag
         else:
-            for indx, i in enumerate(list(map(lambda l: Utils.sanitize_uni(l.strip()).lower(),self.tags.keys()))):
+            for indx, i in enumerate(list(map(lambda l: tagUtils.sanitize_uni(l.strip()).lower(),self.tags.keys()))):
                 if tag.lower() == i:
                     existing_tag = list(self.tags.keys())[indx]
                     break
@@ -755,9 +679,9 @@ class Table():
             orig_tags = copy.deepcopy(self.tags)
             dic_str = ''
             for ind, i in enumerate(list(dic.items())):
-                dic_str+="{} ".format(i[0])
+                dic_str+=f"{i[0]} "
                 for j in i[1]:
-                    dic_str+='{} '.format(j)
+                    dic_str+=f'{j} '
                 if ind!=len(dic)-1: dic_str+="/ "
 
         affected_players = []
@@ -805,7 +729,7 @@ class Table():
         for tag, tag_players in self.tags.items():
             if tag == "SUBS" or "":
                 restore_tags[tag].extend(tag_players)
-        self.tags = restore_tags
+        self.tags = copy.deepcopy(restore_tags)
 
     def change_name(self, l, redo=False): 
         ret = ''
@@ -852,7 +776,7 @@ class Table():
         
         counter = 1
         string =''
-        self.tags = dict(sorted(self.tags.items(), key=lambda item: Utils.sanitize_uni(item[0].upper())))
+        self.tags = dict(sorted(self.tags.items(), key=lambda item: tagUtils.sanitize_uni(item[0].upper())))
         if isFFA(self.format):
             for p in self.players:
                 if p in self.deleted_players: continue
@@ -872,28 +796,6 @@ class Table():
 
         return string
 
-    def dc_to_str(self, dc: Dict[str, Any]) -> str:
-        dc_type = dc.get('type')
-        is_edited = dc.get('is_edited', False)
-        race = dc.get('race', 0)
-        ret = ""
-
-        if '_on' in dc_type:
-            dc_type = dc_type+'_confirmed' if is_edited else dc_type
-            if race == 1:
-                ret = DC_MAP.get((dc_type, 1)).format(dc.get('player').getName(), dc.get('gp'), dc.get('gp'))
-            elif race == -1:
-                ret = DC_MAP.get((dc_type, -1)).format(dc.get('player').getName(), dc.get('gp'))
-            else:
-                ret = DC_MAP.get(dc_type).format(dc.get('player').getName(), dc.get('gp'), dc.get('pts'))
-        else:
-            if race == 1:
-                ret = DC_MAP.get((dc_type, 1)).format(dc.get('player').getName(), dc.get('gp'), dc.get('gp'), dc.get('gp'))
-            else:
-                ret = DC_MAP.get(dc_type).format(dc.get('player').getName(),  dc.get('gp'), dc.get('pts'))
-
-        return ret + (' - edited by tabler' if is_edited else "")
-
     def dc_list_str(self): 
         ret = "DCs in the room:\n"
 
@@ -905,19 +807,19 @@ class Table():
         for race in list(self.dc_list.items()):
             ret+=f'**Race #{race[0]}: {self.races[int(race[0]-1)][1]}**\n'
             for dc in race[1]:
-                ret+=f'\t`{dc_count}.` **{self.dc_to_str(dc)}\n'
+                ret+=f'\t`{dc_count}.` **{Utils.dc_to_str(dc)}\n'
                 dc_count+=1
                 
         return ret
         
     def dc_ids_append(self,player: Player, race: int):
         self.temp_dc_list.append([player, race])
-        self.temp_dc_list = sorted(self.temp_dc_list, key=lambda l: (l[1], Utils.sanitize_uni(l[0].getName())))
+        self.temp_dc_list = sorted(self.temp_dc_list, key=lambda l: (l[1], tagUtils.sanitize_uni(l[0].getName())))
         self.dc_list_ids = {}
         for dcID, dc in enumerate(self.temp_dc_list):
             self.dc_list_ids[dcID+1] = dc
         for race, dcs in self.dc_list.items(): #sort dc_list within races
-            self.dc_list[race] = sorted(dcs, key = lambda l: Utils.sanitize_uni(l.get('player').getName()))
+            self.dc_list[race] = sorted(dcs, key = lambda l: tagUtils.sanitize_uni(l.get('player').getName()))
         self.dc_list = defaultdict(list, dict(sorted(self.dc_list.items(), key = lambda l: l[0])))
 
     def edit(self,l, redo=False): 
@@ -993,14 +895,14 @@ class Table():
         if len(self.prev_rxxs)>0:
             ret+="*Past rooms:*\n"
             for n, r in enumerate(self.prev_rxxs):
-                ret+="\t{}. {} | {}\n".format(n+1, r, self.ROOM_URL.format(r))
+                ret+=f"\t{n+1}. {r} | {self.ROOM_URL.format(r)}\n"
         ret+= f'{"**Current room:**" if len(self.prev_rxxs)>0 else "Current room:"} {self.rxx} | {self.ROOM_URL.format(self.rxx)}'
         return ret
         
     def get_pen_player_list(self, c_form=True, team_command = False) -> str:
         counter = 1
         string =''
-        self.tags = dict(sorted(self.tags.items(), key=lambda item: Utils.sanitize_uni(item[0].upper())))
+        self.tags = dict(sorted(self.tags.items(), key=lambda item: tagUtils.sanitize_uni(item[0].upper())))
         if isFFA(self.format):
             for p in self.players:
                 self.player_ids[str(counter)] = p
@@ -1036,7 +938,7 @@ class Table():
             player.pens = pen
             
             if not reundo:
-                self.modifications.append([('pen {} {}'.format(p_indx, '='+str(pen)), player, '='+str(pen))])
+                self.modifications.append([(f"pen {p_indx} {'='+str(pen)}", player, '='+str(pen))])
                 self.undos.clear()
                 
             return f"`{Utils.backtick_clean(player.getName())}` penalty set to `{pen}`."
@@ -1090,8 +992,8 @@ class Table():
             try:
                 assert(team in self.tags.keys())
             except AssertionError:
-                lowered_tags = list(map(lambda l: Utils.sanitize_uni(l.strip()).lower(), self.tags.keys()))
-                sanitized_tag = Utils.sanitize_uni(team.strip()).lower()
+                lowered_tags = list(map(lambda l: tagUtils.sanitize_uni(l.strip()).lower(), self.tags.keys()))
+                sanitized_tag = tagUtils.sanitize_uni(team.strip()).lower()
                 assert(sanitized_tag in lowered_tags)
                 team = list(self.tags.keys())[lowered_tags.index(sanitized_tag)]
         except AssertionError:
@@ -1130,8 +1032,8 @@ class Table():
             try:
                 assert(team in self.tags.keys())
             except AssertionError:
-                lowered_tags = list(map(lambda l: Utils.sanitize_uni(l.strip()).lower(), self.tags.keys()))
-                sanitized_tag = Utils.sanitize_uni(team.strip()).lower()
+                lowered_tags = list(map(lambda l: tagUtils.sanitize_uni(l.strip()).lower(), self.tags.keys()))
+                sanitized_tag = tagUtils.sanitize_uni(team.strip()).lower()
                 assert(sanitized_tag in lowered_tags)
                 team = list(self.tags.keys())[lowered_tags.index(sanitized_tag)]
         except AssertionError:
@@ -1157,40 +1059,6 @@ class Table():
                 self.undos.clear()
             return f"Penalty for team `{Utils.backtick_clean(team)}` reduced by `{unpen}`."
 
-    def find_players(self,url, soup: BeautifulSoup): 
-        elem = soup.select('tr[id*=r]')[-1]
-        next_elem = elem.findNext('tr').findNext('tr')
-        
-        players = []
-        
-        while next_elem !=None:
-            miiName = next_elem.find('td', class_='mii-font').text
-            if miiName == "no name": miiName = "Player"
-            fc = next_elem.select('span[title*=PID]')[0].text
-            
-            players.append((miiName, fc))
-            next_elem = next_elem.findNext('tr') 
-
-        player_names = [i[0] for i in players]
-        self.dup_names = set([x for x in player_names if player_names.count(x) > 1])
-
-        for miiName, fc in players:
-            if miiName in self.dup_names:
-                x = 1
-                name = miiName+'-'+str(x)
-                while name in self.names:
-                    x+=1
-                    name = miiName+'-'+str(x)
-                miiName = name
-            
-            self.players.append(Player(fc=fc, name=miiName, scores=[0,[0]*self.gps, [0]*self.gps*4]))
-
-            self.names.append(miiName)
-            
-        self.all_players = copy.copy(self.players)
-
-        if isFFA(self.format): 
-            print(self.players)
         
     def check_name(self, name) -> str:
         if name not in self.dup_names and name not in self.names:
@@ -1209,14 +1077,14 @@ class Table():
             if player in tag_players:
                 found_tag = tag
                 break
-        return (0 if found_tag!="" else 1, Utils.sanitize_uni(found_tag), Utils.sanitize_uni(player.getName()))
+        return (0 if found_tag!="" else 1, tagUtils.sanitize_uni(found_tag), tagUtils.sanitize_uni(player.getName()))
 
     def get_all_players(self) -> str: 
         ret = ''
         self.all_players = sorted(self.all_players, key = lambda l: self.sort_AP(l))
 
         for i, p in enumerate(self.all_players):
-            ret+="\n{}. {}".format(i+1, Utils.disc_clean(p.getName()))
+            ret+=f"\n{i+1}. {Utils.disc_clean(p.getName())}"
             if p in self.deleted_players:
                 ret+=' (removed by tabler)'
         return ret
@@ -1267,7 +1135,7 @@ class Table():
         #prefix tag matching
         match = ["", 0]
         for tag in self.tags.keys():
-            if Utils.sanitize_uni(name.strip()).lower().find(Utils.sanitize_uni(tag).lower())==0 and len(self.tags[tag]<per_team):
+            if tagUtils.sanitize_uni(name.strip()).lower().find(tagUtils.sanitize_uni(tag).lower())==0 and len(self.tags[tag]<per_team):
                 if len(tag)>match[1]:
                     match = [tag, len(tag)]
         if match[1]>0:
@@ -1277,7 +1145,7 @@ class Table():
         #suffix tag matching
         match = ["", 0]
         for tag in self.tags.keys():
-            if Utils.sanitize_uni(name[::-1].strip()).lower().find(Utils.sanitize_uni(tag[::-1]).lower())==0 and len(self.tags[tag]<per_team):
+            if tagUtils.sanitize_uni(name[::-1].strip()).lower().find(tagUtils.sanitize_uni(tag[::-1]).lower())==0 and len(self.tags[tag]<per_team):
                 if len(tag)>match[1]:
                     match = [tag, len(tag)]
         if match[1]>0:
@@ -1288,7 +1156,7 @@ class Table():
         if per_team==2:
             match = ["", 0]
             for tag in self.tags.keys():
-                lcs = Utils.LCS(Utils.sanitize_uni(name.strip()).lower(), Utils.sanitize_uni(tag).lower())
+                lcs = Utils.LCS(tagUtils.sanitize_uni(name.strip()).lower(), tagUtils.sanitize_uni(tag).lower())
                 if len(lcs)>1 and lcs==tag and len(self.tags[tag]<per_team):
                     if len(lcs)>match[1]:
                         match = [lcs, len(lcs)]
@@ -1303,7 +1171,7 @@ class Table():
                 return
 
         #all tags were full, so create new tag
-        new_tag = self.check_tags(Utils.sanitize_uni(name)[0])
+        new_tag = self.check_tags(tagUtils.sanitize_uni(name)[0])
         self.tags[new_tag] = [player]
 
     def get_subs(self) -> str:
@@ -1327,9 +1195,7 @@ class Table():
             except KeyError:
                 return f"`{out}` was not a valid player number. The player number must be from 1-{len(self.player_ids)}."
         
-        # for sub in self.subs: #checking whether this player has already subbed in for someone
-        #     if in_player == sub.get('in_player'):
-        #         return f"`{Utils.backtick_clean(in_player.getName())}` has already subbed in for `{Utils.backtick_clean(sub.get('out_player'))}`."
+
         if len(in_player.getSubs())>0:
             return f"`{Utils.backtick_clean(in_player.getName())}` has already subbed in for `{Utils.backtick_clean(in_player.getSubs()[-1][0].getName())}`."
 
@@ -1424,8 +1290,8 @@ class Table():
             return f"`{Utils.backtick_clean(player.getName())}` is not a subbed-in player."
 
         if is_in:
-            orig_races = player.races_played
-            player.races_played = races
+            orig_races = player.get_races_played()
+            player.set_races_played(races)
         else:
             try:
                 orig_races = player.subs[out_index-1][1]
@@ -1513,6 +1379,14 @@ class Table():
                     orig_status = 'on'
                     self.change_room_size([[raceNum, len(self.races[raceNum-1][2])-1]], self_call=True, player=player)
                     gp = int((raceNum-1)/4)
+
+                    #checking if need to get rid of tied DC times warnings
+                    DC_ties = [p[0] for p in self.races[raceNum-1][2] if p[1]=='DC']
+                    if len(DC_ties)<2:
+                        for indx, w in enumerate(self.warnings[raceNum]):
+                            if w.get('type') == "tie_dc":
+                                self.warnings[raceNum].pop(indx)
+                                break
                     
                     if raceNum %4 != 1:
                         player.scores[1][gp] +=3
@@ -1675,10 +1549,7 @@ class Table():
             for a in aff:
                 aff_orig_pts[a] = PTS_MAP[len(corresponding_rr)][corresponding_rr.index(a)]
             
-            # correct_ft_order = list(self.finish_times[raceNum-1].keys())
-            # correct_ft_order.insert(correct_pos, correct_ft_order.pop(orig_pos))
-            # self.finish_times[raceNum-1] = {k : self.finish_times[raceNum-1][k] for k in correct_ft_order}
-            
+           
             self.races[raceNum-1][2].insert(correct_pos, self.races[raceNum-1][2].pop(orig_pos))
 
             aff_new_pts = {}
@@ -1944,7 +1815,7 @@ class Table():
                   
     async def room_is_updated(self):
         if self.last_race_update is not None and datetime.datetime.now() - self.last_race_update < datetime.timedelta(seconds=45): return False
-        soup = await self.fetch(self.current_url)
+        soup = await wiimmfiUtils.fetch(self.current_url)
         #TODO: JSON fetch for /room after first /list check (less load on wiimmfi apparently)
         # cur_race = await self.fetch_mkwx_JSON(self.current_url.replace('/list/', '/room/'))
         # if isinstance(cur_race, str and "error") and 'error' in cur_race:
@@ -1979,7 +1850,7 @@ class Table():
         rID = self.rxx
 
         if not recalc:
-            soup = await self.fetch(self.current_url)
+            soup = await wiimmfiUtils.fetch(self.current_url)
             if isinstance(soup, str) and 'error' in soup:
                 if 'response' in soup:
                     return "Wiimmfi appears to be down. The table could not be updated. Try again later."
@@ -2090,10 +1961,10 @@ class Table():
 
             if not all_blank: #don't check these errors if the race's times are all blank
                 #repeat times check
-                check_repeat_times = Utils.check_repeat_times(race, self.races[:raceNum] if recalc else self.races+iter_races[:raceNum])
-                if check_repeat_times[0]:
-                    self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'race': check_repeat_times[1].get('race'),
-                                                        'num_affected':check_repeat_times[1].get('num_aff'), 'gp': self.gp+1})
+                is_repeat, repeat_times = wiimmfiUtils.check_repeat_times(race, self.races[:raceNum] if recalc else self.races+iter_races[:raceNum])
+                if is_repeat:
+                    self.warnings[shift+raceNum+1].append({'type': 'mkwx_bug_repeat', 'race': repeat_times.get('race'),
+                                                        'num_affected': repeat_times.get('num_aff'), 'gp': self.gp+1})
 
                 #tr check
                 tr_count = Counter([i[2] for i in race[2]])[True]
@@ -2282,7 +2153,6 @@ class Table():
         if prnt:
             print()
             print(self.table_str)
-            # print(sub_miis)
 
         if not recalc:   
             return "Table {}updated. Room {} has finished {} {}. Last race: {}.".format("auto-" if auto else "", rID, len(self.races), "race" if len(self.races)==1 else "races",self.races[-1][1])
@@ -2295,31 +2165,29 @@ class Table():
     def create_string(self, by_race = False):
         self.tags = {k:v for k,v in self.tags.items() if len(v)>0}
         
-        ret = "#title {} {}".format(len(self.races), "race" if len(self.races)==1 else 'races')
+        ret = f"#title {len(self.races)} {'race' if len(self.races)==1 else 'races'}"
         if self.style:
-            ret+="\n#style {}".format(self.style.get('table'))
+            ret+=f"\n#style {self.style.get('table')}"
         if self.graph:
-            ret+="\n#graph {}".format(self.graph.get('table'))
+            ret+=f"\n#graph {self.graph.get('table')}"
 
         if isFFA(self.format):
             ret+='\nFFA'
             for player in self.players:
                 if player in self.deleted_players: 
                     continue
-                ret+="\n{} ".format(player.get_full_name(len(self.races)))
-                #flag insertion by region
+                ret+=f"\n{player.get_full_name(len(self.races))} "
                 flag_code = player.getFlag()
                 ret+=f"[{flag_code if flag_code else ''}] "
                 ret+= player.get_score_str(by_race)
                 
         else:
             for tag in self.tags.keys():
-                ret+='\n\n{}'.format(tag)
+                ret+=f'\n\n{tag}'
                 for player in self.tags[tag]:
                     if player in self.deleted_players: 
                         continue
-                    ret+="\n{} ".format(player.get_full_name(len(self.races)))
-                    #flag insertion by region
+                    ret+=f"\n{player.get_full_name(len(self.races))} "
                     flag_code = player.getFlag()
                     ret+=f"[{flag_code if flag_code else ''}] "
                     ret+= player.get_score_str(by_race)
@@ -2336,10 +2204,10 @@ class Table():
     async def get_table_img(self, by_race = False):
         if by_race:
             temp_string = self.create_string(by_race=by_race)
-            png_link = "https://gb.hlorenzi.com/table.png?data={}".format(quote(temp_string))
+            png_link = f"https://gb.hlorenzi.com/table.png?data={quote(temp_string)}"
             
         else:
-            png_link = "https://gb.hlorenzi.com/table.png?data={}".format(quote(self.table_str))
+            png_link = f"https://gb.hlorenzi.com/table.png?data={quote(self.table_str)}"
             
         self.table_link = png_link.replace('.png', "")
        
@@ -2368,7 +2236,7 @@ class Table():
     def get_undos(self):
         ret = ''
         if len(self.undos)==0:
-            ret+="No table modification undos to redo."
+            ret+="No table modifications to redo."
         
         for i,u in enumerate(self.undos):
             ret+=f"{i+1}. {self.channel.prefix}{u[0][0]}\n"
@@ -2394,7 +2262,7 @@ class Table():
                     if 'editrace' in j[0] and int(j[2])==raceNum:
                         count+=1
             if count==1: 
-                self.manual_warnings[raceNum].pop(self.manual_warnings[raceNum].index("Placements for this race have been manually altered by the tabler."))
+                self.manual_warnings[raceNum].remove("Placements for this race have been manually altered by the tabler.")
                 
         elif 'dcs' in mod_type:
             count = 0
@@ -2415,7 +2283,7 @@ class Table():
             raceNum= int(mod[1])
             track = mod[2]
             for indx,i in enumerate(self.manual_warnings[-1]):
-                if 'Race #{}'.format(raceNum) in i and track in i and 'has been removed' in i:
+                if f'Race #{raceNum}' in i and track in i and 'has been removed' in i:
                     self.manual_warnings[-1].pop(indx)
                     break
         
@@ -2566,7 +2434,7 @@ class Table():
             self.change_sui(j[2], reundo=True)
         
         else:
-            raise AssertionError("UNKNOWN REDO TYPE:",j[0])
+            raise AssertionError("UNKNOWN REDO TYPE:", j[0])
             
     async def undo_commands(self, num): 
         if num == 0: #undo all
@@ -2583,10 +2451,9 @@ class Table():
             if len(self.modifications)>0:
                 for i in self.modifications[-1]:
                     await self.undo(i)
-                    
-                mod = self.modifications[-1]
+                
+                mod = self.modifications.pop()
                 self.undos.append(mod)
-                del self.modifications[-1]
                 return f"Last table modification ({Utils.disc_clean(self.channel.prefix+mod[0][0])}) has been undone."
             return "No manual modifications to the table to undo."
         
@@ -2607,60 +2474,9 @@ class Table():
                 for i in self.undos[-1]:
                     await self.redo(i)
                     
-                mod = self.undos[-1]
+                mod = self.undos.pop()
                 self.modifications.append(mod)
-                del self.undos[-1]
                 return f"Last table modification undo ({Utils.disc_clean(self.channel.prefix+mod[0][0])}) has been redone."
             return "No table modifications to redo."
         
-        
-    async def fetch(self, url, headers=None): 
-        timeout = aiohttp.ClientTimeout(total=10)
-        async with aiohttp.ClientSession() as session:
-            if headers == None:
-                try:
-                    async with session.get(url, timeout=timeout) as response:
-                        if response.status!=200:
-                            return 'response error'
-                        return BeautifulSoup(await response.text(), 'html.parser')
-                except:
-                    return 'timeout error'
-
-            else:
-                try:
-                    async with session.get(url, timeout=timeout, headers=headers) as response:
-                        if response.status!=200:
-                            return 'response error'
-                        return BeautifulSoup(await response.text(), 'html.parser')
-                except:
-                    return 'timeout error'
-
-    async def fetch_mkwx_JSON(self, url, headers=None):
-        url+="?m=json"
-        timeout = aiohttp.ClientTimeout(total=10)
-        async with aiohttp.ClientSession() as session:
-            if headers == None:
-                try:
-                    async with session.get(url, timeout=timeout) as response:
-                        if response.status!=200:
-                            return 'response error'
-                        return await response.json()
-                except:
-                    return 'timeout error'
-
-            else:
-                try:
-                    async with session.get(url, timeout=timeout, headers=headers) as response:
-                        if response.status!=200:
-                            return 'response error'
-                        return await response.json()
-                except:
-                    return 'timeout error'
-        
-    
-# if __name__ == "__main__":
-#     import urllib3
-#     http = urllib3.PoolManager()
-#     page = http.request('GET', "www.wiimmfi.de/stats/mkwx/list/{}")
-#     soup = BeautifulSoup(page.data, "html.parser")
     

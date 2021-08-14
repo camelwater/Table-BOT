@@ -7,7 +7,12 @@ Created on Sat Jun 5 15:30:03 2021
 import time
 import os
 import io
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Any
+import re
+from more_itertools import consecutive_groups
+import itertools
+
+###=================== discord utils =====================###
 
 def create_temp_file(filename, content, dir='.', no_ret = False):
     with open(dir+filename, 'w', encoding='utf-8') as e_file:
@@ -36,18 +41,26 @@ def destroy_temp_files(channel):
     for ind, dir in enumerate(['./error_footers/warnings_and_errors-']): # , './save_states/'
         delete_file(dir+channel+'.txt') # '.pickle' if ind==1 else 
 
+def disc_clean(string:str):
+    return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~")
 
-import re
-
-def is_rxx(arg: str):
+def backtick_clean(string: str):
     '''
-    check if string is a roomID (if it is in rxx or xx00 format)
+    LMAOOOO
     '''
-    return re.match('^r[0-9]{7}$|^[a-z]{2}[0-9]{2}$', arg.lower()) is not None
-    # return (arg3[0]=='r' and len(arg3)==8) or (arg3[2:].isnumeric() and len(arg3)==4)
+    # if '`' not in string:
+    #     return string
+    # ins_tick = '`' if string.count('`')%2!=0 else ''
+    # if string[0] == '`':
+    #     return f"{ins_tick} "+string+f"{ins_tick}"
+    # elif string[-1]=='`':
+    #     return f"{ins_tick}"+string+f" {ins_tick}"
+    # else:
+    #     return f'{ins_tick}'+string+f'{ins_tick}'
+    return string.replace('`', '\'')
 
-from more_itertools import consecutive_groups
-import itertools
+
+###======================================================###
 
 def insert_formats(string: str):
     return string.replace('5', '5v5').replace('2', '2v2').replace('3','3v3').replace('4','4v4').replace('6','6v6').replace('1', 'FFA')
@@ -60,7 +73,7 @@ def parse_ILT_setting(string: str, max_format=6, local_inject = False):
     for indx, i in list(enumerate(args))[::-1]:
         i = i.strip()
         check = i.strip('+')
-        if '-' not in check and (int(check)>max_format or int(check)<0):
+        if '-' not in check and (int(check)>max_format or int(check)<0): #check for illegal input
             raise ValueError
 
         if i=='1+': #always ignoreLargeTimes
@@ -111,7 +124,14 @@ def determine_ILT(setting, format) -> bool:
     excludes = parse_ILT_setting(setting, local_inject=True)
     return format in excludes
 
-#-------------- Table.py methods --------------#
+
+###========================================================###
+
+def is_rxx(arg: str):
+    '''
+    check if string is a roomID (if it is in rxx or xx00 format)
+    '''
+    return re.match('^r[0-9]{7}$|^[a-z]{2}[0-9]{2}$', arg.lower()) is not None
 
 #max teams based on format (ex. 6 teams for a 2v2, 2 teams for a 5v5)
 def max_teams(f):
@@ -136,8 +156,6 @@ def get_num_players(f, teams):
     
     return teams*f
 
-
-#============= tabler.py stuff ==============#
 
 def isfloat(n):
     try:
@@ -173,229 +191,109 @@ def chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i+n]
 
-def LCS(X, Y) -> str:
-    """
-    find longest common substring between two strings.
-    used to find tags that are not prefixes nor suffixes. 
-    currently only used for 2v2 tags.
-    
-    """
-    
-    m = len(X)
-    n= len(Y)
-    
-    maxLength = 0           # stores the max length of LCS
-    endingIndex = m         # stores the ending index of LCS in `X`
- 
-    # `lookup[i][j]` stores the length of LCS of substring `X[0…i-1]` and `Y[0…j-1]`
-    lookup = [[0 for x in range(n + 1)] for y in range(m + 1)]
- 
-    # fill the lookup table in a bottom-up manner
-    for i in range(1, m + 1):
-        for j in range(1, n + 1):
- 
-            # if the current character of `X` and `Y` matches
-            if X[i - 1] == Y[j - 1]:
-                lookup[i][j] = lookup[i - 1][j - 1] + 1
- 
-                # update the maximum length and ending index
-                if lookup[i][j] > maxLength:
-                    maxLength = lookup[i][j]
-                    endingIndex = i
- 
-    # return longest common substring having length `maxLength`
-    return X[endingIndex - maxLength: endingIndex]
 
-def is_CJK(char) -> bool:
-    return any([start <= ord(char) <= end for start, end in 
-                [(4352, 4607), (11904, 42191), (43072, 43135), (44032, 55215), 
-                 (63744, 64255), (65072, 65103), (65381, 65500), 
-                 (131072, 196607)]
-                ])
+def warn_to_str(warning: Dict[str, Any]) -> str:                
+    warning_type = warning.get('type')
 
-from unidecode import unidecode
+    if "dc_" in warning_type:
+        ret = ''
+        is_edited = warning.get('is_edited', False)
 
-def sanitize_uni(string: str, for_search = False):
-    '''
-    convert known/common un-unidecodable and unicode strings to ASCII and clean string for tag-matching
-
-    '''
-  
-    ret= []
-    for i in string:
-        if i in MULT_CHAR_MAP:
-            for char in MULT_CHAR_MAP[i]:
-                ret.append(char)
-            continue
-        i = CHAR_MAP.get(i, i)
-        if i in VALID_CHARS or is_CJK(i):
-            ret.append(i)
-            continue
+        if "on" in warning_type:
+            warning_type = warning_type+"_confirmed" if is_edited else warning_type
+            race = warning.get('race')
+            if race == 1:
+                ret = WARNING_MAP.get((warning_type, race)).format(warning.get('player').getName(), warning.get('gp'), warning.get('gp')) 
+            elif race == -1:
+                ret = WARNING_MAP.get((warning_type, race)).format(warning.get('player').getName(), warning.get('gp'))
+            else:
+                ret = WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('gp'), warning.get('pts'))
         
-        ret.append(" ")
-        # n = unidecode(i)
-        # if n=="":
-        #     ret.append(" ")
-        # elif n in VALID_CHARS:
-        #     ret.append(n)
-            
-    if for_search:
-        return ''.join(ret)
-
-    while len(ret)>0:
-        if ret[0] in PRE_REMOVE:
-            ret.pop(0)
-        elif ret[-1] in POST_REMOVE:
-            ret.pop(-1)
         else:
-            break
+            race = warning.get('race')
+            if race == 1:
+                ret = WARNING_MAP.get((warning_type,race)).format(warning.get('player').getName(), warning.get('gp'), warning.get('gp'), warning.get('gp'))
+            else:
+                ret = WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('gp'), warning.get('pts'))
+    
+        return ret + '{}'.format(" - determined by tabler" if is_edited else "")
 
-    return ''.join(ret)
+    elif "mkwx_bug" in warning_type:
+        if "_increase" in warning_type:
+            return WARNING_MAP.get(warning_type).format(warning.get('orig_players'), warning.get('new_players'), ', '.join(map(str, warning.get('races'))))
 
+        elif "_change" in warning_type:
+            return WARNING_MAP.get(warning_type).format(warning.get('race'), warning.get('gp'))
+        
+        elif "_tr" in warning_type:
+            return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get("gp"))
 
-def sanitize_tag_uni(string):
-    '''
-    get rid of non-unicode characters that cannot be converted, but keep convertable characters in original form
-    '''
-    string = [i for i in string if CHAR_MAP.get(i, i) in VALID_CHARS or is_CJK(i) or i in MULT_CHAR_MAP or (unidecode(i)!="" and unidecode(i) in VALID_CHARS)]
-    while len(string)>0:
-        if string[0] in PRE_REMOVE:
-            string.pop(0)
-        elif string[-1] in POST_REMOVE:
-            string.pop(-1)
+        elif "_delta" in warning_type:
+            return WARNING_MAP.get(warning_type).format(warning.get("aff_players"), warning.get('gp'))
+        
+        elif "_repeat" in warning_type:
+            return WARNING_MAP.get(warning_type).format(warning.get("num_affected"), warning.get('race'), warning.get('gp'))
+
         else:
-            break
+            return WARNING_MAP.get(warning_type).format(warning.get('gp'))
 
-    return ''.join(string)
-
-def replace_brackets(string: str): #don't really need this anymore
-    string = string.lstrip('[').lstrip(']').lstrip('(').lstrip(')').lstrip('{').lstrip('}')
-    string = sanitize_uni(string)
+    elif warning_type == "missing":
+        sup_players = warning.get('sup_players')
+        cur_players = warning.get('cur_players')
+        num_missing = sup_players - cur_players
+        return WARNING_MAP.get(warning_type).format(warning.get('gp'), num_missing, cur_players, sup_players)
     
-    return string
-
-def disc_clean(string:str):
-    return string.replace("*", "\*").replace("`",'\`').replace("_", "\_").replace("~~", "\~~")
-
-def backtick_clean(string: str):
-    '''
-    LMAOOOO
-    '''
-    # if '`' not in string:
-    #     return string
-    # ins_tick = '`' if string.count('`')%2!=0 else ''
-    # if string[0] == '`':
-    #     return f"{ins_tick} "+string+f"{ins_tick}"
-    # elif string[-1]=='`':
-    #     return f"{ins_tick}"+string+f" {ins_tick}"
-    # else:
-    #     return f'{ins_tick}'+string+f'{ins_tick}'
-    return string.replace('`', '\'')
-
-from collections import defaultdict
-
-def check_repeat_times(race, prev_races) -> Tuple[bool, Dict]:
-    race = [i for i in race[2]]
-    prev_races = [i[2] for i in prev_races]
-    repetitions = defaultdict(int)
-    dc_repetitions = defaultdict(int)
-
-    for c_indx, compare in enumerate(prev_races[::-1]):
-        for player1, player2 in zip(race, compare):
-            if player1[0] == player2[0]:
-                if player1[1] != 'DC' and player1[1] == player2[1]:
-                    repetitions[c_indx] += 1
-                elif player1[1] == 'DC' and player1[1] == player2[1]:
-                    dc_repetitions[c_indx]+=1
-
-    repetitions = dict(repetitions)
-
-    try:
-        most_key = max(repetitions, key=repetitions.get)
-    except ValueError:
-        most_key = None
-
-    if most_key:
-        most_rep= repetitions[most_key] + dc_repetitions[most_key]
-    return (True, {'race': len(prev_races)-most_key, 'num_aff': most_rep}) if most_key else (False, {})
-
-def check_repeat_times_slow(race, prev_races):
-    repetitions = {}
-    race = [(i[2], i[1]) for i in race]
-    prev_races = [[(i[2], i[1]) for i in r] for r in prev_races]
-
-    for i, r in enumerate(prev_races[::-1]):
-        cou = len([c for c in race if c in r])
-        if cou>0:
-            repetitions[i] = cou
+    elif warning_type == "missing_w_sub":
+        return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('num_missing'), [i.getName() for i in warning.get('missing_players')])
     
-    try:
-        max_key = max(repetitions, key=repetitions.get)
-    except ValueError:
-        max_key = None
-
-    return (True, {'race': len(prev_races)-max_key, 'num_aff': repetitions[max_key]}) if max_key else (False, {})
-
-
-
-### constants + maps
-
-VALID_CHARS = "/\*`^+-_.!?@%&()\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz" + "abcdefghijklmnopqrstuvwxyz0123456789 ".upper()
-PRE_REMOVE = "/\*^+-_.!?#%() "
-POST_REMOVE = "/\*^+-.!?# "
-
-CHAR_MAP = {
-    "Λ": 'A', "λ": 'A', "@": 'A', "Δ": "A", "Ά": "A", "Ã": "A", "À": "A", "Á": "A", "Â": "A", "Ä": "A", "Å": "A", "ά": "a", "à": "a", "á": "a", "â": "a", "ä": "a", "å": "a", "ã": "a", "α": "a", "ª": "a",
+    elif warning_type == "overflow":
+        return WARNING_MAP.get(warning_type).format(warning.get('gp'), warning.get('cur_players'), warning.get('sup_players'))
     
-    "♭": "b", "ß": "B", "β": "B",
-    
-    "¢": "c", "ς": "c", "ç": "c", "©": "c", "Ç": "C",
-    
-    "è": "e", "é": "e", "ê": "e", "ë": "e", "ε": "e", "ᵉ": "e", "έ": "E", "€": "E", "Ξ": "E", "ξ": "E", "Σ": "E", "£": "E", "Έ": "E", "È": "E", "É": "E", "Ê": "E", "Ë": "E",
-    
-    "Ή": "H",
+    elif warning_type == "blank_time":
+        return WARNING_MAP.get(warning_type).format(warning.get('player').getName())
 
-    "ì": "i", "í": "i", "î": "i", "ï": "i", "ι": "i", "ΐ": "i", "ί": "i", "ϊ": "i", "Ϊ": "I", "Ì": "I", "Í": "I", "Î": "I", "Ί": "I", "Ï": "I",
+    elif warning_type == "tie":
+        return WARNING_MAP.get(warning_type).format([i.getName() for i in warning.get('players')], warning.get('time'))
     
-    "κ": "k", 
+    elif warning_type == "tie_dc":
+        return WARNING_MAP.get(warning_type).format([i.getName() for i in warning.get('players')])
 
-    "ñ": "n", "η": "n", "ή": "n", "Ñ": "N", "Π": "N",
+    elif warning_type == "sub":
+        if warning.get('is_edited', False):
+            return WARNING_MAP.get("sub_conf").format(warning.get('player').getName(), warning.get('sub_out').getName())
+        else:
+            return WARNING_MAP.get(warning_type).format(warning.get('player').getName())
 
-    "σ": "o", "○": "o", "º": "o", "ο": "o", "ò": "o", "ó": "o", "ό": "o", "ô": "o", "ö": "o", "ø": "o", "δ": "o", "õ": "o", "Ό": "O", "Ò": "O", "Ó": "O", "Ô": "O", "Ö": "O", "Ø": "O", "Õ": "O", "θ": "O", "φ": "O", "Θ": "O", "Φ": "O", "Ω": "O", "Ώ": "O", "◎": "O",
-    
-    "や": "P", "ρ": "p",
-    
-    "π": "r", "Г": "r", "®": "R",
-    
-    "$": "S", "§": "S",
-    
-    "τ": "t",
-    
-    "μ": "u", "ù": "u", "ú": "u", "û": "u", "ü": "u", "ϋ": "u", "ύ": "u", "Ù": "U", "Ú": "U", "Û": "U", "Ü": "U", "ΰ": "U", "υ": "u",
-    
-    "ν": "v",
+    elif warning_type == "large_time":
+        return WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('time'))
 
-    "ώ": "w", "Ψ": "w", "ω": "w", "ψ": "W",
-    
-    "χ": "X",
-    
-    "ý": "y", "ÿ": "y", "γ": "y", "¥": "Y", "Ύ": "Y", "Ϋ": "Y", "Ý": "Y", "Ÿ": "Y",
-    
-    "ζ": "Z", "Ζ": "Z",
+    else:
+        raise AssertionError("WARNING TYPE NOT FOUND:", warning_type)
 
-    "「": "[", "」": "]", "『": "[", "』": "]"
-}
+def dc_to_str(dc: Dict[str, Any]) -> str:
+        dc_type = dc.get('type')
+        is_edited = dc.get('is_edited', False)
+        race = dc.get('race', 0)
+        ret = ""
 
-MULT_CHAR_MAP = {
-    "Æ": 'AE',
-    "æ": "ae",
+        if '_on' in dc_type:
+            dc_type = dc_type+'_confirmed' if is_edited else dc_type
+            if race == 1:
+                ret = DC_MAP.get((dc_type, 1)).format(dc.get('player').getName(), dc.get('gp'), dc.get('gp'))
+            elif race == -1:
+                ret = DC_MAP.get((dc_type, -1)).format(dc.get('player').getName(), dc.get('gp'))
+            else:
+                ret = DC_MAP.get(dc_type).format(dc.get('player').getName(), dc.get('gp'), dc.get('pts'))
+        else:
+            if race == 1:
+                ret = DC_MAP.get((dc_type, 1)).format(dc.get('player').getName(), dc.get('gp'), dc.get('gp'), dc.get('gp'))
+            else:
+                ret = DC_MAP.get(dc_type).format(dc.get('player').getName(),  dc.get('gp'), dc.get('pts'))
 
-    "œ": "oe",
-    "Œ": "OE",
+        return ret + (' - edited by tabler' if is_edited else "")
 
-    "™": "TM"
-}
-
+        
+### =================== MAPS ====================###
 
 PTS_MAP =  { 
     12:{0:15, 1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0},
@@ -424,7 +322,7 @@ WARNING_MAP = {
         "dc_before": "{} DCed before race. Giving 3 DC points per missing race in GP {} ({} pts).", 
         ("dc_before", 1): "{} is missing from GP {}. 18 DC points for GP {} (mogi), 15 DC points for GP {} (war).", 
 
-        "missing": "GP {} is missing player(s). GP started with {} players, but should've started with {} players.",
+        "missing": "GP {} is missing {} player(s). GP started with {} players, but should've started with {} players.",
         "missing_w_sub": "GP {} is missing {} player(s): {}. Missing players either DCed or were subbed out.",
         "overflow": "GP {} has too many players. GP started with {} players, but should've started with {} players.",
 
@@ -500,17 +398,17 @@ SETTINGS = {
     "style": STYLE_MAP
 }
 
-if __name__ == "__main__":
-    setting = "1,6-2-3"
-    setting = parse_ILT_setting(setting)
-    print(setting)
-    print(determine_ILT(setting, '3'))
+# if __name__ == "__main__":
+#     setting = "1,6-2-3"
+#     setting = parse_ILT_setting(setting)
+#     print(setting)
+#     print(determine_ILT(setting, '3'))
 
-    # i = "A◇山周回のれみ"
-    # sans = []
-    # t = time.time()
-    # for _ in range(1000):
-    #     sans.append(sanitize_uni(i))
-    # print(time.time()-t)
-    # print(sans[0])
+#     i = "A◇山周回のれみ"
+#     sans = []
+#     t = time.time()
+#     for _ in range(1000):
+#         sans.append(sanitize_uni(i))
+#     print(time.time()-t)
+#     print(sans[0])
     
