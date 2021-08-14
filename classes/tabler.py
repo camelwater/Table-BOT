@@ -944,7 +944,11 @@ class Table():
             
             if '-' in score or '+' in score:
                 try:
-                    assert(player.edited_scores[int(gp)] + int(score)>=0)
+                    try:
+                        current_edit = player.edited_scores[int(gp)]
+                    except KeyError:
+                        current_edit = 0
+                    assert(current_edit + int(score)>=0)
                 except AssertionError:
                     ret+=f"`{score}` was an invalid edit{f' (player `{p_indx}`)' if len(l)>1 else ''}: players cannot have negative GP scores. Use `{self.channel.prefix}pen` if you want to penalize players.\n"
                     continue
