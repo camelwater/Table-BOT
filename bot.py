@@ -163,7 +163,7 @@ class TableBOT(commands.Bot):
         #     if instance.last_command_sent is not None and datetime.now() - instance.last_command_sent > timedelta(minutes=30):
         #         Utils.destroy_temp_files(channel)
         #         self.channel_instances.pop(channel)
-        self.table_instances = {channel: instance for (channel, instance) in self.channel_instances.items() 
+        self.channel_instances = {channel: instance for (channel, instance) in self.channel_instances.items() 
                                 if instance.last_command_sent is None or datetime.now() - instance.last_command_sent <= timedelta(minutes=30)}
 
     @tasks.loop(seconds=15)
