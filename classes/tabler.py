@@ -926,7 +926,7 @@ class Table():
         for elem in l:
             player = elem[0]
             gp = elem[1]
-            score = elem[2]
+            edit_score = elem[2]
             if not redo:    
                 try:
                     p_indx = int(player)
@@ -937,29 +937,28 @@ class Table():
         
             try:
                 assert(0 < int(gp) <= self.gps)
+                gp = int(gp)
             except AssertionError:
                 ret+=f"`{gp}` was not a valid gp{f' (player `{p_indx}`)' if len(l)>1 else ''}. The gp number must be from 1-{self.gps}.\n"
                 continue
             orig_edited_scores = copy.deepcopy(player.edited_scores)
             
-            if '-' in score or '+' in score:
+            if '-' in edit_score or '+' in edit_score:
                 try:
-                    try:
-                        current_edit = player.edited_scores[int(gp)]
-                    except KeyError:
-                        current_edit = 0
-                    assert(current_edit + int(score)>=0)
-                except AssertionError:
-                    ret+=f"`{score}` was an invalid edit{f' (player `{p_indx}`)' if len(l)>1 else ''}: players cannot have negative GP scores. Use `{self.channel.prefix}pen` if you want to penalize players.\n"
-                    continue
+                    if gp in player.edited_scores:
+                        assert(player.edited_scores[gp] + int(edit_score)>=0)
+                        player.edited_scores[gp] += int(edit_score)                    
+                    else:
+                        player_score = player.scores[1][gp-1]
+                        assert(player_score + int(edit_score)>=0)
+                        player.edited_scores[gp] = player_score + int(edit_score)
 
-                if int(gp) in player.edited_scores:
-                    player.edited_scores[int(gp)] += int(score)                    
-                else:
-                    player.edited_scores[int(gp)] = player.scores[1][int(gp)-1] + int(score)
+                except AssertionError:
+                    ret+=f"`{edit_score}` was an invalid edit{f' (player `{p_indx}`)' if len(l)>1 else ''}: players cannot have negative GP scores. Use `{self.channel.prefix}pen` if you want to penalize players.\n"
+                    continue
                 
                 if not redo:
-                    self.modifications.append([(f'edit {p_indx} {gp} {score}', player, gp, score, orig_edited_scores)])
+                    self.modifications.append([(f'edit {p_indx} {gp} {edit_score}', player, gp, edit_score, orig_edited_scores)])
                     self.undos.clear()
                 
                 try:
@@ -968,12 +967,12 @@ class Table():
                     pass
                 self.manual_warnings[-1].append(f"GP {gp} scores have been manually modified by the tabler.")
                     
-                ret += f"`{Utils.backtick_clean(player.getName())}` GP `{gp}` score changed to `{player.edited_scores[int(gp)]}`.\n"
+                ret += f"`{Utils.backtick_clean(player.getName())}` GP `{gp}` score changed to `{player.edited_scores[gp]}`.\n"
             else:
-                player.edited_scores[int(gp)] = int(score)
+                player.edited_scores[gp] = int(edit_score)
                 
                 if not redo:
-                    self.modifications.append([(f'edit {p_indx} {gp} {score}', player, gp, score, orig_edited_scores)])
+                    self.modifications.append([(f'edit {p_indx} {gp} {edit_score}', player, gp, edit_score, orig_edited_scores)])
                     self.undos.clear()
                 
                 try:
@@ -982,11 +981,12 @@ class Table():
                     pass
                 self.manual_warnings[-1].append(f"GP {gp} scores have been manually modified by the tabler.")
                         
-                ret+=f"`{Utils.backtick_clean(player.getName())}` GP `{gp}` score changed to `{score}`.\n"
+                ret+=f"`{Utils.backtick_clean(player.getName())}` GP `{gp}` score changed to `{edit_score}`.\n"
+
         return ret
     
     def undo_edit(self, player: Player, orig_edited_scores):
-        player.edited_scores = orig_edited_scores
+        player.edited_scores = copy.deepcopy(orig_edited_scores)
        
     def get_rxx(self) -> str:
         ret = ""
@@ -1380,7 +1380,7 @@ class Table():
         return f"Subbed in `{Utils.backtick_clean(in_player.getName())}` for `{Utils.backtick_clean(out_player.getName())}` (played `{out_races}` races)."
     
     def undo_sub(self, in_player: Player, out_player: Player, restore: Dict[str, Any]): 
-        self.subs.pop(-1) # pop last sub (always last because undos can only go linearly one by one)
+        self.subs.pop() # pop last sub (always last because undos can only go linearly one by one)
         self.players.append(out_player)
 
         if restore['warning']:
@@ -1388,7 +1388,7 @@ class Table():
             restore['warning'].pop('sub_out')
 
         if restore['in_edited_scores'] is not None and len(restore['in_edited_scores']) >0:
-            in_player.edited_scores = restore['in_edited_scores'] 
+            in_player.edited_scores = copy.deepcopy(restore['in_edited_scores']) 
 
         if not isFFA(self.format):
             for tag in self.tags.items():
@@ -1632,7 +1632,7 @@ class Table():
     def undo_crs(self, raceNum, orig_size, restore): 
         raceNum -=1
 
-        self.races[raceNum] =  restore
+        self.races[raceNum] = copy.deepcopy(restore)
         self.change_room_size([[raceNum+1, orig_size]], undo=True,reundo=True)
         if raceNum+1 in self.changed_room_sizes:
             self.changed_room_sizes[raceNum+1].pop()
@@ -2504,12 +2504,9 @@ class Table():
         else:
             raise AssertionError("UNKNOWN UNDO TYPE: ", j[0])
     
-    async def redo(self, j):
+    async def redo(self, j: Tuple[str, Any]):
         if j[0].find('edit ') == 0:
-            if "+" in j[0] or '-' in j[0]:
-                self.edit([[j[1], j[2], str(j[3])]], redo=True)
-            else:
-                self.edit([[j[1], j[2], str(j[3])]], redo=True)
+            self.edit([[j[1], j[2], str(j[3])]], redo=True)
                 
         elif 'editrace' in j[0]:
             self.edit_race([[j[2], j[1], j[4]]], reundo=True)
@@ -2574,10 +2571,10 @@ class Table():
     async def undo_commands(self, num): 
         if num == 0: #undo all
             if len(self.modifications)>0:
-                for i in list(reversed(copy.deepcopy(self.modifications))):
+                for i in self.modifications[::-1]:
                     for j in i:
                         await self.undo(j)
-                        self.undos.append(self.modifications.pop(self.modifications.index(i)))
+                        self.undos.append(self.modifications.pop())
                 
                 return "All manual table modifications have been undone."
             return "No manual modifications to the table to undo."
@@ -2596,11 +2593,11 @@ class Table():
     async def redo_commands(self, num):
         if num == 0: #redo all
             if len(self.undos)>0:
-                for i in list(reversed(self.undos)):
+                for i in self.undos[::-1]:
                     for j in i:
                         await self.redo(j)
                 
-                self.modifications = list(reversed(self.undos))
+                self.modifications = self.undos[::-1]
                 self.undos = []
                 return "All manual table modifications have been redone."
             return "No table modifications to redo."
