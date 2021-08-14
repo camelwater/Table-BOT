@@ -15,7 +15,7 @@ class Player:
     tag: str = field(default="", repr=False, hash=False)
     pens: int = field(default=0,hash=False, repr=False)
     scores: list = field(default_factory=list, hash=False, repr=False)
-    edited_scores: Dict[int, int] = field(default_factory=lambda : defaultdict(int), hash=False, repr=False)
+    edited_scores: Dict[int, int] = field(default_factory=dict, hash=False, repr=False)
     flag_code: str = field(default="", hash=False, repr=False)
     dc_pts: list = field(default_factory=list, hash=False, repr=False)
     subs: List[Tuple['Player', int]] = field(default_factory=list, hash=False, repr=False) #players this player has subbed in for
@@ -115,10 +115,11 @@ class Player:
         self.scores[2] = [a+b for a, b in zip(self.scores[2], out_player.scores[2])]
 
         for gp, score in out_player.edited_scores.items():
-            if gp in self.edited_scores:
+            try:
                 self.edited_scores[gp] += score
-            else:
+            except KeyError:
                 self.edited_scores[gp] = score
+            
 
     def combine_pens(self, out_player: 'Player'):
         self.pens+=out_player.getPens()

@@ -932,17 +932,23 @@ class Table():
                     p_indx = int(player)
                     player: Player = self.player_ids[player]
                 except KeyError:
-                    ret+=f"`{player}` was not a valid player index. The player number must be from 1-{len(self.players)}.\n"
+                    ret+=f"`{player}` was not a valid player index. The player index must be from 1-{len(self.players)}.\n"
                     continue
         
             try:
-                assert(int(gp)-1 <=self.gp)
+                assert(0 < int(gp) <= self.gps)
             except AssertionError:
-                ret+=f"`{gp}` was not a valid gp (player number `{p_indx}`). The gp number must be from 1-{self.gp+1}.\n"
+                ret+=f"`{gp}` was not a valid gp{f' (player `{p_indx}`)' if len(l)>1 else ''}. The gp number must be from 1-{self.gps}.\n"
                 continue
             orig_edited_scores = copy.deepcopy(player.edited_scores)
             
             if '-' in score or '+' in score:
+                try:
+                    assert(player.edited_scores[int(gp)] + int(score)>=0)
+                except AssertionError:
+                    ret+=f"`{score}` was an invalid edit{f' (player `{p_indx}`)' if len(l)>1 else ''}: players cannot have negative GP scores. Use `{self.channel.prefix}pen` if you want to penalize players.\n"
+                    continue
+
                 if int(gp) in player.edited_scores:
                     player.edited_scores[int(gp)] += int(score)                    
                 else:
@@ -958,8 +964,14 @@ class Table():
                     pass
                 self.manual_warnings[-1].append(f"GP {gp} scores have been manually modified by the tabler.")
                     
-                ret += f"`{Utils.backtick_clean(player.getName())}` GP `{gp}` score changed to `{player.edited_scores[int(gp)]}`."
+                ret += f"`{Utils.backtick_clean(player.getName())}` GP `{gp}` score changed to `{player.edited_scores[int(gp)]}`.\n"
             else:
+                try:
+                    assert(int(score)>=0)
+                except AssertionError:
+                    ret+=f"`{score}` was an invalid edit{f' (player `{p_indx}`)' if len(l)>1 else ''}: players cannot have negative GP scores. Use `{self.channel.prefix}pen` if you want to penalize players.\n"
+                    continue
+
                 player.edited_scores[int(gp)] = int(score)
                 
                 if not redo:

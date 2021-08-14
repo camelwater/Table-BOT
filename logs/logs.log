@@ -1,49 +1,8 @@
-2021-08-12 01:23:32,242 ERROR -> Task exception was never retrieved
-future: <Task finished name='Task-36' coro=<Loop._loop() done, defined at C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\tasks\__init__.py:88> exception=AttributeError("'Channel' object has no attribute 'check_mkwx_update'")>
+2021-08-14 01:06:26,155 ERROR -> Attempting a reconnect in 1.12s
 Traceback (most recent call last):
-  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\tasks\__init__.py", line 125, in _loop
-    raise exc
-  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\tasks\__init__.py", line 101, in _loop
-    await self.coro(*args, **kwargs)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\Channel.py", line 58, in mkwx_update
-    self.check_mkwx_update.stop()
-AttributeError: 'Channel' object has no attribute 'check_mkwx_update'
-2021-08-12 01:25:27,418 ERROR -> in command: undo
-Traceback (most recent call last):
-  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
-    ret = await coro(*args, **kwargs)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 586, in undo
-    mes = await self.bot.channel_instances[ctx.channel.id].get_table().undo_commands(args)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2533, in undo_commands
-    await self.undo(i)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\tabler.py", line 2449, in undo
-    raise AssertionError
-AssertionError
-
-
-2021-08-12 21:14:57,813 ERROR -> in command: picture
-Traceback (most recent call last):
-  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
-    ret = await coro(*args, **kwargs)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 555, in picture
-    is_overflow, error_footer, full_footer = self.bot.channel_instances[ctx.channel.id].get_table().get_warnings(show_large_times = large_times)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\classes\tabler.py", line 464, in get_warnings
-    ret+=f"       \t- {self.warn_to_str(warning) if isinstance(warning, dict) else warning}\n"
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\classes\tabler.py", line 364, in warn_to_str
-    ret = WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('gp'), warning.get('pts'))
-AttributeError: 'NoneType' object has no attribute 'getName'
-
-
-2021-08-12 21:18:59,771 ERROR -> in command: picture
-Traceback (most recent call last):
-  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\ext\commands\core.py", line 85, in wrapped
-    ret = await coro(*args, **kwargs)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\cogs\Table.py", line 555, in picture
-    is_overflow, error_footer, full_footer = self.bot.channel_instances[ctx.channel.id].get_table().get_warnings(show_large_times = large_times)
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\classes\tabler.py", line 464, in get_warnings
-    ret+=f"       \t- {self.warn_to_str(warning) if isinstance(warning, dict) else warning}\n"
-  File "c:\Users\ryanz\OneDrive\Desktop\Table-BOT\classes\tabler.py", line 364, in warn_to_str
-    ret = WARNING_MAP.get(warning_type).format(warning.get('player').getName(), warning.get('gp'), warning.get('pts'))
-AttributeError: 'NoneType' object has no attribute 'getName'
-
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\client.py", line 566, in connect
+    await self.ws.poll_event()
+  File "C:\Users\ryanz\AppData\Local\Programs\Python\Python39\lib\site-packages\discord\gateway.py", line 582, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
 
