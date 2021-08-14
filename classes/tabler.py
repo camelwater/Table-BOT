@@ -1808,7 +1808,8 @@ class Table():
         self.sui = setting
 
         if not reundo:
-            self.modifications.append([(f"largetimes {setting}", orig_sui, setting)])
+            display_setting = "yes" if setting else "no"
+            self.modifications.append([(f"ignorelargetimes {display_setting}", orig_sui, setting)])
     
     def create_new_player(self, name, fc):
         return Player(fc=fc, name=name, scores=[0, [0]*self.gps, [0]*self.gps*4])
@@ -2366,7 +2367,7 @@ class Table():
         elif 'changegps ' in j[0]:
             self.change_gps(j[1], reundo=True)
         
-        elif 'largetimes' in j[0]:
+        elif 'ignorelargetimes' in j[0]:
             self.change_sui(j[1], reundo=True)
         
         else:
@@ -2430,7 +2431,7 @@ class Table():
         elif 'changegps ' in j[0]:
             self.change_gps(j[2], reundo=True)
         
-        elif 'largetimes' in j[0]:
+        elif 'ignorelargetimes' in j[0]:
             self.change_sui(j[2], reundo=True)
         
         else:

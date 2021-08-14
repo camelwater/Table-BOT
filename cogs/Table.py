@@ -475,26 +475,26 @@ class Table_cog(commands.Cog):
             await self.send_messages(ctx, self.bot.channel_instances[ctx.channel.id].get_table().graph_options(), f"\nUsage: `{ctx.prefix}graph <graphNumber|graphName>`")        
     
     @commands.command(aliases=['showlarge', 'showlargefinishtimes', 'large', 'largefinish', 'showlargefinish', 
-                        'largefinishtimes', 'largetimes', 'ignorelargetimes', 'ignorelarge', 'ignoretimes', 'ignorelargefinish', 'ignorelargefinishtimes',
+                        'largefinishtimes', 'largetimes', 'showlargetimes', 'ignorelarge', 'ignoretimes', 'ignorelargefinish', 'ignorelargefinishtimes',
                         'ignorefinishtimes'])
-    async def showlargetimes(self,ctx: commands.Context, choice: str):
-        if await self.check_callable(ctx, "showlargetimes"): return
+    async def ignorelargetimes(self,ctx: commands.Context, choice: str):
+        if await self.check_callable(ctx, "ignorelargetimes"): return
         if choice.lower() not in {'yes', 'y', 'no', 'n'}: 
             return await ctx.send(f"Invalid value `{choice}`. You must put either yes or no.")
 
         show_large = True if choice.lower() in {'yes', 'y'} else False
-        if 'ignore' not in self.ctx.invoked_with:
+        if 'ignore' not in ctx.invoked_with:
             show_large = not show_large
         self.bot.channel_instances[ctx.channel.id].get_table().change_sui(show_large)
         await ctx.send("Table now showing large finish times." if not show_large else "Table now suppressing large finish times.")
 
-    @showlargetimes.error
+    @ignorelargetimes.error
     async def largefinishtimes_error(self, ctx, error):
         self.set_instance(ctx)
-        if await self.check_callable(ctx, "largefinishtimes"): return
+        if await self.check_callable(ctx, "ignorelargetimes"): return
 
         if isinstance(error, commands.MissingRequiredArgument):
-            await self.send_messages(ctx, f"\nUsage: `{ctx.prefix}showlargetimes <yes/no>`")     
+            await self.send_messages(ctx, f"\nUsage: `{ctx.prefix}ignorelargetimes <yes/no>`")     
 
     @commands.command(aliases=['showerrors', 'warnings', 'showwarnigns', 'err', 'warn', 'errs', 'warns'])
     async def errors(self, ctx: commands.Context):
