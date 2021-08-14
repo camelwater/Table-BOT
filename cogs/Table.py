@@ -784,7 +784,9 @@ class Table_cog(commands.Cog):
                 await self.send_temp_messages(ctx, "Too many arguments for player number {}. The only arguments should be <player number>, <gp number>, and <gp score>.".format(i[0]), usage)
                 return
             for j in i:
-                if not j.lstrip('-').lstrip('+').isnumeric():
+                try:
+                    int(j)
+                except ValueError:
                     await self.send_temp_messages(ctx, "All arguments for this command must be numeric.")
                     return
 

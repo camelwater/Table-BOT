@@ -970,12 +970,6 @@ class Table():
                     
                 ret += f"`{Utils.backtick_clean(player.getName())}` GP `{gp}` score changed to `{player.edited_scores[int(gp)]}`.\n"
             else:
-                try:
-                    assert(int(score)>=0)
-                except AssertionError:
-                    ret+=f"`{score}` was an invalid edit{f' (player `{p_indx}`)' if len(l)>1 else ''}: players cannot have negative GP scores. Use `{self.channel.prefix}pen` if you want to penalize players.\n"
-                    continue
-
                 player.edited_scores[int(gp)] = int(score)
                 
                 if not redo:
