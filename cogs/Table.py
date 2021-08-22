@@ -580,6 +580,9 @@ class Table_cog(commands.Cog):
                 args = 0
             else:
                 args=-1
+        if len(self.bot.channel_instances[ctx.channel.id].get_table().modifications) == 0:
+            return await ctx.send("No table modifications to undo.")
+
         del_mes = await ctx.send("Undoing...")
         mes = await self.bot.channel_instances[ctx.channel.id].get_table().undo_commands(args)
         await del_mes.delete()
@@ -601,6 +604,9 @@ class Table_cog(commands.Cog):
                 args = 0
             else:
                 args = -1
+        
+        if len(self.bot.channel_instances[ctx.channel.id].get_table().undos) == 0:
+            return await ctx.send("No table modifications to redo.")
         del_mes = await ctx.send("Redoing...")
         mes = await self.bot.channel_instances[ctx.channel.id].get_table().redo_commands(args)
         await del_mes.delete()

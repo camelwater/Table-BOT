@@ -1,3 +1,28 @@
+from itertools import chain
+from functools import reduce, partial
+
+
+def ngram(seq: str, n: int):
+    return (seq[i: i+n] for i in range(0, len(seq)-n+1))
+
+def allngram(seq: str, minn=1, maxn=None):
+    lengths = range(minn, maxn+1) if maxn else range(minn, len(seq))
+    ngrams = map(partial(ngram, seq), lengths)
+    return set(chain.from_iterable(ngrams))
+
+def commonaffix(group):
+    maxn = min(map(len, group))
+    seqs_ngrams = map(partial(allngram, maxn=maxn), group)
+    intersection = reduce(set.intersection, seqs_ngrams)
+    try:
+        all_presub = sorted(intersection, key=len, reverse=True)
+        for sub in all_presub:
+            if all([i.startswith(sub) or i.endswith(sub) for i in group]):
+                return sub
+
+        return ""
+    except:
+        return ""
 
 def is_CJK(char) -> bool:
     return any([start <= ord(char) <= end for start, end in 
@@ -22,9 +47,8 @@ def sanitize_uni(string: str, for_search = False):
         i = CHAR_MAP.get(i, i)
         if i in VALID_CHARS or is_CJK(i):
             ret.append(i)
-            continue
-        
-        ret.append(" ")
+        else:
+            ret.append(" ")
         # n = unidecode(i)
         # if n=="":
         #     ret.append(" ")
@@ -34,13 +58,15 @@ def sanitize_uni(string: str, for_search = False):
     if for_search:
         return ''.join(ret)
 
-    while len(ret)>0:
+    remove = True
+    while remove and len(ret)>0:
+        remove = False
         if ret[0] in PRE_REMOVE:
             ret.pop(0)
-        elif ret[-1] in POST_REMOVE:
+            remove = True
+        if len(ret)>0 and ret[-1] in POST_REMOVE:
             ret.pop(-1)
-        else:
-            break
+            remove = True
 
     return ''.join(ret)
 
@@ -63,9 +89,9 @@ def sanitize_tag_uni(string):
 
 # CONSTANTS
 
-VALID_CHARS = "/\*`^+-_.!?@%&()\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz" + "abcdefghijklmnopqrstuvwxyz0123456789 ".upper()
-PRE_REMOVE = "/\*^+-_.!?#%() "
-POST_REMOVE = "/\*^+-.!?# "
+VALID_CHARS = set("/\*`^+-_.!?@%&()\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz" + "abcdefghijklmnopqrstuvwxyz0123456789 ".upper())
+PRE_REMOVE = set("/\*^+-_.!?#%() ")
+POST_REMOVE = set("/\*^+-.!?# ")
 
 CHAR_MAP = {
     "Λ": 'A', "λ": 'A', "@": 'A', "Δ": "A", "Ά": "A", "Ã": "A", "À": "A", "Á": "A", "Â": "A", "Ä": "A", "Å": "A", "ά": "a", "à": "a", "á": "a", "â": "a", "ä": "a", "å": "a", "ã": "a", "α": "a", "ª": "a",

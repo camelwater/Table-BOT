@@ -87,7 +87,7 @@ def callable_prefix(bot, msg: discord.Message, mention=True) -> List[str]:
         base = default
     else:
         base.extend(bot.prefixes.get(msg.guild.id, default))
-        # base.append('$')
+        base.append('$')
 
     if mention:
         return commands.when_mentioned_or(*base)(bot, msg)
@@ -336,10 +336,13 @@ class TableBOT(commands.Bot):
     def run(self):
         super().run(KEY, reconnect=True)
 
-if __name__ == "__main__":
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('key', metavar='KEY', type=str, nargs='?')
-    bot_key = parser.parse_args().key
+    return parser.parse_args().key
+
+if __name__ == "__main__":
+    bot_key = parse_args()
     if bot_key: KEY = bot_key
 
     bot = TableBOT()

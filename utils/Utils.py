@@ -191,6 +191,10 @@ def chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i+n]
 
+def find_if_edited(player, raceNum, ref):
+    for i in ref[raceNum]:
+        if "dc_" in i.get('type') and i.get('player') == player:
+            return i.get("is_edited", False)
 
 def warn_to_str(warning: Dict[str, Any]) -> str:                
     warning_type = warning.get('type')

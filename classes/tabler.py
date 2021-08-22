@@ -308,7 +308,7 @@ class Table():
 
         tick=timer.time()
         per_team = int(f)
-        name_to_player = {}
+        name_to_player: Dict[str, Player] = {}
         for i in self.players:
             name_to_player[i.getName()] = i
         player_copy = list(name_to_player.keys()) if not self.IGNORE_FCS else list(copy.deepcopy(self.players).keys())
@@ -325,7 +325,11 @@ class Table():
         if not self.IGNORE_FCS:
             print(teams)
             for t, ps in teams.items():
-                teams[t] = [name_to_player[name] for name in ps]
+                teams[t] = []
+                for name in ps:
+                    player = name_to_player[name]
+                    player.tag = t
+                    teams[t].append(player)
 
         self.tags = teams
         self.tags = dict(sorted(self.tags.items(), key=lambda item: tagUtils.sanitize_uni(item[0].lower())))
@@ -333,7 +337,7 @@ class Table():
 
         print()
         print(self.tags)
-        print("tag algo time:",timer.time()-tick)
+        print("tag algo time:", timer.time()-tick)
 
 
     def get_warnings(self, show_large_times = None, override=False) -> Tuple[bool, str, str]:
@@ -1072,12 +1076,8 @@ class Table():
         return new
     
     def sort_AP(self, player: Player) -> Tuple[int, str, str]:
-        found_tag = ""
-        for tag, tag_players in self.tags.items():
-            if player in tag_players:
-                found_tag = tag
-                break
-        return (0 if found_tag!="" else 1, tagUtils.sanitize_uni(found_tag), tagUtils.sanitize_uni(player.getName()))
+        
+        return (0 if player.tag!="" else 1, tagUtils.sanitize_uni(player.tag), tagUtils.sanitize_uni(player.getName()))
 
     def get_all_players(self) -> str: 
         ret = ''
@@ -1121,6 +1121,14 @@ class Table():
 
         return 'success'
     
+    def add_player_to_tag(self, player: Player, tag):
+        try:
+            self.tags[tag].append(player)
+        except KeyError:
+            self.tags[tag] = [player]
+        
+        player.tag = tag
+
     def find_tag(self, player: Player):
         name = player.getName()
         per_team = int(self.format[0])
@@ -1129,7 +1137,7 @@ class Table():
         if len(self.players)==self.num_players:
             for tag in self.tags.items():
                 if len(tag[1])<per_team:
-                    self.tags[tag[0]].append(player)
+                    self.add_player_to_tag(player, tag[0])
                     return
 
         #prefix tag matching
@@ -1139,7 +1147,7 @@ class Table():
                 if len(tag)>match[1]:
                     match = [tag, len(tag)]
         if match[1]>0:
-            self.tags[match[0]].append(player)
+            self.add_player_to_tag(player, match[0])
             return
 
         #suffix tag matching
@@ -1149,30 +1157,31 @@ class Table():
                 if len(tag)>match[1]:
                     match = [tag, len(tag)]
         if match[1]>0:
-            self.tags[match[0]].append(player)
+            self.add_player_to_tag(player, match[0])
             return
         
-        #common substring matching if 2v2
-        if per_team==2:
-            match = ["", 0]
-            for tag in self.tags.keys():
-                lcs = Utils.LCS(tagUtils.sanitize_uni(name.strip()).lower(), tagUtils.sanitize_uni(tag).lower())
-                if len(lcs)>1 and lcs==tag and len(self.tags[tag]<per_team):
-                    if len(lcs)>match[1]:
-                        match = [lcs, len(lcs)]
-            if match[0]!="":   
-                self.tags[match[0]].append(player)
-                return
+        #common substring matching (will only match if LCS is > length 1)
+        match = ["", 0]
+        for tag in self.tags.keys():
+            if tag in ["", "SUBS"]:
+                continue
+            tag_uni = tagUtils.sanitize_uni(tag).lower()
+            lcs = tagUtils.commonaffix([tagUtils.sanitize_uni(name.strip()).lower(), tag_uni])
+            if lcs==tag_uni and len(self.tags[tag]<per_team) and len(lcs)>1 and len(lcs) > match[1]:
+                match = [lcs, len(lcs)]
+        if match[0]!="":   
+            self.add_player_to_tag(player, match[0])
+            return
         
         #no tags matched, so randomly fill
         for i in self.tags.items():
             if len(i[1])<per_team:
-                self.tags[i[0]].append(player)
+                self.add_player_to_tag(player, i[0])
                 return
 
         #all tags were full, so create new tag
         new_tag = self.check_tags(tagUtils.sanitize_uni(name)[0])
-        self.tags[new_tag] = [player]
+        self.add_player_to_tag(player, new_tag)
 
     def get_subs(self) -> str:
         ret = 'Room subs:\n'
@@ -1839,13 +1848,67 @@ class Table():
                 self.last_race_update = datetime.datetime.now()
             return True
         return False
-         
-    async def update_table(self, prnt=True, auto=False, recalc = False, reference_warnings = None):
-        def find_if_edited(player, raceNum, ref):
-            for i in ref[raceNum]:
-                if "dc_" in i.get('type') and i.get('player') == player:
-                    return i.get("is_edited", False)
 
+    def get_new_races(self, soup: BeautifulSoup):
+        new_races = []
+        limbo_players: List[Player] = []
+        elems = soup.select('tr[id*=r]')
+        new_elems = []
+        for i in elems:
+            elem = i
+            raceID = elem.findAll('a')[0].text
+
+            if raceID in self.recorded_elems:
+                # print("RACE ALREADY RECORDED")
+                break
+            new_elems.append(raceID)
+                
+            try:
+                track = elem.findAll('a')[-1].text
+                assert(elem.findAll('a')[2] == elem.findAll('a')[-1])
+                track = track[0:track.find('(')-1]
+            except (AssertionError, IndexError):
+                track = "Unknown Track"
+                
+            race = (raceID, track,[])
+            next_elem = elem.findNext('tr').findNext('tr')
+            
+            while next_elem not in elems and next_elem is not None:
+                fin_time = next_elem.findAll('td', align='center')[-1].text
+                fin_time = 'DC' if fin_time == '—' else fin_time
+                miiName = next_elem.find('td', class_='mii-font').text
+                if miiName == "no name": miiName = "Player"
+                fc = next_elem.select('span[title*=PID]')[0].text
+                tr = next_elem.find_all('td',{"align" : "center"})[4].text
+                tr = False if tr=="✓" else True
+                try:
+                    delta = next_elem.select('td[title*=delay]')[0].text
+                except IndexError:
+                    delta = next_elem.find_all('td', {"align" : "center"})[5].text
+                
+                player_obj = None
+                for player in self.players:
+                    if player.getFC()==fc:
+                        player_obj = player
+                        break
+                for player in limbo_players:
+                    if player.getFC()==fc:
+                        player_obj = player
+                        break
+                if player_obj is None: 
+                    player_obj = self.create_new_player(self.check_name(miiName), fc)
+                    limbo_players.append(player_obj)
+
+                race[2].append((player_obj, fin_time, tr, delta))
+                next_elem = next_elem.findNext('tr')
+                
+            new_races.append(race)
+
+        new_races.reverse()
+        new_elems.reverse()
+        return new_races, new_elems
+
+    async def update_table(self, prnt=True, auto=False, recalc = False, reference_warnings = None):
         shift = len(self.races) if not recalc else 0
         reference_warnings = self.warnings if reference_warnings is None else reference_warnings
         rID = self.rxx
@@ -1858,62 +1921,7 @@ class Table():
                 else:
                     return "I am currently experiencing some issues with Wiimmfi. The table could not be updated. Try again later."
             
-            new_races = []
-            limbo_players = []
-            elems = soup.select('tr[id*=r]')
-            new_elems = []
-            for i in elems:
-                elem = i
-                raceID = elem.findAll('a')[0].text
-
-                if raceID in self.recorded_elems:
-                    # print("RACE ALREADY RECORDED")
-                    break
-                new_elems.append(raceID)
-                    
-                try:
-                    track = elem.findAll('a')[-1].text
-                    assert(elem.findAll('a')[2] == elem.findAll('a')[-1])
-                    track = track[0:track.find('(')-1]
-                except (AssertionError, IndexError):
-                    track = "Unknown Track"
-                    
-                race = (raceID, track,[])
-                next_elem = elem.findNext('tr').findNext('tr')
-                
-                while next_elem not in elems and next_elem is not None:
-                    fin_time = next_elem.findAll('td', align='center')[-1].text
-                    fin_time = 'DC' if fin_time == '—' else fin_time
-                    miiName = next_elem.find('td', class_='mii-font').text
-                    if miiName == "no name": miiName = "Player"
-                    fc = next_elem.select('span[title*=PID]')[0].text
-                    tr = next_elem.find_all('td',{"align" : "center"})[4].text
-                    tr = False if tr=="✓" else True
-                    try:
-                        delta = next_elem.select('td[title*=delay]')[0].text
-                    except IndexError:
-                        delta = next_elem.find_all('td', {"align" : "center"})[5].text
-                    
-                    player_obj = None
-                    for player in self.players:
-                        if player.getFC()==fc:
-                            player_obj = player
-                            break
-                    for player in limbo_players:
-                        if player.getFC()==fc:
-                            player_obj = player
-                            break
-                    if player_obj is None: 
-                        player_obj = self.create_new_player(self.check_name(miiName), fc)
-                        limbo_players.append(player_obj)
-
-                    race[2].append((player_obj, fin_time, tr, delta))
-                    next_elem = next_elem.findNext('tr')
-                    
-                new_races.append(race)
-
-            new_races.reverse()
-            new_elems.reverse()
+            new_races, new_elems = self.get_new_races(soup)
             
             #make sure table doesn't record unwanted races
             if len(self.races+new_races)>self.gps*4:
@@ -2022,7 +2030,7 @@ class Table():
                 if not sub_outs:
                     if (shift+raceNum)%4 == 0:
                         for mp in missing_players:
-                            is_edited = find_if_edited(mp, shift+raceNum+1, reference_warnings)
+                            is_edited = Utils.find_if_edited(mp, shift+raceNum+1, reference_warnings)
                             if self.gp not in self.gp_dcs or mp not in self.gp_dcs[self.gp]:
                                 self.warnings[shift+raceNum+1].append({'type': 'dc_before', 'race':1, 'gp': self.gp+1, 'player':mp, "is_edited":is_edited})
                                 self.dc_list[shift+raceNum+1].append({'type': 'dc_before', 'race':1, 'gp': self.gp+1, 'player':mp, "is_edited":is_edited})
@@ -2032,7 +2040,7 @@ class Table():
                                 
                     else:
                         for mp in missing_players:
-                            is_edited = find_if_edited(mp, shift+raceNum+1, reference_warnings)
+                            is_edited = Utils.find_if_edited(mp, shift+raceNum+1, reference_warnings)
                             if self.gp not in self.gp_dcs or mp not in self.gp_dcs[self.gp]:
                                 self.warnings[shift+raceNum+1].append({'type':'dc_before', 'race':shift+raceNum+1, 'rem_races':4-((shift+raceNum)%4), 'pts':0, 'gp':self.gp+1,'player':mp, "is_edited":is_edited})    
                                 self.dc_list[shift+raceNum+1].append({'type':'dc_before', 'race':shift+raceNum+1, 'rem_races':4-((shift+raceNum)%4), 'pts':0, 'gp':self.gp+1,'player':mp, "is_edited":is_edited})    
@@ -2043,7 +2051,6 @@ class Table():
                                 if self.gp not in self.gp_dcs: self.gp_dcs[self.gp] = []
                                 self.gp_dcs[self.gp].append(mp)
             
-            
             last_finish_times = {}
             ties = defaultdict(list)
             DC_ties = []
@@ -2051,7 +2058,7 @@ class Table():
             for place, player in enumerate(race[2]):
                 time = player[1]
                 player_obj: Player = player[0]
-                is_edited = find_if_edited(player_obj, shift+raceNum+1, reference_warnings)
+                is_edited = Utils.find_if_edited(player_obj, shift+raceNum+1, reference_warnings)
 
                 for indx, j in enumerate(player_obj.dc_pts):
                     if shift+raceNum+1 in j[1]:
@@ -2065,7 +2072,6 @@ class Table():
                     if not isFFA(self.format) and status == 'success':
                         self.warnings[shift+raceNum+1].append({'type':'sub', 'player': player_obj})
             
-                
                 player_obj.scores[1][self.gp] += PTS_MAP[cur_room_size][place]
                 player_obj.scores[2][shift+raceNum] = PTS_MAP[cur_room_size][place]
                 player_obj.scores[0] += PTS_MAP[cur_room_size][place]
@@ -2439,45 +2445,37 @@ class Table():
             
     async def undo_commands(self, num): 
         if num == 0: #undo all
-            if len(self.modifications)>0:
-                for i in self.modifications[::-1]:
-                    for j in i:
-                        await self.undo(j)
-                        self.undos.append(self.modifications.pop())
-                
-                return "All manual table modifications have been undone."
-            return "No manual modifications to the table to undo."
+            for i in self.modifications[::-1]:
+                for j in i:
+                    await self.undo(j)
+                    self.undos.append(self.modifications.pop())
+            
+            return "All manual table modifications have been undone."
         
         else: #undo last
-            if len(self.modifications)>0:
-                for i in self.modifications[-1]:
-                    await self.undo(i)
-                
-                mod = self.modifications.pop()
-                self.undos.append(mod)
-                return f"Last table modification ({Utils.disc_clean(self.channel.prefix+mod[0][0])}) has been undone."
-            return "No manual modifications to the table to undo."
+            for i in self.modifications[-1]:
+                await self.undo(i)
+            
+            mod = self.modifications.pop()
+            self.undos.append(mod)
+            return f"Last table modification ({Utils.disc_clean(self.channel.prefix+mod[0][0])}) has been undone."
         
     async def redo_commands(self, num):
         if num == 0: #redo all
-            if len(self.undos)>0:
-                for i in self.undos[::-1]:
-                    for j in i:
-                        await self.redo(j)
-                
-                self.modifications = self.undos[::-1]
-                self.undos = []
-                return "All manual table modifications have been redone."
-            return "No table modifications to redo."
+            for i in self.undos[::-1]:
+                for j in i:
+                    await self.redo(j)
+                    self.modifications.append(self.undos.pop())
+            
+            # self.modifications = self.undos[::-1]
+            self.undos = []
+            return "All manual table modifications have been redone."
         
         else: #redo last undo
-            if len(self.undos)>0:
-                for i in self.undos[-1]:
-                    await self.redo(i)
-                    
-                mod = self.undos.pop()
-                self.modifications.append(mod)
-                return f"Last table modification undo ({Utils.disc_clean(self.channel.prefix+mod[0][0])}) has been redone."
-            return "No table modifications to redo."
+            for i in self.undos[-1]:
+                await self.redo(i)
+                
+            mod = self.undos.pop()
+            self.modifications.append(mod)
+            return f"Last table modification undo ({Utils.disc_clean(self.channel.prefix+mod[0][0])}) has been redone."
         
-    

@@ -52,8 +52,8 @@ class Channel:
         if len(self.table.races)>=self.table.gps*4 or (self.table.last_race_update is not None and datetime.datetime.now()-self.table.last_race_update>datetime.timedelta(minutes=25)):
             self.mkwx_update.stop()
 
-        cur_iter = self.mkwx_update.current_loop
-        print(cur_iter)
+        # cur_iter = self.mkwx_update.current_loop
+        # print(cur_iter)
         if not await self.table.room_is_updated(): return
 
         await self.auto_send_pic()

@@ -14,7 +14,7 @@ class Player:
     name: str = field(default="", hash=False)
     tag: str = field(default="", repr=False, hash=False)
     pens: int = field(default=0,hash=False, repr=False)
-    scores: list = field(default_factory=list, hash=False, repr=False)
+    scores: List[List[int]] = field(default_factory=list, hash=False, repr=False)
     edited_scores: Dict[int, int] = field(default_factory=dict, hash=False, repr=False)
     flag_code: str = field(default="", hash=False, repr=False)
     dc_pts: list = field(default_factory=list, hash=False, repr=False)
@@ -29,6 +29,9 @@ class Player:
 
     def getFC(self) -> str:
         return self.fc
+    
+    def get_tag(self) -> str:
+        return self.tag
 
     def getName(self) -> str:
         return self.name

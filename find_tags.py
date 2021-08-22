@@ -5,10 +5,10 @@ import utils.tagUtils as tagUtils
 from collections import defaultdict
 import copy
 import random as rand
-from itertools import chain
-from functools import reduce, partial
+from utils.tagUtils import commonaffix
 import tag_testing.simulatedAnnealingTag as simAnl
 from typing import Dict, Tuple, List, Set
+import cProfile
 
 def get_test_case(large = False):
     """
@@ -142,8 +142,6 @@ def check_overlaps(players: Set[Tuple[str, str]], tag: str, all_tags: Dict[str, 
             if i not in strict_non_overlapped:
                 all_tags[tag].discard(i)
         return
-    # elif len(non_overlapped)>=per_team:
-    #     pass
 
     iter = sorted(list(players), key=lambda l: (1 if overlaps(l, tag, all_tags, per_team)[1]==1 else 0, 1 if overlaps(l, tag, all_tags, per_team)[0]==1 else 0, 0 if l[0].startswith(tag.lower()) else 1))
 
@@ -155,67 +153,46 @@ def check_overlaps(players: Set[Tuple[str, str]], tag: str, all_tags: Dict[str, 
 
         comp_tag_uni = tagUtils.sanitize_uni(comp_tag).lower()
         for p in iter[::-1]:
-            if p in tag_p and len(tag_p)>=per_team: 
-                if len(comp_tag)>len(tag) and (comp_tag_uni.startswith(tag.lower())
-                                            or comp_tag_uni.endswith(tag.lower())):
+            if p not in tag_p or len(tag_p)<per_team: 
+                continue
+
+            if len(comp_tag)>len(tag) and (comp_tag_uni.startswith(tag.lower())
+                                        or comp_tag_uni.endswith(tag.lower())):
+                all_tags[tag].discard(p)
+                iter.remove(p)
+                if len(all_tags[tag])<=per_team:
+                    return
+
+            # elif not len(non_overlapped)<per_team and all([True if overlaps(i, tag, all_tags, per_team)==1 else False for i in tag_p]):
+            #     all_tags[tag].discard(p)
+            #     iter.remove(p)
+                # if len(all_tags[tag])<=per_team:
+                #         return
+
+            elif p[0].startswith(comp_tag_uni) and not p[0].startswith(tag.lower()) \
+                    and more_prefix(all_tags[comp_tag], comp_tag) and not more_suffix(all_tags[tag], tag):
+                if overlaps(p, tag, all_tags, per_team)[0]==1:
                     all_tags[tag].discard(p)
                     iter.remove(p)
-                    if len(all_tags[tag])<=per_team:
-                        return
-
-                # elif not len(non_overlapped)<per_team and all([True if overlaps(i, tag, all_tags, per_team)==1 else False for i in tag_p]):
-                #     all_tags[tag].discard(p)
-                #     iter.remove(p)
+                        
+                elif len(tag_p)==per_team and len(all_tags[tag])>per_team:
+                    all_tags[tag].discard(p)
+                    iter.remove(p)
                     # if len(all_tags[tag])<=per_team:
-                    #         return
+                    #     return 
+                if len(all_tags[tag])<=per_team:
+                    return                             
 
-                elif p[0].startswith(comp_tag_uni) and not p[0].startswith(tag.lower()) \
-                        and more_prefix(all_tags[comp_tag], comp_tag) and not more_suffix(all_tags[tag], tag):
-                    if overlaps(p, tag, all_tags, per_team)[0]==1:
-                        all_tags[tag].discard(p)
-                        iter.remove(p)
-                         
-                    elif len(tag_p)==per_team and len(all_tags[tag])>per_team:
-                        all_tags[tag].discard(p)
-                        iter.remove(p)
-                        # if len(all_tags[tag])<=per_team:
-                        #     return 
-                    if len(all_tags[tag])<=per_team:
-                            return                             
-
-                elif p[0].endswith(comp_tag_uni) and not p[0].endswith(tag.lower()) \
-                        and more_suffix(all_tags[comp_tag], comp_tag) and not more_prefix(all_tags[tag], tag):
-                    if overlaps(p, tag, all_tags, per_team)[0]==1:
-                        all_tags[tag].discard(p)
-                        iter.remove(p)
-                    elif len(tag_p)==per_team and len(all_tags[tag])>per_team:
-                        all_tags[tag].discard(p)
-                        iter.remove(p)
-                    if len(all_tags[tag])<=per_team:
-                        return
-                
-                
-def ngram(seq: str, n: int):
-    return (seq[i: i+n] for i in range(0, len(seq)-n+1))
-
-def allngram(seq: str, minn=1, maxn=None):
-    lengths = range(minn, maxn+1) if maxn else range(minn, len(seq))
-    ngrams = map(partial(ngram, seq), lengths)
-    return set(chain.from_iterable(ngrams))
-
-def commonaffix(group):
-    maxn = min(map(len, group))
-    seqs_ngrams = map(partial(allngram, maxn=maxn), group)
-    intersection = reduce(set.intersection, seqs_ngrams)
-    try:
-        all_presub = sorted(intersection, key=len, reverse=True)
-        for sub in all_presub:
-            if all([i.startswith(sub) or i.endswith(sub) for i in group]):
-                return sub
-
-        return ""
-    except:
-        return ""
+            elif p[0].endswith(comp_tag_uni) and not p[0].endswith(tag.lower()) \
+                    and more_suffix(all_tags[comp_tag], comp_tag) and not more_prefix(all_tags[tag], tag):
+                if overlaps(p, tag, all_tags, per_team)[0]==1:
+                    all_tags[tag].discard(p)
+                    iter.remove(p)
+                elif len(tag_p)==per_team and len(all_tags[tag])>per_team:
+                    all_tags[tag].discard(p)
+                    iter.remove(p)
+                if len(all_tags[tag])<=per_team:
+                    return
 
 def split_by_actual(players: Set[Tuple[str, str]], tag: str, per_team: int, all_tags: Dict[str, Set[Tuple[str, str]]]):
     '''
@@ -309,38 +286,25 @@ def handle_undetermined(teams: Dict[str, List[str]], un_players: List[Tuple[str,
 
     first, fill tags that aren't full. then, if necessary, create random groupings.
     '''
-    #substring tag for 2v2s check
-    # if len(un_players)>0 and per_team==2:
-    #     find_substring_tags(un_players, teams)
-
     def rand_split():
         split = list(Utils.chunks(un_players, per_team))
         for r_team in split:
             for ind,player in enumerate(r_team):
                 try:
                     temp = check = tagUtils.sanitize_uni(player[1])[0] #use first valid character from name as new tag
-                    d = 1
-                    while check.lower() in map(lambda o: o.lower(), teams.keys()):
-                        check = f"{temp}-{d}"
-                        d+=1
-                    teams[check] = r_team
-                    break
-                
-                except: #player has no valid characters in their name 
-                    if ind+1==len(r_team):
-                        temp = check = player[1][0]
-                        d = 1
-                        while check.lower() in map(lambda o: o.lower(), teams.keys()):
-                            check = f"{temp}-{d}"
-                            d+=1
-                        teams[check] = r_team
+                except IndexError: #player has no valid characters in their name, so just use their first character
+                    if ind+1<len(r_team):
+                        continue
+                    temp = check = player[1][0]
 
+                d = 1
+                while check.lower() in map(lambda o: o.lower(), teams.keys()):
+                    check = f"{temp}-{d}"
+                    d+=1
+                teams[check] = r_team
+                break
+                
     is_all_filled = False if len(list(teams.values())[-1])<per_team else True
-    # is_all_filled=True
-    # for tag in list(teams.items())[::-1]:
-    #     if len(tag[1])<per_team:
-    #         is_all_filled = False
-    #         break
 
     if not is_all_filled:
         for tag in list(teams.items())[::-1]:
@@ -406,14 +370,10 @@ def select_top(all_tags: Dict[str, Set[Tuple[str, str]]], per_team: int, num_tea
 
         if len(tag_players)<=per_team: continue  
         #just randomly get rid of someone at this point - either the format is wrong or the players' tags are bad (and impossible to get completely correct)
-        # overlapped_players = [i for i in tag_players if overlaps(i, tag, all_tags, per_team[1][])>0]
         tag_players = sorted(tag_players, key = lambda p: overlaps(p, tag, all_tags, per_team))
         while len(tag_players)>per_team: 
             tag_players.pop()
-            # if len(overlapped_players)>0:
-            #     tag_players.discard(overlapped_players.pop(-1))
-            # else:
-            #     tag_players.pop()
+            
     for _ in range(num_teams_supposed):
         for x in list(all_tags.items())[::-1]:
             new_set = set([i for i in x[1] if i in players])
@@ -539,7 +499,7 @@ def tag_algo(players: List[str], per_team: int, num_teams: int) -> Dict[str, Lis
 if __name__ == "__main__":
     import time
     
-    large = False
+    large = True
     players, lengths = get_test_case(large=large)
     rand.shuffle(players)
     # print(players)
@@ -547,7 +507,11 @@ if __name__ == "__main__":
 
     tick = time.perf_counter()
     per_team = 2
+    prof = cProfile.Profile()
+    prof.enable()
     teams = tag_algo(players, per_team=per_team, num_teams=6)
+    prof.disable()
+    prof.print_stats()
     # print(dict(sorted(t.items(), key = lambda l: l[0])))
     if not large: print(teams)
     print("\nPERFORMANCE: {:.15f}".format(time.perf_counter()-tick))
