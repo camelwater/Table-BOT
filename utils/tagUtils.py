@@ -1,6 +1,6 @@
 from itertools import chain
 from functools import reduce, partial
-
+from collections import deque
 
 def ngram(seq: str, n: int):
     return (seq[i: i+n] for i in range(0, len(seq)-n+1))
@@ -38,7 +38,7 @@ def sanitize_uni(string: str, for_search = False):
     convert known/common un-unidecodable and unicode strings to ASCII and clean string for tag-matching
 
     '''  
-    ret= []
+    ret = []
     for i in string:
         if i in MULT_CHAR_MAP:
             for char in MULT_CHAR_MAP[i]:
@@ -49,12 +49,8 @@ def sanitize_uni(string: str, for_search = False):
             ret.append(i)
         else:
             ret.append(" ")
-        # n = unidecode(i)
-        # if n=="":
-        #     ret.append(" ")
-        # elif n in VALID_CHARS:
-        #     ret.append(n)
-            
+       
+       
     if for_search:
         return ''.join(ret)
 
@@ -65,7 +61,7 @@ def sanitize_uni(string: str, for_search = False):
             ret.pop(0)
             remove = True
         if len(ret)>0 and ret[-1] in POST_REMOVE:
-            ret.pop(-1)
+            ret.pop()
             remove = True
 
     return ''.join(ret)

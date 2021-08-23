@@ -4,6 +4,7 @@ utils/__pycache__
 tag_testing/__pycache__
 tag_testing/backup_tag_algo.py
 tag_testing/testTag.py
+tag_testing/find_tags_restore.py
 resources/prefixes.json
 resources/settings.json
 error_footers/*.txt
