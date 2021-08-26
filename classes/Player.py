@@ -50,10 +50,10 @@ class Player:
             sub_races+=sub[1]
             full_name.append(f"{sub[0].get_full_name(-1)}({sub[1]})")
         
-        full_name.append(f"{self.name}{self.__figure_out_num_races(num_races, sub_races)}")
+        full_name.append(f"{self.name}{self.__calculate_num_races(num_races, sub_races)}")
         return '/'.join(full_name)
     
-    def __figure_out_num_races(self, num_races, sub_races):
+    def __calculate_num_races(self, num_races, sub_races):
         if num_races == -1: #don't include num_races in full_name
             return ""
         this_races = (num_races-sub_races) if self.__races_played is None else self.__races_played
@@ -73,25 +73,21 @@ class Player:
             if by_race:
                 if int(num/4)+1 in self.edited_scores:
                     if num/4 +1 in self.edited_scores:
-                        ret+="{}".format(self.edited_scores[int(num/4)+1])
+                        ret+=f"{self.edited_scores[int(num/4)+1]}"
                     else:
                         ret+='0'
-                    if num+1!=len(scores_iter):
-                        ret+='|'
+                    ret+='|'
                     continue
             else:
                 if num+1 in self.edited_scores:
-                    ret+='{}'.format(self.edited_scores[num+1])
-                    if num+1!=len(scores_iter):
-                        ret+='|'
+                    ret+=f'{self.edited_scores[num+1]}|'
                     continue
 
-            ret+="{}".format(gp)
-            if num+1!=len(scores_iter):
-                ret+='|'
+            ret+=f"{gp}|"
+        ret.rstrip("|")
         
         if self.pens>0:
-            ret+='-{}'.format(self.pens)
+            ret+=f'-{self.pens}'
         return ret
 
     def getFlag(self) -> str:
