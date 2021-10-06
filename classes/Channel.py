@@ -9,7 +9,9 @@ class Channel:
     '''
     class representing a discord channel on which a table instance is running
 
-    sort of acts like a bridge between Table_cog and Table instances
+    sort of acts like a bridge between Table_cog and Table instances because it deals with automatic updates, 
+    
+    which use both Table instance methods and discord Contexts
     '''
 
     def __init__(self, bot: bot.TableBOT, ctx: commands.Context, table: tabler.Table):

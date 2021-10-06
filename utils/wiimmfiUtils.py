@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from typing import Tuple, Dict, Any, Optional
 import utils.tagUtils as tagUtils
 
-
+#TODO: rewrite with undetected_chromedriver.v2 to make requests to wiimmfi (don't need to for json)
 async def fetch(url, headers=None): 
     timeout = aiohttp.ClientTimeout(total=10)
     async with aiohttp.ClientSession() as session:
@@ -122,3 +122,8 @@ def check_repeat_times_slow(race, prev_races):
         max_key = None
 
     return (True, {'race': len(prev_races)-max_key, 'num_aff': repetitions[max_key]}) if max_key else (False, {})
+
+# if __name__ == "__main__":
+#     import asyncio
+#     loop = asyncio.get_event_loop()
+#     print(loop.run_until_complete(fetch("https://wiimmfi.de/stats/mkwx")))

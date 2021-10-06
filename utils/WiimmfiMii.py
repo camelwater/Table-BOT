@@ -7,17 +7,50 @@ import aiohttp
 
 WIIMMFI_SAKE = 'http://mariokartwii.sake.gs.wiimmfi.de/SakeStorageServer/StorageServer.asmx'
 
+SAKE_POST_DATA ="""<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://gamespy.net/sake">
+  <SOAP-ENV:Body>
+    <ns1:SearchForRecords>
+      <ns1:gameid>1687</ns1:gameid>
+      <ns1:secretKey>9Rmy</ns1:secretKey>
+      <ns1:loginTicket>23c715d620f986c22Pwwii</ns1:loginTicket>
+      <ns1:tableid>FriendInfo</ns1:tableid>
+      <ns1:filter>ownerid={}</ns1:filter>
+      <ns1:sort>recordid</ns1:sort>
+      <ns1:offset>0</ns1:offset>
+      <ns1:max>1</ns1:max>
+      <ns1:surrounding>0</ns1:surrounding>
+      <ns1:ownerids></ns1:ownerids>
+      <ns1:cacheFlag>0</ns1:cacheFlag>
+      <ns1:fields>
+        <ns1:string>info</ns1:string>
+      </ns1:fields>
+    </ns1:SearchForRecords>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>"""
+
+SAKE_HEADERS = {
+                "Host":"mariokartwii.sake.gs.wiimmfi.de",
+                "User-Agent":"GameSpyHTTP/1.0",
+                "Connection":"close",
+                "Content-Type": "text/xml",
+                "SOAPAction":"http://gamespy.net/sake/SearchForRecords"
+                }
+
+def post_data(pid: str):
+    SAKE_POST_DATA.format(pid)
+
 async def get_wiimmfi_mii_async(playerid: str):
     playerid = miiUtils.fc_to_pid(int(playerid.replace("-","")), b'RMCJ')
     async with aiohttp.ClientSession() as session:
-        async with session.post(WIIMMFI_SAKE, data=f'<?xml version="1.0" encoding="UTF-8"?><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://gamespy.net/sake"><SOAP-ENV:Body><ns1:SearchForRecords><ns1:gameid>1687</ns1:gameid><ns1:secretKey>test</ns1:secretKey><ns1:loginTicket>23c715d620f986c22Pwwii</ns1:loginTicket><ns1:tableid>FriendInfo</ns1:tableid><ns1:filter>ownerid&#x20;=&#x20;{playerid}</ns1:filter><ns1:sort>recordid</ns1:sort><ns1:offset>0</ns1:offset><ns1:max>1</ns1:max><ns1:surrounding>0</ns1:surrounding><ns1:ownerids></ns1:ownerids><ns1:cacheFlag>0</ns1:cacheFlag><ns1:fields><ns1:string>info</ns1:string></ns1:fields></ns1:SearchForRecords></SOAP-ENV:Body></SOAP-ENV:Envelope>') as resp:
+        async with session.post(WIIMMFI_SAKE, headers = SAKE_HEADERS, data = post_data(playerid)) as resp:
             mii_data = await resp.content.read()
             if mii_data == b'': return None
             return WiimmfiMii(mii_data)
 
 def get_wiimmfi_mii(playerid: str):
     playerid = miiUtils.fc_to_pid(int(playerid.replace("-","")), b'RMCJ')
-    mii_data = requests.post(WIIMMFI_SAKE, data=f'<?xml version="1.0" encoding="UTF-8"?><SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://gamespy.net/sake"><SOAP-ENV:Body><ns1:SearchForRecords><ns1:gameid>1687</ns1:gameid><ns1:secretKey>test</ns1:secretKey><ns1:loginTicket>23c715d620f986c22Pwwii</ns1:loginTicket><ns1:tableid>FriendInfo</ns1:tableid><ns1:filter>ownerid&#x20;=&#x20;{playerid}</ns1:filter><ns1:sort>recordid</ns1:sort><ns1:offset>0</ns1:offset><ns1:max>1</ns1:max><ns1:surrounding>0</ns1:surrounding><ns1:ownerids></ns1:ownerids><ns1:cacheFlag>0</ns1:cacheFlag><ns1:fields><ns1:string>info</ns1:string></ns1:fields></ns1:SearchForRecords></SOAP-ENV:Body></SOAP-ENV:Envelope>')
+    mii_data = requests.post(WIIMMFI_SAKE, headers=SAKE_HEADERS, data=post_data(playerid))
     if mii_data == b'': return None
     return WiimmfiMii(mii_data.content)
 

@@ -141,8 +141,8 @@ class Settings(commands.Cog):
                     valid = False
 
         if not valid:
-            await ctx.send(f"Invalid value `{default}` for setting `{settingType}`. The value must be one of the following"+
-                        f"{' or a combination of the following separated by commas' if settingType == 'IgnoreLargeTimes' else ''}:\n{get_avail_settings(settingType)}")
+            await ctx.send(f"Invalid value `{default}` for setting `{settingType}`. The value must be"+
+                        f"{' a combination of the following separated by commas' if settingType == 'IgnoreLargeTimes' else ''}:\n{get_avail_settings(settingType)}")
             return
 
         mes = self.bot.set_setting(ctx.guild.id, settingType, default)

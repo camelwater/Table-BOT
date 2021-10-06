@@ -22,10 +22,13 @@ from utils.WiimmfiMii import get_wiimmfi_mii # get_wiimmfi_mii_async
 import utils.Utils as Utils
 import utils.wiimmfiUtils as wiimmfiUtils
 import utils.tagUtils as tagUtils
-from utils.Utils import isFFA, WARNING_MAP, DC_MAP, STYLE_MAP, PTS_MAP
+import cloudscraper
+from utils.Utils import isFFA, STYLE_MAP, PTS_MAP
 from utils.Utils import GRAPH_MAP as GM
 from classes.Player import Player
 import classes.Channel as Channel
+from classes.Race import Race
+
 
 # TODO: maybe automate first race dcs (18 and 15 pts) 
 
@@ -46,7 +49,8 @@ class Table():
         
         self.recorded_elems: List[str] = [] #don't record races that have already been recorded
         self.players: List[Player] = [] #dictionary of players: holds their total score, gp scores, and race scores
-        self.races: List[Tuple[str, str, List]] = [] #list (race) of lists (placements for each race) 
+        # self.races: List[Tuple[str, str, List]] = [] #list (race) of lists (placements for each race) 
+        self.races: List[Race] = []
         self.team_pens: Dict[str, int] = defaultdict(int) #mapping penalties to teams
         self.player_ids: Dict[int, Player] = {} #used to map player ids to players (player id from bot)
         self.all_players: List[Player] = [] #list of every player who has been in the room
@@ -385,7 +389,7 @@ class Table():
                 for warning in i[1]:
                     ret+=f'     - {warning}\n'
                 continue
-            ret+=f"     Race #{i[0]}: {self.races[i[0]-1][1]}\n"
+            ret+=f"     Race #{i[0]}: {self.races[i[0]-1].getTrack()}\n"
             for warning in i[1]:
                 ret+=f"       \t- {Utils.warn_to_str(warning) if isinstance(warning, dict) else warning}\n"
 
@@ -595,29 +599,27 @@ class Table():
     def tracklist(self):
         ret = ''
         for i, race in enumerate(self.races):
-            track = race[1]
+            track = race.getTrack()
             ret+=f'Race #{i+1}: {track}\n'
         return ret
     
-    def get_finish_times(self, index) -> Dict[Player, str]:
-        race = self.races[index]
-        return {player[0]: player[1] for player in race[2]}
+    # def get_finish_times(self, index) -> Dict[Player, str]:
+    #     race = self.races[index]
+    #     return {player[0]: player[1] for player in race[2]}
 
-    def race_results(self,race) -> Tuple[bool, str]:
+    def race_results(self, race) -> Tuple[bool, str]:
         ret = ''
         results = {}
         tag_places = defaultdict(list)
+        if race > len(self.races):
+            return True, f"Race `{race}` doesn't exist. The race number should be from 1-{len(self.races)}."
         if race==-1:
             race = len(self.races)
-            results = self.get_finish_times(race-1)
 
-        else: 
-            if race > len(self.races):
-                return True, f"Race `{race}` doesn't exist. The race number should be from 1-{len(self.races)}."
-            results = self.get_finish_times(race-1)
+        results = self.races[race-1].get_finish_times()
        
         count = 0
-        ret+=f"Race #{race} - {self.races[race-1][1]}:\n"
+        ret+=f"Race #{race} - {self.races[race-1].getTrack()}:\n"
         for player, time in list(results.items()):
             count+=1
             ret+=f"   {count}. {Utils.disc_clean(player.getName())} - {time}\n"
@@ -809,7 +811,7 @@ class Table():
 
         dc_count = 1
         for race in list(self.dc_list.items()):
-            ret+=f'**Race #{race[0]}: {self.races[int(race[0]-1)][1]}**\n'
+            ret+=f'**Race #{race[0]}: {self.races[int(race[0]-1)].getTrack()}**\n'
             for dc in race[1]:
                 ret+=f'\t`{dc_count}.` **{Utils.dc_to_str(dc)}\n'
                 dc_count+=1
@@ -1329,17 +1331,20 @@ class Table():
                 continue
             
             status = i[1]
-            players = [i[0] for i in self.races[raceNum-1][2]]
+            # players = [i[0] for i in self.races[raceNum-1][2]]
+            players = self.races[raceNum-1].get_players()
+            
             if status == "on" or status == "during": #CHANGE TO 'ON'
                 orig_status = 'on'
                 if player not in players:
                     orig_status = "before"
-                    self.change_room_size([[raceNum, len(self.races[raceNum-1][2])+1]], self_call=True)
-                    self.races[raceNum-1][2].append((player, 'DC', "", ""))
+                    self.change_room_size([[raceNum, self.races[raceNum-1].room_size()+1]], self_call=True)
+                    # self.races[raceNum-1][2].append((player, 'DC', "", ""))
+                    self.races[raceNum-1].add_placement((player, 'DC', "", ""))
                     gp = int((raceNum-1)/4)
 
                     # checking for multiple DCs in the same race
-                    DC_ties = [p[0] for p in self.races[raceNum-1][2] if p[1]=='DC']
+                    DC_ties = [p[0] for p in self.races[raceNum-1].get_placements() if p[1]=='DC']
                     if len(DC_ties)>1:
                         exists = False
                         for indx, w in enumerate(self.warnings[raceNum]):
@@ -1386,11 +1391,11 @@ class Table():
                 orig_status = 'before'
                 if player in players:
                     orig_status = 'on'
-                    self.change_room_size([[raceNum, len(self.races[raceNum-1][2])-1]], self_call=True, player=player)
+                    self.change_room_size([[raceNum, self.races[raceNum-1].room_size()-1]], self_call=True, player=player)
                     gp = int((raceNum-1)/4)
 
                     #checking if need to get rid of tied DC times warnings
-                    DC_ties = [p[0] for p in self.races[raceNum-1][2] if p[1]=='DC']
+                    DC_ties = [p[0] for p in self.races[raceNum-1].get_placements() if p[1]=='DC']
                     if len(DC_ties)<2:
                         for indx, w in enumerate(self.warnings[raceNum]):
                             if w.get('type') == "tie_dc":
@@ -1436,7 +1441,7 @@ class Table():
             try:
                 raceNum = int(i[0])-1
                 assert(raceNum>=0)
-                orig_room_size = len(self.races[raceNum][2]) 
+                orig_room_size = self.races[raceNum].room_size()
                 if raceNum+1 in self.changed_room_sizes and len(self.changed_room_sizes[raceNum+1])>0:
                     orig_room_size = self.changed_room_sizes[raceNum+1][-1]
                     
@@ -1460,7 +1465,7 @@ class Table():
                 continue
             
             orig_pts = {}
-            for place, p in enumerate(self.races[raceNum][2]):
+            for place, p in enumerate(self.races[raceNum].get_placements()):
                 player = p[0]
                 try:
                     pts = PTS_MAP[orig_room_size][place]
@@ -1471,11 +1476,11 @@ class Table():
             fixed_pts = {}
             
             if self_call and player is not None:
-                for pos, player in enumerate(self.races[raceNum][2]):
+                for pos, player in enumerate(self.races[raceNum].get_placements()):
                     if player[0] == player:
-                        self.races[raceNum].pop(pos)
+                        self.races[raceNum].get_placements().pop(pos)
 
-            for place, p in enumerate(self.races[raceNum][2]):
+            for place, p in enumerate(self.races[raceNum].get_placements):
                 player = p[0]
                 try:
                     pts = PTS_MAP[cor_room_size][place]
@@ -1489,7 +1494,8 @@ class Table():
 
             if not reundo and not self_call:
                 restore = copy.deepcopy(self.races[raceNum])
-                self.races[raceNum][2] = self.races[raceNum][2][:cor_room_size]
+                self.races[raceNum].resize(cor_room_size)
+                # self.races[raceNum].get_placements() = self.races[raceNum].get_placements()[:cor_room_size]
                 
             if not self_call:
                 done = False
@@ -1519,8 +1525,7 @@ class Table():
         self.change_room_size([[raceNum+1, orig_size]], undo=True,reundo=True)
         if raceNum+1 in self.changed_room_sizes:
             self.changed_room_sizes[raceNum+1].pop()
-        
-
+    
     def edit_race(self, l, reundo=False):
         ret = ''
         mods = []
@@ -1536,37 +1541,14 @@ class Table():
             correct_pos = int(elem[2])-1
             try:
                 raceNum = int(raceNum)
-                corresponding_rr = self.races[raceNum-1][2]
+                corresponding_rr = self.races[raceNum-1]
             except IndexError:
                 return f"Race number `{raceNum}` was invalid. It must be a number from 1-{len(self.races)}"
-            
-            corresponding_rr = [i[0] for i in corresponding_rr]
-            
-            orig_pos = corresponding_rr.index(player)
-            orig_pts = PTS_MAP[len(corresponding_rr)][orig_pos]
-            try:   
-                cor_pts = PTS_MAP[len(corresponding_rr)][int(correct_pos)]
+
+            try:
+                orig_pos, orig_pts, cor_pts, aff_orig_pts, aff_new_pts = self.races[raceNum-1].change_placement(player, correct_pos)
             except KeyError:
                 return f"Corrected position `{correct_pos+1}` was invalid. It must be a number from 1-{len(corresponding_rr)}."
-            
-            if orig_pos<correct_pos:
-                aff = [self.races[raceNum-1][2][i][0] for i in range(orig_pos+1,correct_pos+1)]
-            else:
-                aff = [self.races[raceNum-1][2][i][0] for i in range(correct_pos,orig_pos)]
-                
-            aff_orig_pts = {}
-            for a in aff:
-                aff_orig_pts[a] = PTS_MAP[len(corresponding_rr)][corresponding_rr.index(a)]
-            
-           
-            self.races[raceNum-1][2].insert(correct_pos, self.races[raceNum-1][2].pop(orig_pos))
-
-            aff_new_pts = {}
-            corresponding_rr = self.races[raceNum-1][2]
-            corresponding_rr = [i[0] for i in corresponding_rr]
-            
-            for a in aff:
-                aff_new_pts[a] = PTS_MAP[len(corresponding_rr)][corresponding_rr.index(a)]
             
             gp = int((raceNum-1)/4)
 
@@ -1574,7 +1556,7 @@ class Table():
             player.scores[1][gp] += (cor_pts-orig_pts)
             player.scores[2][raceNum-1] = cor_pts
 
-            for a in aff:
+            for a in aff_orig_pts.keys():
                 a.scores[0]+= (aff_new_pts[a] - aff_orig_pts[a])
                 a.scores[1][gp] += (aff_new_pts[a] - aff_orig_pts[a])
                 a.scores[2][raceNum-1] = aff_new_pts[a]
@@ -1653,7 +1635,7 @@ class Table():
         
         recorded_players = []
         for raceNum,race in enumerate(self.races):
-            cur_room_size= len(race)
+            cur_room_size= race.room_size()
             gp = self.gp = int(raceNum/4)
             
             for placement, player in enumerate(race):
@@ -1707,7 +1689,7 @@ class Table():
         except AssertionError:
             return f"`{raceNum}` was not a valid race number. The race number must be from 1-{len(self.races)}."
         
-        track = self.races[raceNum-1][1]
+        track = self.races[raceNum-1].getTrack()
         self.removed_races[raceNum] = [self.races.pop(raceNum-1)]
        
         try:
@@ -1870,7 +1852,8 @@ class Table():
             except (AssertionError, IndexError):
                 track = "Unknown Track"
                 
-            race = (raceID, track,[])
+            # race = (raceID, track,[])
+            race = Race(raceID, track)
             next_elem = elem.findNext('tr').findNext('tr')
             
             while next_elem not in elems and next_elem is not None:
@@ -1899,7 +1882,7 @@ class Table():
                     player_obj = self.create_new_player(self.check_name(miiName), fc)
                     limbo_players.append(player_obj)
 
-                race[2].append((player_obj, fin_time, tr, delta))
+                race.add_placement((player_obj, fin_time, tr, delta))
                 next_elem = next_elem.findNext('tr')
                 
             new_races.append(race)
@@ -2162,7 +2145,7 @@ class Table():
             print(self.table_str)
 
         if not recalc:   
-            return "Table {}updated. Room {} has finished {} {}. Last race: {}.".format("auto-" if auto else "", rID, len(self.races), "race" if len(self.races)==1 else "races",self.races[-1][1])
+            return "Table {}updated. Room {} has finished {} {}. Last race: {}.".format("auto-" if auto else "", rID, len(self.races), "race" if len(self.races)==1 else "races",self.races[-1].getTrack())
 
     # def update_warn_file(self):
     #     warn_content = self.get_warnings(override=True)
@@ -2478,4 +2461,3 @@ class Table():
             mod = self.undos.pop()
             self.modifications.append(mod)
             return f"Last table modification undo ({Utils.disc_clean(self.channel.prefix+mod[0][0])}) has been redone."
-        

@@ -86,7 +86,8 @@ def parse_ILT_setting(string: str, max_format=6, local_inject = False):
         if '-' in i: #range
             n_range = sorted([int(n) for n in i.split('-')])
             start, end = n_range[0], n_range[-1]
-            if start>max_format or start<1 or end<0 or end>max_format:
+            # if start>max_format or start<1 or end<0 or end>max_format:
+            if start>max_format or start<1 or end>max_format:
                 raise ValueError
             args.pop(indx)
             args.extend(list(range(start, end+1)))

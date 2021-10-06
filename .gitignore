@@ -10,6 +10,7 @@ resources/settings.json
 error_footers/*.txt
 REFACTORING
 save_states
+Cloudflare_testing
 .env.testing
 .venv
 .vscode

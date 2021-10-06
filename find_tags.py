@@ -10,60 +10,6 @@ import tag_testing.simulatedAnnealingTag as simAnl
 from typing import Dict, Tuple, List, Set
 import cProfile
 
-
-def get_test_case(large = False):
-    """
-    return a test case for the tag algorithm (manual).
-
-    `large` is for large performance testing - more than what is usually required of the algorithm.
-    """
-    if large:
-        players5 = list({'x#*********************ATSDUAJSDGHASDUYkajsdhalkjdh1':0, 'awasasasdasdasddsdadsddasdsadd':0, 'Ryadadadadddanasdasd@X':0, '¢unasdklajsdkajsdhalkjsddsasdasdt':0, 'stop asd;liajds;aosdij;alskdj;alsdkasdasdman': 0, 'coolasdasd kasdlkajsd;laksjdasdsadid cool': 0, "GG EaslkdjahsldkjadshlkajsdhlaksjdahsdasdZ": 0, 'gas moasdalkdsja;lsdb':0, "gasseasdasddsasasdd up":0, "kaya kljaxdlasdkasjdhalksdjhkjyanar":0, "yaya kasdaasdljsdhaosduy98712sdanar":0, "ya123123313233asdASDASDkqeeqweqwea ranar":0}.keys())
-        players6 = list({'helasasdndkzxdkzjxdnzddasdlo':0, 'stupasdalasdsdasda  asda ds adsdasid':0, 'asdl;lajsdhalksdjhlaskdjhaoisudyoaisduVA':0, 'banvannnnansdasdnansdnsdnasdndansdansdasndned':0, '09a8sd79as8d7a9s8d7a9sd87a9sd90':0, 'heaqoiu1p2oiu12981y49yoiusdasdll&*':0, 'whaasdasldajdsh;akjdhlaksjdhladsdsasdasddaat?':0, "a;lsdkja;sldkja;dlkaj;daaslkdja;lsdkjasd;l ad92y?":0, "λxasdasdasd12131311231asddade":0, 'Aaasd;lkasjd;alskdj;alskdjsdasdasAA':0, 'λp fraasdaskdkhalksdasdasdadud':0, 'AasdlkajdlaasdasdsdasdkdsjhlaksdBB':0}.keys())
-        players9 = list({'helasasdndkzxdkzjxdnzddasdlo':0, 'stupasdalasdsdasda  asda ds adsdasid':0, 'asdl;lajsdhalksdjhlaskdjhaoisudyoaisduVA':0, 'banvannnnansdasdnansdnsdnasdndansdansdasndned':0, '09a8sd79as8d7a9s8d7a9sd87a9sd90':0, 'heaqoiu1p2oiu12981y49yoiusdasdll&*':0, 'whaasdasldajdsh;akjdhlaksjdhladsdsasdasddaat?':0, "a;lsdkja;sldkja;dlkaj;daaslkdja;lsdkjasd;l ad92y?":0, "λxasdasdasd12131311231asddade":0, 'Aaasd;lkasjd;alskdj;alskdjsdasdasAA':0, 'λp fraasdaskdkhalksdasdasdadud':0, 'AasdlkajdlaasdasdsdasdkdsjhlaksdBB':0}.keys())
-        players7 = list({'he1273182376198237619283716932llo':0, 'heasdaklsdhalisduyaosidu123':0, 'borrowasalsdjhalsdkjalsdkjdasded time':0, 'bannasdasdaded':0, 'barasdasdrasda;klsdjakldsjhasd9o8yael':0, 
-                    'hellas1o2y92yoiuasdasdasdasdasddlkjasdlkajdsl&*':0, 'whaskdjhadsklbccmzbnx,mzat?':0, "wasdasdasdlkahsdjho?":0, "λasdasdkjalshdlakshdo9yous&*^&(*&^(*^&%9aksjdhaasdlkasd9qweyasdxe":0, 'AAasldkjadslkjadkajhdslkajdhlaksjdhalsdkjhasdA':0, 'λpasdasdas asd;alisdha;lksdhlakdsfraud':0, 'whasd;laskdhasdkjhaosiduyas9od8as9d8yapsd9ere?':0}.keys())
-        players8 = list({'helasdas1231y392y31o2dlo':0, 'stupasdaasasdasdasdddasddssdasid':0, 'asdl;lajsdhalksdjhlaskdjhaoisudyoaisduVA':0, 'banvannnnansdasdnansdnsdnasdndansdansdasndned':0, '09a8sd79as8d7a9s8d7a9sd87a9sd90':0, 'heaqoiu1p2oiu12981y49yoiusdasdll&*':0, 'whaasdasldajdsh;akjdhlaksjdhladsdsasdasddaat?':0, "whasdasdasdasdasdo?":0, "λxasdasdasdasddade":0, 'Aaasd;lkasjd;alskdj;alskdjsdasdasAA':0, 'λp fraasdahdsdo9oysda2eoiu oi u  lajsd lassdasdadud':0, 'Aasdlkasdlkj lkj asdadasdajdlakdsjhlaksdBB':0}.keys())
-                    
-        players4 = list({'pringleMVMMVMVMVMVMVMVMVMVMVMMVMV@MV':0,'5heaskdjhadslkajhdslakhdaiuyo876o876o8768asdadMV':0,'hellasjdhahksdjhalskdjhalsdkjhaldo LTA':0,'Lasdkjahdklajsdhaosd98odTAX':0,
-                'jaja Lasdkjhdslaiusdyoasudyoasyasdya0sddTA':0,'stupasldasldkj;sdkaj;sdalkdsj;asldkid@LTA':0,'poop asdlakjdshlakjdshadssdMV':0,'MVMVMasdklahdsldssaadVMV':0,'LTA Vvalksjlpvalkjalksuqwealpo':0,"5 guys glajshdl asjh mom's spaghet":0}.keys())
-        players = list({'x#*(*&(&(*&(*&(*&akjsdhasd87asd6a8sd11':0, 'xxxXXXXXXXXXXXXXXXXXXXXXXXXXXXXX':0, 'Ryan@XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX':0, '¢uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuunt':0, 'coolllllllllllkjkjkjkj123l12jk1jlio': 0, 'cool k12o381 102u 2oi1u 2id cool': 0, "GG EZZZZZZZZZZZZZZZZZZZZZZZZZ": 0, 'gas masd12o31uy2398   asdasadsadadsaob':0, "gassessssssssssssssssssd up":0, "kayajksdhasuoday9y098709a yanar":0, "yaya kasmasklaslkadsljladskjldsanar":0, "yaka kakaakakakdskdskasdadsjdsakranar":0}.keys())
-        players2 = ['asldkjadheaslkjdaskjdhlaksjdahdsllo', 'hasd123123213.kjadshaliskdjho876e123', 'borrowed timasd;laasdllndlksdhaposdu98q2ee', 'WAasd.kj.asdas.da.dsasd.asd.asd.a adshiaosda8dsX', 'basdkjasda  sda qe e j12oei1eahdlkajdsyao8ds7yarrel', 
-                    'A-asdlkadslkajdhlla192837192akjsdh1', 'whasdoqiouewiuy12o13y4183476184716894124at?', "WWW.Pasdalj;lsdhaldksjhlkaH.COM", "λxeasdlkahdsasdsd ds adaalsda98", 'Aasdlkaskldjahsd9a8y-2', 'λp frasdjlhalkdsjsasdlaksjdhadsd90ayaud', 'WOwowowowowowowowowowoowowowowowowW!!']
-        players3 = ['λρ ToOOOOOOOOOOOOOOoooooooooooom', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA*', 'v¢ bvbvbvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbvbvbvbvsauzule', 'sahasdjasdkjadshlkajsdhlakdsarave', 'MasdkjjdslakjdshlaksdjhKW 4Beans', 'cadasdasldhadjh9y01984y1944144avreMK', 'cocia;lskdhklajsdhasdo9y loko', 'Casdkjadhlajdasdasdhlkdsho9shap9sd8y', 'So[akjsdhakljdshaoisduyads8yLLLLLL]', 'Zjazasda,smdda   asddnadsasdasdca', 'Z- stavrosaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa']
-        players+=players2+players7+players8+players4+players5+players6+players3+players9*44
-
-        seen = []
-        lengths = []
-        for ind,i in enumerate(players):
-            if i not in seen:
-                seen.append(i)
-                lengths.append(len(i))
-            else:
-                temp = i
-                a =1
-                while temp in seen:
-                    temp = f'{i}-{a}'
-                    a+=1
-                seen.append(temp)
-                players[ind] = temp
-                lengths.append(len(temp))
-        
-    else:
-        players = list({'x#1':0, 'xxx':0, 'Ryan@X':0, '¢ant':0, 'coolio': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}.keys())
-        # players = ['hello', 'he123', 'borrowed time', 'WAX', 'barrel', 
-        #             'A-1', 'what?', "WWW.PH.COM", "BWλHλHλ", 'Ã', 'λp fraud', 'WOW!!']
-        players = ['Mo taz', 'Mo Matt', 'Mo Jαggγ', 'Mo Sal', 'Mo Jos', 'Prιngle@MV', 'MV Noah', 'MV stripe', 'MV L-boaT', 'MV yax']
-        # players = ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros']
-        # players = ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', '@*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA h', 'USA K', 'ABBA']
-        # players = ['Æ big', 'PP hi', 'PP powerplant', 'Æ oo', 'PP ger', 'Æ hello', 'shuyx@Æ', 'PP POWERGRID', 'big PP', 'Æ vamp']
-        # players = ['Ac☆Mirymeg', 'Z☆', 'WC top 2', 'Player', 'MonkeyTime', 'z おk', 'Ac Stubbz', 'Hosseini','MΞ☆Mγτh','Hτ chξΣ◇€£', 'Player', 'WC △△◎◎♪☆○']
-        # players= ['X◇山周回のれみ','CRYLIXDAWN', 'さぼX', 'DG★mila*', 'C☆Latent', 'Player-1','Dovi', 'らいよんのRemi', 'にしのだいせんせい',
-        #             'Player-2', 'ライオンのRemi', 'だいせんせい', 'ωΖ hALr', '[ωZ] PogU', "Anairis", "A L I C E"]
-        # players = ['Anairis' ,'A L I C E', 'B frozen', 'Bayview', 'Get Candy△', 'GANK/FF@15', "m shix", "m¢ jipper", "Player", "Prayer", "Se Revan", 'sussy baka']
-
-    return players, (lengths if large else None)
-
 class Tag:
     def __init__(self, tag: str, dup_num: int=None):
         tag = tag.strip()
@@ -136,14 +82,16 @@ def clean_subsets(all_tags: Dict[Tag, Set[Tuple[str, str]]]):
 
     i = 0
     while i<len(all_tags):
-        item = list(all_tags.items())[i]
-        tag2, players2 = item[0], item[1]
+        # print(all_tags.keys())
+        item2 = list(all_tags.items())[i]
+        tag2, players2 = item2[0], item2[1]
         for tag, players in all_tags.items():
-            if tag!=tag2 and players2.issubset(players) and (tag2.get_tag().lower()==tag.get_tag().lower() or (len(tag2.get_tag())<len(tag.get_tag()) and \
-                (tag.get_tag().lower().startswith(tag2.get_tag().lower()) or tag.get_tag().lower().endswith(tag2.get_tag().lower())))):
-                all_tags.pop(tag2)
-                i-=1
-                break
+            if tag.get_tag()!=tag2.get_tag() and players2.issubset(players) and (tag2.get_tag().lower()==tag.get_tag().lower() 
+                or (len(tag2.get_tag())<len(tag.get_tag()) and (tag.get_tag().lower().startswith(tag2.get_tag().lower()) or tag.get_tag().lower().endswith(tag2.get_tag().lower())))):
+                    all_tags.pop(tag2)
+                    i-=1
+                    break
+                
         i+=1
 
 def overlaps(p: Tuple[str, str], tag: Tag, all_tags: Dict[str, Set[Tuple[str, str]]], per_team: int):
@@ -421,7 +369,7 @@ def select_top(all_tags: Dict[Tag, Set[Tuple[str, str]]], per_team: int, num_tea
 
         split_by_actual(tag_players, tag, per_team, all_tags)
         check_overlaps(tag_players, tag, all_tags, per_team)
-        # check_isolated_overlaps(tag_players, tag, all_tags, per_team) 
+        check_isolated_overlaps(tag_players, tag, all_tags, per_team) 
         split_chunks(tag_players, tag, per_team, all_tags)
 
         if len(tag_players)<=per_team: continue  
@@ -485,38 +433,42 @@ def find_possible_tags(players: List[Tuple[str, str]]):
     '''
     find all possible tag matches - any tag that has 2 or more matching players.
     '''
-    #this does find duplicates, which makes it inefficient 
+    #this method does find duplicates, which makes it inefficient 
     all_tag_matches = defaultdict(set)
 
     for i in range(len(players)):
         tag_matches = defaultdict(set)
         
-        orig_i = players[i][1]
+        orig_i = players[i][2]    
         i_tag = players[i][0]
-        for temp_indx in range(len(i_tag), 0, -1):
-            for j in range(len(players)):
-                if i==j: continue
+        for j in range(len(players)):
+            if i==j: continue
+            
+            j_tag = players[j][0]
+            
+            #don't iterate through string if it's guaranteed to not match
+            # i_set = {i_tag[0], i_tag[-1]}
+            # j_set = {j_tag[0], j_tag[-1]}
+            # if len(i_set.intersection(j_set)) == 0:
+            #     continue
 
-                j_tag = players[j][0]
-                
-                if (i_tag[:temp_indx] == j_tag[:temp_indx] or i_tag[:temp_indx] == j_tag[-temp_indx:]):
-                    m_tag = tagUtils.sanitize_uni(orig_i)[:temp_indx].strip()
+            for temp_indx in range(len(i_tag), 0, -1):
+                if i_tag[:temp_indx] == j_tag[:temp_indx] or i_tag[:temp_indx] == j_tag[-temp_indx:]:
+                    # m_tag = tagUtils.sanitize_uni(orig_i)[:temp_indx].strip()
+                    m_tag = orig_i[:temp_indx].strip()
                     if len(m_tag)>0:
                         if len(m_tag) == 1: 
                             m_tag = m_tag.upper()
-                        if m_tag[-1] == '-':
-                            m_tag = m_tag[:-1]
                         
                         tag_matches[m_tag].add(players[i])
                         tag_matches[m_tag].add(players[j])
 
-                if (i_tag[-temp_indx:] == j_tag[-temp_indx:] or i_tag[-temp_indx:] == j_tag[:temp_indx]):
-                    m_tag = tagUtils.sanitize_uni(orig_i)[-temp_indx:].strip()
+                if i_tag[-temp_indx:] == j_tag[-temp_indx:] or i_tag[-temp_indx:] == j_tag[:temp_indx]:
+                    # m_tag = tagUtils.sanitize_uni(orig_i)[-temp_indx:].strip()
+                    m_tag = orig_i[-temp_indx:].strip()
                     if len(m_tag)==0: continue
                     if len(m_tag) == 1: 
                         m_tag = m_tag.upper()
-                    if m_tag[-1] == '-':
-                        m_tag = m_tag[:-1]
                 
                     tag_matches[m_tag].add(players[i])
                     tag_matches[m_tag].add(players[j])
@@ -541,7 +493,7 @@ def tag_algo(players: List[str], per_team: int, num_teams: int) -> Dict[str, Lis
 
     for ind, p in enumerate(players):
         sanitized = tagUtils.sanitize_uni(p.strip())
-        players[ind] = (sanitized.lower(), p)
+        players[ind] = (sanitized.lower(), p, sanitized)
 
     all_tag_matches = find_possible_tags(players)
 
@@ -560,34 +512,161 @@ def tag_algo(players: List[str], per_team: int, num_teams: int) -> Dict[str, Lis
 
     return teams
 
+
+
+def get_test_case(large = False):
+    """
+    return a test case for the tag algorithm (manual).
+
+    `large` is for large performance testing - more than what is usually required of the algorithm.
+    """
+    if large:
+        players5 = list({'x#*********************ATSDUAJSDGHASDUYkajsdhalkjdh1':0, 'awasasasdasdasddsdadsddasdsadd':0, 'Ryadadadadddanasdasd@X':0, '¢unasdklajsdkajsdhalkjsddsasdasdt':0, 'stop asd;liajds;aosdij;alskdj;alsdkasdasdman': 0, 'coolasdasd kasdlkajsd;laksjdasdsadid cool': 0, "GG EaslkdjahsldkjadshlkajsdhlaksjdahsdasdZ": 0, 'gas moasdalkdsja;lsdb':0, "gasseasdasddsasasdd up":0, "kaya kljaxdlasdkasjdhalksdjhkjyanar":0, "yaya kasdaasdljsdhaosduy98712sdanar":0, "ya123123313233asdASDASDkqeeqweqwea ranar":0}.keys())
+        players6 = list({'helasasdndkzxdkzjxdnzddasdlo':0, 'stupasdalasdsdasda  asda ds adsdasid':0, 'asdl;lajsdhalksdjhlaskdjhaoisudyoaisduVA':0, 'banvannnnansdasdnansdnsdnasdndansdansdasndned':0, '09a8sd79as8d7a9s8d7a9sd87a9sd90':0, 'heaqoiu1p2oiu12981y49yoiusdasdll&*':0, 'whaasdasldajdsh;akjdhlaksjdhladsdsasdasddaat?':0, "a;lsdkja;sldkja;dlkaj;daaslkdja;lsdkjasd;l ad92y?":0, "λxasdasdasd12131311231asddade":0, 'Aaasd;lkasjd;alskdj;alskdjsdasdasAA':0, 'λp fraasdaskdkhalksdasdasdadud':0, 'AasdlkajdlaasdasdsdasdkdsjhlaksdBB':0}.keys())
+        players9 = list({'helasasdndkzxdkzjxdnzddasdlo':0, 'stupasdalasdsdasda  asda ds adsdasid':0, 'asdl;lajsdhalksdjhlaskdjhaoisudyoaisduVA':0, 'banvannnnansdasdnansdnsdnasdndansdansdasndned':0, '09a8sd79as8d7a9s8d7a9sd87a9sd90':0, 'heaqoiu1p2oiu12981y49yoiusdasdll&*':0, 'whaasdasldajdsh;akjdhlaksjdhladsdsasdasddaat?':0, "a;lsdkja;sldkja;dlkaj;daaslkdja;lsdkjasd;l ad92y?":0, "λxasdasdasd12131311231asddade":0, 'Aaasd;lkasjd;alskdj;alskdjsdasdasAA':0, 'λp fraasdaskdkhalksdasdasdadud':0, 'AasdlkajdlaasdasdsdasdkdsjhlaksdBB':0}.keys())
+        players7 = list({'he1273182376198237619283716932llo':0, 'heasdaklsdhalisduyaosidu123':0, 'borrowasalsdjhalsdkjalsdkjdasded time':0, 'bannasdasdaded':0, 'barasdasdrasda;klsdjakldsjhasd9o8yael':0, 
+                    'hellas1o2y92yoiuasdasdasdasdasddlkjasdlkajdsl&*':0, 'whaskdjhadsklbccmzbnx,mzat?':0, "wasdasdasdlkahsdjho?":0, "λasdasdkjalshdlakshdo9yous&*^&(*&^(*^&%9aksjdhaasdlkasd9qweyasdxe":0, 'AAasldkjadslkjadkajhdslkajdhlaksjdhalsdkjhasdA':0, 'λpasdasdas asd;alisdha;lksdhlakdsfraud':0, 'whasd;laskdhasdkjhaosiduyas9od8as9d8yapsd9ere?':0}.keys())
+        players8 = list({'helasdas1231y392y31o2dlo':0, 'stupasdaasasdasdasdddasddssdasid':0, 'asdl;lajsdhalksdjhlaskdjhaoisudyoaisduVA':0, 'banvannnnansdasdnansdnsdnasdndansdansdasndned':0, '09a8sd79as8d7a9s8d7a9sd87a9sd90':0, 'heaqoiu1p2oiu12981y49yoiusdasdll&*':0, 'whaasdasldajdsh;akjdhlaksjdhladsdsasdasddaat?':0, "whasdasdasdasdasdo?":0, "λxasdasdasdasddade":0, 'Aaasd;lkasjd;alskdj;alskdjsdasdasAA':0, 'λp fraasdahdsdo9oysda2eoiu oi u  lajsd lassdasdadud':0, 'Aasdlkasdlkj lkj asdadasdajdlakdsjhlaksdBB':0}.keys())
+                    
+        players4 = list({'pringleMVMMVMVMVMVMVMVMVMVMVMMVMV@MV':0,'5heaskdjhadslkajhdslakhdaiuyo876o876o8768asdadMV':0,'hellasjdhahksdjhalskdjhalsdkjhaldo LTA':0,'Lasdkjahdklajsdhaosd98odTAX':0,
+                'jaja Lasdkjhdslaiusdyoasudyoasyasdya0sddTA':0,'stupasldasldkj;sdkaj;sdalkdsj;asldkid@LTA':0,'poop asdlakjdshlakjdshadssdMV':0,'MVMVMasdklahdsldssaadVMV':0,'LTA Vvalksjlpvalkjalksuqwealpo':0,"5 guys glajshdl asjh mom's spaghet":0}.keys())
+        players = list({'x#*(*&(&(*&(*&(*&akjsdhasd87asd6a8sd11':0, 'xxxXXXXXXXXXXXXXXXXXXXXXXXXXXXXX':0, 'Ryan@XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX':0, '¢uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuunt':0, 'coolllllllllllkjkjkjkj123l12jk1jlio': 0, 'cool k12o381 102u 2oi1u 2id cool': 0, "GG EZZZZZZZZZZZZZZZZZZZZZZZZZ": 0, 'gas masd12o31uy2398   asdasadsadadsaob':0, "gassessssssssssssssssssd up":0, "kayajksdhasuoday9y098709a yanar":0, "yaya kasmasklaslkadsljladskjldsanar":0, "yaka kakaakakakdskdskasdadsjdsakranar":0}.keys())
+        players2 = ['asldkjadheaslkjdaskjdhlaksjdahdsllo', 'hasd123123213.kjadshaliskdjho876e123', 'borrowed timasd;laasdllndlksdhaposdu98q2ee', 'WAasd.kj.asdas.da.dsasd.asd.asd.a adshiaosda8dsX', 'basdkjasda  sda qe e j12oei1eahdlkajdsyao8ds7yarrel', 
+                    'A-asdlkadslkajdhlla192837192akjsdh1', 'whasdoqiouewiuy12o13y4183476184716894124at?', "WWW.Pasdalj;lsdhaldksjhlkaH.COM", "λxeasdlkahdsasdsd ds adaalsda98", 'Aasdlkaskldjahsd9a8y-2', 'λp frasdjlhalkdsjsasdlaksjdhadsd90ayaud', 'WOwowowowowowowowowowoowowowowowowW!!']
+        players3 = ['λρ ToOOOOOOOOOOOOOOoooooooooooom', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA*', 'v¢ bvbvbvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbvbvbvbvsauzule', 'sahasdjasdkjadshlkajsdhlakdsarave', 'MasdkjjdslakjdshlaksdjhKW 4Beans', 'cadasdasldhadjh9y01984y1944144avreMK', 'cocia;lskdhklajsdhasdo9y loko', 'Casdkjadhlajdasdasdhlkdsho9shap9sd8y', 'So[akjsdhakljdshaoisduyads8yLLLLLL]', 'Zjazasda,smdda   asddnadsasdasdca', 'Z- stavrosaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa']
+        players+=players2+players7+players8+players4+players5+players6+players3+players9*44
+
+        seen = []
+        lengths = []
+        for ind,i in enumerate(players):
+            if i not in seen:
+                seen.append(i)
+                lengths.append(len(i))
+            else:
+                temp = i
+                a =1
+                while temp in seen:
+                    temp = f'{i}-{a}'
+                    a+=1
+                seen.append(temp)
+                players[ind] = temp
+                lengths.append(len(temp))
+        
+    else:
+        players = [
+        list({'x#1':0, 'xxx':0, 'Ryan@X':0, '¢ant':0, 'coolio': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}.keys()),
+        ['hello', 'he123', 'borrowed time', 'WAX', 'barrel', 
+                    'A-1', 'what?', "WWW.PH.COM", "BWλHλHλ", 'Ã', 'λp fraud', 'WOW!!'],
+        ['Mo taz', 'Mo Matt', 'Mo Jαggγ', 'Mo Sal', 'Mo Jos', 'Prιngle@MV', 'MV Noah', 'MV stripe', 'MV L-boaT', 'MV yax'],
+        ['λρ Tom', 'A*', 'v¢ sauzule', 'saharave', 'MKW 4Beans', 'cadavreMK', 'coci loko', 'C', 'So[LLLLLL]', 'Zjazca', 'Z- stavros'],
+        ['AYA hello', '!!m&m?!', 'mong', 'MV math', 'pringle@MV', '@*', 'AYAYA', 'i need ZZZ', 'Z - stop', 'USA H', 'USA K', 'ABBA'],
+        ['Æ big', 'PP hi', 'PP powerplant', 'Æ oo', 'PP gerp', 'Æ hello', 'shuyx@Æ', 'PP POWERGRID', 'big PP', 'Æ vamp'],
+        ['Ac☆Mirymeg', 'Z☆', 'WC top 2', 'Player', 'MonkeyTime', 'z おk', 'Ac Stubbz', 'Hosseini','MΞ☆Mγτh','Hτ chξΣ◇€£', 'Player', 'WC △△◎◎♪☆○'],
+        ['X◇山周回のれみ','CRYLIXDAWN', 'さぼX', 'DG★mila*', 'C☆Latent', 'Player-1','Dovi', 'らいよんのRemi', 'にしのだいせんせい',
+                    'Player-2', 'ライオンのRemi', 'だいせんせい', 'ωΖ hALr', '[ωZ] PogU', "Anairis", "A L I C E"],
+        ['Anairis' ,'A L I C E', 'B frozen', 'Bayview', 'Get Candy△', 'GANK/FF@15', "m shix", "m¢ jipper", "Player", "Prayer", "Se Revan", 'sussy baka'],
+        ["A☆", "A◇KA", "God's Λν", "Λν Nn", "◇B", "BSHU neK", "Dz FROZONE", "Dz frozone", "Fλ μ's", "F8l", "PlayeR", "Player"]
+    ]
+
+    return players, (lengths if large else None)
+
+def exec_test(players, per_team, num_teams, lengths = None, large = False, batch=False):
+    '''
+    execute a singular test on one player set.
+    '''
+    def calc_cost(teams):
+        L = []
+        for tag, p in teams.items():
+            if tag.find('-')>=len(tag)/2 and tag[tag.find('-'):].isnumeric():
+                tag = tag[tag.find('-')]
+            L.append([tagUtils.sanitize_uni(tag).lower(), list(map(lambda l: (tagUtils.sanitize_uni(l.strip()).lower(), l), p))])
+        cost_check = simAnl.SimulatedAnnealing(L, per_team)
+        return cost_check.E(L)
+
+    if large:
+        tick = time.perf_counter()
+        prof = cProfile.Profile()
+        prof.enable()
+        teams = tag_algo(players, per_team=per_team, num_teams=num_teams)
+        prof.disable()
+        prof.print_stats(sort='time')
+        # print(dict(sorted(t.items(), key = lambda l: l[0])))
+        print("\nPERFORMANCE: {:.15f}".format(time.perf_counter()-tick))
+        print('avg length:', sum(lengths)/len(lengths))
+        print('# strings:', len(lengths))
+        
+        print("cost:", calc_cost(teams))
+
+    elif not large and not batch:
+        tick = time.perf_counter()
+        teams = tag_algo(players, per_team=per_team, num_teams=num_teams)
+        print(teams)
+        print("\nPERFORMANCE: {:.15f}".format(time.perf_counter()-tick))
+        
+        print("cost:", calc_cost(teams))
+    
+    elif not large and batch:
+        tick = time.perf_counter()
+        teams = tag_algo(players, per_team=per_team, num_teams = num_teams)
+        perf = time.perf_counter()-tick
+
+        return calc_cost(teams), perf
+
+def batch_test(players, batch_num=100):
+    '''
+    test each set `batch_num` times
+    '''
+    PASSES = [71.25, 17.25, 9.75, 2.25, 4.5, 12.0, 0.0, 7.25, 0.0, 2.25]
+    TEAMS = [(2,6),(2,6),(2,6),(2,6),(2,6),(2,6),(2,6),(2,6),(2,6),(2,6)]
+    PERF_PASS = 0.01
+    results = list()
+    for ind, set in enumerate(range(len(players))):
+        set_res = list()
+        for _ in range(batch_num):
+            p_set = copy.copy(players[set])
+            rand.shuffle(p_set)
+
+            cost, perf = exec_test(p_set, TEAMS[set][0], TEAMS[set][1], batch=True)
+            res = list()
+            res.append(cost<=PASSES[set])
+            res.append(perf<PERF_PASS)
+            set_res.append(res)
+
+        cost_passed = sum([1 for x in set_res if x[0]])
+        perf_passed = sum([1 for x in set_res if x[1]])
+        print(f"SET {ind+1} -> COSTS: {cost_passed}/{len(set_res)} passed; PERF: {perf_passed}/{len(set_res)} passed")
+        results.append(set_res)
+
+    # for ind, set in enumerate(results):
+    #     cost_passed = sum([1 for x in set if x[0]])
+    #     perf_passed = sum([1 for x in set if x[1]])
+    #     print(f"SET {ind+1} -> COSTS: {cost_passed}/{len(set)} passed; PERF: {perf_passed}/{len(set)} passed")
+
+
+def create_test(large=False, batch=False, select = None):
+    players, lengths = get_test_case(large=large)
+    if not large:
+        if batch:
+            batch_test(players)
+            
+        else:
+            if select is not None and select>0:
+                players = players[select-1]
+            else:
+                players = rand.choice(players)
+            exec_test(players, 2, 6)
+    else:
+        exec_test(players, 2, 6, lengths = lengths, large=True)
+    
+
 if __name__ == "__main__":
     import time
     
     large = False
-    players, lengths = get_test_case(large=large)
-    rand.shuffle(players)
-    # print(players)
+    batch = True
+    select = 10
+    if batch: large=False
+    create_test(large, batch, select = select)
     #find_possible_tags faster than commonaffix (maybe should change for split_acutal_tag)
 
-    tick = time.perf_counter()
-    per_team = 2
-    prof = cProfile.Profile()
-    prof.enable()
-    teams = tag_algo(players, per_team=per_team, num_teams=6)
-    prof.disable()
-    prof.print_stats(sort='time')
-    # print(dict(sorted(t.items(), key = lambda l: l[0])))
-    if not large: print(teams)
-    print("\nPERFORMANCE: {:.15f}".format(time.perf_counter()-tick))
     
-    if lengths:
-        print('avg length:', sum(lengths)/len(lengths))
-        print(len(lengths))
-    
-    L = []
-    for tag, p in teams.items():
-        if tag.find('-')>=len(tag)/2 and tag[tag.find('-'):].isnumeric():
-            tag = tag[tag.find('-')]
-        L.append([tagUtils.sanitize_uni(tag).lower(), list(map(lambda l: (tagUtils.sanitize_uni(l.strip()).lower(), l), p))])
-    cost_check = simAnl.SimulatedAnnealing(L, per_team)
-    print("cost:", cost_check.E(L))
