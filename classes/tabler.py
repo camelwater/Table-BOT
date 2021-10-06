@@ -22,13 +22,11 @@ from utils.WiimmfiMii import get_wiimmfi_mii # get_wiimmfi_mii_async
 import utils.Utils as Utils
 import utils.wiimmfiUtils as wiimmfiUtils
 import utils.tagUtils as tagUtils
-import cloudscraper
 from utils.Utils import isFFA, STYLE_MAP, PTS_MAP
 from utils.Utils import GRAPH_MAP as GM
 from classes.Player import Player
 import classes.Channel as Channel
 from classes.Race import Race
-
 
 # TODO: maybe automate first race dcs (18 and 15 pts) 
 
