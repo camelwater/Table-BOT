@@ -1,6 +1,7 @@
-from typing import List, Tuple, Dict
+from typing import List, Optional, Tuple, Dict
 from classes.Player import Player
 from utils.Utils import PTS_MAP
+import utils.Utils as Utils
 #TODO: finish and implement
 
 class Race:
@@ -32,7 +33,7 @@ class Race:
     def get_placements(self):
         return self.placements
     
-    def get_pos(self, player):
+    def get_pos(self, player) -> int:
         '''
         return player's placement in race (index not actual placement)
         '''
@@ -41,16 +42,23 @@ class Race:
                 return pos
         return None
     
-    def room_size(self):
+    def room_size(self) -> int:
         return len(self.placements)
     
-    def add_placement(self, player):
+    def add_placement(self, player: Player):
         self.placements.append(player)
     
-    def resize(self, size):
+    def resize(self, size: int):
         self.placements = self.placements[:size]
 
-    def change_placement(self, player, correct_pos):
+    def check_lag(self, player: Player) -> Tuple[bool, Optional[str]]:
+        for placement in self.placements:
+            if placement[0] == player:
+                if Utils.flag_delta(placement[3]):
+                    return True, placement[3]
+        return False, None
+
+    def change_placement(self, player: Player, correct_pos: int):
         '''
         change a player's placement to `cor_pos` and shift up/down accordingly
 

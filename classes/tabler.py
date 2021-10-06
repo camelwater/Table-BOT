@@ -607,6 +607,15 @@ class Table():
     #     race = self.races[index]
     #     return {player[0]: player[1] for player in race[2]}
 
+    def delta_warning_str(self, player: Player, raceNum: int):
+        race = self.races[raceNum-1]
+        lagged, amount = race.check_lag(player)
+        if lagged:
+            if amount == "—":
+                return "(unknown lag)"
+            return f" ({amount} lag start)"
+        return ""
+
     def race_results(self, race) -> Tuple[bool, str]:
         ret = ''
         results = {}
@@ -622,7 +631,7 @@ class Table():
         ret+=f"Race #{race} - {self.races[race-1].getTrack()}:\n"
         for player, time in list(results.items()):
             count+=1
-            ret+=f"   {count}. {Utils.disc_clean(player.getName())} - {time}\n"
+            ret+=f"   {count}. {Utils.disc_clean(player.getName())} - {time}{self.delta_warning_str(player, race)}\n"
             if not isFFA(self.format):
                 for t in self.tags.items():
                     if player in t[1]:
@@ -1964,7 +1973,7 @@ class Table():
                     self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_tr", 'aff_players': tr_count, 'gp': self.gp+1})
             
                 #delay check
-                delay_count = len([i[3] for i in race[2] if i[3]=="—" or (Utils.isfloat(i[3]) and (float(i[3])>7.0 or float(i[3])<-7.0))])
+                delay_count = len([i[3] for i in race[2] if Utils.flag_delta(i[3])])
                 if delay_count>0:
                     self.warnings[shift+raceNum+1].append({'type': "mkwx_bug_delta", 'aff_players':delay_count, 'gp': self.gp+1})
 
