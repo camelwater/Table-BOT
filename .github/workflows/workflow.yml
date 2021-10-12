@@ -50,3 +50,4 @@ jobs:
             --deployment-group-name table-bot \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+            
