@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import utils.Utils as Utils
 import utils.tagUtils as tagUtils
-# from os.path import commonprefix
 from collections import defaultdict
 import copy
 import random as rand
@@ -17,6 +16,7 @@ class Tag:
             self.tag = (tag, dup_num)
         else:
             self.tag = tag
+        self.eq_tag: str = str(self.tag).lower()
         self.sanitized_tag: str = tagUtils.sanitize_uni(self.get_tag()).lower()
 
     def get_tag(self) -> str:
@@ -37,7 +37,7 @@ class Tag:
     
     def __eq__(self, o: object) -> bool:
         try:
-            return str(self.tag).lower() == str(o.tag).lower()
+            return self.eq_tag == o.eq_tag
         except:
             return False
 
@@ -196,6 +196,7 @@ def check_overlaps(players: Set[Tuple[str, str]], tag: Tag, all_tags: Dict[Tag, 
                 if len(all_tags[tag])<=per_team:
                     return
 
+
 def split_by_actual(players: Set[Tuple[str, str]], tag: Tag, per_team: int, all_tags: Dict[Tag, Set[Tuple[str, str]]]):
     '''
     split overflowing tags which have players who have different actual tag values and are supposed to have a different tag.
@@ -203,7 +204,7 @@ def split_by_actual(players: Set[Tuple[str, str]], tag: Tag, per_team: int, all_
     #ex. 2 players currently in tag `A` are actually tag `λ`
 
     def actual_matches(p, diff_players):
-        return len([i for i in diff_players if commonaffix([p, i[1]])!=""])
+        return len([1 for i in diff_players if tagUtils.common_actual_affix(p.lower(), i[1].lower())])
 
     diff_actual_players = []
     for p in players:
@@ -618,7 +619,7 @@ def batch_test(players, batch_num=100):
     '''
     PASSES = [71.25, 17.25, 9.75, 2.25, 4.5, 12.0, 0.0, 7.25, 0.0, 2.25]
     TEAMS = [(2,6),(2,6),(2,6),(2,6),(2,6),(2,6),(2,6),(2,6),(2,6),(2,6)]
-    PERF_PASS = 0.01
+    PERF_PASS = 0.007
     results = list()
     for ind, set in enumerate(range(len(players))):
         set_res = list()
@@ -661,12 +662,9 @@ def create_test(large=False, batch=False, select = None):
 
 if __name__ == "__main__":
     import time
-    
-    large = False
-    batch = True
-    select = 10
+
+    large = True
+    batch = False
+    select = 7
     if batch: large=False
     create_test(large, batch, select = select)
-    #find_possible_tags faster than commonaffix (maybe should change for split_acutal_tag)
-
-    

@@ -1,6 +1,7 @@
 from itertools import chain
 from functools import reduce, partial
 from collections import deque
+from typing import List
 
 def ngram(seq: str, n: int):
     return (seq[i: i+n] for i in range(0, len(seq)-n+1))
@@ -23,6 +24,14 @@ def commonaffix(group):
         return ""
     except:
         return ""
+
+def common_actual_affix(player: str, comp: str):
+    for temp_indx in range(len(min(player, comp, key=len)), 0, -1):
+        if player[:temp_indx] == comp[:temp_indx] or player[:temp_indx] == comp[-temp_indx:]:
+            return True
+        if player[-temp_indx:] == comp[-temp_indx:] or player[-temp_indx:] == comp[:temp_indx]:
+            return True
+    return False
 
 def is_CJK(char) -> bool:
     return any([start <= ord(char) <= end for start, end in 

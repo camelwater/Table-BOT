@@ -34,8 +34,8 @@ class Table():
     def __init__(self, testing = False):
         self.TESTING = testing
         self.IGNORE_FCS = False
-        if self.TESTING:
-            self.init_testing()
+        # if self.TESTING:
+        #     self.init_testing()
         
         self.URL = "https://wiimmfi.de/stats/mkwx"
         self.ROOM_URL = "https://wiimmfi.de/stats/mkwx/list/{}"
@@ -97,17 +97,16 @@ class Table():
 
         self.channel: Channel.Channel = None #must be set by Channel class during initialization
         
-    def init_testing(self):
-
-        # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
-        #     'jaja LTA':0,'stupid@LTA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
-        # self.players = {'x#1':0, 'awd':0, 'Ryan@X':0, '¢unt':0, 'stop man': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}
-        # self.players = {'hello':0, 'stupid':0, 'VA':0, 'banned':0, '090':0, 'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'ABB':0}
-        self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'banned':0, 'barrel':0, 
-                'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'where?':0}
+    # def init_testing(self):
+    #     # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
+    #     #     'jaja LTA':0,'stupid@LTA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
+    #     # self.players = {'x#1':0, 'awd':0, 'Ryan@X':0, '¢unt':0, 'stop man': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}
+    #     # self.players = {'hello':0, 'stupid':0, 'VA':0, 'banned':0, '090':0, 'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'ABB':0}
+    #     self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'banned':0, 'barrel':0, 
+    #             'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'where?':0}
         
-        self.IGNORE_FCS = True
-        self.split_teams('3', 4)
+    #     self.IGNORE_FCS = True
+    #     self.split_teams('3', 4)
 
     async def find_room_to_merge(self, rid: str=None, mii: List[str]=None, redo=False) -> Tuple[bool, str]:
         '''
@@ -610,8 +609,8 @@ class Table():
         lagged, amount = race.check_lag(player)
         if lagged:
             if amount == "—":
-                return "(unknown lag)"
-            return f" ({amount} lag start)"
+                return "**(unknown lag)**"
+            return f" **({amount}s lag start)**"
         return ""
 
     def race_results(self, race) -> Tuple[bool, str]:

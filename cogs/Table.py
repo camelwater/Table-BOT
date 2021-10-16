@@ -997,11 +997,12 @@ class Table_cog(commands.Cog):
         await self.send_messages(ctx, "Changed total gps to `{}`.".format(self.bot.channel_instances[ctx.channel.id].get_table().gps))
         
         
-    @commands.command(aliases=['quickedit', 'qe', 'er', 'editplace', 'editpos', 'ep', 'pe'])
-    async def editrace(self,ctx, *, arg):
-        if await self.check_callable(ctx, "editrace"): return
+    @commands.command(aliases=['cp', 'changepos','changeplace', 'changeposition', 
+        'changeplacement', 'quickedit', 'editrace', 'qe', 'er', 'editplace', 'editpos', 'ep', 'pe'])
+    async def editplacement(self,ctx, *, arg):
+        if await self.check_callable(ctx, "editplacement"): return
         
-        usage = f"Usage: `{ctx.prefix}editrace <race number> <player id> <corrected placement>`"
+        usage = f"Usage: `{ctx.prefix}editplacement <race number> <player id> <corrected placement>`"
         arg = [i.strip() for i in arg.strip().split("/")]
         arg  = [i.split(" ") for i in arg]
         if len(arg)==0:
@@ -1012,27 +1013,27 @@ class Table_cog(commands.Cog):
                 await self.send_temp_messages(ctx, "Missing <race number> for command.", self.bot.channel_instances[ctx.channel.id].get_table().get_player_list(), '\n',usage)
                 return
             if len(i)<2:
-                await self.send_temp_messages(ctx, "Error processing command: missing players for command on race `{}`.".format(i[0]), self.bot.channel_instances[ctx.channel.id].get_table().get_player_list(), usage)
+                await self.send_temp_messages(ctx, f"Error processing command: missing players for command on race `{i[0]}`.", self.bot.channel_instances[ctx.channel.id].get_table().get_player_list(), usage)
                 return
             if len(i)<3:
-                await self.send_temp_messages(ctx, "Error: missing <corrected placement> for race `{}`, player `{}`.".format(i[0], i[1]), self.bot.channel_instances[ctx.channel.id].get_table().get_player_list(), usage)
+                await self.send_temp_messages(ctx, f"Error: missing <corrected placement> for race `{i[0]}`, player `{i[1]}`.", self.bot.channel_instances[ctx.channel.id].get_table().get_player_list(), usage)
             
             for t in i:
                 if not t.isnumeric():
-                    await self.send_temp_messages(ctx, "Argument `{}` for must be a real number.".format(t), self.bot.channel_instances[ctx.channel.id].get_table().get_player_list(), usage)
+                    await self.send_temp_messages(ctx, f"Argument `{t}` for must be a real number.", self.bot.channel_instances[ctx.channel.id].get_table().get_player_list(), usage)
                     return
                 
         mes = self.bot.channel_instances[ctx.channel.id].get_table().edit_race(arg)
         await self.send_messages(ctx, mes)
         
-    @editrace.error
-    async def editrace_error(self, ctx, error):
+    @editplacement.error
+    async def editplacement_error(self, ctx, error):
         self.set_instance(ctx)
         
-        if await self.check_callable(ctx, 'editrace'): return
+        if await self.check_callable(ctx, 'editplacement'): return
         
         if isinstance(error, commands.MissingRequiredArgument):
-            await self.send_messages(ctx, self.bot.channel_instances[ctx.channel.id].get_table().get_player_list(),f"\nUsage: `{ctx.prefix}editrace <race number> <player id> <corrected placement>`")
+            await self.send_messages(ctx, self.bot.channel_instances[ctx.channel.id].get_table().get_player_list(),f"\nUsage: `{ctx.prefix}editplacement <race number> <player id> <corrected placement>`")
     
     @commands.command(aliases=['crs', 'roomsize'])
     async def changeroomsize(self, ctx, *, arg): 
