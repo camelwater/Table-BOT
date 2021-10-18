@@ -1,7 +1,7 @@
 from itertools import chain
 from functools import reduce, partial
 from collections import deque
-from typing import List
+from typing import List, Tuple, Optional
 
 def ngram(seq: str, n: int):
     return (seq[i: i+n] for i in range(0, len(seq)-n+1))
@@ -33,6 +33,7 @@ def common_actual_affix(player: str, comp: str):
             return True
     return False
 
+
 def is_CJK(char) -> bool:
     return any([start <= ord(char) <= end for start, end in 
                 [(4352, 4607), (11904, 42191), (43072, 43135), (44032, 55215), 
@@ -41,6 +42,27 @@ def is_CJK(char) -> bool:
                 ])
 
 from unidecode import unidecode
+
+def get_player_tag(player, orig = False, both = False) -> Tuple[str, Optional[str]]:
+    '''
+    get the tag value of a string
+    '''
+    remove = True
+    while remove and len(player)>0:
+        remove = False
+        if player[0] in PRE_REMOVE:
+            player = player[1:]
+            remove = True
+        if len(player)>0 and player[-1] in POST_REMOVE:
+            player = player[:-1]
+            remove = True
+
+    if orig or both:
+        tag = [i for i in player if i in MULT_CHAR_MAP or CHAR_MAP.get(i, i) in VALID_CHARS or is_CJK(i)]
+        tag = "".join(tag)
+        if orig: return tag
+    sanitized_tag = sanitize_uni(player, for_search=True)
+    if both: return sanitized_tag, tag
 
 def sanitize_uni(string: str, for_search = False):
     '''
@@ -94,7 +116,7 @@ def sanitize_tag_uni(string):
 
 # CONSTANTS
 
-VALID_CHARS = set("/\*`^+-_.!?@%&()\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz" + "abcdefghijklmnopqrstuvwxyz0123456789 ".upper())
+VALID_CHARS = set("/\*`^+-_.!?@%&()':;=`~|\"\u03A9\u038F" + "abcdefghijklmnopqrstuvwxyz" + "abcdefghijklmnopqrstuvwxyz0123456789 ".upper())
 PRE_REMOVE = set("/\*^+-_.!?#%() ")
 POST_REMOVE = set("/\*^+-.!?# ")
 

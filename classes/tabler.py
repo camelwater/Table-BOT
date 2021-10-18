@@ -34,8 +34,6 @@ class Table():
     def __init__(self, testing = False):
         self.TESTING = testing
         self.IGNORE_FCS = False
-        # if self.TESTING:
-        #     self.init_testing()
         
         self.URL = "https://wiimmfi.de/stats/mkwx"
         self.ROOM_URL = "https://wiimmfi.de/stats/mkwx/list/{}"
@@ -88,7 +86,7 @@ class Table():
         self.current_elems: List[str] = [] #elem list of current room
         # self.restore_merged = []
         
-        self.format = "" #format (FFA, 2v2, etc.)
+        self.format = "0" #format (FFA, 2v2, etc.)
         self.teams = 0 #number of teams
         self.gps = 3 #number of total gps
         self.rxx = '' #rxx that table is watching
@@ -96,17 +94,21 @@ class Table():
         self.num_players = 0 #number of players room is supposed to have (based on format and teams)
 
         self.channel: Channel.Channel = None #must be set by Channel class during initialization
+
+        if self.TESTING:
+            self.init_testing()
         
-    # def init_testing(self):
-    #     # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
-    #     #     'jaja LTA':0,'stupid@LTA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
-    #     # self.players = {'x#1':0, 'awd':0, 'Ryan@X':0, '¢unt':0, 'stop man': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}
-    #     # self.players = {'hello':0, 'stupid':0, 'VA':0, 'banned':0, '090':0, 'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'ABB':0}
-    #     self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'banned':0, 'barrel':0, 
-    #             'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'where?':0}
+    def init_testing(self):
+        # self.players = {'pringle@MV':0,'5headMV':0,'hello LTA':0,'LTAX':0,
+        #     'jaja LTA':0,'stupid@LTA':0,'poop MV':0,'MVMVMVMV':0,'LTA Valpo':0,"5 guys mom's spaghet":0}
+        # self.players = {'x#1':0, 'awd':0, 'Ryan@X':0, '¢unt':0, 'stop man': 0, 'cool kid cool': 0, "GG EZ": 0, 'gas mob':0, "gassed up":0, "kaya yanar":0, "yaya kanar":0, "yaka ranar":0}
+        self.players = {'hello':0, 'stupid':0, 'VA':0, 'banned':0, '090':0, 'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'ABB':0}
+        # self.players = {'hello':0, 'he123':0, 'borrowed time':0, 'banned':0, 'barrel':0, 
+        #         'hell&*':0, 'what?':0, "who?":0, "λxe":0, 'AAA':0, 'λp fraud':0, 'where?':0}
         
-    #     self.IGNORE_FCS = True
-    #     self.split_teams('3', 4)
+        self.IGNORE_FCS = True
+        self.format = '3'
+        self.split_teams(self.format, 6)
 
     async def find_room_to_merge(self, rid: str=None, mii: List[str]=None, redo=False) -> Tuple[bool, str]:
         '''
@@ -309,19 +311,30 @@ class Table():
 
         tick=timer.time()
         per_team = int(f)
-        name_to_player: Dict[str, Player] = {}
-        for i in self.players:
-            name_to_player[i.getName()] = i
+        if not self.TESTING:
+            name_to_player: Dict[str, Player] = {}
+            for i in self.players:
+                name_to_player[i.getName()] = i
         player_copy = list(name_to_player.keys()) if not self.IGNORE_FCS else list(copy.deepcopy(self.players).keys())
         
-        teams = tag_algo(player_copy, per_team = per_team, num_teams = num_teams)
-        
-        if self.TESTING:
+        format, (teams, cost) = tag_algo(player_copy, per_team = per_team if per_team!=0 else None, num_teams = num_teams)
+        if (cost>25 and len(self.players) == 12) or (cost>30 and len(self.players)%2==0) or (cost>40 and len(self.players)%2==1):
+            format = "FFA"
+
+        if self.format == "0": #user didn't enter anything during ?sw so have to determine automatically after teams found
+            self.format = str(format)
+            self.teams = Utils.max_teams(self.format)
+            self.num_players =  Utils.get_num_players(self.format, self.teams)
+            if isFFA(self.format): return 
+            
+        elif self.TESTING:
             L = []
-            for i in teams.items():
-                L.append([tagUtils.sanitize_uni(i[0]).lower(), list(map(lambda l: (tagUtils.sanitize_uni(l.strip()).lower(), l), i[1]))])
+            for tag, p in teams.items():
+                if tag.find('-')>=len(tag)//2 and tag[tag.find('-')+1:].isnumeric():
+                    tag = tag[:tag.find('-')]
+                L.append([tagUtils.sanitize_uni(tag.strip()).lower(), list(map(lambda l: (tagUtils.sanitize_uni(l.strip()).lower()), p))])
             cost_check = simAnl.SimulatedAnnealing(L, per_team)
-            print("cost:", cost_check.E(L))
+            print(cost_check.E_check(L))
 
         if not self.IGNORE_FCS:
             print(teams)

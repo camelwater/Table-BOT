@@ -137,6 +137,9 @@ def is_rxx(arg: str):
 def flag_delta(num: str):
     return num=="—" or (isfloat(num) and (float(num)>7.0 or float(num)<-7.0))
 
+def should_display_delta(num: str):
+    return num=="—" or (isfloat(num) and (float(num)>1.0 or float(num)<-1.0))
+
 #max teams based on format (ex. 6 teams for a 2v2, 2 teams for a 5v5)
 def max_teams(f):
     f = f[0]

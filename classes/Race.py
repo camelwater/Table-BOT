@@ -54,15 +54,15 @@ class Race:
     def check_lag(self, player: Player) -> Tuple[bool, Optional[str]]:
         for placement in self.placements:
             if placement[0] == player:
-                if Utils.flag_delta(placement[3]):
-                    return True, placement[3]
+                if Utils.should_display_delta(placement[3]):
+                    return True, placement[3].lstrip("-")
         return False, None
 
     def change_placement(self, player: Player, correct_pos: int):
         '''
         change a player's placement to `cor_pos` and shift up/down accordingly
 
-        used for ?editrace
+        used for ?editplacement
         '''
         orig_pos = self.get_pos(player)
         orig_pts = PTS_MAP[len(self.placements)][orig_pos]
