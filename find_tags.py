@@ -503,7 +503,7 @@ def tag_algo(o_players: List[str], per_team: int, num_teams: int) -> Dict[str, L
         
         teams = squeeze_player_names(teams)
         if target:
-            return None, (teams, None)
+            return None, (teams, calc_cost(teams, format))
         bonus = 0
         if format == 5 and len(o_players) == 10:
             bonus = -2.5

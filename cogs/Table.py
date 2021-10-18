@@ -17,7 +17,7 @@ class Table_cog(commands.Cog):
     def __init__(self, bot: bot.TableBOT):
         self.HOME_URL = "https://wiimmfi.de/stats/mkwx/list/"
         self.bot = bot
-        self.TESTING = True
+        self.TESTING = False
         
         if self.TESTING:
             table = Table(testing=True)
