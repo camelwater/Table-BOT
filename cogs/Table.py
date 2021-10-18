@@ -40,7 +40,7 @@ class Table_cog(commands.Cog):
             self.bot.channel_instances[channel_id].get_table().graph = self.bot.get_setting('graph',ctx.guild.id, raw=True)
             self.bot.channel_instances[channel_id].get_table().style = self.bot.get_setting('style', ctx.guild.id, raw=True)
      
-    async def send_temp_messages(self,ctx, *args):
+    async def send_temp_messages(self, ctx, *args):
         try:
             await ctx.send('\n'.join(args), delete_after=25)
         except discord.errors.Forbidden:
@@ -240,7 +240,7 @@ class Table_cog(commands.Cog):
         
         if error:
             await wait_mes.delete()
-            return await self.send_messages(self.bot.channel_instances[ctx.channel.id].choose_message, usage)
+            return await self.send_messages(ctx, self.bot.channel_instances[ctx.channel.id].choose_message, usage)
         
         self.bot.channel_instances[ctx.channel.id].confirm_room = True
         await wait_mes.delete()
