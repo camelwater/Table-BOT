@@ -4,6 +4,9 @@ Table BOT is a discord bot made to automate the process of scoring and tabling M
 
 This bot was inspired and influenced conceptually by another similar bot, which can be found [here](https://github.com/BadWolf1023/MKW-Table-Bot). It has greater functionality than this bot and is used in MKW Lounge, a ranked ladder for Mario Kart Wii.
 
+## Documentation
+
+Table BOT's full documentation can be found at this GitHub repository's [Wiki page](https://github.com/camelwater/Table-BOT/wiki).
 
 ## Important Information
 
@@ -40,10 +43,6 @@ Searches for a room on [Wiimmfi][mkwxWebsite] that best fits the provided miiNam
 ex. `?picture byrace`
 
 Fetches a [table picture][hlorenziWebsite] of the room's scores. `byrace/race` is an optional argument that can be included if you would like to see the table scores organized by each race (by default it is every gp, which is every 4 races).
-
-## Documentation
-
-Table BOT's full documentation can be found at this GitHub repository's [Wiki page](https://github.com/camelwater/Table-BOT/wiki).
 
 [mkwxWebsite]: https://www.wiimmfi.de/stats/mkwx
 [hlorenziWebsite]: https://gb.hlorenzi.com/table 
