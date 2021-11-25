@@ -178,7 +178,7 @@ class TableBOT(commands.Bot):
     
     # @tasks.loop(hours=1)
     # async def routine_stats_dump(self):
-    #     self.dump_stats_json()
+    #     self.dump_stats_json()    
     
     def count_active_channels(self):
         return sum([1 for chan in list(self.channel_instances.values()) if chan.table_running])

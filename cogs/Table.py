@@ -20,7 +20,7 @@ class Table_cog(commands.Cog):
         self.TESTING = False
         
         if self.TESTING:
-            table = Table(testing=True)
+            Table(testing=True)
     
     @commands.Cog.listener()
     async def on_command(self, ctx: commands.Context):

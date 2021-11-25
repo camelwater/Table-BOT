@@ -141,7 +141,7 @@ def should_display_delta(num: str):
     return num=="—" or (isfloat(num) and (float(num)>1.0 or float(num)<-1.0))
 
 #max teams based on format (ex. 6 teams for a 2v2, 2 teams for a 5v5)
-def max_teams(f):
+def max_teams(f: str):
     f = f[0]
     if f == 'f':
         return 12
@@ -150,12 +150,12 @@ def max_teams(f):
         return int(12/f)
     
 #check if number of teams exceeds max possible teams for format
-def check_teams(f, teams):
+def check_teams(f: str, teams: int):
     max_t = max_teams(f)
     if teams>max_t: return True
     return False
 
-def get_num_players(f, teams):
+def get_num_players(f: str, teams: int):
     f = f[0]
     if f == 'f':
         f = 1
@@ -164,7 +164,7 @@ def get_num_players(f, teams):
     return teams*f
 
 
-def isfloat(n):
+def isfloat(n: str):
     try:
         float(n)
         return True
