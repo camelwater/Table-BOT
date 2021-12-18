@@ -121,9 +121,9 @@ class Table_cog(commands.Cog):
         usage = f"Usage: `{prefix}start [format] [number of teams]  [rxx|miiNames] [gps=3] [sui=no]`"
         
         if len(args)<1:
-            # return await self.send_temp_messages(ctx, usage)
-            self.bot.channel_instances[ctx.channel.id].searching_room = True   
-            return await self.send_messages(ctx, f"Provide a room id (rxx) or mii name(s) to search for a room. Make sure the room has finished at least one race.", f"\nUsage: `{prefix}search <rxx or mii> <rxx or mii names(s)>`")
+            return await ctx.send(usage)
+#             self.bot.channel_instances[ctx.channel.id].searching_room = True   
+#             return await self.send_messages(ctx, f"Provide a room id (rxx) or mii name(s) to search for a room. Make sure the room has finished at least one race.", f"\nUsage: `{prefix}search <rxx or mii> <rxx or mii names(s)>`")
     
          
         if isinstance(args[0], tuple) and self.bot.channel_instances[ctx.channel.id].reset_args !=None:
