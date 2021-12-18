@@ -1,6 +1,9 @@
 discord
 python-dotenv
+unidecode
 datetime
 aiohttp[speedups]
 bs4
 requests
+bitstring
+more_itertools
