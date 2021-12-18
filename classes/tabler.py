@@ -1499,7 +1499,7 @@ class Table():
                     if player[0] == player:
                         self.races[raceNum].get_placements().pop(pos)
 
-            for place, p in enumerate(self.races[raceNum].get_placements):
+            for place, p in enumerate(self.races[raceNum].get_placements()):
                 player = p[0]
                 try:
                     pts = PTS_MAP[cor_room_size][place]
