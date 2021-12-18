@@ -118,7 +118,7 @@ class Table_cog(commands.Cog):
             return
 
         prefix = ctx.prefix
-        usage = f"Usage: `{prefix}start [format] [number of teams]  [rxx|miiNames] [gps=3] [sui=no]`"
+        usage = f"Usage: `{prefix}start <format> <numTeams> (rxx|...miiNames) (gps=3) (sui=no)`"
         
         if len(args)<1:
             return await ctx.send(usage)
@@ -132,6 +132,10 @@ class Table_cog(commands.Cog):
             
         _format = args[0].lower()
         
+        if _format not in ['ffa', '2v2', '3v3', '4v4', '5v5', '6v6', '2', '3', '4', '5', '6']:
+            await self.send_messages(ctx, "Invalid format. Format must be FFA, 2v2, 3v3, 4v4, 5v5, or 6v6.", usage)
+            return
+        
         # if len(args)<2 and _format[0]!='f':
         #     await self.send_temp_messages(ctx, "Missing <teams>.", usage)
         #     return
@@ -139,10 +143,6 @@ class Table_cog(commands.Cog):
         teams = Utils.max_teams(_format)
         if len(args)<2 or not args[1].isnumeric():
             args.insert(1, teams)
-        
-        if _format not in ['ffa', '2v2', '3v3', '4v4', '5v5', '6v6', '2', '3', '4', '5', '6']:
-            await self.send_messages(ctx, "Invalid format. Format must be FFA, 2v2, 3v3, 4v4, 5v5, or 6v6.", usage)
-            return
         
         if len(args)>1:
             try:
