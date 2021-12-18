@@ -134,15 +134,14 @@ class Settings(commands.Cog):
         else:
             #other settings (currently only IgnoreLargeTimes)
             if settingType == "IgnoreLargeTimes":
-                if default.lower() == 'never': #word arguments
-                    default = '0'
-                elif default.lower() == 'always':
-                    default = '1+'
-                try:
-                    default = Utils.parse_ILT_setting(default)
-                    valid=True
-                except (ValueError, IndexError):
+                if any([True if ('never' in entry and 'always' in entry) else False for entry in default.split(',')]):
                     valid = False
+                else:
+                    try:
+                        default = Utils.parse_ILT_setting(default)
+                        valid = True
+                    except (ValueError, IndexError):
+                        valid = False
 
         if not valid:
             await ctx.send(f"Invalid value `{default}` for setting `{settingType}`. The value must be"+

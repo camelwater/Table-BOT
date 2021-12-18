@@ -70,6 +70,7 @@ def remove_formats(string: str):
 def parse_ILT_setting(string: str, max_format=6, local_inject = False):
     args = remove_formats(string.strip().lower()).split(',')
     args = sorted(args, key=lambda l: l.strip()[0], reverse=True)
+    
     for indx, i in list(enumerate(args))[::-1]:
         i = i.strip()
         check = i.strip('+')
