@@ -1,6 +1,6 @@
 discord
 python-dotenv
 datetime
-aiohttp
+aiohttp[speedups]
 bs4
 requests
