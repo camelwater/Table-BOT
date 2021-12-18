@@ -2,8 +2,7 @@ discord
 python-dotenv
 unidecode
 datetime
-cchardet
-aiohttp
+aiohttp[speedups]
 bs4
 requests
 bitstring
