@@ -65,11 +65,11 @@ def backtick_clean(string: str):
 def insert_formats(string: str):
     return string.replace('0', 'Never').replace('1+', 'Always').replace('5', '5v5').replace('2', '2v2').replace('3','3v3').replace('4','4v4').replace('6','6v6').replace('1', 'FFA')
 def remove_formats(string: str):
-    return string.replace("5v5", '5').replace('2v2', '2').replace('3v3', '3').replace('4v4', '4').replace('6v6', '6').replace('ffa', '1')
+    return string.replace('never', '0').replace('always', '1+').replace("5v5", '5').replace('2v2', '2').replace('3v3', '3').replace('4v4', '4').replace('6v6', '6').replace('ffa', '1')
 
 def parse_ILT_setting(string: str, max_format=6, local_inject = False):
     args = remove_formats(string.strip().lower()).split(',')
-    args = sorted(args)
+    args = sorted(args, key=lambda l: l.strip()[0], reverse=True)
     for indx, i in list(enumerate(args))[::-1]:
         i = i.strip()
         check = i.strip('+')
