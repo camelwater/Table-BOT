@@ -134,6 +134,10 @@ class Settings(commands.Cog):
         else:
             #other settings (currently only IgnoreLargeTimes)
             if settingType == "IgnoreLargeTimes":
+                if default.lower() == 'never': #word arguments
+                    default = '0'
+                elif default.lower() == 'always':
+                    default = '1+'
                 try:
                     default = Utils.parse_ILT_setting(default)
                     valid=True
