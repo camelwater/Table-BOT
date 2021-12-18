@@ -1,0 +1,6 @@
+discord
+python-dotenv
+datetime
+aiohttp
+bs4
+more_itertools
