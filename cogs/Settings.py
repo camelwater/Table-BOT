@@ -56,7 +56,7 @@ class Settings(commands.Cog):
     @prefix.command(name='set')
     @commands.has_guild_permissions(manage_guild=True)
     async def _set(self, ctx: commands.Context, *, prefix: str = None):
-        if RESERVED_DELIM in prefix:
+        if prefix and RESERVED_DELIM in prefix:
             return await ctx.send("You cannot set this prefix because it contains forbidden characters.")
 
         mes = self.bot.set_prefix(ctx.guild.id, prefix)
